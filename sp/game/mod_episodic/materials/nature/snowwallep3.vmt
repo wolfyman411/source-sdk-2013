@@ -1,0 +1,8 @@
+"LightmappedGeneric"
+{
+	"$basetexture" 	"nature/snowwallep3"
+	"$bumpmap" 	"nature/snowwallep3normal"
+	"$normalmap"	"nature/snowwallep3normal"
+	"$surfaceprop" "snow"
+	
+}
