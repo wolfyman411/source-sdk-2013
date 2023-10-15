@@ -22,8 +22,8 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar    sk_plr_dmg_iceaxe("sk_plr_dmg_iceaxe", "10");
-ConVar    sk_npc_dmg_iceaxe("sk_npc_dmg_iceaxe", "10");
+ConVar    sk_plr_dmg_iceaxe("sk_plr_dmg_iceaxe", "15");
+ConVar    sk_npc_dmg_iceaxe("sk_npc_dmg_iceaxe", "15");
 
 //-----------------------------------------------------------------------------
 // CWeaponIceaxe
@@ -69,7 +69,7 @@ float CWeaponIceaxe::GetDamageForActivity(Activity hitActivity)
 	if ((GetOwner() != NULL) && (GetOwner()->IsPlayer()))
 	{
 		Msg("%f\n", sk_plr_dmg_iceaxe.GetFloat() + addedDamage);
-		return sk_plr_dmg_iceaxe.GetFloat();
+		return sk_plr_dmg_iceaxe.GetFloat() + addedDamage;
 	}
 
 	return sk_npc_dmg_iceaxe.GetFloat();
@@ -92,8 +92,6 @@ void CWeaponIceaxe::AddViewKick(void)
 	punchAng.z = 0.0f;
 
 	pPlayer->ViewPunch(punchAng);
-
-	addedDamage = 0;
 }
 
 
@@ -162,6 +160,7 @@ void CWeaponIceaxe::ItemPostFrame()
 	//Check for m2
 	if (pPlayer && pPlayer->m_afButtonPressed & IN_ATTACK2 && cooldown == false)
 	{
+		addedDamage = 0;
 		SendWeaponAnim(ACT_VM_CHARGE);
 		isCharging = true;
 		canSwing = false;
@@ -177,6 +176,11 @@ void CWeaponIceaxe::ItemPostFrame()
 	{
 		canSwing = true;
 	}
+	//Check for m1
+	else if (pPlayer && pPlayer->m_afButtonPressed & IN_ATTACK && cooldown == false)
+	{
+		addedDamage = 0;
+	}
 
 	//Get Charge
 	if (isCharging)
@@ -185,12 +189,6 @@ void CWeaponIceaxe::ItemPostFrame()
 		//Swing
 		if (canSwing && chargeDuration > 1.0f)
 		{
-			isCharging = false;
-			canSwing = false;
-			AddViewKick();
-			BaseClass::SecondaryAttack();
-			TraceMeleeAttack();
-
 			//added damage 
 			if (chargeDuration < 1.4f)
 			{
@@ -202,12 +200,18 @@ void CWeaponIceaxe::ItemPostFrame()
 			}
 			else if (chargeDuration > 2.0f)
 			{
-				addedDamage = 40;
+				addedDamage = 45;
 			}
 
 			lastSwing = gpGlobals->curtime;
 			chargeDuration = 0.0f;
 			cooldown = true;
+
+			isCharging = false;
+			canSwing = false;
+			AddViewKick();
+			BaseClass::SecondaryAttack();
+			TraceMeleeAttack();
 		}
 	}
 
