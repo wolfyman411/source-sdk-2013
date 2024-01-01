@@ -3021,6 +3021,7 @@ BEGIN_DATADESC( CPhysicsProp )
 	DEFINE_OUTPUT( m_MotionEnabled, "OnMotionEnabled" ),
 	DEFINE_OUTPUT( m_OnPhysGunPickup, "OnPhysGunPickup" ),
 	DEFINE_OUTPUT( m_OnPhysGunOnlyPickup, "OnPhysGunOnlyPickup" ),
+	DEFINE_OUTPUT( m_OnPhysGunPull, "OnPhysGunPull" ),
 	DEFINE_OUTPUT( m_OnPhysGunPunt, "OnPhysGunPunt" ),
 	DEFINE_OUTPUT( m_OnPhysGunDrop, "OnPhysGunDrop" ),
 	DEFINE_OUTPUT( m_OnPlayerUse, "OnPlayerUse" ),
@@ -3389,6 +3390,13 @@ void CPhysicsProp::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t r
 	}
 
 	CheckRemoveRagdolls();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CPhysicsProp::OnPhysGunPull( CBasePlayer* pPhysGunUser, Vector pullDir ) {
+	m_OnPhysGunPull.FireOutput(pPhysGunUser, this);
 }
 
 //-----------------------------------------------------------------------------
