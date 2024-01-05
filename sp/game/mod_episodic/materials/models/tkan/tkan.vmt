@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+     "$basetexture" "Models/tkan/tkan"
+     "$model" 1
+	$bumpmap "Models/palata/palata_bump"
+}

@@ -1,0 +1,37 @@
+"VertexLitGeneric"
+{
+	"$alphatest" 1
+	"$basetexture" "models/props_foliage/tree_pine_01_branches"
+	"$bumpmap" "models/props_foliage/tree_pine_01_branches_nromal"
+	"$model" 1
+	"$nocull" 1
+"$translate" "[0 0]"
+
+	"Proxies"
+{
+	Sine
+	{
+		sineperiod	4
+		sinemin		0
+		sinemax		0.007
+		timeoffset	0
+		resultVar	"$translate[0]"
+	}
+	Sine
+	{
+		sineperiod	5.5
+		sinemin		0
+		sinemax		0.007
+		timeoffset	0
+		resultVar	"$translate[1]"
+	}
+	
+	TextureTransform
+        {
+		translateVar	$translate
+		resultVar	$basetexturetransform
+        }
+}
+}
+
+

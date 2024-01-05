@@ -1,0 +1,18 @@
+"WorldVertexTransition"
+{
+	"$basetexture" "nature/snow_ep3"
+	"$bumpmap" "nature/snow_ep3_normal"
+	"$basetexture2" "Xen/xen_ground04"
+	"$bumpmap2" "Xen/xen_ground04_normal"
+	"$surfaceprop" "snow"
+	"$surfaceprop2" "slime"
+	"$blendmodulatetexture" "nature/blendtexture01"
+
+	"$normalmapalphaenvmapmask" 1
+	"$envmapcontrast" 1
+	"$envmapsaturation" .1
+	"$envmaptint" "[ .2 .2 .2 ]"
+	"$fresnelreflection" ".1"
+	"$envmap" "env_cubemap"
+	$reflectivity "[0.4 0.4 0.6]"
+}

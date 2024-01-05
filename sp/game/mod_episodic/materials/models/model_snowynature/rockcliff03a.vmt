@@ -1,0 +1,5 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "models/model_snowynature/rockcliff03a"
+	"$normalmap"	"models/model_snowynature/rockcliff03a_normal"
+}

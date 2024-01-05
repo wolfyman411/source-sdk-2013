@@ -1,0 +1,26 @@
+"sdk_unlittwotexture"
+{
+	"$basetexture" "models/beefbacon/newterrain/newclouds"
+	"$texture2"    "models/beefbacon/newterrain/newclouds_mask"
+
+
+	
+	"$translucent" 1
+	"$nocull" 1
+	
+//	"$nofog" 1
+	
+	"$color2" "[.712 .71 .70]"
+	"$model" 1
+
+    "proxies"
+    {
+
+		"texturescroll"
+		{
+			"texturescrollvar" "$basetexturetransform"
+			"texturescrollrate" 0.005
+			"texturescrollangle" 0
+		}
+     }
+}

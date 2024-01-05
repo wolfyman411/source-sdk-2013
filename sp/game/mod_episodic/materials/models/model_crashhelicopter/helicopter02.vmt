@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$basetexture"	"models/model_crashhelicopter/helicopter"
+	"$bumpmap"	 "models/model_crashhelicopter/helicopter_normal"
+	"$normalmap"	"models/model_crashhelicopter/helicopter_normal"
+	
+}

@@ -40,7 +40,7 @@ PRECACHE_WEAPON_REGISTER(weapon_iceaxe);
 acttable_t CWeaponIceaxe::m_acttable[] =
 {
 	{ ACT_MELEE_ATTACK1,	ACT_MELEE_ATTACK_SWING, true },
-	{ ACT_IDLE,				ACT_IDLE_ANGRY_MELEE,	false },
+	{ ACT_IDLE,				ACT_IDLE_ANGRY_MELEE,	true },
 	{ ACT_IDLE_ANGRY,		ACT_IDLE_ANGRY_MELEE,	false },
 	{ ACT_VM_HOLSTER,		ACT_VM_HOLSTER,	false },
 	{ ACT_VM_MISSCENTER,		ACT_VM_MISSCENTER,	false },
@@ -68,7 +68,6 @@ float CWeaponIceaxe::GetDamageForActivity(Activity hitActivity)
 {
 	if ((GetOwner() != NULL) && (GetOwner()->IsPlayer()))
 	{
-		Msg("%f\n", sk_plr_dmg_iceaxe.GetFloat() + addedDamage);
 		return sk_plr_dmg_iceaxe.GetFloat() + addedDamage;
 	}
 
@@ -144,80 +143,72 @@ int CWeaponIceaxe::WeaponMeleeAttack1Condition(float flDot, float flDist)
 	return COND_CAN_MELEE_ATTACK1;
 }
 
-bool cooldown = false;
-float chargeDuration = 0.0f;
-float chargeStart = 0.0f;
-float lastSwing = 0.0f;
-bool isCharging = false;
-bool canSwing = true;
-bool startBuildup = false;
 void CWeaponIceaxe::ItemPostFrame()
 {
-	// Call the base class function first
-	BaseClass::ItemPostFrame();
 	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
 
-	//Check for m2
-	if (pPlayer && pPlayer->m_afButtonPressed & IN_ATTACK2 && cooldown == false)
-	{
-		addedDamage = 0;
-		SendWeaponAnim(ACT_VM_CHARGE);
+
+	if (pPlayer == NULL)
+		return;
+
+	int curActivity = GetActivity();
+
+	//Check for M2
+	if (pPlayer && pPlayer->m_afButtonPressed & IN_ATTACK2 && m_flNextPrimaryAttack <= gpGlobals->curtime && m_flNextSecondaryAttack <= gpGlobals->curtime) {
 		isCharging = true;
-		canSwing = false;
-		//Check if new swing
-		if (chargeDuration == 0.0f)
-		{
-			Msg("StartCharge!\n");
-			chargeStart = gpGlobals->curtime;
-			startBuildup = true;
+		//Start Charge Duration
+		if (chargeDuration == 0.0f) {
+			chargeDuration = gpGlobals->curtime;
 		}
 	}
-	else if (pPlayer && pPlayer->m_afButtonReleased & IN_ATTACK2 && cooldown == false)
-	{
-		canSwing = true;
-	}
-	//Check for m1
-	else if (pPlayer && pPlayer->m_afButtonPressed & IN_ATTACK && cooldown == false)
-	{
-		addedDamage = 0;
+	//Stop Charge
+	else if (pPlayer && pPlayer->m_afButtonReleased & IN_ATTACK2){
+		isCharging = false;
 	}
 
-	//Get Charge
-	if (isCharging)
-	{
-		chargeDuration = gpGlobals->curtime - chargeStart;
-		//Swing
-		if (canSwing && chargeDuration > 1.0f)
+	//Swing
+	if (gpGlobals->curtime >= chargeDuration + 1.0f && !isCharging && chargeDuration != 0.0f) {
+		addedDamage = (gpGlobals->curtime - chargeDuration)*10.0f;
+
+		if (addedDamage >= 65.0f)
 		{
-			//added damage 
-			if (chargeDuration < 1.4f)
-			{
-				addedDamage = 15;
-			}
-			else if (chargeDuration > 1.4f && chargeDuration < 2.0f)
-			{
-				addedDamage = 25;
-			}
-			else if (chargeDuration > 2.0f)
-			{
-				addedDamage = 45;
-			}
+			Msg("%f\n", addedDamage);
+			addedDamage = 65.0f;
+		}
+		AddViewKick();
+		BaseClass::SecondaryAttack();
+		TraceMeleeAttack();
+		
+		chargeDuration = 0.0f;
+		addedDamage = 0.0f;
+	}
 
-			lastSwing = gpGlobals->curtime;
-			chargeDuration = 0.0f;
-			cooldown = true;
-
-			isCharging = false;
-			canSwing = false;
-			AddViewKick();
-			BaseClass::SecondaryAttack();
-			TraceMeleeAttack();
+	//Animate the Charging
+	if (chargeDuration != 0.0f) {
+		if (GetActivity() != ACT_VM_CHARGE) {
+			SendWeaponAnim(ACT_VM_CHARGE);
+			Msg("%i\n", curActivity);
 		}
 	}
 
-	if (gpGlobals->curtime - lastSwing > 1.8f)
+#ifdef MAPBASE
+	if (pPlayer->HasSpawnFlags(SF_PLAYER_SUPPRESS_FIRING))
 	{
-		cooldown = false;
+		BaseClass::WeaponIdle();
+		return;
+	}
+#endif
+
+	if ((pPlayer->m_nButtons & IN_ATTACK) && (m_flNextPrimaryAttack <= gpGlobals->curtime))
+	{
+		chargeDuration = 0.0f;
+		addedDamage = 0.0f;
+		BaseClass::PrimaryAttack();
+	}
+	else if (chargeDuration == 0.0f)
+	{
+		BaseClass::WeaponIdle();
+		return;
 	}
 }
 

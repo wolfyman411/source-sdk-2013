@@ -1,0 +1,13 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/model_xen/xen_crystal_01"
+	"$normalmap" "models/model_xen/xen_crystal_01_normal"
+	"$bumpmap" "models/model_xen/xen_crystal_01_normal"
+	"$surfaceprop" "Glass"
+	"$normalmapalphaenvmapmask" 1
+	"$envmapcontrast" 1
+	"$envmapsaturation" .7
+	"$envmaptint" "[ .72 .72 .72 ]"
+	"$fresnelreflection" ".3"
+	"$envmap" "env_cubemap"
+}

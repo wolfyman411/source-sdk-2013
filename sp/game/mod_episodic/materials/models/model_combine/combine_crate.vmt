@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/model_combine/combine_crate"
+	"$normalmap" "models/model_combine/combine_crate_normal"
+	"$surfaceprop" "Metal"
+}

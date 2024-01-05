@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/model_snowynature/rock_sheet03_snowytop"
+	"$normalmap" "models/model_snowynature/rock_sheet03_snowytop_normal"
+	"$surfaceprop" "Boulder"
+}

@@ -1,0 +1,10 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/npcs/turret/turret_gibs"
+	"$surfaceprop" "Metal"
+$nocull 1
+$phong 1
+$phongexponent 100
+$phongboost 8
+$phongfresnelranges "[.3 .6 4]"
+}

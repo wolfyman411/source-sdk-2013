@@ -1,0 +1,7 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "mat_hiperborea/ice_lake"
+	"$bumpmap" "mat_hiperborea/ice_lake_normal"
+	"$normalmap" "mat_hiperborea/ice_lake_normal"
+	"$surfaceprop" "glass"
+}

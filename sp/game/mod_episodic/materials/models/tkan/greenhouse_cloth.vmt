@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+     "$basetexture" "Models/tkan/greenhouse_cloth"
+     "$model" 1
+	$bumpmap "Models/tkan/greenhouse_cloth_normal"
+}

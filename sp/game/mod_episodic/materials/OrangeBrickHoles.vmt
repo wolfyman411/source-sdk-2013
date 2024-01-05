@@ -1,0 +1,6 @@
+"LightmappedGeneric"
+{
+	"$basetexture"	"OrangeBrickHoles"
+	"$surfaceprop"	"brick"
+	"$bumpmap"		"OrangeBrickHoles_normal"
+}

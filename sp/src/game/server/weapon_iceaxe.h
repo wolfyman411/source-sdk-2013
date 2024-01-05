@@ -49,8 +49,8 @@ private:
 	// Animation event handlers
 	bool isCharging = false;
 	bool canSwing = false;
-	float chargeStart;
-	float addedDamage;
+	float chargeDuration;
+	float addedDamage = 0.0f;
 };
 
 #endif // WEAPON_ICEAXE_H

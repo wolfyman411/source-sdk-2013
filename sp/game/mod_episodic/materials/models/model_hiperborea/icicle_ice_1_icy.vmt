@@ -1,0 +1,14 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/model_hiperborea/icicle_ice_1_icy"
+	"$bumpmap" "models/model_hiperborea/icicle_ice_normal"
+	"$normalmap" "models/model_hiperborea/icicle_ice_normal"
+	"$surfaceprop" "Ice"
+	"$normalmapalphaenvmapmask" 1
+	"$envmapcontrast" 1
+	"$envmapsaturation" .7
+	"$envmaptint" "[ .72 .72 .72 ]"
+	"$fresnelreflection" ".3"
+	"$envmap" "env_cubemap"
+
+}

@@ -1,0 +1,7 @@
+"LightMappedGeneric"
+{
+	"$basetexture"	"mat_hiperborea/stonewall_snow"
+	"$bumpmap" 	"mat_hiperborea/stonewall_snow_normal"
+	"$normalmap" 	"mat_hiperborea/stonewall_snow_normal"
+	"$surfaceprop" 	"rock"
+}

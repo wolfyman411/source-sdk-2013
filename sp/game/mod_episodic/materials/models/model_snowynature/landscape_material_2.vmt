@@ -1,0 +1,7 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/model_snowynature/landscape_material_2"
+	"$bumpmap" "models/model_snowynature/landscape_material_2_nromal"
+	"$normalmap" "models/model_snowynature/landscape_material_2_nromal"
+	"$surfaceprop" "Boulder"
+}

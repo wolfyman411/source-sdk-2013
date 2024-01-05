@@ -1,0 +1,6 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "slug/longbrick_floor_moss"
+	"$bumpmap" "slug/longbrick_floor_mossNR"
+	"$surfaceprop" "Brick"
+}

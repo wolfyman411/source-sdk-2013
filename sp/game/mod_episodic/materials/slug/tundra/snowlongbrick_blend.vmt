@@ -1,0 +1,9 @@
+WorldVertexTransition
+{
+	$basetexture "slug/longbrick_floor_moss"
+	$bumpmap "slug/longbrick_floor_mossNR"
+	$surfaceprop Brick
+	
+	$basetexture2 "nature/snowfloor001a"
+	$surfaceprop2 Sand
+}

@@ -1,0 +1,13 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/model_xen/xentree_sheet"
+	"$bumpmap" "models/model_xen/xentree_sheet_nromal"
+	"$normalmap" "models/model_xen/xentree_sheet_nromal"
+	"$surfaceprop" "Alienflesh"
+	"$normalmapalphaenvmapmask" 1
+	"$envmapcontrast" 1
+	"$envmapsaturation" .7
+	"$envmaptint" "[ .72 .72 .72 ]"
+	"$fresnelreflection" ".3"
+	"$envmap" "env_cubemap"
+}
