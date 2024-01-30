@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/model_xen/stalk_bulb_dark"
+	"$surfaceprop" "Alienflesh"
+}

@@ -121,6 +121,8 @@ void CXenTree::Precache(void)
 
 	PrecacheScriptSound("XenTree.AttackMiss");
 	PrecacheScriptSound("XenTree.AttackHit");
+
+	SetActivity(ACT_IDLE);
 }
 
 

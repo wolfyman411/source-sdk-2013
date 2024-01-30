@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/model_xen/stalk_bulb"
+	"$selfillummask" 	"models/model_xen/stalk_sheet_selfillum"
+	"$surfaceprop" "AlienFlesh"
+	"$selfillum" "1"
+}

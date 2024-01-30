@@ -146,15 +146,16 @@ int CWeaponIceaxe::WeaponMeleeAttack1Condition(float flDot, float flDist)
 void CWeaponIceaxe::ItemPostFrame()
 {
 	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
+	Msg("%f\n", gpGlobals->curtime - chargeDuration);
 
 
 	if (pPlayer == NULL)
 		return;
 
-	int curActivity = GetActivity();
+	//int curActivity = GetActivity();
 
 	//Check for M2
-	if (pPlayer && pPlayer->m_afButtonPressed & IN_ATTACK2 && m_flNextPrimaryAttack <= gpGlobals->curtime && m_flNextSecondaryAttack <= gpGlobals->curtime) {
+	if (pPlayer && (pPlayer->m_afButtonPressed & IN_ATTACK2 && m_flNextPrimaryAttack <= gpGlobals->curtime) && m_flNextSecondaryAttack <= gpGlobals->curtime) {
 		isCharging = true;
 		//Start Charge Duration
 		if (chargeDuration == 0.0f) {
@@ -162,13 +163,13 @@ void CWeaponIceaxe::ItemPostFrame()
 		}
 	}
 	//Stop Charge
-	else if (pPlayer && pPlayer->m_afButtonReleased & IN_ATTACK2){
+	else if (pPlayer && pPlayer->m_afButtonReleased & IN_ATTACK2) {
 		isCharging = false;
 	}
 
 	//Swing
 	if (gpGlobals->curtime >= chargeDuration + 1.0f && !isCharging && chargeDuration != 0.0f) {
-		addedDamage = (gpGlobals->curtime - chargeDuration)*10.0f;
+		addedDamage = (gpGlobals->curtime - chargeDuration) * 10.0f;
 
 		if (addedDamage >= 65.0f)
 		{
@@ -178,16 +179,16 @@ void CWeaponIceaxe::ItemPostFrame()
 		AddViewKick();
 		BaseClass::SecondaryAttack();
 		TraceMeleeAttack();
-		
+
 		chargeDuration = 0.0f;
 		addedDamage = 0.0f;
 	}
 
 	//Animate the Charging
-	if (chargeDuration != 0.0f) {
-		if (GetActivity() != ACT_VM_CHARGE) {
+	if (gpGlobals->curtime - chargeDuration < 1.0f) {
+		if (GetIdealActivity() != ACT_VM_CHARGE) {
 			SendWeaponAnim(ACT_VM_CHARGE);
-			Msg("%i\n", curActivity);
+
 		}
 	}
 
@@ -228,7 +229,7 @@ void CWeaponIceaxe::TraceMeleeAttack()
 	trace_t traceHit;
 	UTIL_TraceLine(swingStart, swingEnd, MASK_SHOT_HULL, pPlayer, COLLISION_GROUP_NONE, &traceHit);
 
-	if (traceHit.m_pEnt)
+	if (!traceHit.m_pEnt)
 	{
 		// Hit
 		SendWeaponAnim(ACT_VM_CHARGE_HIT);
