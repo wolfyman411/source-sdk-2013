@@ -2725,7 +2725,7 @@ CWeaponPhysCannon::FindObjectResult_t CWeaponPhysCannon::FindObject( void )
 
 	CPhysicsProp* pProp = dynamic_cast<CPhysicsProp*>(pObj);
 	if (pProp) {
-		pProp->OnPhysGunPull( pOwner, pullDir );
+		pProp->OnPhysGunPull( pOwner );
 	}
 
 	// Nudge it towards us

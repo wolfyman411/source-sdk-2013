@@ -413,7 +413,7 @@ public:
 	void EnableMotion( void );
 	bool CanBePickedUpByPhyscannon( void );
 	void OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t reason );
-	void OnPhysGunPull( CBasePlayer *pPhysGunUser, Vector pullDir );
+	void OnPhysGunPull( CBasePlayer *pPhysGunUser );
 	void OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t reason );
 
 	bool GetPropDataAngles( const char *pKeyName, QAngle &vecAngles );

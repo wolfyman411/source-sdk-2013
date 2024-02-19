@@ -3395,7 +3395,7 @@ void CPhysicsProp::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t r
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CPhysicsProp::OnPhysGunPull( CBasePlayer* pPhysGunUser, Vector pullDir ) {
+void CPhysicsProp::OnPhysGunPull( CBasePlayer* pPhysGunUser ) {
 	m_OnPhysGunPull.FireOutput(pPhysGunUser, this);
 }
 
