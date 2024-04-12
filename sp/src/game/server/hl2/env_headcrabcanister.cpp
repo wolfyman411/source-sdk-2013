@@ -262,14 +262,14 @@ void CEnvHeadcrabCanister::Precache( void )
 	PrecacheScriptSound( "HeadcrabCanister.Open" );
 
 #ifdef MAPBASE
-	if (m_nHeadcrabType != RANDOM_CRAB_TYPE)
+	if ( m_nHeadcrabType != RANDOM_CRAB_TYPE )
 	{
 		UTIL_PrecacheOther( s_pHeadcrabClass[m_nHeadcrabType] );
 	}
 	else
 	{
 		// precache all the headcrabs if we're spawning random species
-		for (int i = 0; i < ARRAYSIZE(s_pHeadcrabClass); i++)
+		for ( int i = 0; i < ARRAYSIZE( s_pHeadcrabClass ); i++ )
 		{
 			UTIL_PrecacheOther( s_pHeadcrabClass[i] );
 		}
@@ -753,9 +753,9 @@ void CEnvHeadcrabCanister::HeadcrabCanisterSpawnHeadcrabThink()
 	{
 #ifdef MAPBASE
 		int iHeadcrabType = m_nHeadcrabType;
-		if (m_nHeadcrabType == RANDOM_CRAB_TYPE)
+		if ( m_nHeadcrabType == RANDOM_CRAB_TYPE )
 		{
-			iHeadcrabType = RandomInt( 0, ARRAYSIZE(s_pHeadcrabClass) - 1 );
+			iHeadcrabType = RandomInt( 0, ARRAYSIZE( s_pHeadcrabClass ) - 1 );
 		}
 
 		CBaseEntity *pEnt = CreateEntityByName( s_pHeadcrabClass[iHeadcrabType] );
