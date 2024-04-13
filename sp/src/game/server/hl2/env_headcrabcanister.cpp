@@ -34,7 +34,7 @@ ConVar sk_env_headcrabcanister_shake_radius_vehicle( "sk_env_headcrabcanister_sh
 
 #define ENV_HEADCRABCANISTER_TRAIL_TIME	3.0f
 #ifdef MAPBASE
-#define RANDOM_CRAB_TYPE 3
+#define RANDOM_CRAB_TYPE -1
 #endif
 
 //-----------------------------------------------------------------------------
