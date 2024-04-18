@@ -65,6 +65,9 @@ DEFINE_KEYFIELD(m_fAsleep, FIELD_BOOLEAN,"m_fAsleep"),
 DEFINE_FIELD(m_fDontBlink, FIELD_BOOLEAN),
 DEFINE_FIELD(m_vecPackCenter, FIELD_POSITION_VECTOR),
 
+DEFINE_INPUTFUNC(FIELD_VOID, "StartPatrolling", InputStartPatrolling),
+DEFINE_INPUTFUNC(FIELD_VOID, "StopPatrolling", InputStopPatrolling),
+
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS(npc_houndeye, CNPC_Houndeye);
@@ -377,6 +380,7 @@ void CNPC_Houndeye::HandleAnimEvent(animevent_t* pEvent)
 //=========================================================
 void CNPC_Houndeye::SonicAttack(void)
 {
+
 	float		flAdjustedDamage;
 	float		flDist;
 
@@ -901,6 +905,13 @@ int CNPC_Houndeye::SelectSchedule(void)
 {
 	switch (m_NPCState)
 	{
+	case NPC_STATE_IDLE:
+	{
+		if (m_bShouldPatrol)
+			return SCHED_PATROL_WALK;
+		else
+			break;
+	}
 	case NPC_STATE_COMBAT:
 	{
 		// dead enemy
@@ -945,6 +956,22 @@ int CNPC_Houndeye::SelectSchedule(void)
 	}
 
 	return BaseClass::SelectSchedule();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CNPC_Houndeye::InputStartPatrolling(inputdata_t& inputdata)
+{
+	m_bShouldPatrol = true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CNPC_Houndeye::InputStopPatrolling(inputdata_t& inputdata)
+{
+	m_bShouldPatrol = false;
 }
 
 

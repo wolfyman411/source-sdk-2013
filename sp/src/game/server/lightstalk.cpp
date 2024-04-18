@@ -21,7 +21,7 @@
 #include "player.h"
 #include "isaverestore.h"
 
-#define XEN_PLANT_GLOW_SPRITE		"sprites/flare3.vmt"
+#define XEN_PLANT_GLOW_SPRITE		"sprites/light_glow03.vmt"
 #define XEN_PLANT_HIDE_TIME			5
 #define SKIN_DEFAULT				0
 #define SKIN_DIM					1
@@ -108,9 +108,6 @@ void CXenPLight::Precache(void)
 		pLightEntity->Activate();
 		DispatchSpawn(pLightEntity);
 	}
-
-	// Set the light index to the restored value
-	//m_lightIndex = pLightEntity->entindex();
 }
 
 void CXenPLight::Think(void)

@@ -53,11 +53,14 @@ public:
 	float FLSoundVolume(CSound* pSound);
 	int RangeAttack1Conditions(float flDot, float flDist);
 
+	void InputStartPatrolling(inputdata_t& inputdata);
+	void InputStopPatrolling(inputdata_t& inputdata);
+
 	DEFINE_CUSTOM_AI;
 	DECLARE_DATADESC();
 
 private:
-
+	bool m_bShouldPatrol;
 	int m_iSpriteTexture;
 	bool m_fAsleep;// some houndeyes sleep in idle mode if this is set, the houndeye is lying down
 	bool m_fDontBlink;// don't try to open/close eye if this bit is set!
