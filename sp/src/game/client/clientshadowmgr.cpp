@@ -1404,7 +1404,7 @@ bool CClientShadowMgr::Init()
 	m_nMaxDepthTextureShadows = bTools ? 4 : 1;	// Just one shadow depth texture in games, more in tools
 #else
 	// 5 lets mappers use up to 4 shadow-casting projected textures, which is better than 3.
-	int iNumShadows = CommandLine()->ParmValue( "-numshadowtextures", 5 );
+	int iNumShadows = CommandLine()->ParmValue( "-numshadowtextures", 10 );
 	m_nMaxDepthTextureShadows = iNumShadows;
 #endif
 
@@ -4282,6 +4282,7 @@ int CClientShadowMgr::BuildActiveShadowDepthList( const CViewSetup &viewSetup, i
 			continue;
 
 		// Calculate an AABB around the shadow frustum
+
 		Vector vecAbsMins, vecAbsMaxs;
 		CalculateAABBFromProjectionMatrix( shadow.m_WorldToShadow, &vecAbsMins, &vecAbsMaxs );
 

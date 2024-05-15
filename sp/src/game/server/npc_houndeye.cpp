@@ -122,7 +122,7 @@ void CNPC_Houndeye::Spawn()
 
 	SetModel("models/model_xen/houndeye.mdl");
 
-	SetHullType(HULL_TINY);
+	SetHullType(HULL_SMALL);
 	SetHullSizeNormal();
 
 	SetSolid(SOLID_BBOX);
@@ -1117,7 +1117,7 @@ DEFINE_SCHEDULE
 	"		TASK_STOP_MOVING			0"
 	"		TASK_HOUND_OPEN_EYE			0"
 	"		TASK_WAIT_RANDOM			2.5"
-	"		TASK_PLAY_SEQUENCE			ACT_STAND"
+	"		TASK_PLAY_SEQUENCE			ACTIVITY:ACT_STAND"
 	"		TASK_HOUND_WAKE_UP			0"
 	"	"
 	"	Interrupts"
@@ -1132,7 +1132,7 @@ DEFINE_SCHEDULE
 
 	"	Tasks"
 	"		TASK_HOUND_OPEN_EYE			0"
-	"		TASK_PLAY_SEQUENCE			ACT_HOP"
+	"		TASK_PLAY_SEQUENCE			ACTIVITY:ACT_HOP"
 	"		TASK_FACE_IDEAL				0"
 	"		TASK_HOUND_WAKE_UP			0"
 	"	"
