@@ -33,7 +33,7 @@
 
 // houndeye does 20 points of damage spread over a sphere 384 units in diameter, and each additional 
 // squad member increases the BASE damage by 110%, per the spec.
-#define HOUNDEYE_MAX_SQUAD_SIZE			4
+#define HOUNDEYE_MAX_SQUAD_SIZE			10
 #define	HOUNDEYE_MAX_ATTACK_RADIUS		384
 #define	HOUNDEYE_SQUAD_BONUS			(float)1.1
 
@@ -518,10 +518,8 @@ Vector CNPC_Houndeye::WriteBeamColor(void)
 
 	if (m_pSquad)
 	{
-		switch (m_pSquad->NumMembers())
-		{
+		switch (m_pSquad->NumMembers()) {
 		case 2:
-			// no case for 0 or 1, cause those are impossible for monsters in Squads.
 			bRed = 101;
 			bGreen = 133;
 			bBlue = 221;
@@ -532,17 +530,25 @@ Vector CNPC_Houndeye::WriteBeamColor(void)
 			bBlue = 255;
 			break;
 		case 4:
-			bRed = 62;
-			bGreen = 33;
-			bBlue = 211;
+			bRed = 84;
+			bGreen = 7;
+			bBlue = 196;
 			break;
 		default:
-			Msg("Unsupported Houndeye SquadSize!\n");
-			bRed = 188;
-			bGreen = 220;
-			bBlue = 255;
+			if (m_pSquad->NumMembers() > 4) {
+				bRed = 156;
+				bGreen = 100;
+				bBlue = 150;
+			}
+			else {
+				Msg("Unsupported Houndeye SquadSize!\n");
+				bRed = 188;
+				bGreen = 220;
+				bBlue = 255;
+			}
 			break;
 		}
+
 	}
 	else
 	{
