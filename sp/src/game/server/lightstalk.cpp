@@ -140,6 +140,12 @@ void CXenPLight::Think(void)
 		m_pGlow->SetTransparency(kRenderGlow, GetRenderColor().r, GetRenderColor().g, GetRenderColor().b, GetRenderColor().a * 0.0f, m_nRenderFX);
 	}
 
+	if (pPlayer->GetTimeSinceWeaponFired() < 0.5f && playerDis < 500.0f)
+	{
+		SetActivity(ACT_CROUCHIDLE);
+		LightOff();
+	}
+
 	switch (GetActivity())
 	{
 	case ACT_CROUCH:
@@ -152,7 +158,7 @@ void CXenPLight::Think(void)
 
 	case ACT_CROUCHIDLE:
 		//See how close the player is
-		if (playerDis > 300.0f) {
+		if (playerDis > 300.0f && pPlayer->GetTimeSinceWeaponFired() > 5.0f) {
 			SetActivity(ACT_STAND);
 			LightOn();
 		}

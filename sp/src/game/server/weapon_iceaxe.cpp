@@ -146,7 +146,7 @@ int CWeaponIceaxe::WeaponMeleeAttack1Condition(float flDot, float flDist)
 void CWeaponIceaxe::ItemPostFrame()
 {
 	CBasePlayer* pPlayer = ToBasePlayer(GetOwner());
-	Msg("%f\n", gpGlobals->curtime - chargeDuration);
+	//Msg("%f\n", gpGlobals->curtime - chargeDuration);
 
 
 	if (pPlayer == NULL)
@@ -173,7 +173,7 @@ void CWeaponIceaxe::ItemPostFrame()
 
 		if (addedDamage >= 65.0f)
 		{
-			Msg("%f\n", addedDamage);
+			//Msg("%f\n", addedDamage);
 			addedDamage = 65.0f;
 		}
 		AddViewKick();
