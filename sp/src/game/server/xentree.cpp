@@ -72,9 +72,10 @@ public:
 	void		Whack(void);
 	void SetActivity(Activity NewActivity);
 	int			OnTakeDamage(const CTakeDamageInfo& info) { Attack(); return 0; }
-	float lastSwing = 0.0f;
+	float angryTimer = 0.0f;
 	void		Attack(void);
 	Class_T			Classify(void) { return CLASS_EARTH_FAUNA; }
+	void HandleAnimEvent(animevent_t* pEvent);
 
 	DECLARE_DATADESC();
 
@@ -99,16 +100,20 @@ void CXenTree::Spawn(void)
 
 	m_takedamage = DAMAGE_YES;
 
-	UTIL_SetSize(this, Vector(-30, -30, 0), Vector(30, 30, 188));
+	//Bounding Box
+	UTIL_SetSize(this, Vector(-30, -30, 0), Vector(30, 30, 132));
+
+
 	SetActivity(ACT_IDLE);
 	SetNextThink(gpGlobals->curtime + 0.1);
 	SetCycle(random->RandomFloat(0, 1));
 	m_flPlaybackRate = random->RandomFloat(0.7, 1.4);
+	angryTimer = gpGlobals->curtime + random->RandomFloat(5.0, 15.0);
 
 	Vector triggerPosition, vForward;
 
 	AngleVectors(GetAbsAngles(), &vForward);
-	triggerPosition = GetAbsOrigin() + (vForward * 64);
+	triggerPosition = GetAbsOrigin() + (vForward * 90);
 
 	// Create the trigger
 	m_pTrigger = CXenTreeTrigger::TriggerCreate(this, triggerPosition);
@@ -125,12 +130,20 @@ void CXenTree::Precache(void)
 	SetActivity(ACT_IDLE);
 }
 
+void CXenTree::HandleAnimEvent(animevent_t* pEvent)
+{
+	if (pEvent->event == AE_NPC_ATTACK_BROADCAST)
+	{
+		Whack();
+		return;
+	}
+}
+
 
 void CXenTree::Touch(CBaseEntity* pOther)
 {
 	if (!pOther->IsAlive())
 		return;
-
 	Attack();
 }
 
@@ -139,31 +152,10 @@ void CXenTree::Attack(void)
 {
 	if (GetActivity() == ACT_IDLE)
 	{
-		lastSwing = gpGlobals->curtime+0.7;
-		int num = RandomInt(4, 4);
-		switch (num)
-		{
-			case 1:
-				SetActivity(ACT_MELEE_ATTACK1);
-				lastSwing = gpGlobals->curtime + 0.7;
-				break;
-			case 2:
-				SetActivity(ACT_MELEE_ATTACK2);
-				lastSwing = gpGlobals->curtime + 0.9;
-				break;
-			case 3:
-				SetActivity(ACT_MELEE_ATTACK_MISS1);
-				lastSwing = gpGlobals->curtime + 0.7;
-				break;
-			case 4:
-				SetActivity(ACT_MELEE_ATTACK_MISS2);
-				lastSwing = gpGlobals->curtime + 0.7;
-				break;
-		}
-		m_flPlaybackRate = random->RandomFloat(0.9, 1.1);
-
 		CPASAttenuationFilter filter(this);
+		SetActivity(ACT_MELEE_ATTACK);
 		EmitSound(filter, entindex(), "XenTree.AttackMiss");
+		angryTimer = gpGlobals->curtime + random->RandomFloat(5.0, 15.0);
 	}
 }
 
@@ -173,50 +165,32 @@ void CXenTree::Think(void)
 	SetNextThink(gpGlobals->curtime + 0.1);
 	DispatchAnimEvents(this);
 
-	//Hurt Targets
-	if (gpGlobals->curtime > lastSwing && lastSwing != 0.0f)
+	if (gpGlobals->curtime > angryTimer)
 	{
-		Msg("%fLastSwing\n", lastSwing);
-		lastSwing = 0.0f;
-		Whack();
+		SetActivity(ACT_IDLE_ANGRY);
+		angryTimer = gpGlobals->curtime + random->RandomFloat(5.0, 15.0);
 	}
 
 	//Return to idle
 	switch (GetActivity())
 	{
-	case ACT_MELEE_ATTACK1:
+	case ACT_MELEE_ATTACK:
 		if (IsSequenceFinished())
 		{
 			SetActivity(ACT_IDLE);
 			m_flPlaybackRate = random->RandomFloat(0.6f, 1.4f);
 		}
 		break;
-	case ACT_MELEE_ATTACK2:
+	case ACT_IDLE_ANGRY:
 		if (IsSequenceFinished())
 		{
 			SetActivity(ACT_IDLE);
 			m_flPlaybackRate = random->RandomFloat(0.6f, 1.4f);
 		}
 		break;
-	case ACT_MELEE_ATTACK_MISS1:
-		if (IsSequenceFinished())
-		{
-			SetActivity(ACT_IDLE);
-			m_flPlaybackRate = random->RandomFloat(0.6f, 1.4f);
-		}
-		break;
-	case ACT_MELEE_ATTACK_MISS2:
-		if (IsSequenceFinished())
-		{
-			SetActivity(ACT_IDLE);
-			m_flPlaybackRate = random->RandomFloat(0.6f, 1.4f);
-		}
-		break;
-
 	default:
 	case ACT_IDLE:
 		break;
-
 	}
 }
 

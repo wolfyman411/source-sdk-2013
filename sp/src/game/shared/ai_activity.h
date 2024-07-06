@@ -131,7 +131,8 @@ typedef enum
 	ACT_LOOKBACK_LEFT,
 	ACT_COWER,				// FIXME: unused, should be more extreme version of crouching
 	ACT_SMALL_FLINCH,		// FIXME: needed? shouldn't flinching be down with overlays?
-	ACT_BIG_FLINCH,		
+	ACT_BIG_FLINCH,	
+	ACT_MELEE_ATTACK,
 	ACT_MELEE_ATTACK1,
 	ACT_MELEE_ATTACK2,
 	ACT_MELEE_ATTACK_MISS1, //Xentree

@@ -55,6 +55,8 @@ private:
 	CSprite* m_pGlow;
 	CBasePlayer* pPlayer;
 	CBaseEntity* pLightEntity;
+	bool enableDynamicLight = true;
+	bool enableSpriteLight = true;
 };
 
 LINK_ENTITY_TO_CLASS(xen_plantlight, CXenPLight);
@@ -64,6 +66,9 @@ BEGIN_DATADESC(CXenPLight)
 DEFINE_FIELD(m_pGlow, FIELD_CLASSPTR),
 DEFINE_FIELD(m_flDmgTime, FIELD_FLOAT),
 DEFINE_FIELD(pLightEntity, FIELD_CLASSPTR),
+
+DEFINE_KEYFIELD(enableDynamicLight, FIELD_BOOLEAN, "enableDynamicLight"),
+DEFINE_KEYFIELD(enableSpriteLight, FIELD_BOOLEAN, "enableSpriteLight"),
 
 DEFINE_OUTPUT(m_OnHide, "OnHide"),
 DEFINE_OUTPUT(m_OnShow, "OnShow"),
@@ -91,6 +96,11 @@ void CXenPLight::Spawn(void)
 	transRatio = 1;
 
 	LightOn();
+
+	if (!enableSpriteLight)
+	{
+		m_pGlow->AddEffects(EF_NODRAW);
+	}
 }
 
 
@@ -101,7 +111,7 @@ void CXenPLight::Precache(void)
 	SetActivity(ACT_IDLE);
 
 	// Create the dynamic light entity if it doesn't exist
-	if (!pLightEntity)
+	if (!pLightEntity && enableDynamicLight)
 	{
 		pLightEntity = CreateEntityByName("light_dynamic");
 		pLightEntity->SetAbsOrigin(GetAbsOrigin() + Vector(0, 0, 50));
@@ -186,12 +196,18 @@ void CXenPLight::LightOn(void)
 
 	if (m_pGlow)
 	{
-		m_pGlow->RemoveEffects(EF_NODRAW);
+		if (enableSpriteLight)
+		{
+			m_pGlow->RemoveEffects(EF_NODRAW);
+		}
 		m_nSkin = SKIN_DEFAULT;
 
-		pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", 255, 240, 111));
-		pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 300.0f));
-		pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", 0.1f));
+		if (pLightEntity)
+		{
+			pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", 255, 240, 111));
+			pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 300.0f));
+			pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", 0.1f));
+		}
 		DispatchSpawn(pLightEntity);
 	}
 }
@@ -209,9 +225,12 @@ void CXenPLight::LightOff(void)
 		m_pGlow->AddEffects(EF_NODRAW);
 		m_nSkin = SKIN_DIM;
 
-		pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", 0, 0, 0));
-		pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 0.0f));
-		pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", 0.0f));
+		if (pLightEntity)
+		{
+			pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", 0, 0, 0));
+			pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 0.0f));
+			pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", 0.0f));
+		}
 		DispatchSpawn(pLightEntity);
 	}
 }
