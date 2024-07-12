@@ -57,6 +57,9 @@ private:
 	CBaseEntity* pLightEntity;
 	bool enableDynamicLight = true;
 	bool enableSpriteLight = true;
+	color32 lightColor;
+	//Default { 255, 240, 111 , 1 };
+	float lightStrength = 0.1f;
 };
 
 LINK_ENTITY_TO_CLASS(xen_plantlight, CXenPLight);
@@ -69,6 +72,9 @@ DEFINE_FIELD(pLightEntity, FIELD_CLASSPTR),
 
 DEFINE_KEYFIELD(enableDynamicLight, FIELD_BOOLEAN, "enableDynamicLight"),
 DEFINE_KEYFIELD(enableSpriteLight, FIELD_BOOLEAN, "enableSpriteLight"),
+DEFINE_KEYFIELD(lightColor, FIELD_COLOR32, "lightColor"),
+DEFINE_KEYFIELD(lightStrength, FIELD_FLOAT, "lightStrength"),
+
 
 DEFINE_OUTPUT(m_OnHide, "OnHide"),
 DEFINE_OUTPUT(m_OnShow, "OnShow"),
@@ -207,15 +213,14 @@ void CXenPLight::LightOn(void)
 			m_pGlow->RemoveEffects(EF_NODRAW);
 		}
 		m_nSkin = SKIN_DEFAULT;
-
-		if (pLightEntity)
-		{
-			pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", 255, 240, 111));
-			pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 300.0f));
-			pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", 0.1f));
-		}
-		DispatchSpawn(pLightEntity);
 	}
+	if (pLightEntity)
+	{
+		pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", lightColor.r, lightColor.g, lightColor.b));
+		pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 300.0f));
+		pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", lightStrength));
+	}
+	DispatchSpawn(pLightEntity);
 }
 
 
@@ -230,13 +235,12 @@ void CXenPLight::LightOff(void)
 		
 		m_pGlow->AddEffects(EF_NODRAW);
 		m_nSkin = SKIN_DIM;
-
-		if (pLightEntity)
-		{
-			pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", 0, 0, 0));
-			pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 0.0f));
-			pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", 0.0f));
-		}
-		DispatchSpawn(pLightEntity);
 	}
+	if (pLightEntity)
+	{
+		pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", lightColor.r, lightColor.g, lightColor.b));
+		pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 0.0f));
+		pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", 0.0f));
+	}
+	DispatchSpawn(pLightEntity);
 }

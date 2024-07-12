@@ -142,6 +142,11 @@ void CNPC_Houndeye::Spawn()
 	CapabilitiesAdd(bits_CAP_SQUAD);
 
 	NPCInit();
+
+	if (m_fAsleep)
+	{
+		SetSchedule(SCHED_HOUND_SLEEP);
+	}
 }
 
 //=========================================================
