@@ -211,6 +211,7 @@ BEGIN_DATADESC( CNPC_BaseZombie )
 	DEFINE_FIELD( m_fIsTorso, FIELD_BOOLEAN ),
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_fIsHeadless, FIELD_BOOLEAN, "Headless" ),
+	DEFINE_KEYFIELD( m_flMeleeReach, FIELD_FLOAT, "MeleeReach" ),
 #else
 	DEFINE_FIELD( m_fIsHeadless, FIELD_BOOLEAN ),
 #endif

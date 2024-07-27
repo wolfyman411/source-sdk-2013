@@ -20,8 +20,6 @@
 
 #define	ENVELOPE_CONTROLLER		(CSoundEnvelopeController::GetController())
 
-#define ZOMBIE_MELEE_REACH	55
-
 extern int AE_ZOMBIE_ATTACK_RIGHT;
 extern int AE_ZOMBIE_ATTACK_LEFT;
 extern int AE_ZOMBIE_ATTACK_BOTH;
@@ -141,7 +139,7 @@ public:
 	}
 
 	int MeleeAttack1Conditions ( float flDot, float flDist );
-	virtual float GetClawAttackRange() const { return ZOMBIE_MELEE_REACH; }
+	virtual float GetClawAttackRange() const { return m_flMeleeReach; }
 
 	// No range attacks
 	int RangeAttack1Conditions ( float flDot, float flDist ) { return( 0 ); }
@@ -256,6 +254,8 @@ protected:
 	bool	m_fIsHeadless;		// is this zombie headless
 
 	float	m_flNextFlinch;
+
+	float m_flMeleeReach;
 
 	bool m_bHeadShot;			// Used to determine the survival of our crab beyond our death.
 
