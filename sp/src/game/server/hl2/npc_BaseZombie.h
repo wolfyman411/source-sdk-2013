@@ -43,6 +43,7 @@ extern int AE_ZOMBIE_POUND;
 
 #ifdef MAPBASE
 #define SF_ZOMBIE_NO_TORSO ( 1 << 15 )
+#define SF_ZOMBIE_NO_HEADCRAB_SPAWN ( 1 << 16 )
 #endif
 	
 

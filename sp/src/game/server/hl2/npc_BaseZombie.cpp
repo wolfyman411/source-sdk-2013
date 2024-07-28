@@ -787,7 +787,7 @@ bool CNPC_BaseZombie::ShouldBecomeTorso( const CTakeDamageInfo &info, float flDa
 HeadcrabRelease_t CNPC_BaseZombie::ShouldReleaseHeadcrab( const CTakeDamageInfo &info, float flDamageThreshold )
 {
 #ifdef MAPBASE
-	if ( m_iHealth <= 0 && !m_fIsHeadless )
+	if ( m_iHealth <= 0 && !m_fIsHeadless && !HasSpawnFlags(SF_ZOMBIE_NO_HEADCRAB_SPAWN))
 #else
 	if ( m_iHealth <= 0 )
 #endif
