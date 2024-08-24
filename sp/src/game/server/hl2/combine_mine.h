@@ -146,6 +146,8 @@ private:
 	CHandle<CBasePlayer>	m_hPhysicsAttacker;
 	float					m_flLastPhysicsInfluenceTime;
 
+	float					m_alteredMass;
+
 	float					m_flTimeGrabbed;
 	IPhysicsConstraint		*m_pConstraint;
 	int						m_iMineState;

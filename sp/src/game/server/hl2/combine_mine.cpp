@@ -126,6 +126,8 @@ BEGIN_DATADESC( CBounceBomb )
 	DEFINE_FIELD( m_hPhysicsAttacker, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flLastPhysicsInfluenceTime, FIELD_TIME ),
 
+	DEFINE_FIELD(m_alteredMass, FIELD_FLOAT),
+
 	DEFINE_PHYSPTR( m_pConstraint ),
 
 	DEFINE_OUTPUT( m_OnPulledUp, "OnPulledUp" ),
@@ -212,6 +214,13 @@ void CBounceBomb::Spawn()
 	{
 		// Create vphysics now if I'm not being carried.
 		CreateVPhysics();
+	}
+
+	//Change Mass
+	if (m_alteredMass > 0.0f)
+	{
+		IPhysicsObject* pPhysicsObject = this->VPhysicsGetObject();
+		pPhysicsObject->SetMass(m_alteredMass);
 	}
 
 	m_flTimeGrabbed = FLT_MAX;
