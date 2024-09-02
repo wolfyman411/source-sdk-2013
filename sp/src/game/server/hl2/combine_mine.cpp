@@ -126,7 +126,7 @@ BEGIN_DATADESC( CBounceBomb )
 	DEFINE_FIELD( m_hPhysicsAttacker, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flLastPhysicsInfluenceTime, FIELD_TIME ),
 
-	DEFINE_FIELD(m_alteredMass, FIELD_FLOAT),
+	DEFINE_KEYFIELD(m_alteredMass, FIELD_FLOAT,"alteredMass"),
 
 	DEFINE_PHYSPTR( m_pConstraint ),
 
@@ -214,13 +214,6 @@ void CBounceBomb::Spawn()
 	{
 		// Create vphysics now if I'm not being carried.
 		CreateVPhysics();
-	}
-
-	//Change Mass
-	if (m_alteredMass > 0.0f)
-	{
-		IPhysicsObject* pPhysicsObject = this->VPhysicsGetObject();
-		pPhysicsObject->SetMass(m_alteredMass);
 	}
 
 	m_flTimeGrabbed = FLT_MAX;
@@ -447,13 +440,19 @@ void CBounceBomb::SetMineState( int iState )
 
 	case MINE_STATE_LAUNCHED:
 		{
-			UpdateLight( true, 255, 0, 0, 190 );
-			SetThink( NULL );
-			SetNextThink( gpGlobals->curtime + 0.5 );
+		//Change Mass
+		if (m_alteredMass > 0.0f)
+		{
+			IPhysicsObject* pPhysicsObject = this->VPhysicsGetObject();
+			pPhysicsObject->SetMass(m_alteredMass);
+		}
+		UpdateLight( true, 255, 0, 0, 190 );
+		SetThink( NULL );
+		SetNextThink( gpGlobals->curtime + 0.5 );
 
-			SetTouch( &CBounceBomb::ExplodeTouch );
-			unsigned int flags = VPhysicsGetObject()->GetCallbackFlags();
-			VPhysicsGetObject()->SetCallbackFlags( flags | CALLBACK_GLOBAL_TOUCH_STATIC );
+		SetTouch( &CBounceBomb::ExplodeTouch );
+		unsigned int flags = VPhysicsGetObject()->GetCallbackFlags();
+		VPhysicsGetObject()->SetCallbackFlags( flags | CALLBACK_GLOBAL_TOUCH_STATIC );
 		}
 		break;
 
