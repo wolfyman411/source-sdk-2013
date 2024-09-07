@@ -1615,7 +1615,7 @@ public:
 #define SetProp( type, name )\
 	void SetProp##name( HSCRIPT hEnt, const char* szProp, type value )\
 	{\
-		return SetProp##name##Array( hEnt, szProp, value, 0 );\
+		SetProp##name##Array( hEnt, szProp, value, 0 );\
 	}
 
 	GetProp( int, Int );
@@ -1624,8 +1624,8 @@ public:
 	SetProp( float, Float );
 	GetProp( HSCRIPT, Entity );
 	SetProp( HSCRIPT, Entity );
-	GetProp( Vector, Vector );
-	SetProp( Vector, Vector );
+	GetProp( const Vector&, Vector );
+	SetProp( const Vector&, Vector );
 	GetProp( const char*, String );
 	SetProp( const char*, String );
 
