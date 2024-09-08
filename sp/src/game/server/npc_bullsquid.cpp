@@ -1,10 +1,3 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
-//
-// Purpose:		Cute hound like Alien.
-//
-// $NoKeywords: $
-//=============================================================================//
-
 #include "cbase.h"
 #include "game.h"
 #include "AI_Default.h"
@@ -85,156 +78,6 @@ int ACT_SQUID_EAT;
 int ACT_SQUID_DETECT_SCENT;
 int ACT_SQUID_INSPECT_FLOOR;
 
-//=========================================================
-// Bullsquid's spit projectile
-//=========================================================
-class CSquidSpit : public CBaseEntity
-{
-	DECLARE_CLASS(CSquidSpit, CBaseEntity);
-public:
-	void Spawn(void);
-	void Precache(void);
-
-	static void Shoot(CBaseEntity* pOwner, Vector vecStart, Vector vecVelocity);
-	void Touch(CBaseEntity* pOther);
-	void Animate(void);
-
-	int m_nSquidSpitSprite;
-
-	DECLARE_DATADESC();
-
-	void SetSprite(CBaseEntity* pSprite)
-	{
-		m_hSprite = pSprite;
-	}
-
-	CBaseEntity* GetSprite(void)
-	{
-		return m_hSprite.Get();
-	}
-
-private:
-	EHANDLE m_hSprite;
-
-
-};
-
-LINK_ENTITY_TO_CLASS(squidspit, CSquidSpit);
-
-BEGIN_DATADESC(CSquidSpit)
-DEFINE_FIELD(m_nSquidSpitSprite, FIELD_INTEGER),
-DEFINE_FIELD(m_hSprite, FIELD_EHANDLE),
-END_DATADESC()
-
-
-void CSquidSpit::Precache(void)
-{
-	m_nSquidSpitSprite = PrecacheModel("sprites/bigspit.vmt");// client side spittle.
-
-	PrecacheScriptSound("NPC_BigMomma.SpitTouch1");
-	PrecacheScriptSound("NPC_BigMomma.SpitHit1");
-	PrecacheScriptSound("NPC_BigMomma.SpitHit2");
-}
-
-void CSquidSpit::Spawn(void)
-{
-	Precache();
-
-	SetMoveType(MOVETYPE_FLY);
-	SetClassname("squidspit");
-
-	SetSolid(SOLID_BBOX);
-
-	m_nRenderMode = kRenderTransAlpha;
-	SetRenderColorA(255);
-	SetModel("");
-
-	SetSprite(CSprite::SpriteCreate("sprites/bigspit.vmt", GetAbsOrigin(), true));
-
-	UTIL_SetSize(this, Vector(0, 0, 0), Vector(0, 0, 0));
-
-	SetCollisionGroup(HL2COLLISION_GROUP_SPIT);
-}
-
-void CSquidSpit::Shoot(CBaseEntity* pOwner, Vector vecStart, Vector vecVelocity)
-{
-	CSquidSpit* pSpit = CREATE_ENTITY(CSquidSpit, "squidspit");
-	pSpit->Spawn();
-
-	UTIL_SetOrigin(pSpit, vecStart);
-	pSpit->SetAbsVelocity(vecVelocity);
-	pSpit->SetOwnerEntity(pOwner);
-
-	CSprite* pSprite = (CSprite*)pSpit->GetSprite();
-
-	if (pSprite)
-	{
-		pSprite->SetAttachment(pSpit, 0);
-		pSprite->SetOwnerEntity(pSpit);
-
-		pSprite->SetScale(0.5);
-		pSprite->SetTransparency(pSpit->m_nRenderMode, pSpit->m_clrRender->r, pSpit->m_clrRender->g, pSpit->m_clrRender->b, pSpit->m_clrRender->a, pSpit->m_nRenderFX);
-	}
-
-
-	CPVSFilter filter(vecStart);
-
-	VectorNormalize(vecVelocity);
-	te->SpriteSpray(filter, 0.0, &vecStart, &vecVelocity, pSpit->m_nSquidSpitSprite, 210, 25, 15);
-}
-
-void CSquidSpit::Touch(CBaseEntity* pOther)
-{
-	trace_t tr;
-	int		iPitch;
-
-	if (pOther->GetSolidFlags() & FSOLID_TRIGGER)
-		return;
-
-	if (pOther->GetCollisionGroup() == HL2COLLISION_GROUP_SPIT)
-	{
-		return;
-	}
-
-	// splat sound
-	iPitch = random->RandomFloat(90, 110);
-
-	EmitSound("NPC_BigMomma.SpitTouch1");
-
-	switch (random->RandomInt(0, 1))
-	{
-	case 0:
-		EmitSound("NPC_BigMomma.SpitHit1");
-		break;
-	case 1:
-		EmitSound("NPC_BigMomma.SpitHit2");
-		break;
-	}
-
-	if (!pOther->m_takedamage)
-	{
-		// make a splat on the wall
-		UTIL_TraceLine(GetAbsOrigin(), GetAbsOrigin() + GetAbsVelocity() * 10, MASK_SOLID, this, COLLISION_GROUP_NONE, &tr);
-		UTIL_DecalTrace(&tr, "BeerSplash");
-
-		// make some flecks
-		CPVSFilter filter(tr.endpos);
-
-		te->SpriteSpray(filter, 0.0, &tr.endpos, &tr.plane.normal, m_nSquidSpitSprite, 30, 8, 5);
-
-	}
-	else
-	{
-		CTakeDamageInfo info(this, this, sk_bullsquid_dmg_spit.GetFloat(), DMG_ACID);
-		CalculateBulletDamageForce(&info, GetAmmoDef()->Index("9mmRound"), GetAbsVelocity(), GetAbsOrigin());
-		pOther->TakeDamage(info);
-	}
-
-	UTIL_Remove(m_hSprite);
-	UTIL_Remove(this);
-}
-
-
 BEGIN_DATADESC(CNPC_Bullsquid)
 DEFINE_FIELD(m_fCanThreatDisplay, FIELD_BOOLEAN),
 DEFINE_FIELD(m_flLastHurtTime, FIELD_TIME),
@@ -272,20 +115,63 @@ void CNPC_Bullsquid::Spawn()
 	m_flNextSpitTime = gpGlobals->curtime;
 
 	NPCInit();
-
-	m_flDistTooFar = 784;
 }
 
-//=========================================================
-// Precache - precaches all resources this monster needs
-//=========================================================
+bool CNPC_Bullsquid::BullGetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut)
+{
+	float spitSpeed = 15.0f;
+	// Try the most direct route
+	Vector vecToss = BullVecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed, (10.0f * 12.0f));
+
+	// If this failed then try a little faster (flattens the arc)
+	if (vecToss == vec3_origin)
+	{
+		vecToss = BullVecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed * 1.5f, (10.0f * 12.0f));
+		if (vecToss == vec3_origin)
+			return false;
+	}
+
+	// Save out the result
+	if (vecOut)
+	{
+		*vecOut = vecToss;
+	}
+
+	return true;
+}
+
+Vector CNPC_Bullsquid::BullVecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance)
+{
+	flSpeed = MAX(1.0f, flSpeed);
+
+	float flGravity = GetCurrentGravity();
+
+	Vector vecGrenadeVel = (vecSpot2 - vecSpot1);
+
+	// throw at a constant time
+	float time = vecGrenadeVel.Length() / flSpeed;
+	vecGrenadeVel = vecGrenadeVel * (1.0 / time);
+
+	// adjust upward toss to compensate for gravity loss
+	vecGrenadeVel.z += flGravity * time * 0.5;
+
+	Vector vecApex = vecSpot1 + (vecSpot2 - vecSpot1) * 0.5;
+	vecApex.z += 0.5 * flGravity * (time * 0.5) * (time * 0.5);
+
+
+	trace_t tr;
+	UTIL_TraceLine(vecSpot1, vecApex, MASK_SOLID, pEdict, COLLISION_GROUP_NONE, &tr);
+
+	UTIL_TraceLine(vecApex, vecSpot2, MASK_SOLID_BRUSHONLY, pEdict, COLLISION_GROUP_NONE, &tr);
+
+	return vecGrenadeVel;
+}
+
 void CNPC_Bullsquid::Precache()
 {
 	BaseClass::Precache();
 
 	PrecacheModel("models/model_xen/bullsquid.mdl");
-
-	PrecacheModel("sprites/bigspit.vmt");// spit projectile.
 
 	PrecacheScriptSound("Bullsquid.Idle");
 	PrecacheScriptSound("Bullsquid.Pain");
@@ -398,27 +284,32 @@ void CNPC_Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 	{
 		if (GetEnemy())
 		{
-			Vector	vecSpitOffset;
-			Vector	vecSpitDir;
-			Vector  vRight, vUp, vForward;
-
-			AngleVectors(GetAbsAngles(), &vForward, &vRight, &vUp);
-
-			// !!!HACKHACK - the spot at which the spit originates (in front of the mouth) was measured in 3ds and hardcoded here.
-			// we should be able to read the position of bones at runtime for this info.
-			vecSpitOffset = (vRight * 8 + vForward * 60 + vUp * 50);
-			vecSpitOffset = (GetAbsOrigin() + vecSpitOffset);
-			vecSpitDir = ((GetEnemy()->BodyTarget(GetAbsOrigin())) - vecSpitOffset);
-
-			VectorNormalize(vecSpitDir);
-
-			vecSpitDir.x += random->RandomFloat(-0.05, 0.05);
-			vecSpitDir.y += random->RandomFloat(-0.05, 0.05);
-			vecSpitDir.z += random->RandomFloat(-0.05, 0);
-
 			AttackSound();
 
-			CSquidSpit::Shoot(this, vecSpitOffset, vecSpitDir * 900);
+			//Create Grenade
+			Vector vSpitPos;
+			GetAttachment("head", vSpitPos);
+
+			//Vector
+			Vector	vTarget = GetEnemy()->BodyTarget(vSpitPos, true);
+			Vector	vecToss;
+			BullGetSpitVector(vSpitPos, vTarget, &vecToss);
+			float flVelocity = VectorNormalize(vecToss);
+
+			//Grenade
+			CGrenadeSpit* pGrenade = (CGrenadeSpit*)CreateEntityByName("grenade_spit");
+			pGrenade->SetAbsOrigin(vSpitPos);
+			pGrenade->SetAbsAngles(vec3_angle);
+			DispatchSpawn(pGrenade);
+			pGrenade->SetThrower(this);
+			pGrenade->SetOwnerEntity(this);
+
+			pGrenade->SetSpitSize(SPIT_LARGE);
+			pGrenade->SetAbsVelocity(vecToss * flVelocity);
+			pGrenade->SetLocalAngularVelocity(
+				QAngle(random->RandomFloat(-250, -500),
+					random->RandomFloat(-250, -500),
+					random->RandomFloat(-250, -500)));
 		}
 	}
 	break;
@@ -518,7 +409,7 @@ int CNPC_Bullsquid::RangeAttack1Conditions(float flDot, float flDist)
 		return (COND_NONE);
 	}
 
-	if (flDist > 85 && flDist <= 784 && flDot >= 0.5 && gpGlobals->curtime >= m_flNextSpitTime)
+	if (flDist <= 784 && flDot >= 0.5)  // Adjust the minimum distance
 	{
 		if (GetEnemy() != NULL)
 		{
@@ -529,15 +420,16 @@ int CNPC_Bullsquid::RangeAttack1Conditions(float flDot, float flDist)
 			}
 		}
 
-		if (IsMoving())
+		if (IsMoving() || gpGlobals->curtime < m_flNextSpitTime)
 		{
 			// don't spit again for a long time, resume chasing enemy.
-			m_flNextSpitTime = gpGlobals->curtime + 5;
+			m_flNextSpitTime = gpGlobals->curtime + 5.0;
+			return(COND_NONE);
 		}
 		else
 		{
 			// not moving, so spit again pretty soon.
-			m_flNextSpitTime = gpGlobals->curtime + 0.5;
+			m_flNextSpitTime = gpGlobals->curtime + 1.0;
 		}
 
 		return(COND_CAN_RANGE_ATTACK1);
@@ -621,35 +513,6 @@ Disposition_t CNPC_Bullsquid::IRelationType(CBaseEntity* pTarget)
 //=========================================================
 int CNPC_Bullsquid::OnTakeDamage_Alive(const CTakeDamageInfo& inputInfo)
 {
-
-#if 0 //Fix later.
-
-	float flDist;
-	Vector vecApex, vOffset;
-
-	// if the squid is running, has an enemy, was hurt by the enemy, hasn't been hurt in the last 3 seconds, and isn't too close to the enemy,
-	// it will swerve. (whew).
-	if (GetEnemy() != NULL && IsMoving() && pevAttacker == GetEnemy() && gpGlobals->curtime - m_flLastHurtTime > 3)
-	{
-		flDist = (GetAbsOrigin() - GetEnemy()->GetAbsOrigin()).Length2D();
-
-		if (flDist > SQUID_SPRINT_DIST)
-		{
-			AI_Waypoint_t* pRoute = GetNavigator()->GetPath()->Route();
-
-			if (pRoute)
-			{
-				flDist = (GetAbsOrigin() - pRoute[pRoute->iNodeID].vecLocation).Length2D();// reusing flDist. 
-
-				if (GetNavigator()->GetPath()->BuildTriangulationRoute(GetAbsOrigin(), pRoute[pRoute->iNodeID].vecLocation, flDist * 0.5, GetEnemy(), &vecApex, &vOffset, NAV_GROUND))
-				{
-					GetNavigator()->PrependWaypoint(vecApex, bits_WP_TO_DETOUR | bits_WP_DONT_SIMPLIFY);
-				}
-			}
-		}
-	}
-#endif
-
 	if (!FClassnameIs(inputInfo.GetAttacker(), "npc_headcrab"))
 	{
 		// don't forget about headcrabs if it was a headcrab that hurt the squid.
