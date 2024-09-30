@@ -100,10 +100,12 @@ void CNPC_Combine_Armored::Precache()
 {
 	if( !GetModelName() )
 	{
-		SetModelName( MAKE_STRING( "models/armored_soldier.mdl" ) );
+		//SetModelName( MAKE_STRING( "models/armored_soldier.mdl" ) ); //TODO name changed
+		SetModelName(MAKE_STRING("models/combine_soldier.mdl"));
 	}
 
 	PrecacheModel( STRING( GetModelName() ) );
+	PrecacheModel("models/combine_soldier.mdl");
 
 	UTIL_PrecacheOther( "combine_armor_piece" );
 
@@ -123,11 +125,17 @@ void CNPC_Combine_Armored::SpawnArmorPieces( void )
 
 	armorpiecepositions_t ArmorPiecesPositions[] =
 	{
-		{ "attach_L_Thigh_armor",		"models/combine_armor.mdl" },
+		/*{"attach_L_Thigh_armor",		"models/combine_armor.mdl"},
 		{ "attach_L_UpperArm_armor",	"models/combine_armor.mdl" },
 		{ "attach_R_Thigh_armor",		"models/combine_armor.mdl" },  
 		{ "attach_R_UpperArm_armor",	"models/combine_armor.mdl" },
-		{ "attach_chest_armor",			"models/combine_armor_chest.mdl" },
+		{ "attach_chest_armor",			"models/combine_armor_chest.mdl" },*/
+		// TODO prop changed
+		{"attach_L_Thigh_armor",		"models/combine_soldier.mdl"},
+		{ "attach_L_UpperArm_armor",	"models/combine_soldier.mdl" },
+		{ "attach_R_Thigh_armor",		"models/combine_soldier.mdl" },
+		{ "attach_R_UpperArm_armor",	"models/combine_soldier.mdl" },
+		{ "attach_chest_armor",			"models/combine_soldier.mdl" }
 	};
 
 	for ( int i = 0; i < ARRAYSIZE(ArmorPiecesPositions); i++ )
