@@ -73,6 +73,41 @@ CLIENTEFFECT_REGISTER_END()
 
 CUtlVector< RayTracingEnvironment* > g_RayTraceEnvironments;
 
+//-----------------------------------------------------------------------------
+// Precipitation blocker entity
+//-----------------------------------------------------------------------------
+
+// Just receive the normal data table stuff
+IMPLEMENT_CLIENTCLASS_DT(C_PrecipitationBlocker, DT_PrecipitationBlocker, CPrecipitationBlocker)
+END_RECV_TABLE()
+
+
+static CUtlVector< C_PrecipitationBlocker* > g_PrecipitationBlockers;
+
+C_PrecipitationBlocker::C_PrecipitationBlocker()
+{
+	g_PrecipitationBlockers.AddToTail(this);
+}
+
+C_PrecipitationBlocker::~C_PrecipitationBlocker()
+{
+	g_PrecipitationBlockers.FindAndRemove(this);
+}
+
+bool ParticleIsBlocked(const Vector& end, const Vector& start)
+{
+	for (int i = 0; i < g_PrecipitationBlockers.Count(); ++i)
+	{
+		C_PrecipitationBlocker* blocker = g_PrecipitationBlockers[i];
+		if (blocker->CollisionProp()->IsPointInBounds(end))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 // Just receive the normal data table stuff
 IMPLEMENT_CLIENTCLASS_DT(CClient_Precipitation, DT_Precipitation, CPrecipitation)
 	RecvPropInt( RECVINFO( m_nPrecipType ) ),
@@ -226,7 +261,7 @@ inline bool CClient_Precipitation::SimulateRain( CPrecipitationParticle* pPartic
 
 inline bool CClient_Precipitation::SimulateSnow( CPrecipitationParticle* pParticle, float dt )
 {
-	if ( IsInAir( pParticle->m_Pos ) )
+if ( IsInAir( pParticle->m_Pos ) )
 	{
 		// Update position
 		VectorMA( pParticle->m_Pos, dt, pParticle->m_Velocity, 
@@ -1293,20 +1328,19 @@ void CClient_Precipitation::DispatchInnerParticlePrecip( C_BasePlayer *pPlayer, 
 	m_pParticlePrecipInnerFar->SetControlPoint( 3, vDensity );
 }
 
-void CClient_Precipitation::CreateRainOrSnowParticle( Vector vSpawnPosition, Vector vVelocity )
+void CClient_Precipitation::CreateRainOrSnowParticle(const Vector& vSpawnPosition, const Vector& vEndPosition, const Vector& vVelocity)
 {
 	// Create the particle
 	CPrecipitationParticle* p = CreateParticle();
-	if (!p) 
+	if (!p)
 		return;
 
-	VectorCopy( vVelocity, p->m_Velocity );
+	VectorCopy(vVelocity, p->m_Velocity);
 	p->m_Pos = vSpawnPosition;
 
-	p->m_Velocity[ 0 ] += random->RandomFloat(-r_RainSideVel.GetInt(), r_RainSideVel.GetInt());
-	p->m_Velocity[ 1 ] += random->RandomFloat(-r_RainSideVel.GetInt(), r_RainSideVel.GetInt());
+	p->m_Mass = random->RandomFloat(0.5, 1.5);
 
-	p->m_Mass = random->RandomFloat( 0.5, 1.5 );
+	p->m_flMaxLifetime = fabs((vSpawnPosition.z - vEndPosition.z) / vVelocity.z);
 }
 
 //-----------------------------------------------------------------------------
@@ -1350,21 +1384,36 @@ void CClient_Precipitation::EmitParticles( float fTimeDelta )
 		// Emit all the particles
 		for ( int i = 0 ; i < cParticles ; i++ )
 		{
+			Vector vParticleVel = vel;
+			vParticleVel[0] += random->RandomFloat(-r_RainSideVel.GetInt(), r_RainSideVel.GetInt());
+			vParticleVel[1] += random->RandomFloat(-r_RainSideVel.GetInt(), r_RainSideVel.GetInt());
+
 			Vector vParticlePos = org;
-			vParticlePos[ 0 ] += size[ 0 ] * random->RandomFloat(0, 1);
-			vParticlePos[ 1 ] += size[ 1 ] * random->RandomFloat(0, 1);
+			vParticlePos[0] += size[0] * random->RandomFloat(0, 1);
+			vParticlePos[1] += size[1] * random->RandomFloat(0, 1);
 
 			// Figure out where the particle should lie in Z by tracing a line from the player's height up to the 
 			// desired height and making sure it doesn't hit a wall.
 			Vector vPlayerHeight = vParticlePos;
 			vPlayerHeight.z = vPlayerCenter.z;
 
+			if (ParticleIsBlocked(vPlayerHeight, vParticlePos))
+			{
+				continue;
+			}
+
+			Vector vUnitParticleVel = vParticleVel;
+			float fallHeight = vParticlePos.z - vPlayerHeight.z;
+			vUnitParticleVel /= fallHeight;
+			vPlayerHeight.x += vUnitParticleVel.x * fallHeight;
+			vPlayerHeight.y += vUnitParticleVel.y * fallHeight;
+
 			trace_t trace;
-			UTIL_TraceLine( vPlayerHeight, vParticlePos, MASK_SOLID_BRUSHONLY, NULL, COLLISION_GROUP_NONE, &trace );
-			if ( trace.fraction < 1 )
+			UTIL_TraceLine(vPlayerHeight, vParticlePos, MASK_SOLID_BRUSHONLY, NULL, COLLISION_GROUP_NONE, &trace);
+			if (trace.fraction < 1)
 			{
 				// If we hit a brush, then don't spawn the particle.
-				if ( trace.surface.flags & SURF_SKY )
+				if (trace.surface.flags & SURF_SKY)
 				{
 					vParticlePos = trace.endpos;
 				}
@@ -1374,7 +1423,9 @@ void CClient_Precipitation::EmitParticles( float fTimeDelta )
 				}
 			}
 
-		CreateRainOrSnowParticle( vParticlePos, vel );
+			Vector vParticleEndPos(vPlayerHeight);
+
+			CreateRainOrSnowParticle(vParticlePos, vParticleEndPos, vParticleVel);
 	}
 }
 
