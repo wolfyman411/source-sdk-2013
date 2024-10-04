@@ -66,6 +66,7 @@ private:
 	float m_flLastHurtTime;// we keep track of this, because if something hurts a squid, it will forget about its love of headcrabs for a while.
 	float m_flNextSpitTime;// last time the bullsquid used the spit attack.
 	float m_flHungryTime;// set this is a future time to stop the monster from eating for a while. 
+	Vector m_vecSaveSpitVelocity;
 
 };
 #endif // NPC_BULLSQUID_H

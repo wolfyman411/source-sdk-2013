@@ -258,41 +258,15 @@ inline bool CClient_Precipitation::SimulateRain( CPrecipitationParticle* pPartic
 	return true;
 }
 
-
 inline bool CClient_Precipitation::SimulateSnow( CPrecipitationParticle* pParticle, float dt )
 {
 if ( IsInAir( pParticle->m_Pos ) )
 	{
 		// Update position
-		VectorMA( pParticle->m_Pos, dt, pParticle->m_Velocity, 
+		VectorMA( pParticle->m_Pos, dt*0.3, pParticle->m_Velocity, 
 					pParticle->m_Pos );
 
-		// wind blows rain around
-		for ( int i = 0 ; i < 2 ; i++ )
-		{
-			if ( pParticle->m_Velocity[i] < s_WindVector[i] )
-			{
-				pParticle->m_Velocity[i] += ( 5.0f / pParticle->m_Mass );
-
-				// accelerating flakes get a trail
-				pParticle->m_Ramp = 0.5f;
-
-				// clamp
-				if ( pParticle->m_Velocity[i] > s_WindVector[i] )
-					pParticle->m_Velocity[i] = s_WindVector[i];
-			}
-			else if (pParticle->m_Velocity[i] > s_WindVector[i] )
-			{
-				pParticle->m_Velocity[i] -= ( 5.0f / pParticle->m_Mass );
-
-				// accelerating flakes get a trail
-				pParticle->m_Ramp = 0.5f;
-
-				// clamp.
-				if ( pParticle->m_Velocity[i] < s_WindVector[i] )
-					pParticle->m_Velocity[i] = s_WindVector[i];
-			}
-		}
+		pParticle->m_Ramp = 0.05f;
 
 		return true;
 	}
