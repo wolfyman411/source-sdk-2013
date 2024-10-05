@@ -2514,13 +2514,12 @@ void CSnowFallManager::CreateSnowFallParticle( const Vector &vecParticleSpawn, i
 
 	UTIL_TraceLine(groundPos, pParticle->m_Pos, MASK_SOLID_BRUSHONLY, NULL, COLLISION_GROUP_NONE, &trace);
 
-	pParticle->m_flDieTime = fabs((vecParticleSpawn.z - trace.endpos.z));
+	pParticle->m_flDieTime = clamp(fabs((vecParticleSpawn.z - trace.endpos.z)),0.0f,10.0f);
 
 	if (pParticle->m_flDieTime < 0.5f)
 	{
 		pParticle->m_vecVelocity = Vector(0, 0, 0);
 	}
-
 	// Probably want to put the color in the snow entity.
 //	pParticle->m_uchColor[0] = 150;//color;
 //	pParticle->m_uchColor[1] = 175;//color;
