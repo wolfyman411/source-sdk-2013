@@ -2300,17 +2300,37 @@ void CSnowFallManager::CreateSnowFall( void )
 //			&vecForward - 
 //			flZoomScale - 
 //-----------------------------------------------------------------------------
-void CSnowFallManager::CreateSnowFallParticles( float flCurrentTime, float flRadius, const Vector &vecEyePos, const Vector &vecForward, float flZoomScale )
-		{
-	// Outside of a snow volume.
-	if ( m_iSnowFallArea == SNOWFALL_IN_ENTITY )
+void CSnowFallManager::CreateSnowFallParticles(float flCurrentTime, float flRadius, const Vector& vecEyePos, const Vector& vecForward, float flZoomScale)
+{
+	const float SnowfallRate = 500.0f;
+	if (m_nActiveSnowCount > 0)
 	{
-		CreateOutsideVolumeSnowParticles( flCurrentTime, flRadius, flZoomScale );
+		C_BaseEntity* pEntity = m_aSnow[m_aActiveSnow[0]].m_pEntity;
+		int density = pEntity->ScriptGetAlpha();
+		density = clamp(density, 0, 100);
+		if (pEntity && density > 0)
+		{
+			m_tSnowFallParticleTimer.ResetRate(SnowfallRate * density * 0.01f);
+		}
+		else
+		{
+			m_tSnowFallParticleTimer.ResetRate(SnowfallRate);
+		}
+	}
+	else
+	{
+		m_tSnowFallParticleTimer.ResetRate(SnowfallRate);
+	}
+
+	// Outside of a snow volume.
+	if (m_iSnowFallArea == SNOWFALL_IN_ENTITY)
+	{
+		CreateOutsideVolumeSnowParticles(flCurrentTime, flRadius, flZoomScale);
 	}
 	// Inside of a snow volume.
 	else
 	{
-		CreateInsideVolumeSnowParticles( flCurrentTime, flRadius, vecEyePos, vecForward, flZoomScale );
+		CreateInsideVolumeSnowParticles(flCurrentTime, flRadius, vecEyePos, vecForward, flZoomScale);
 	}
 }
 
@@ -2495,7 +2515,6 @@ void CSnowFallManager::CreateSnowFallParticle( const Vector &vecParticleSpawn, i
 	UTIL_TraceLine(groundPos, pParticle->m_Pos, MASK_SOLID_BRUSHONLY, NULL, COLLISION_GROUP_NONE, &trace);
 
 	pParticle->m_flDieTime = fabs((vecParticleSpawn.z - trace.endpos.z));
-	Msg("%f\n", pParticle->m_flDieTime);
 
 	if (pParticle->m_flDieTime < 0.5f)
 	{
@@ -2506,9 +2525,13 @@ void CSnowFallManager::CreateSnowFallParticle( const Vector &vecParticleSpawn, i
 //	pParticle->m_uchColor[0] = 150;//color;
 //	pParticle->m_uchColor[1] = 175;//color;
 //	pParticle->m_uchColor[2] = 200;//color;
-	pParticle->m_uchColor[0] = r_SnowColorRed.GetInt();
-	pParticle->m_uchColor[1] = r_SnowColorGreen.GetInt();
-	pParticle->m_uchColor[2] = r_SnowColorBlue.GetInt();
+
+
+	C_BaseEntity* pEntity = m_aSnow[m_aActiveSnow[0]].m_pEntity;
+
+	pParticle->m_uchColor[0] = pEntity->ScriptGetColorR();
+	pParticle->m_uchColor[1] = pEntity->ScriptGetColorB();
+	pParticle->m_uchColor[2] = pEntity->ScriptGetColorG();
 
 	pParticle->m_uchStartSize = r_SnowStartSize.GetInt();
 	pParticle->m_uchEndSize = r_SnowEndSize.GetInt();
