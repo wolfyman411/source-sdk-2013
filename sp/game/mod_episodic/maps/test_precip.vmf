@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "6440"
-	"mapversion" "16"
+	"mapversion" "18"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -20,7 +20,7 @@ viewsettings
 world
 {
 	"id" "1"
-	"mapversion" "16"
+	"mapversion" "18"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -694,7 +694,7 @@ entity
 	"classname" "func_precipitation"
 	"preciptype" "3"
 	"renderamt" "100"
-	"rendercolor" "255 255 255"
+	"rendercolor" "255 128 64"
 	solid
 	{
 		"id" "78"

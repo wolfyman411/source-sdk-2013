@@ -37,7 +37,6 @@ public:
 
 	void SonicAttack(void);
 
-	Vector WriteBeamColor(void);
 	bool ShouldGoToIdleState(void);
 	bool FValidateHintType(CAI_Hint* pHint);
 

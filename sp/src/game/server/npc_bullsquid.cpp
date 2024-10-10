@@ -22,6 +22,7 @@
 #include "decals.h"
 #include "hl2_shareddefs.h"
 #include "ammodef.h"
+#include "ai_behavior.h"
 
 #define		SQUID_SPRINT_DIST	256 // how close the squid has to get before starting to sprint and refusing to swerve
 
@@ -85,6 +86,14 @@ DEFINE_FIELD(m_flNextSpitTime, FIELD_TIME),
 
 DEFINE_FIELD(m_flHungryTime, FIELD_TIME),
 END_DATADESC()
+
+bool CNPC_Bullsquid::CreateBehaviors()
+{
+	AddBehavior( &m_AssaultBehavior );
+	AddBehavior( &m_StandoffBehavior );
+	AddBehavior( &m_FollowBehavior );
+	return BaseClass::CreateBehaviors();
+}
 
 //=========================================================
 // Spawn
@@ -314,7 +323,8 @@ void CNPC_Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 		if (GetEnemy())
 		{
 			Vector vSpitPos;
-			GetAttachment("head", vSpitPos);
+			GetAttachment("Mouth", vSpitPos);
+			//vSpitPos.z += 50.0f;
 
 			Vector	vTarget;
 
@@ -682,99 +692,104 @@ int CNPC_Bullsquid::SelectSchedule(void)
 {
 	switch (m_NPCState)
 	{
-	case NPC_STATE_ALERT:
-	{
-		if (HasCondition(COND_LIGHT_DAMAGE) || HasCondition(COND_HEAVY_DAMAGE))
+		case NPC_STATE_ALERT:
 		{
-			return SCHED_SQUID_HURTHOP;
-		}
-
-		if (HasCondition(COND_SQUID_SMELL_FOOD))
-		{
-			CSound* pSound;
-
-			pSound = GetBestScent();
-
-			if (pSound && (!FInViewCone(pSound->GetSoundOrigin()) || !FVisible(pSound->GetSoundOrigin())))
+			if (HasCondition(COND_LIGHT_DAMAGE) || HasCondition(COND_HEAVY_DAMAGE))
 			{
-				// scent is behind or occluded
-				return SCHED_SQUID_SNIFF_AND_EAT;
+				return SCHED_SQUID_HURTHOP;
 			}
 
-			// food is right out in the open. Just go get it.
-			return SCHED_SQUID_EAT;
-		}
+			if (HasCondition(COND_SQUID_SMELL_FOOD))
+			{
+				CSound* pSound;
 
-		if (HasCondition(COND_SMELL))
+				pSound = GetBestScent();
+
+				if (pSound && (!FInViewCone(pSound->GetSoundOrigin()) || !FVisible(pSound->GetSoundOrigin())))
+				{
+					// scent is behind or occluded
+					return SCHED_SQUID_SNIFF_AND_EAT;
+				}
+
+				// food is right out in the open. Just go get it.
+				return SCHED_SQUID_EAT;
+			}
+
+			if (HasCondition(COND_SMELL))
+			{
+				// there's something stinky. 
+				CSound* pSound;
+
+				pSound = GetBestScent();
+				if (pSound)
+					return SCHED_SQUID_WALLOW;
+			}
+
+			break;
+		}
+		case NPC_STATE_COMBAT:
 		{
-			// there's something stinky. 
-			CSound* pSound;
+			// dead enemy
+			if (HasCondition(COND_ENEMY_DEAD))
+			{
+				// call base class, all code to handle dead enemies is centralized there.
+				return BaseClass::SelectSchedule();
+			}
 
-			pSound = GetBestScent();
-			if (pSound)
-				return SCHED_SQUID_WALLOW;
+			if (HasCondition(COND_NEW_ENEMY))
+			{
+				if (m_fCanThreatDisplay && IRelationType(GetEnemy()) == D_HT && FClassnameIs(GetEnemy(), "monster_headcrab"))
+				{
+					// this means squid sees a headcrab!
+					m_fCanThreatDisplay = FALSE;// only do the headcrab dance once per lifetime.
+					return SCHED_SQUID_SEECRAB;
+				}
+				else
+				{
+					return SCHED_WAKE_ANGRY;
+				}
+			}
+
+			if (HasCondition(COND_SQUID_SMELL_FOOD))
+			{
+				CSound* pSound;
+
+				pSound = GetBestScent();
+
+				if (pSound && (!FInViewCone(pSound->GetSoundOrigin()) || !FVisible(pSound->GetSoundOrigin())))
+				{
+					// scent is behind or occluded
+					return SCHED_SQUID_SNIFF_AND_EAT;
+				}
+
+				// food is right out in the open. Just go get it.
+				return SCHED_SQUID_EAT;
+			}
+
+			if (HasCondition(COND_CAN_RANGE_ATTACK1))
+			{
+				return SCHED_RANGE_ATTACK1;
+			}
+
+			if (HasCondition(COND_CAN_MELEE_ATTACK1))
+			{
+				return SCHED_MELEE_ATTACK1;
+			}
+
+			if (HasCondition(COND_CAN_MELEE_ATTACK2))
+			{
+				return SCHED_MELEE_ATTACK2;
+			}
+
+			return SCHED_CHASE_ENEMY;
+
+			break;
 		}
-
-		break;
 	}
-	case NPC_STATE_COMBAT:
+	if (m_AssaultBehavior.CanSelectSchedule())
 	{
-		// dead enemy
-		if (HasCondition(COND_ENEMY_DEAD))
-		{
-			// call base class, all code to handle dead enemies is centralized there.
-			return BaseClass::SelectSchedule();
-		}
-
-		if (HasCondition(COND_NEW_ENEMY))
-		{
-			if (m_fCanThreatDisplay && IRelationType(GetEnemy()) == D_HT && FClassnameIs(GetEnemy(), "monster_headcrab"))
-			{
-				// this means squid sees a headcrab!
-				m_fCanThreatDisplay = FALSE;// only do the headcrab dance once per lifetime.
-				return SCHED_SQUID_SEECRAB;
-			}
-			else
-			{
-				return SCHED_WAKE_ANGRY;
-			}
-		}
-
-		if (HasCondition(COND_SQUID_SMELL_FOOD))
-		{
-			CSound* pSound;
-
-			pSound = GetBestScent();
-
-			if (pSound && (!FInViewCone(pSound->GetSoundOrigin()) || !FVisible(pSound->GetSoundOrigin())))
-			{
-				// scent is behind or occluded
-				return SCHED_SQUID_SNIFF_AND_EAT;
-			}
-
-			// food is right out in the open. Just go get it.
-			return SCHED_SQUID_EAT;
-		}
-
-		if (HasCondition(COND_CAN_RANGE_ATTACK1))
-		{
-			return SCHED_RANGE_ATTACK1;
-		}
-
-		if (HasCondition(COND_CAN_MELEE_ATTACK1))
-		{
-			return SCHED_MELEE_ATTACK1;
-		}
-
-		if (HasCondition(COND_CAN_MELEE_ATTACK2))
-		{
-			return SCHED_MELEE_ATTACK2;
-		}
-
-		return SCHED_CHASE_ENEMY;
-
-		break;
-	}
+		DeferSchedulingToBehavior(&m_AssaultBehavior);
+		return BaseClass::SelectSchedule();
 	}
 
 	return BaseClass::SelectSchedule();

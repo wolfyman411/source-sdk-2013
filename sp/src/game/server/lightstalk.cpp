@@ -60,6 +60,7 @@ private:
 	color32 lightColor;
 	//Default { 255, 240, 111 , 1 };
 	float lightStrength = 0.1f;
+	float lightRadius = 300.0f;
 };
 
 LINK_ENTITY_TO_CLASS(xen_plantlight, CXenPLight);
@@ -74,6 +75,7 @@ DEFINE_KEYFIELD(enableDynamicLight, FIELD_BOOLEAN, "enableDynamicLight"),
 DEFINE_KEYFIELD(enableSpriteLight, FIELD_BOOLEAN, "enableSpriteLight"),
 DEFINE_KEYFIELD(lightColor, FIELD_COLOR32, "lightColor"),
 DEFINE_KEYFIELD(lightStrength, FIELD_FLOAT, "lightStrength"),
+DEFINE_KEYFIELD(lightRadius, FIELD_FLOAT, "lightRadius"),
 
 
 DEFINE_OUTPUT(m_OnHide, "OnHide"),
@@ -217,7 +219,7 @@ void CXenPLight::LightOn(void)
 	if (pLightEntity)
 	{
 		pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", lightColor.r, lightColor.g, lightColor.b));
-		pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 300.0f));
+		pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", lightRadius));
 		pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", lightStrength));
 	}
 	DispatchSpawn(pLightEntity);
@@ -238,7 +240,7 @@ void CXenPLight::LightOff(void)
 	}
 	if (pLightEntity)
 	{
-		pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", lightColor.r, lightColor.g, lightColor.b));
+		pLightEntity->KeyValue("_light", UTIL_VarArgs("%d %d %d", 0.0f, 0.0f, 0.0f));
 		pLightEntity->KeyValue("distance", UTIL_VarArgs("%f", 0.0f));
 		pLightEntity->KeyValue("brightness", UTIL_VarArgs("%f", 0.0f));
 	}

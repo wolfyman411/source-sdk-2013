@@ -10,12 +10,18 @@
 
 #include "ai_basenpc.h"
 #include "hl2_gamerules.h"
+#include "ai_behavior.h"
+#include "ai_baseactor.h"
+#include "ai_behavior_assault.h"
+#include "ai_behavior_standoff.h"
+#include "ai_behavior_follow.h"
 
-class CNPC_Bullsquid : public CAI_BaseNPC
+class CNPC_Bullsquid : public CAI_BaseActor
 {
-	DECLARE_CLASS(CNPC_Bullsquid, CAI_BaseNPC);
+	DECLARE_CLASS(CNPC_Bullsquid, CAI_BaseActor);
 
 public:
+	bool CreateBehaviors();
 	void Spawn(void);
 	void Precache(void);
 	Class_T	Classify(void);
@@ -67,6 +73,12 @@ private:
 	float m_flNextSpitTime;// last time the bullsquid used the spit attack.
 	float m_flHungryTime;// set this is a future time to stop the monster from eating for a while. 
 	Vector m_vecSaveSpitVelocity;
+
+protected:
+
+	CAI_AssaultBehavior			m_AssaultBehavior;
+	CAI_StandoffBehavior		m_StandoffBehavior;
+	CAI_FollowBehavior			m_FollowBehavior;
 
 };
 #endif // NPC_BULLSQUID_H
