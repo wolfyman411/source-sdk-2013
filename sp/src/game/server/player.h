@@ -1435,7 +1435,6 @@ inline bool CBasePlayer::TouchedPhysics( void )
 
 inline void CBasePlayer::OnMyWeaponFired( CBaseCombatWeapon *weapon )
 {
-	Msg("ATTACK!\n");
 	m_weaponFiredTimer.Start();
 }
 
