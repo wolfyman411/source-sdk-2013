@@ -62,12 +62,12 @@ ConVar sk_houndeye_dmg_blast("sk_houndeye_dmg_blast", "15");
 BEGIN_DATADESC(CNPC_Houndeye)
 DEFINE_FIELD(m_iSpriteTexture, FIELD_INTEGER),
 //DEFINE_FIELD(m_fAsleep, FIELD_BOOLEAN),
-DEFINE_KEYFIELD(m_fAsleep, FIELD_BOOLEAN,"m_fAsleep"),
 DEFINE_FIELD(m_fDontBlink, FIELD_BOOLEAN),
 DEFINE_FIELD(m_vecPackCenter, FIELD_POSITION_VECTOR),
 
 DEFINE_INPUTFUNC(FIELD_VOID, "StartPatrolling", InputStartPatrolling),
 DEFINE_INPUTFUNC(FIELD_VOID, "StopPatrolling", InputStopPatrolling),
+DEFINE_INPUTFUNC(FIELD_VOID, "StartSleep", InputStartSleep),
 
 END_DATADESC()
 
@@ -108,7 +108,7 @@ enum
 
 enum HoundEyeSquadSlots
 {
-	SQUAD_SLOTS_HOUND_ATTACK = LAST_SHARED_SQUADSLOT,
+	SQUAD_SLOTS_HOUND_ATTACK = LAST_SHARED_SQUADSLOT
 };
 
 
@@ -134,7 +134,6 @@ void CNPC_Houndeye::Spawn()
 	m_iHealth = sk_houndeye_health.GetFloat();
 	m_flFieldOfView = 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_NPCState = NPC_STATE_NONE;
-	//m_fAsleep = FALSE; // everyone spawns awake
 	m_fDontBlink = FALSE;
 
 	CapabilitiesClear();
@@ -797,7 +796,7 @@ int CNPC_Houndeye::TranslateSchedule(int scheduleType)
 		else
 		{
 			// hound is waking up on its own
-			return SCHED_HOUND_WAKE_LAZY;
+			return SCHED_HOUND_SLEEP;
 		}
 	}
 	switch (scheduleType)
@@ -893,12 +892,13 @@ int CNPC_Houndeye::SelectSchedule(void)
 
 		if (HasCondition(COND_CAN_RANGE_ATTACK1))
 		{
-			if (OccupyStrategySlot(SQUAD_SLOTS_HOUND_ATTACK))
+			if (OccupyStrategySlot(SQUAD_SLOTS_HOUND_ATTACK) || OccupyStrategySlot(0) || OccupyStrategySlot(GetSquad()->NumMembers()/2))
 			{
 				return SCHED_RANGE_ATTACK1;
 			}
 
 			return SCHED_HOUND_AGITATED;
+
 		}
 		return SCHED_CHASE_ENEMY;
 
@@ -923,6 +923,15 @@ void CNPC_Houndeye::InputStartPatrolling(inputdata_t& inputdata)
 void CNPC_Houndeye::InputStopPatrolling(inputdata_t& inputdata)
 {
 	m_bShouldPatrol = false;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CNPC_Houndeye::InputStartSleep(inputdata_t& inputdata)
+{
+	m_fAsleep = true;
+	SetSchedule(SCHED_HOUND_SLEEP);
 }
 
 

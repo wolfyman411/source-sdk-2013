@@ -54,6 +54,7 @@ public:
 
 	void InputStartPatrolling(inputdata_t& inputdata);
 	void InputStopPatrolling(inputdata_t& inputdata);
+	void InputStartSleep(inputdata_t& inputdata);
 
 	DEFINE_CUSTOM_AI;
 	DECLARE_DATADESC();
