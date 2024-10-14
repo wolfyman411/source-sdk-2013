@@ -27,7 +27,8 @@
 #include "AI_SquadSlot.h"
 
 #define		SQUID_SPRINT_DIST	256 // how close the squid has to get before starting to sprint and refusing to swerve
-#define HOUNDEYE_MAX_SQUAD_SIZE			5
+#define		SQUID_MAX_SQUAD_SIZE			5
+#define		SQUID_SPIT_DISTANCE		2048
 
 ConVar sk_bullsquid_health("sk_bullsquid_health", "125");
 ConVar sk_bullsquid_dmg_bite("sk_bullsquid_dmg_bite", "35");
@@ -135,13 +136,17 @@ void CNPC_Bullsquid::Spawn()
 	m_flNextSpitTime = gpGlobals->curtime;
 
 	NPCInit();
+
+	GetSenses()->SetDistLook(SQUID_SPIT_DISTANCE);
 }
 
 int CNPC_Bullsquid::SelectFailSchedule(int failedSchedule, int failedTask, AI_TaskFailureCode_t taskFailCode)
 {
 	// Catch the LOF failure and choose another route to take
 	if (failedSchedule == SCHED_ESTABLISH_LINE_OF_FIRE)
-		return SCHED_ESTABLISH_LINE_OF_FIRE_FALLBACK;
+		return SCHED_SQUID_FLANK_RANDOM;
+	if (failedSchedule == SCHED_SQUID_COVER_FROM_ENEMY)
+		return SCHED_SQUID_RANGE_ATTACK1;
 
 	return BaseClass::SelectFailSchedule(failedSchedule, failedTask, taskFailCode);
 }
@@ -163,22 +168,27 @@ bool CNPC_Bullsquid::InnateWeaponLOSCondition(const Vector& ownerPos, const Vect
 		Vector vSpitPos;
 		GetAttachment("mouth", vSpitPos);
 
-		return GetSpitVector(vSpitPos, targetPos, &m_vecSaveSpitVelocity);
+		return GetSpitVector(vSpitPos, targetPos, &m_vecSaveSpitVelocity,true);
 	}
 
 	return BaseClass::InnateWeaponLOSCondition(ownerPos, targetPos, bSetConditions);
 }
 
-bool CNPC_Bullsquid::GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut)
+bool CNPC_Bullsquid::GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut, bool lobbing = false)
 {
 	float spitSpeed = 800.0f;
 
-	Vector vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed, (10.0f * 12.0f));
+	if (lobbing)
+	{
+		spitSpeed = 400.0f;
+	}
+
+	Vector vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed, (10.0f * 12.0f), lobbing);
 
 	// If this failed then try a little faster (flattens the arc)
 	if (vecToss == vec3_origin)
 	{
-		vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed * 1.5f, (10.0f * 12.0f));
+		vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed * 1.5f, (10.0f * 12.0f), lobbing);
 		if (vecToss == vec3_origin)
 			return false;
 	}
@@ -192,7 +202,7 @@ bool CNPC_Bullsquid::GetSpitVector(const Vector& vecStartPos, const Vector& vecT
 	return true;
 }
 
-Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance)
+Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance, bool lobbing)
 {
 	flSpeed = MAX(1.0f, flSpeed);
 
@@ -205,10 +215,20 @@ Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector&
 	vecGrenadeVel = vecGrenadeVel * (2.0 / time);
 
 	// adjust upward toss to compensate for gravity loss
-	vecGrenadeVel.z += flGravity * time * 0.3;
+	vecGrenadeVel.z += flGravity * time * 0.27;
 
 	Vector vecApex = vecSpot1 + (vecSpot2 - vecSpot1) * 0.3;
 	vecApex.z += 0.3 * flGravity * (time * 0.3) * (time * 0.3);
+
+	if (lobbing)
+	{
+		float testVar = 0.427f;
+		vecGrenadeVel = vecGrenadeVel * (1.0 / time);
+		vecGrenadeVel.z += flGravity * time * testVar;
+
+		vecApex = vecSpot1 + (vecSpot2 - vecSpot1) * testVar;
+		vecApex.z += testVar * flGravity * (time * testVar) * (time * testVar);
+	}
 
 
 	trace_t tr;
@@ -384,12 +404,20 @@ void CNPC_Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 
 			vTarget[2] += random->RandomFloat(0.0f, 32.0f);
 
+			// Get dot with upwards to determine lob
+			Vector direction = (GetAbsOrigin() - GetEnemy()->GetAbsOrigin());
+			direction.NormalizeInPlace();
+
+			float dotProduct = DotProduct(direction, Vector(0, 0, 1));
+
+			Msg("%f\n", dotProduct);
+
 			// Try and spit at our target
 			Vector	vecToss;
-			if (GetSpitVector(vSpitPos, vTarget, &vecToss) == false)
+			if (GetSpitVector(vSpitPos, vTarget, &vecToss, dotProduct < -0.4f) == false)
 			{
 				// Now try where they were
-				if (GetSpitVector(vSpitPos, m_vSavePosition, &vecToss) == false)
+				if (GetSpitVector(vSpitPos, m_vSavePosition, &vecToss, dotProduct < -0.4f) == false)
 				{
 					// Failing that, just shoot with the old velocity we calculated initially!
 					vecToss = m_vecSaveSpitVelocity;
@@ -519,37 +547,21 @@ void CNPC_Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 
 int CNPC_Bullsquid::RangeAttack1Conditions(float flDot, float flDist)
 {
-	if (IsMoving() && flDist >= 512)
+	if (GetNextAttack() > gpGlobals->curtime)
 	{
-		// squid will far too far behind if he stops running to spit at this distance from the enemy.
-		return (COND_NONE);
+		Msg("I failed 1\n");
+		return COND_NONE;
 	}
 
-	if (flDist <= 784 && flDot >= 0.5)  // Adjust the minimum distance
+	if (flDot < DOT_10DEGREE)
 	{
-		if (GetEnemy() != NULL)
-		{
-			if (fabs(GetAbsOrigin().z - GetEnemy()->GetAbsOrigin().z) > 256)
-			{
-				// don't try to spit at someone up really high or down really low.
-				return(COND_NONE);
-			}
-		}
-
-		if (IsMoving())
-		{
-			// don't spit again for a long time, resume chasing enemy.
-			m_flNextSpitTime = gpGlobals->curtime + 5.0;
-			return(COND_NONE);
-		}
-		else
-		{
-			// not moving, so spit again pretty soon.
-			m_flNextSpitTime = gpGlobals->curtime + 1.0;
-		}
-		return(COND_CAN_RANGE_ATTACK1);
+		Msg("I failed 2\n");
+		return COND_NONE;
 	}
-	return(COND_NONE);
+
+
+	Msg("I can attack\n");
+	return COND_CAN_RANGE_ATTACK1;
 }
 
 //=========================================================
@@ -769,6 +781,10 @@ int CNPC_Bullsquid::SelectSchedule(void)
 		}
 		case NPC_STATE_COMBAT:
 		{
+			if (HasCondition(COND_CAN_RANGE_ATTACK1))
+			{
+				return SCHED_SQUID_RANGE_ATTACK1;
+			}
 
 			// dead enemy
 			if (HasCondition(COND_ENEMY_DEAD))
@@ -805,11 +821,6 @@ int CNPC_Bullsquid::SelectSchedule(void)
 
 				// food is right out in the open. Just go get it.
 				return SCHED_SQUID_EAT;
-			}
-
-			if (HasCondition(COND_CAN_RANGE_ATTACK1))
-			{
-				return SCHED_SQUID_RANGE_ATTACK1;
 			}
 
 			if (HasCondition(COND_CAN_MELEE_ATTACK1))
@@ -1178,6 +1189,7 @@ DEFINE_SCHEDULE
 	"		COND_TASK_FAILED"
 	"		COND_HEAVY_DAMAGE"
 	"		COND_CAN_RANGE_ATTACK1"
+	"		COND_COND_SEE_ENEMY"
 	"		COND_CAN_MELEE_ATTACK1"
 )
 
@@ -1195,6 +1207,7 @@ DEFINE_SCHEDULE
 	""
 	"	Interrupts"
 	"		COND_TASK_FAILED"
+	"		COND_COND_SEE_ENEMY"
 	"		COND_CAN_RANGE_ATTACK1"
 )
 DEFINE_SCHEDULE
