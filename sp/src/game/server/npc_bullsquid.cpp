@@ -23,8 +23,11 @@
 #include "hl2_shareddefs.h"
 #include "ammodef.h"
 #include "ai_behavior.h"
+#include "AI_Squad.h"
+#include "AI_SquadSlot.h"
 
 #define		SQUID_SPRINT_DIST	256 // how close the squid has to get before starting to sprint and refusing to swerve
+#define HOUNDEYE_MAX_SQUAD_SIZE			5
 
 ConVar sk_bullsquid_health("sk_bullsquid_health", "125");
 ConVar sk_bullsquid_dmg_bite("sk_bullsquid_dmg_bite", "35");
@@ -42,6 +45,10 @@ enum
 	SCHED_SQUID_SNIFF_AND_EAT,
 	SCHED_SQUID_WALLOW,
 	SCHED_SQUID_CHASE_ENEMY,
+	SCHED_SQUID_RANGE_ATTACK1,
+	SCHED_SQUID_FLANK_RANDOM,
+	SCHED_SQUID_RUN_RANDOM,
+	SCHED_SQUID_COVER_FROM_ENEMY,
 };
 
 //=========================================================
@@ -85,6 +92,9 @@ DEFINE_FIELD(m_flLastHurtTime, FIELD_TIME),
 DEFINE_FIELD(m_flNextSpitTime, FIELD_TIME),
 
 DEFINE_FIELD(m_flHungryTime, FIELD_TIME),
+
+DEFINE_FIELD(m_vecSaveSpitVelocity, FIELD_VECTOR),
+
 END_DATADESC()
 
 bool CNPC_Bullsquid::CreateBehaviors()
@@ -119,6 +129,7 @@ void CNPC_Bullsquid::Spawn()
 
 	CapabilitiesClear();
 	CapabilitiesAdd(bits_CAP_MOVE_GROUND | bits_CAP_INNATE_RANGE_ATTACK1 | bits_CAP_INNATE_MELEE_ATTACK1 | bits_CAP_INNATE_MELEE_ATTACK2);
+	CapabilitiesAdd(bits_CAP_SQUAD);
 
 	m_fCanThreatDisplay = TRUE;
 	m_flNextSpitTime = gpGlobals->curtime;
@@ -126,16 +137,48 @@ void CNPC_Bullsquid::Spawn()
 	NPCInit();
 }
 
-bool CNPC_Bullsquid::BullGetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut)
+int CNPC_Bullsquid::SelectFailSchedule(int failedSchedule, int failedTask, AI_TaskFailureCode_t taskFailCode)
+{
+	// Catch the LOF failure and choose another route to take
+	if (failedSchedule == SCHED_ESTABLISH_LINE_OF_FIRE)
+		return SCHED_ESTABLISH_LINE_OF_FIRE_FALLBACK;
+
+	return BaseClass::SelectFailSchedule(failedSchedule, failedTask, taskFailCode);
+}
+
+bool CNPC_Bullsquid::SeenEnemyWithinTime(float flTime)
+{
+	float flLastSeenTime = GetEnemies()->LastTimeSeen(GetEnemy());
+	return (flLastSeenTime != 0.0f && (gpGlobals->curtime - flLastSeenTime) < flTime);
+}
+
+bool CNPC_Bullsquid::InnateWeaponLOSCondition(const Vector& ownerPos, const Vector& targetPos, bool bSetConditions)
+{
+	if (GetNextAttack() > gpGlobals->curtime)
+		return false;
+
+	// If we can see the enemy, or we've seen them in the last few seconds just try to lob in there
+	if (SeenEnemyWithinTime(3.0f))
+	{
+		Vector vSpitPos;
+		GetAttachment("mouth", vSpitPos);
+
+		return GetSpitVector(vSpitPos, targetPos, &m_vecSaveSpitVelocity);
+	}
+
+	return BaseClass::InnateWeaponLOSCondition(ownerPos, targetPos, bSetConditions);
+}
+
+bool CNPC_Bullsquid::GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut)
 {
 	float spitSpeed = 800.0f;
 
-	Vector vecToss = BullVecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed, (10.0f * 12.0f));
+	Vector vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed, (10.0f * 12.0f));
 
 	// If this failed then try a little faster (flattens the arc)
 	if (vecToss == vec3_origin)
 	{
-		vecToss = BullVecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed * 1.5f, (10.0f * 12.0f));
+		vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed * 1.5f, (10.0f * 12.0f));
 		if (vecToss == vec3_origin)
 			return false;
 	}
@@ -149,7 +192,7 @@ bool CNPC_Bullsquid::BullGetSpitVector(const Vector& vecStartPos, const Vector& 
 	return true;
 }
 
-Vector CNPC_Bullsquid::BullVecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance)
+Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance)
 {
 	flSpeed = MAX(1.0f, flSpeed);
 
@@ -324,7 +367,6 @@ void CNPC_Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 		{
 			Vector vSpitPos;
 			GetAttachment("Mouth", vSpitPos);
-			//vSpitPos.z += 50.0f;
 
 			Vector	vTarget;
 
@@ -344,10 +386,10 @@ void CNPC_Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 
 			// Try and spit at our target
 			Vector	vecToss;
-			if (BullGetSpitVector(vSpitPos, vTarget, &vecToss) == false)
+			if (GetSpitVector(vSpitPos, vTarget, &vecToss) == false)
 			{
 				// Now try where they were
-				if (BullGetSpitVector(vSpitPos, m_vSavePosition, &vecToss) == false)
+				if (GetSpitVector(vSpitPos, m_vSavePosition, &vecToss) == false)
 				{
 					// Failing that, just shoot with the old velocity we calculated initially!
 					vecToss = m_vecSaveSpitVelocity;
@@ -494,7 +536,7 @@ int CNPC_Bullsquid::RangeAttack1Conditions(float flDot, float flDist)
 			}
 		}
 
-		if (IsMoving() || gpGlobals->curtime < m_flNextSpitTime)
+		if (IsMoving())
 		{
 			// don't spit again for a long time, resume chasing enemy.
 			m_flNextSpitTime = gpGlobals->curtime + 5.0;
@@ -505,10 +547,8 @@ int CNPC_Bullsquid::RangeAttack1Conditions(float flDot, float flDist)
 			// not moving, so spit again pretty soon.
 			m_flNextSpitTime = gpGlobals->curtime + 1.0;
 		}
-
 		return(COND_CAN_RANGE_ATTACK1);
 	}
-
 	return(COND_NONE);
 }
 
@@ -729,6 +769,7 @@ int CNPC_Bullsquid::SelectSchedule(void)
 		}
 		case NPC_STATE_COMBAT:
 		{
+
 			// dead enemy
 			if (HasCondition(COND_ENEMY_DEAD))
 			{
@@ -768,7 +809,7 @@ int CNPC_Bullsquid::SelectSchedule(void)
 
 			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
-				return SCHED_RANGE_ATTACK1;
+				return SCHED_SQUID_RANGE_ATTACK1;
 			}
 
 			if (HasCondition(COND_CAN_MELEE_ATTACK1))
@@ -1089,7 +1130,7 @@ DEFINE_SCHEDULE
 	SCHED_SQUID_CHASE_ENEMY,
 
 	"	Tasks"
-	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_RANGE_ATTACK1"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_ESTABLISH_LINE_OF_FIRE"
 	"		TASK_GET_PATH_TO_ENEMY			0"
 	"		TASK_RUN_PATH					0"
 	"		TASK_WAIT_FOR_MOVEMENT			0"
@@ -1104,6 +1145,73 @@ DEFINE_SCHEDULE
 	"		COND_CAN_MELEE_ATTACK1"
 	"		COND_CAN_MELEE_ATTACK2"
 	"		COND_TASK_FAILED"
+)
+DEFINE_SCHEDULE
+(
+	SCHED_SQUID_RANGE_ATTACK1,
+
+	"	Tasks"
+	"		TASK_STOP_MOVING		0"
+	"		TASK_FACE_ENEMY			0"
+	"		TASK_ANNOUNCE_ATTACK	1"	// 1 = primary attack
+	"		TASK_RANGE_ATTACK1		0"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
+	"		COND_NEW_ENEMY"
+	"		COND_ENEMY_DEAD"
+)
+
+DEFINE_SCHEDULE
+(
+	SCHED_SQUID_FLANK_RANDOM,
+
+	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE					SCHEDULE:SCHED_SQUID_RUN_RANDOM"
+	"		TASK_SET_TOLERANCE_DISTANCE				48"
+	"		TASK_SET_ROUTE_SEARCH_TIME				1"	// Spend 1 second trying to build a path if stuck
+	"		TASK_GET_FLANK_ARC_PATH_TO_ENEMY_LOS	30"
+	"		TASK_RUN_PATH							0"
+	"		TASK_WAIT_FOR_MOVEMENT					0"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
+	"		COND_HEAVY_DAMAGE"
+	"		COND_CAN_RANGE_ATTACK1"
+	"		COND_CAN_MELEE_ATTACK1"
+)
+
+DEFINE_SCHEDULE
+(
+	SCHED_SQUID_RUN_RANDOM,
+
+	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_SQUID_COVER_FROM_ENEMY"
+	"		TASK_SET_TOLERANCE_DISTANCE		48"
+	"		TASK_SET_ROUTE_SEARCH_TIME		1"	// Spend 1 second trying to build a path if stuck
+	"		TASK_GET_PATH_TO_RANDOM_NODE	128"
+	"		TASK_RUN_PATH					0"
+	"		TASK_WAIT_FOR_MOVEMENT			0"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
+	"		COND_CAN_RANGE_ATTACK1"
+)
+DEFINE_SCHEDULE
+(
+	SCHED_SQUID_COVER_FROM_ENEMY,
+
+	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_FAIL_TAKE_COVER"
+	"		TASK_FIND_COVER_FROM_ENEMY		0"
+	"		TASK_RUN_PATH					0"
+	"		TASK_WAIT_FOR_MOVEMENT			0"
+	"		TASK_STOP_MOVING				0"
+	""
+	"	Interrupts"
+	"		COND_CAN_RANGE_ATTACK1"
+	"		COND_TASK_FAILED"
+	"		COND_NEW_ENEMY"
 )
 
 AI_END_CUSTOM_NPC()

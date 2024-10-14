@@ -26,8 +26,13 @@ public:
 	void Precache(void);
 	Class_T	Classify(void);
 
-	bool BullGetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut);
-	Vector BullVecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance);
+	int SelectFailSchedule(int failedSchedule, int failedTask, AI_TaskFailureCode_t taskFailCode);
+
+	bool SeenEnemyWithinTime(float flTime);
+
+	bool InnateWeaponLOSCondition(const Vector& ownerPos, const Vector& targetPos, bool bSetConditions);
+	bool GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut);
+	Vector VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance);
 
 	void IdleSound(void);
 	void PainSound(const CTakeDamageInfo& info);
