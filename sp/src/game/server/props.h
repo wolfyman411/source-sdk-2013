@@ -231,6 +231,7 @@ public:
 	virtual float GetFlareLifetime() { return 30.0f; }
 #endif
 	void CreateFlare( float flLifetime );
+	void CreateLight(float flLifetime);
 #endif //HL2_EPISODIC
 
 protected:

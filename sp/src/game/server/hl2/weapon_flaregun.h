@@ -17,6 +17,7 @@
 #define	SF_FLARE_NO_SMOKE	0x00000002
 #define	SF_FLARE_INFINITE	0x00000004
 #define	SF_FLARE_START_OFF	0x00000008
+#define	SF_FLARE_NO_SPARKS	0x00000016
 
 #define	FLARE_DURATION		30.0f
 #define FLARE_DECAY_TIME	10.0f
@@ -78,7 +79,9 @@ public:
 	bool		m_bFading;
 	CNetworkVar( bool, m_bLight );
 	CNetworkVar( bool, m_bSmoke );
+	CNetworkVar( bool, m_bSparks );
 	CNetworkVar( bool, m_bPropFlare );
+	CNetworkVar(bool, m_bisWhite);
 
 	bool		m_bInActiveList;
 	CFlare *	m_pNextFlare;

@@ -22,6 +22,7 @@ CLIENTEFFECT_REGISTER_BEGIN( PrecacheEffectFlares )
 CLIENTEFFECT_MATERIAL( "effects/redflare" )
 CLIENTEFFECT_MATERIAL( "effects/yellowflare" )
 CLIENTEFFECT_MATERIAL( "effects/yellowflare_noz" )
+CLIENTEFFECT_MATERIAL("effects/fuse_flare")
 CLIENTEFFECT_REGISTER_END()
 
 class C_Flare : public C_BaseCombatCharacter, CSimpleEmitter
@@ -43,6 +44,7 @@ public:
 	bool	m_bLight;
 	bool	m_bSmoke;
 	bool	m_bPropFlare;
+	bool	m_bisWhite;
 	pixelvis_handle_t m_queryHandle;
 
 
@@ -61,6 +63,7 @@ IMPLEMENT_CLIENTCLASS_DT( C_Flare, DT_Flare, CFlare )
 	RecvPropInt( RECVINFO( m_bLight ) ),
 	RecvPropInt( RECVINFO( m_bSmoke ) ),
 	RecvPropInt( RECVINFO( m_bPropFlare ) ),
+	RecvPropInt(RECVINFO(m_bisWhite)),
 END_RECV_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -126,7 +129,14 @@ void C_Flare::RestoreResources( void )
 {
 	if ( m_pParticle[0] == NULL )
 	{
-		m_pParticle[0] = (SimpleParticle *) AddParticle( sizeof( SimpleParticle ), GetPMaterial( "effects/redflare" ), GetAbsOrigin() );
+		if (!m_bisWhite)
+		{
+			m_pParticle[0] = (SimpleParticle*)AddParticle(sizeof(SimpleParticle), GetPMaterial("effects/redflare"), GetAbsOrigin());
+		}
+		else
+		{
+			m_pParticle[0] = (SimpleParticle*)AddParticle(sizeof(SimpleParticle), GetPMaterial("effects/fuse_flare"), GetAbsOrigin());
+		}
 		
 		if ( m_pParticle[0] != NULL )
 		{

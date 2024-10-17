@@ -410,8 +410,6 @@ void CNPC_Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 
 			float dotProduct = DotProduct(direction, Vector(0, 0, 1));
 
-			Msg("%f\n", dotProduct);
-
 			// Try and spit at our target
 			Vector	vecToss;
 			if (GetSpitVector(vSpitPos, vTarget, &vecToss, dotProduct < -0.4f) == false)
@@ -549,18 +547,14 @@ int CNPC_Bullsquid::RangeAttack1Conditions(float flDot, float flDist)
 {
 	if (GetNextAttack() > gpGlobals->curtime)
 	{
-		Msg("I failed 1\n");
 		return COND_NONE;
 	}
 
 	if (flDot < DOT_10DEGREE)
 	{
-		Msg("I failed 2\n");
 		return COND_NONE;
 	}
 
-
-	Msg("I can attack\n");
 	return COND_CAN_RANGE_ATTACK1;
 }
 

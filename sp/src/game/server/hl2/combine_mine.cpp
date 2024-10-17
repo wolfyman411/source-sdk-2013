@@ -1125,7 +1125,7 @@ bool CBounceBomb::IsFriend( CBaseEntity *pEntity )
 	bool bIsCombine = false;
 
 	// Unconditional enemies to combine and Player.
-	if( classify == CLASS_ZOMBIE || classify == CLASS_HEADCRAB || classify == CLASS_ANTLION )
+	if( classify == CLASS_ZOMBIE || classify == CLASS_HEADCRAB || classify == CLASS_ANTLION || classify == CLASS_HOUNDEYE || classify == CLASS_BULLSQUID )
 	{
 		return false;
 	}
