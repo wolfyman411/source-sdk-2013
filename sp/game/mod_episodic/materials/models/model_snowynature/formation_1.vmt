@@ -1,0 +1,5 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "models/model_snowynature/formation_1"
+	"$normalmap"	"models/model_snowynature/formation_1_normal"
+}

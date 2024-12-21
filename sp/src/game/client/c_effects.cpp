@@ -73,6 +73,41 @@ CLIENTEFFECT_REGISTER_END()
 
 CUtlVector< RayTracingEnvironment* > g_RayTraceEnvironments;
 
+//-----------------------------------------------------------------------------
+// Precipitation blocker entity
+//-----------------------------------------------------------------------------
+
+// Just receive the normal data table stuff
+IMPLEMENT_CLIENTCLASS_DT(C_PrecipitationBlocker, DT_PrecipitationBlocker, CPrecipitationBlocker)
+END_RECV_TABLE()
+
+
+static CUtlVector< C_PrecipitationBlocker* > g_PrecipitationBlockers;
+
+C_PrecipitationBlocker::C_PrecipitationBlocker()
+{
+	g_PrecipitationBlockers.AddToTail(this);
+}
+
+C_PrecipitationBlocker::~C_PrecipitationBlocker()
+{
+	g_PrecipitationBlockers.FindAndRemove(this);
+}
+
+bool ParticleIsBlocked(const Vector& end, const Vector& start)
+{
+	for (int i = 0; i < g_PrecipitationBlockers.Count(); ++i)
+	{
+		C_PrecipitationBlocker* blocker = g_PrecipitationBlockers[i];
+		if (blocker->CollisionProp()->IsPointInBounds(end))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 // Just receive the normal data table stuff
 IMPLEMENT_CLIENTCLASS_DT(CClient_Precipitation, DT_Precipitation, CPrecipitation)
 	RecvPropInt( RECVINFO( m_nPrecipType ) ),
@@ -223,41 +258,15 @@ inline bool CClient_Precipitation::SimulateRain( CPrecipitationParticle* pPartic
 	return true;
 }
 
-
 inline bool CClient_Precipitation::SimulateSnow( CPrecipitationParticle* pParticle, float dt )
 {
-	if ( IsInAir( pParticle->m_Pos ) )
+if ( IsInAir( pParticle->m_Pos ) )
 	{
 		// Update position
-		VectorMA( pParticle->m_Pos, dt, pParticle->m_Velocity, 
+		VectorMA( pParticle->m_Pos, dt*0.3, pParticle->m_Velocity, 
 					pParticle->m_Pos );
 
-		// wind blows rain around
-		for ( int i = 0 ; i < 2 ; i++ )
-		{
-			if ( pParticle->m_Velocity[i] < s_WindVector[i] )
-			{
-				pParticle->m_Velocity[i] += ( 5.0f / pParticle->m_Mass );
-
-				// accelerating flakes get a trail
-				pParticle->m_Ramp = 0.5f;
-
-				// clamp
-				if ( pParticle->m_Velocity[i] > s_WindVector[i] )
-					pParticle->m_Velocity[i] = s_WindVector[i];
-			}
-			else if (pParticle->m_Velocity[i] > s_WindVector[i] )
-			{
-				pParticle->m_Velocity[i] -= ( 5.0f / pParticle->m_Mass );
-
-				// accelerating flakes get a trail
-				pParticle->m_Ramp = 0.5f;
-
-				// clamp.
-				if ( pParticle->m_Velocity[i] < s_WindVector[i] )
-					pParticle->m_Velocity[i] = s_WindVector[i];
-			}
-		}
+		pParticle->m_Ramp = 0.05f;
 
 		return true;
 	}
@@ -1293,20 +1302,19 @@ void CClient_Precipitation::DispatchInnerParticlePrecip( C_BasePlayer *pPlayer, 
 	m_pParticlePrecipInnerFar->SetControlPoint( 3, vDensity );
 }
 
-void CClient_Precipitation::CreateRainOrSnowParticle( Vector vSpawnPosition, Vector vVelocity )
+void CClient_Precipitation::CreateRainOrSnowParticle(const Vector& vSpawnPosition, const Vector& vEndPosition, const Vector& vVelocity)
 {
 	// Create the particle
 	CPrecipitationParticle* p = CreateParticle();
-	if (!p) 
+	if (!p)
 		return;
 
-	VectorCopy( vVelocity, p->m_Velocity );
+	VectorCopy(vVelocity, p->m_Velocity);
 	p->m_Pos = vSpawnPosition;
 
-	p->m_Velocity[ 0 ] += random->RandomFloat(-r_RainSideVel.GetInt(), r_RainSideVel.GetInt());
-	p->m_Velocity[ 1 ] += random->RandomFloat(-r_RainSideVel.GetInt(), r_RainSideVel.GetInt());
+	p->m_Mass = random->RandomFloat(0.5, 1.5);
 
-	p->m_Mass = random->RandomFloat( 0.5, 1.5 );
+	p->m_flMaxLifetime = fabs((vSpawnPosition.z - vEndPosition.z) / vVelocity.z);
 }
 
 //-----------------------------------------------------------------------------
@@ -1350,21 +1358,36 @@ void CClient_Precipitation::EmitParticles( float fTimeDelta )
 		// Emit all the particles
 		for ( int i = 0 ; i < cParticles ; i++ )
 		{
+			Vector vParticleVel = vel;
+			vParticleVel[0] += random->RandomFloat(-r_RainSideVel.GetInt(), r_RainSideVel.GetInt());
+			vParticleVel[1] += random->RandomFloat(-r_RainSideVel.GetInt(), r_RainSideVel.GetInt());
+
 			Vector vParticlePos = org;
-			vParticlePos[ 0 ] += size[ 0 ] * random->RandomFloat(0, 1);
-			vParticlePos[ 1 ] += size[ 1 ] * random->RandomFloat(0, 1);
+			vParticlePos[0] += size[0] * random->RandomFloat(0, 1);
+			vParticlePos[1] += size[1] * random->RandomFloat(0, 1);
 
 			// Figure out where the particle should lie in Z by tracing a line from the player's height up to the 
 			// desired height and making sure it doesn't hit a wall.
 			Vector vPlayerHeight = vParticlePos;
 			vPlayerHeight.z = vPlayerCenter.z;
 
+			if (ParticleIsBlocked(vPlayerHeight, vParticlePos))
+			{
+				continue;
+			}
+
+			Vector vUnitParticleVel = vParticleVel;
+			float fallHeight = vParticlePos.z - vPlayerHeight.z;
+			vUnitParticleVel /= fallHeight;
+			vPlayerHeight.x += vUnitParticleVel.x * fallHeight;
+			vPlayerHeight.y += vUnitParticleVel.y * fallHeight;
+
 			trace_t trace;
-			UTIL_TraceLine( vPlayerHeight, vParticlePos, MASK_SOLID_BRUSHONLY, NULL, COLLISION_GROUP_NONE, &trace );
-			if ( trace.fraction < 1 )
+			UTIL_TraceLine(vPlayerHeight, vParticlePos, MASK_SOLID_BRUSHONLY, NULL, COLLISION_GROUP_NONE, &trace);
+			if (trace.fraction < 1)
 			{
 				// If we hit a brush, then don't spawn the particle.
-				if ( trace.surface.flags & SURF_SKY )
+				if (trace.surface.flags & SURF_SKY)
 				{
 					vParticlePos = trace.endpos;
 				}
@@ -1374,7 +1397,9 @@ void CClient_Precipitation::EmitParticles( float fTimeDelta )
 				}
 			}
 
-		CreateRainOrSnowParticle( vParticlePos, vel );
+			Vector vParticleEndPos(vPlayerHeight);
+
+			CreateRainOrSnowParticle(vParticlePos, vParticleEndPos, vParticleVel);
 	}
 }
 
@@ -2275,17 +2300,37 @@ void CSnowFallManager::CreateSnowFall( void )
 //			&vecForward - 
 //			flZoomScale - 
 //-----------------------------------------------------------------------------
-void CSnowFallManager::CreateSnowFallParticles( float flCurrentTime, float flRadius, const Vector &vecEyePos, const Vector &vecForward, float flZoomScale )
-		{
-	// Outside of a snow volume.
-	if ( m_iSnowFallArea == SNOWFALL_IN_ENTITY )
+void CSnowFallManager::CreateSnowFallParticles(float flCurrentTime, float flRadius, const Vector& vecEyePos, const Vector& vecForward, float flZoomScale)
+{
+	const float SnowfallRate = 500.0f;
+	if (m_nActiveSnowCount > 0)
 	{
-		CreateOutsideVolumeSnowParticles( flCurrentTime, flRadius, flZoomScale );
+		C_BaseEntity* pEntity = m_aSnow[m_aActiveSnow[0]].m_pEntity;
+		int density = pEntity->ScriptGetAlpha();
+		density = clamp(density, 0, 100);
+		if (pEntity && density > 0)
+		{
+			m_tSnowFallParticleTimer.ResetRate(SnowfallRate * density * 0.01f);
+		}
+		else
+		{
+			m_tSnowFallParticleTimer.ResetRate(SnowfallRate);
+		}
+	}
+	else
+	{
+		m_tSnowFallParticleTimer.ResetRate(SnowfallRate);
+	}
+
+	// Outside of a snow volume.
+	if (m_iSnowFallArea == SNOWFALL_IN_ENTITY)
+	{
+		CreateOutsideVolumeSnowParticles(flCurrentTime, flRadius, flZoomScale);
 	}
 	// Inside of a snow volume.
 	else
 	{
-		CreateInsideVolumeSnowParticles( flCurrentTime, flRadius, vecEyePos, vecForward, flZoomScale );
+		CreateInsideVolumeSnowParticles(flCurrentTime, flRadius, vecEyePos, vecForward, flZoomScale);
 	}
 }
 
@@ -2459,15 +2504,33 @@ void CSnowFallManager::CreateSnowFallParticle( const Vector &vecParticleSpawn, i
 
 	pParticle->m_flLifetime	= 0.0f;
 	pParticle->m_vecVelocity = Vector( RandomFloat( -5.0f, 5.0f ), RandomFloat( -5.0f, 5.0f ), ( RandomFloat( -25, -35 ) * r_SnowFallSpeed.GetFloat() ) );
-	pParticle->m_flDieTime	= fabs( ( vecParticleSpawn.z - m_aSnow[iSnow].m_vecMin.z ) / ( pParticle->m_vecVelocity.z - 0.1 ) );
 
+	trace_t trace;
+
+	Vector groundPos = pParticle->m_Pos;
+	groundPos.z -= 250;
+
+	pParticle->m_Pos.z += 250;
+
+	UTIL_TraceLine(groundPos, pParticle->m_Pos, MASK_SOLID_BRUSHONLY, NULL, COLLISION_GROUP_NONE, &trace);
+
+	pParticle->m_flDieTime = clamp(fabs((vecParticleSpawn.z - trace.endpos.z)),0.0f,10.0f);
+
+	if (pParticle->m_flDieTime < 0.5f)
+	{
+		pParticle->m_vecVelocity = Vector(0, 0, 0);
+	}
 	// Probably want to put the color in the snow entity.
 //	pParticle->m_uchColor[0] = 150;//color;
 //	pParticle->m_uchColor[1] = 175;//color;
 //	pParticle->m_uchColor[2] = 200;//color;
-	pParticle->m_uchColor[0] = r_SnowColorRed.GetInt();
-	pParticle->m_uchColor[1] = r_SnowColorGreen.GetInt();
-	pParticle->m_uchColor[2] = r_SnowColorBlue.GetInt();
+
+
+	C_BaseEntity* pEntity = m_aSnow[m_aActiveSnow[0]].m_pEntity;
+
+	pParticle->m_uchColor[0] = pEntity->ScriptGetColorR();
+	pParticle->m_uchColor[1] = pEntity->ScriptGetColorB();
+	pParticle->m_uchColor[2] = pEntity->ScriptGetColorG();
 
 	pParticle->m_uchStartSize = r_SnowStartSize.GetInt();
 	pParticle->m_uchEndSize = r_SnowEndSize.GetInt();

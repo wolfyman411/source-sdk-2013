@@ -1,0 +1,6 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "slug/yellow_bricksandstuff_alltrim"
+	"$bumpmap" "slug/yellow_bricksandstuff_alltrim_NR"
+	"$surfaceprop" "Rock"
+}

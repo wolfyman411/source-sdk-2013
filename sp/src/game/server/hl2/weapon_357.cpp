@@ -361,6 +361,9 @@ void CWeapon357::PrimaryAttack( void )
 	m_iPrimaryAttacks++;
 	gamestats->Event_WeaponFired( pPlayer, true, GetClassname() );
 
+	//Let the game know we've just attacked
+	pPlayer->OnMyWeaponFired(this);
+
 	WeaponSound( SINGLE );
 	pPlayer->DoMuzzleFlash();
 

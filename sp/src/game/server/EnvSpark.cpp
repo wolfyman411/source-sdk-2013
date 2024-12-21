@@ -18,11 +18,11 @@
 // Input  : pev - 
 //			location - 
 //-----------------------------------------------------------------------------
-void DoSpark( CBaseEntity *ent, const Vector &location, int nMagnitude, int nTrailLength, bool bPlaySound, const Vector &vecDir )
+void DoSpark( CBaseEntity *ent, const Vector &location, int nMagnitude, int nTrailLength, bool bPlaySound, const Vector &vecDir)
 {
 	g_pEffects->Sparks( location, nMagnitude, nTrailLength, &vecDir );
 
-	if ( bPlaySound )
+	if ( bPlaySound)
 	{
 		ent->EmitSound( "DoSpark" );
 	}

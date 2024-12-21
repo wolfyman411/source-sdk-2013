@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/headcrab_classic/headcrabsheet"
+	"$normalmap" "models/headcrab_classic/headcrabsheet_normal"
+	"$surfaceprop" "Flesh"
+}

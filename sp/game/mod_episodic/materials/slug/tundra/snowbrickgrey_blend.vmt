@@ -1,0 +1,9 @@
+WorldVertexTransition
+{
+	$basetexture "slug/bricksgreyish"
+	$bumpmap "slug/bricksgreenNR"
+	$surfaceprop Brick
+	
+	$basetexture2 "nature/snowfloor001a"
+	$surfaceprop2 Sand
+}

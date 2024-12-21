@@ -1,0 +1,13 @@
+"WorldVertexTransition"
+{
+	"$basetexture" "mat_hiperborea/glacier"
+	"$bumpmap" "mat_hiperborea/glacier_normal"
+	"$basetexture2" "nature/snowwallep3"
+	"$surfaceprop" "Glass"
+	"$surfaceprop2" "Snow"
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[0.01 0.01 0.01]"
+	"$envmapcontrast" 1
+	"$blendmodulatetexture" "nature/blendtexture01"
+	$reflectivity "[0.2 0.4 0.6]"
+}

@@ -1,0 +1,7 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "woodland/grass"
+	"$bumpmap" "woodland/grass_normal"
+	"$normalmap" "woodland/grass_normal"
+	"$surfaceprop" "Grass"
+}

@@ -1,0 +1,11 @@
+"VertexLitGeneric"
+{
+	$basetexture "models/props_lab/hl1tp_sheet"
+	$bumpmap "models/props_lab/hl1tp_sheet_n"
+	$phong 1
+    	$phongexponent 24 
+    	$phongfresnelranges "[0.5 1.7 1.11]"
+    	$phongalbedotint 1
+	$phongboost 3
+	//"$selfillum" "1"
+}

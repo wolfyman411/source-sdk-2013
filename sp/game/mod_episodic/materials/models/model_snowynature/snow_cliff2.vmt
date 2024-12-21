@@ -1,0 +1,7 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "models/model_snowynature/snow_cliff2"
+	"$normalmap" "models/model_snowynature/snow_cliff2_normal"
+	"$bumpmap" "models/model_snowynature/snow_cliff2_normal"
+
+}

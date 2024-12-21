@@ -53,6 +53,9 @@ void CHLMachineGun::PrimaryAttack( void )
 	CBasePlayer *pPlayer = ToBasePlayer( GetOwner() );
 	if (!pPlayer)
 		return;
+
+	//Let the game know we've just attacked
+	pPlayer->OnMyWeaponFired(this);
 	
 	// Abort here to handle burst and auto fire modes
 	if ( (UsesClipsForAmmo1() && m_iClip1 == 0) || ( !UsesClipsForAmmo1() && !pPlayer->GetAmmoCount(m_iPrimaryAmmoType) ) )

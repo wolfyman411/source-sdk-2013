@@ -1,0 +1,5 @@
+"Vertexlitgeneric"
+{
+	"$basetexture" "models\weapons\Iceaxe\iceaxe_sheet"
+	"$normalmap" "models\weapons\Iceaxe\iceaxe_sheet_normal"
+}

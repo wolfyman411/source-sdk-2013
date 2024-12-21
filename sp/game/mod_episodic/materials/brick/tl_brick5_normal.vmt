@@ -1,0 +1,11 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "Brick/tl_brick5"
+	"$surfaceprop" "brick"
+	"$bumpmap" "brick/tl_brick5_normal"
+"$envmapsaturation" 1
+		"$envmapcontrast" 1
+		"$envmaptint" "[ .56 .56 .56 ]"
+		"$normalmapalphaenvmapmask" 1
+	"%keywords" "c17downtown"
+}

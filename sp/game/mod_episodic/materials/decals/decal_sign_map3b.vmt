@@ -1,0 +1,9 @@
+"LightmappedGeneric"
+{
+	"$vertexcolor" "1"
+	"$vertexalpha" "1"
+	"$translucent" 1
+	"$basetexture" "decals/decal_sign_map3b"
+	"$decal" 1
+	"$decalscale" 0.25
+}

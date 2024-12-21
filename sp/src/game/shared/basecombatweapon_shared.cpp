@@ -2726,6 +2726,11 @@ void CBaseCombatWeapon::PrimaryAttack( void )
 		return;
 	}
 
+#if defined( GAME_DLL )
+	//Let the game know we've just attacked
+	pPlayer->OnMyWeaponFired(this);
+#endif
+
 	pPlayer->DoMuzzleFlash();
 
 	SendWeaponAnim( GetPrimaryAttackActivity() );

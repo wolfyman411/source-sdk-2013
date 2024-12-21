@@ -2482,6 +2482,10 @@ bool CWeaponPhysCannon::AttachObject( CBaseEntity *pObject, const Vector &vPosit
 		{
 			pOwner->FlashlightTurnOff();
 		}
+		if (pProp && pProp->HasInteraction(PROPINTER_PHYSGUN_CREATE_LIGHT))
+		{
+			pOwner->FlashlightTurnOff();
+		}
 #endif
 
 		// NOTE: This can change the mass; so it must be done before max speed setting

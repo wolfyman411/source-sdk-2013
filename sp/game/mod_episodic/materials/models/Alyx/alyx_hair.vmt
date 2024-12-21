@@ -1,0 +1,8 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "models/Alyx/alyx_hair"
+	"$translucent" 1
+	"$halflambert" 1
+	"$nodecal" "1"
+	"$nocull" "1"
+}

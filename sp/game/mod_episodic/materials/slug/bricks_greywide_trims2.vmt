@@ -1,0 +1,6 @@
+LightmappedGeneric
+{
+	$basetexture "slug/bricks_greywide_trims2"
+	$bumpmap "slug/bricks_greenwide_trims2NR"
+	$surfaceprop Brick
+}

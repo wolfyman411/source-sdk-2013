@@ -1,0 +1,8 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/model_xen/xen_shroom01_blue"
+	"$normalmap" "models/model_xen/xen_shroom01_normal"
+	"$selfillummask" 	"models/model_xen/xen_shroom01_selfillum"
+	"$surfaceprop" "AlienFlesh"
+	"$selfillum" "1"
+}

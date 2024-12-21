@@ -1,0 +1,14 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "models/Weapons/v_iceaxe/iceaxe_sheet"
+	"$normalmap" "models\weapons\Iceaxe\iceaxe_sheet_normal"
+	"$bumpmap" "models\weapons\Iceaxe\iceaxe_sheet_normal"
+
+	"$phong" "1"
+	"$phongexponent" "1000"
+	"$phongboost" "7"
+	"$phongfresnelranges"	"[2 .5 .5]"
+	"$phongalbedotint" "1"
+
+
+}

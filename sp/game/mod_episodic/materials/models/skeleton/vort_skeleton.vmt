@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/skeleton/vort_skeleton"
+	"$bumpmap" "models/skeleton/vort_skeleton_normal"
+	"$normalmap" "models/skeleton/vort_skeleton_normal"
+	"$surfaceprop" "Default"
+	"$halflambert"	1
+	"$model"	1
+}

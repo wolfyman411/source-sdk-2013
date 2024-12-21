@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/Alyx/alyx_winter"
+	"$bumpmap" "models/Alyx/alyx_winter_normal"
+	"$normalmap" "models/Alyx/alyx_winter_normal"
+}

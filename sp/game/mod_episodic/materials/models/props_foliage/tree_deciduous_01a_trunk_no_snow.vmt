@@ -1,0 +1,6 @@
+"vertexlitGeneric"
+{
+	"$basetexture" "models/props_foliage/tree_deciduous_01a_trunk_no_snow"
+	"$bumpmap" "models/props_foliage/tree_deciduous_01a_trunk_no_snow_normal"
+	"$surfaceprop" "wood"
+}

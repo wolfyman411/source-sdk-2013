@@ -1,0 +1,10 @@
+"WorldVertexTransition"
+{
+	"$basetexture" "nature/snow_ep3"
+	"$bumpmap" "nature/snow_ep3_normal"
+	"$basetexture2" "nature/snowyground_ep3"
+	"$bumpmap2" "nature/snowyground_ep3_normal"
+	"$surfaceprop" "Snow"
+	"$surfaceprop2" "Gravel"
+	"$blendmodulatetexture" "nature/blendtexture01"
+}

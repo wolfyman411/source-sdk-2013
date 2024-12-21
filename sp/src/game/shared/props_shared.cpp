@@ -168,6 +168,7 @@ propdata_interaction_s sPropdataInteractionSections[PROPINTER_NUM_INTERACTIONS] 
 	{ "fire_interactions", "ignite", "halfhealth" },			// PROPINTER_FIRE_IGNITE_HALFHEALTH,
 
 	{ "physgun_interactions", "onpickup", "create_flare" },		// PROPINTER_PHYSGUN_CREATE_FLARE,
+	{ "physgun_interactions", "onpickup", "create_light" },		// PROPINTER_PHYSGUN_CREATE_LIGHT,
 
 	{ "physgun_interactions", "allow_overhead", "yes" },	// 	PROPINTER_PHYSGUN_ALLOW_OVERHEAD,
 

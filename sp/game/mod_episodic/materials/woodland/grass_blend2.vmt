@@ -1,0 +1,11 @@
+"WorldVertexTransition"
+{
+	"$basetexture" "woodland/grass"
+	"$bumpmap" "woodland/grass_normal"
+	"$basetexture2" "woodland/grass1"
+	"$bumpmap2" "woodland/grass1_normal"
+	"$surfaceprop" "Grass"
+	"$surfaceprop2" "Grass"
+	"$blendmodulatetexture" "nature/blendtexture01"
+	"%detailtype" "forest_grass1"
+}

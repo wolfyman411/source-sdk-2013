@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "Models/zavod_yantar/Pautina_anim"
+	//"$envmap" 			"env_cubemap"
+	//"$envmapmask" "Models/zavod_yantar/Pautina_anim_spec"
+	"$translucent" 1
+	"$nocull" 1
+}
