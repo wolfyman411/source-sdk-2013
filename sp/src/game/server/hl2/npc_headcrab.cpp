@@ -221,6 +221,8 @@ BEGIN_DATADESC( CBaseHeadcrab )
 	DEFINE_INPUTFUNC( FIELD_VOID, "Unburrow", InputUnburrow ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "StartHangingFromCeiling", InputStartHangingFromCeiling ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "DropFromCeiling", InputDropFromCeiling ),
+	DEFINE_INPUTFUNC(FIELD_VOID, "StartPatrolling", InputStartPatrolling),
+	DEFINE_INPUTFUNC(FIELD_VOID, "StopPatrolling", InputStopPatrolling),
 
 #ifdef MAPBASE
 	DEFINE_OUTPUT( m_OnLeap, "OnLeap" ),
@@ -1357,6 +1359,22 @@ void CBaseHeadcrab::DropFromCeiling( void )
 }
 
 //-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBaseHeadcrab::InputStartPatrolling(inputdata_t& inputdata)
+{
+	m_bShouldPatrol = true;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBaseHeadcrab::InputStopPatrolling(inputdata_t& inputdata)
+{
+	m_bShouldPatrol = false;
+}
+
+//-----------------------------------------------------------------------------
 // Purpose: Player has illuminated this NPC with the flashlight
 //-----------------------------------------------------------------------------
 void CBaseHeadcrab::PlayerHasIlluminatedNPC( CBasePlayer *pPlayer, float flDot )
@@ -1949,6 +1967,13 @@ int CBaseHeadcrab::SelectSchedule( void )
 
 	switch ( m_NPCState )
 	{
+		case NPC_STATE_IDLE:
+		{
+			if (m_bShouldPatrol)
+				return SCHED_PATROL_WALK;
+			else
+				break;
+		}
 		case NPC_STATE_ALERT:
 		{
 			if (HasCondition( COND_LIGHT_DAMAGE ) || HasCondition( COND_HEAVY_DAMAGE ))

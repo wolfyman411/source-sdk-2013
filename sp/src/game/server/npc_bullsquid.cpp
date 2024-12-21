@@ -180,7 +180,7 @@ bool CNPC_Bullsquid::GetSpitVector(const Vector& vecStartPos, const Vector& vecT
 
 	if (lobbing)
 	{
-		spitSpeed = 400.0f;
+		spitSpeed = 200.0f;
 	}
 
 	Vector vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed, (10.0f * 12.0f), lobbing);
@@ -222,12 +222,15 @@ Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector&
 
 	if (lobbing)
 	{
-		float testVar = 0.427f;
-		vecGrenadeVel = vecGrenadeVel * (1.0 / time);
-		vecGrenadeVel.z += flGravity * time * testVar;
+		// Apex
+		Vector vecApex = vecSpot1;
+		vecApex.z = max(vecSpot1.z, vecSpot2.z) + 125.0f; // Height
 
-		vecApex = vecSpot1 + (vecSpot2 - vecSpot1) * testVar;
-		vecApex.z += testVar * flGravity * (time * testVar) * (time * testVar);
+		// Apex Timer
+		float timeToApex = time * 0.3f;
+
+		// Upward velocity
+		vecGrenadeVel.z = (vecApex.z - vecSpot1.z) / timeToApex + 0.5f * flGravity;
 	}
 
 
@@ -412,10 +415,10 @@ void CNPC_Bullsquid::HandleAnimEvent(animevent_t* pEvent)
 
 			// Try and spit at our target
 			Vector	vecToss;
-			if (GetSpitVector(vSpitPos, vTarget, &vecToss, dotProduct < -0.4f) == false)
+			if (GetSpitVector(vSpitPos, vTarget, &vecToss, dotProduct < -0.9f) == false)
 			{
 				// Now try where they were
-				if (GetSpitVector(vSpitPos, m_vSavePosition, &vecToss, dotProduct < -0.4f) == false)
+				if (GetSpitVector(vSpitPos, m_vSavePosition, &vecToss, dotProduct < -0.9f) == false)
 				{
 					// Failing that, just shoot with the old velocity we calculated initially!
 					vecToss = m_vecSaveSpitVelocity;
@@ -550,7 +553,12 @@ int CNPC_Bullsquid::RangeAttack1Conditions(float flDot, float flDist)
 		return COND_NONE;
 	}
 
-	if (flDot < DOT_10DEGREE)
+	Vector direction = (GetAbsOrigin() - GetEnemy()->GetAbsOrigin());
+	direction.NormalizeInPlace();
+
+	float dotProduct = DotProduct(direction, Vector(0, 0, 1));
+
+	if (dotProduct < -0.9f)
 	{
 		return COND_NONE;
 	}
