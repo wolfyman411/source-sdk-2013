@@ -30,7 +30,7 @@
 #define		SQUID_MAX_SQUAD_SIZE			5
 #define		SQUID_SPIT_DISTANCE		2048
 
-ConVar sk_bullsquid_health("sk_bullsquid_health", "125");
+ConVar sk_bullsquid_health("sk_bullsquid_health", "75");
 ConVar sk_bullsquid_dmg_bite("sk_bullsquid_dmg_bite", "35");
 ConVar sk_bullsquid_dmg_whip("sk_bullsquid_dmg_whip", "20");
 ConVar sk_bullsquid_dmg_spit("sk_bullsquid_dmg_spit", "25");;
