@@ -78,8 +78,7 @@ void CNPC_CombineS::Spawn( void )
 		SetKickDamage( sk_combine_s_kick.GetFloat() );
 	}
 
-	CapabilitiesAdd( bits_CAP_ANIMATEDFACE );
-	CapabilitiesAdd( bits_CAP_TURN_HEAD );
+	CapabilitiesAdd( bits_CAP_ANIMATEDFACE | bits_CAP_TURN_HEAD );
 	CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
 	CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
