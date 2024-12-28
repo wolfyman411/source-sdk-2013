@@ -66,6 +66,11 @@ void CNPC_CombineS::Spawn( void )
 		SetMaxHealth( sk_combine_guard_health.GetFloat() );
 		SetKickDamage( sk_combine_guard_kick.GetFloat() );
 	}
+	else if ( IsArmorless() ) {
+		SetHealth( sk_combine_s_health.GetFloat() / 2 );
+		SetMaxHealth( sk_combine_s_health.GetFloat() / 2 );
+		SetKickDamage( sk_combine_s_kick.GetFloat() / 2);
+	}
 	else
 	{
 		SetHealth( sk_combine_s_health.GetFloat() );
@@ -74,6 +79,7 @@ void CNPC_CombineS::Spawn( void )
 	}
 
 	CapabilitiesAdd( bits_CAP_ANIMATEDFACE );
+	CapabilitiesAdd( bits_CAP_TURN_HEAD );
 	CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
 	CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
@@ -108,6 +114,13 @@ void CNPC_CombineS::Precache()
 	else
 	{
 		m_fIsElite = false;
+	}
+
+	if ( !Q_stricmp( pModelName, "models/baresoldier/baresoldier.mdl" ) ) {
+		m_fIsArmorless = true;
+	}
+	else {
+		m_fIsArmorless = false;
 	}
 
 	if ( !GetModelName() )
