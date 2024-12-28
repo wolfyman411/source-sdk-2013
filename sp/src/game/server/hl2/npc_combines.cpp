@@ -69,7 +69,7 @@ void CNPC_CombineS::Spawn( void )
 	else if ( IsArmorless() ) {
 		SetHealth( sk_combine_s_health.GetFloat() / 2 );
 		SetMaxHealth( sk_combine_s_health.GetFloat() / 2 );
-		SetKickDamage( sk_combine_s_kick.GetFloat() / 2);
+		SetKickDamage( sk_combine_s_kick.GetFloat() );
 	}
 	else
 	{
