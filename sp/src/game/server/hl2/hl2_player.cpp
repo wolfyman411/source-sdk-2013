@@ -656,6 +656,13 @@ CHL2_Player::CHL2_Player()
 #else
 	CSuitPowerDevice SuitDeviceFlashlight( bits_SUIT_DEVICE_FLASHLIGHT, 2.222 );	// 100 units in 45 second
 #endif
+
+#ifdef HL2_EPISODIC
+	CSuitPowerDevice SuitDeviceTemperature( bits_SUIT_DEVICE_TEMPERATURE, 1.111 );
+#else
+	CSuitPowerDevice SuitDeviceTemperature( bits_SUIT_DEVICE_TEMPERATURE, 2.222 );
+#endif
+
 CSuitPowerDevice SuitDeviceBreather( bits_SUIT_DEVICE_BREATHER, 6.7f );		// 100 units in 15 seconds (plus three padded seconds)
 
 #ifdef MAPBASE
@@ -2371,6 +2378,11 @@ void CHL2_Player::SuitPower_Update( void )
 			factor = 1.0f / m_flFlashlightPowerDrainScale;
 
 			flPowerLoad -= ( SuitDeviceFlashlight.GetDeviceDrainRate() * (1.0f - factor) );
+		}
+
+		if ( SuitPower_IsDeviceActive(SuitDeviceTemperature) )
+		{
+			// TODO: Some Sheganigans
 		}
 
 		if( !SuitPower_Drain( flPowerLoad * gpGlobals->frametime ) )

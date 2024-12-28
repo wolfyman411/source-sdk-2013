@@ -209,6 +209,7 @@ enum CastVote
 #define bits_SUIT_DEVICE_SPRINT		0x00000001
 #define bits_SUIT_DEVICE_FLASHLIGHT	0x00000002
 #define bits_SUIT_DEVICE_BREATHER	0x00000004
+#define bits_SUIT_DEVICE_TEMPERATURE	0x00000008
 
 #ifdef MAPBASE
 // Custom suit power devices
