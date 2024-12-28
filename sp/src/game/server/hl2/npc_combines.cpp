@@ -233,11 +233,14 @@ float CNPC_CombineS::GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDama
 {
 	switch ( iHitGroup )
 	{
-	case HITGROUP_HEAD:
-	{
-		// Soldiers take double headshot damage
-		return 2.0f;
-	}
+		case HITGROUP_HEAD:
+		{
+			if ( IsArmorless() ) {
+				return 3.0f;
+			}
+
+			return 2.0f;
+		}
 	}
 
 	return BaseClass::GetHitgroupDamageMultiplier( iHitGroup, info );
