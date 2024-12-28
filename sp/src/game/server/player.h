@@ -200,6 +200,7 @@ public:
 	virtual int			GetDeathCount();
 	virtual bool		IsConnected();
 	virtual int			GetArmorValue();
+	virtual int			GetTemperature();
 
 	virtual bool IsHLTV();
 	virtual bool IsReplay();
@@ -715,6 +716,7 @@ public:
 	bool	IsDisconnecting() const	{ return m_iConnected == PlayerDisconnecting; }
 	bool	IsSuitEquipped() const	{ return m_Local.m_bWearingSuit; }
 	virtual int		ArmorValue() const		{ return m_ArmorValue; }
+	virtual int		GetTemperature() const { return m_Temperature; }
 	bool	HUDNeedsRestart() const { return m_fInitHUD; }
 	float	MaxSpeed() const		{ return m_flMaxspeed; }
 	Activity GetActivity( ) const	{ return m_Activity; }
@@ -1124,6 +1126,7 @@ private:
 	// from edict_t
 	// CBasePlayer doesn't send this but CCSPlayer does.
 	CNetworkVarForDerived( int, m_ArmorValue );
+	CNetworkVarForDerived( int, m_Temperature );
 	float					m_AirFinished;
 	float					m_PainFinished;
 

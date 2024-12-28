@@ -10023,6 +10023,11 @@ int	CPlayerInfo::GetArmorValue()
 	return m_pParent->ArmorValue(); 
 }
 
+int CPlayerInfo::GetTemperature() {
+	Assert( m_pParent );
+	return m_pParent->GetTemperature();
+}
+
 bool CPlayerInfo::IsHLTV() 
 { 
 	Assert( m_pParent );
