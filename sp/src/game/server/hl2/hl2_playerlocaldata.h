@@ -42,6 +42,7 @@ public:
 	CNetworkVar( bool,	m_bAutoAimTarget );
 #ifdef HL2_EPISODIC
 	CNetworkVar( float, m_flFlashBattery );
+	CNetworkVar( float, m_flTemperature );
 	CNetworkVar( Vector, m_vecLocatorOrigin );
 #endif
 

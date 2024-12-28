@@ -951,6 +951,9 @@ public:
 	bool					m_bLagCompensation;	// user wants lag compenstation
 	bool					m_bPredictWeapons; //  user has client side predicted weapons
 	
+	CNetworkVar( float, m_flFreezeMultiplier );
+	float					m_flFreezeMultiplier;
+	
 	float		GetDeathTime( void ) { return m_flDeathTime; }
 
 	void		ClearZoomOwner( void );

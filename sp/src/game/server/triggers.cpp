@@ -5676,3 +5676,56 @@ bool IsTriggerClass( CBaseEntity *pEntity )
 	
 	return false;
 }
+
+BEGIN_DATADESC( CTriggerFreeze )
+
+// Function Pointers
+DEFINE_FUNCTION( HurtThink ),
+
+// Fields
+DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
+
+END_DATADESC()
+
+
+LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when spawning, after keyvalues have been handled.
+//-----------------------------------------------------------------------------
+void CTriggerFreeze::Spawn( void ) {
+	BaseClass::Spawn();
+
+	InitTrigger();
+
+	SetNextThink( TICK_NEVER_THINK );
+	SetThink( NULL );
+}
+
+void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
+	if ( PassesTriggerFilters( pOther ) ) {
+		EHANDLE hOther;
+		hOther = pOther;
+
+		if ( pOther->IsPlayer() ) {
+			CBasePlayer* player = dynamic_cast< CBasePlayer* >( pOther );
+
+			player->m_flFreezeMultiplier = 0.0f;
+		}
+	}
+	BaseClass::EndTouch( pOther );
+}
+
+void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
+	if ( m_pfnThink == NULL ) {
+		SetThink( &CTriggerFreeze::HurtThink );
+		SetNextThink( gpGlobals->curtime );
+
+		if ( pOther->IsPlayer() ) {
+			CBasePlayer* player = dynamic_cast< CBasePlayer* >( pOther );
+
+			player->m_flFreezeMultiplier = m_flFreezeMultiplier;
+		}
+	}
+}

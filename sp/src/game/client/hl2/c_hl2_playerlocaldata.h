@@ -43,6 +43,7 @@ public:
 	bool	m_bAutoAimTarget;
 #ifdef HL2_EPISODIC
 	float	m_flFlashBattery;
+	float	m_flTemperature;
 	Vector	m_vecLocatorOrigin;
 #endif
 

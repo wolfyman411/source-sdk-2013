@@ -128,6 +128,8 @@ ConVar hl2_use_sp_animstate( "hl2_use_sp_animstate", "1", FCVAR_NONE, "Allows SP
 #define	FLASH_DRAIN_TIME	 1.1111	// 100 units / 90 secs
 #define	FLASH_CHARGE_TIME	 50.0f	// 100 units / 2 secs
 
+#define TEMP_DRAIN_TIME		10
+
 
 //==============================================================================================
 // CAPPED PLAYER PHYSICS DAMAGE TABLE
@@ -657,13 +659,8 @@ CHL2_Player::CHL2_Player()
 	CSuitPowerDevice SuitDeviceFlashlight( bits_SUIT_DEVICE_FLASHLIGHT, 2.222 );	// 100 units in 45 second
 #endif
 
-#ifdef HL2_EPISODIC
-	CSuitPowerDevice SuitDeviceTemperature( bits_SUIT_DEVICE_TEMPERATURE, 1.111 );
-#else
-	CSuitPowerDevice SuitDeviceTemperature( bits_SUIT_DEVICE_TEMPERATURE, 2.222 );
-#endif
-
 CSuitPowerDevice SuitDeviceBreather( bits_SUIT_DEVICE_BREATHER, 6.7f );		// 100 units in 15 seconds (plus three padded seconds)
+CSuitPowerDevice SuitDeviceTemperature( bits_SUIT_DEVICE_TEMPERATURE, 1.111 );	// 100 units in 90 second
 
 #ifdef MAPBASE
 // Default: 100 units in 8 seconds
@@ -1545,6 +1542,7 @@ void CHL2_Player::Spawn(void)
 	// Setup our flashlight values
 #ifdef HL2_EPISODIC
 	m_HL2Local.m_flFlashBattery = 100.0f;
+	m_HL2Local.m_flTemperature = 100.0f;
 #endif 
 
 	GetPlayerProxy();
@@ -2378,11 +2376,6 @@ void CHL2_Player::SuitPower_Update( void )
 			factor = 1.0f / m_flFlashlightPowerDrainScale;
 
 			flPowerLoad -= ( SuitDeviceFlashlight.GetDeviceDrainRate() * (1.0f - factor) );
-		}
-
-		if ( SuitPower_IsDeviceActive(SuitDeviceTemperature) )
-		{
-			// TODO: Some Sheganigans
 		}
 
 		if( !SuitPower_Drain( flPowerLoad * gpGlobals->frametime ) )
@@ -3975,6 +3968,24 @@ void CHL2_Player::UpdateClientData( void )
 	else
 	{
 		m_HL2Local.m_flFlashBattery = -1.0f;
+	}
+
+	if ( !sv_infinite_aux_power.GetBool() ) {
+		if ( GlobalEntity_GetIndex( "gordon_freezing" ) == 1 ) {
+			m_HL2Local.m_flTemperature += ( TEMP_DRAIN_TIME * m_flFreezeMultiplier ) * gpGlobals->frametime;
+
+			if ( m_HL2Local.m_flTemperature <= 0.0f ) {
+				SetMaxSpeed( HL2_WALK_SPEED / 1.5 );
+				m_HL2Local.m_flTemperature = 0.0f;
+			}
+			else {
+				SetMaxSpeed( HL2_WALK_SPEED );
+			}
+		}
+		else {
+			m_HL2Local.m_flTemperature = 100.0f;
+			SetMaxSpeed( HL2_WALK_SPEED );
+		}
 	}
 #endif // HL2_EPISODIC
 
