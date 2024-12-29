@@ -379,16 +379,4 @@ public:
 	DECLARE_DATADESC();
 
 	float	m_flFreezeMultiplier;
-
-	enum
-	{
-		DAMAGEMODEL_NORMAL = 0,
-		DAMAGEMODEL_DOUBLE_FORGIVENESS,
-	};
-
-	// Outputs
-	COutputEvent m_OnHurt;
-	COutputEvent m_OnHurtPlayer;
-
-	CUtlVector<EHANDLE>	m_hurtEntities;
 };
