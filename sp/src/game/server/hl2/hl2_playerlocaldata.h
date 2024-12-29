@@ -43,7 +43,6 @@ public:
 #ifdef HL2_EPISODIC
 	CNetworkVar( float, m_flFlashBattery );
 	CNetworkVar( float, m_flTemperature );
-	CNetworkVar( float, m_flFreezeMultiplier );
 	CNetworkVar( Vector, m_vecLocatorOrigin );
 #endif
 

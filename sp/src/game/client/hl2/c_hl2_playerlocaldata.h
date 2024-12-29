@@ -44,7 +44,6 @@ public:
 #ifdef HL2_EPISODIC
 	float	m_flFlashBattery;
 	float	m_flTemperature;
-	float	m_flFreezeMultiplier;
 	Vector	m_vecLocatorOrigin;
 #endif
 
