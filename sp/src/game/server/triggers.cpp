@@ -5683,7 +5683,7 @@ BEGIN_DATADESC( CTriggerFreeze )
 DEFINE_FUNCTION( HurtThink ),
 
 // Fields
-DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
+DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT, "freezemultiplier"),
 
 END_DATADESC()
 
@@ -5711,6 +5711,7 @@ void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
 		if ( pOther->IsPlayer() ) {
 			CBasePlayer* player = dynamic_cast< CBasePlayer* >( pOther );
 
+			DevMsg( "Player left the freeze trigger\n" );
 			player->m_flFreezeMultiplier = 0.0f;
 		}
 	}
@@ -5726,6 +5727,11 @@ void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
 			CBasePlayer* player = dynamic_cast< CBasePlayer* >( pOther );
 
 			player->m_flFreezeMultiplier = m_flFreezeMultiplier;
+			DevMsg( "Player entered the freeze trigger\n" );
 		}
 	}
+}
+
+void CTriggerFreeze::HurtThink() {
+	SetNextThink( gpGlobals->curtime + 0.5f );
 }

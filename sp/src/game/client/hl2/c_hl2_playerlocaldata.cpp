@@ -28,6 +28,7 @@ BEGIN_RECV_TABLE_NOBASE( C_HL2PlayerLocalData, DT_HL2Local )
 #ifdef HL2_EPISODIC
 	RecvPropFloat( RECVINFO(m_flFlashBattery) ),
 	RecvPropFloat( RECVINFO( m_flTemperature ) ),
+	RecvPropFloat( RECVINFO( m_flFreezeMultiplier ) ),
 	RecvPropVector( RECVINFO(m_vecLocatorOrigin) ),
 #endif
 END_RECV_TABLE()
@@ -48,6 +49,7 @@ C_HL2PlayerLocalData::C_HL2PlayerLocalData()
 #ifdef HL2_EPISODIC
 	m_flFlashBattery = 0.0f;
 	m_flTemperature = 0.0f;
+	m_flFreezeMultiplier = 0.0f;
 	m_vecLocatorOrigin = vec3_origin;
 #endif
 }

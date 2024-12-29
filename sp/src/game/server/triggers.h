@@ -361,9 +361,6 @@ private:
 class CTriggerFreeze : public CBaseTrigger
 {
 public:
-	CTriggerFreeze() {
-	}
-
 	DECLARE_CLASS( CTriggerFreeze, CBaseTrigger );
 
 	void Spawn( void );
@@ -374,12 +371,6 @@ public:
 	DECLARE_DATADESC();
 
 	float	m_flFreezeMultiplier;
-
-	enum
-	{
-		DAMAGEMODEL_NORMAL = 0,
-		DAMAGEMODEL_DOUBLE_FORGIVENESS,
-	};
 
 	// Outputs
 	COutputEvent m_OnHurt;

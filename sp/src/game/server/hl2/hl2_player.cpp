@@ -1543,6 +1543,7 @@ void CHL2_Player::Spawn(void)
 #ifdef HL2_EPISODIC
 	m_HL2Local.m_flFlashBattery = 100.0f;
 	m_HL2Local.m_flTemperature = 100.0f;
+	m_HL2Local.m_flFreezeMultiplier = 0.0f;
 #endif 
 
 	GetPlayerProxy();
@@ -3972,7 +3973,7 @@ void CHL2_Player::UpdateClientData( void )
 
 	if ( !sv_infinite_aux_power.GetBool() ) {
 		if ( GlobalEntity_GetIndex( "gordon_freezing" ) == 1 ) {
-			m_HL2Local.m_flTemperature += ( TEMP_DRAIN_TIME * m_flFreezeMultiplier ) * gpGlobals->frametime;
+			m_HL2Local.m_flTemperature += ( TEMP_DRAIN_TIME * m_HL2Local.m_flFreezeMultiplier ) * gpGlobals->frametime;
 
 			if ( m_HL2Local.m_flTemperature <= 0.0f ) {
 				SetMaxSpeed( HL2_WALK_SPEED / 1.5 );

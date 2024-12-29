@@ -31,6 +31,7 @@ BEGIN_SEND_TABLE_NOBASE( CHL2PlayerLocalData, DT_HL2Local )
 #ifdef HL2_EPISODIC
 	SendPropFloat( SENDINFO(m_flFlashBattery) ),
 	SendPropFloat( SENDINFO( m_flTemperature ) ),
+	SendPropFloat( SENDINFO( m_flFreezeMultiplier ) ),
 	SendPropVector( SENDINFO(m_vecLocatorOrigin) ),
 #endif
 END_SEND_TABLE()
@@ -48,6 +49,7 @@ BEGIN_SIMPLE_DATADESC( CHL2PlayerLocalData )
 #ifdef HL2_EPISODIC
 	DEFINE_FIELD( m_flFlashBattery, FIELD_FLOAT ),
 	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
 	DEFINE_FIELD( m_vecLocatorOrigin, FIELD_POSITION_VECTOR ),
 #endif
 	// Ladder related stuff
@@ -67,6 +69,7 @@ CHL2PlayerLocalData::CHL2PlayerLocalData()
 #ifdef HL2_EPISODIC
 	m_flFlashBattery = 0.0f;
 	m_flTemperature = 0.0f;
+	m_flFreezeMultiplier = 0.0f;
 #endif
 }
 
