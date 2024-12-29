@@ -459,6 +459,8 @@ public:
 	float			m_flConstraintWidth;
 	float			m_flConstraintSpeedFactor;
 
+	float			m_flFreezeMultiplier;
+
 #ifdef MAPBASE
 	// Transmitted from the server for internal player spawnflags.
 	// See baseplayer_shared.h for more details.

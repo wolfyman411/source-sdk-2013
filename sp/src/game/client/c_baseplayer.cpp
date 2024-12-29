@@ -420,6 +420,8 @@ BEGIN_PREDICTION_DATA( C_BasePlayer )
 	DEFINE_FIELD( m_afButtonLast, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonPressed, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonReleased, FIELD_INTEGER ),
+	
+	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
 	// DEFINE_FIELD( m_vecOldViewAngles, FIELD_VECTOR ),
 
 	// DEFINE_ARRAY( m_iOldAmmo, FIELD_INTEGER,  MAX_AMMO_TYPES ),
