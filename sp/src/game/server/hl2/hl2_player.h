@@ -363,6 +363,8 @@ public:
 	CSoundPatch *m_sndLeeches;
 	CSoundPatch *m_sndWaterSplashes;
 
+	float		m_flFreezeMultiplier;
+
 protected:
 	virtual void		PreThink( void );
 	virtual	void		PostThink( void );

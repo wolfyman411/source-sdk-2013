@@ -358,22 +358,37 @@ private:
 
 #endif // TRIGGERS_H
 
+<<<<<<< Updated upstream
+=======
+//-----------------------------------------------------------------------------
+// Purpose: Hurts anything that touches it. If the trigger has a targetname,
+//			firing it will toggle state.
+//-----------------------------------------------------------------------------
+>>>>>>> Stashed changes
 class CTriggerFreeze : public CBaseTrigger
 {
 public:
 	CTriggerFreeze() {
+<<<<<<< Updated upstream
+=======
+		m_flFreezeMultiplier = 2.0f;
+>>>>>>> Stashed changes
 	}
 
 	DECLARE_CLASS( CTriggerFreeze, CBaseTrigger );
 
 	void Spawn( void );
+<<<<<<< Updated upstream
 	void HurtThink( void );
+=======
+>>>>>>> Stashed changes
 	void Touch( CBaseEntity* pOther );
 	void EndTouch( CBaseEntity* pOther );
 
 	DECLARE_DATADESC();
 
 	float	m_flFreezeMultiplier;
+<<<<<<< Updated upstream
 
 	enum
 	{
@@ -386,4 +401,6 @@ public:
 	COutputEvent m_OnHurtPlayer;
 
 	CUtlVector<EHANDLE>	m_hurtEntities;
+=======
+>>>>>>> Stashed changes
 };

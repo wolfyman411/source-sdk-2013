@@ -5678,6 +5678,7 @@ bool IsTriggerClass( CBaseEntity *pEntity )
 }
 
 BEGIN_DATADESC( CTriggerFreeze )
+<<<<<<< Updated upstream
 
 // Function Pointers
 DEFINE_FUNCTION( HurtThink ),
@@ -5685,6 +5686,9 @@ DEFINE_FUNCTION( HurtThink ),
 // Fields
 DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
 
+=======
+	DEFINE_KEYFIELD( m_flFreezeMultiplier, FIELD_FLOAT, "freezemultiplier" ),
+>>>>>>> Stashed changes
 END_DATADESC()
 
 
@@ -5708,16 +5712,27 @@ void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
 		EHANDLE hOther;
 		hOther = pOther;
 
+<<<<<<< Updated upstream
 		if ( pOther->IsPlayer() ) {
 			CBasePlayer* player = dynamic_cast< CBasePlayer* >( pOther );
 
 			player->m_flFreezeMultiplier = 0.0f;
 		}
 	}
+=======
+		if ( hOther->IsPlayer() ) {
+			CBasePlayer* pPlayer = ToBasePlayer( hOther );
+
+			DevMsg( "Player %s left trigger_hurt\n", pPlayer->GetPlayerName() );
+		}
+	}
+
+>>>>>>> Stashed changes
 	BaseClass::EndTouch( pOther );
 }
 
 void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
+<<<<<<< Updated upstream
 	if ( m_pfnThink == NULL ) {
 		SetThink( &CTriggerFreeze::HurtThink );
 		SetNextThink( gpGlobals->curtime );
@@ -5726,6 +5741,15 @@ void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
 			CBasePlayer* player = dynamic_cast< CBasePlayer* >( pOther );
 
 			player->m_flFreezeMultiplier = m_flFreezeMultiplier;
+=======
+	if ( PassesTriggerFilters( pOther ) ) {
+		EHANDLE hOther;
+		hOther = pOther;
+		if ( hOther->IsPlayer() ) {
+			CBasePlayer* pPlayer = ToBasePlayer( hOther );
+
+			DevMsg( "Player %s entered trigger_hurt\n", pPlayer->GetPlayerName() );
+>>>>>>> Stashed changes
 		}
 	}
 }

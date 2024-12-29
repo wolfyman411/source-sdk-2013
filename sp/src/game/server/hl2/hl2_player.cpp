@@ -522,6 +522,7 @@ BEGIN_DATADESC( CHL2_Player )
 	DEFINE_FIELD( m_flTimeAllSuitDevicesOff, FIELD_TIME ),
 	DEFINE_FIELD( m_fIsSprinting, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_fIsWalking, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
 
 	/*
 	// These are initialized every time the player calls Activate()

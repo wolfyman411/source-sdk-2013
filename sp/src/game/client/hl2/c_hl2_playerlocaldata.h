@@ -47,6 +47,8 @@ public:
 	Vector	m_vecLocatorOrigin;
 #endif
 
+	float	m_flFreezeMultiplier;
+
 	// Ladder related data
 	EHANDLE			m_hLadder;
 	LadderMove_t	m_LadderMove;

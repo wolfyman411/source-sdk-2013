@@ -367,6 +367,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_flDeathTime, FIELD_TIME ),
 	DEFINE_FIELD( m_flDeathAnimTime, FIELD_TIME ),
 
+
 	//DEFINE_FIELD( m_fGameHUDInitialized, FIELD_BOOLEAN ), // only used in multiplayer games
 	//DEFINE_FIELD( m_fWeapon, FIELD_BOOLEAN ),  // Don't restore, client needs reset
 	//DEFINE_FIELD( m_iUpdateTime, FIELD_INTEGER ), // Don't need to restore
@@ -487,6 +488,8 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_hPostProcessCtrl, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_hColorCorrectionCtrl, FIELD_EHANDLE ),
 #endif
+
+	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
 
 	// DEFINE_FIELD( m_nBodyPitchPoseParam, FIELD_INTEGER ),
 	// DEFINE_ARRAY( m_StepSoundCache, StepSoundCache_t,  2  ),
@@ -783,6 +786,8 @@ CBasePlayer::CBasePlayer( )
 	m_flMovementTimeForUserCmdProcessingRemaining = 0.0f;
 
 	m_hPostProcessCtrl.Set( NULL );
+
+	m_flFreezeMultiplier = 0.0f;
 }
 
 CBasePlayer::~CBasePlayer( )

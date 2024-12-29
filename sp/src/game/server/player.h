@@ -276,6 +276,8 @@ public:
 #endif
 
 	CPlayerState			*PlayerData( void ) { return &pl; }
+
+	float					m_flFreezeMultiplier;
 	
 	int						RequiredEdictIndex( void ) { return ENTINDEX(edict()); } 
 
