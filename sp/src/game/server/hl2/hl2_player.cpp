@@ -2409,6 +2409,28 @@ void CHL2_Player::SuitPower_Update( void )
 			}
 		}
 	}
+
+	if ( GlobalEntity_GetIndex( "gordon_freezing" ) == 1 ) {
+		m_HL2Local.m_flTemperature = ( m_HL2Local.m_flTemperature * m_flFreezeMultiplier ) + gpGlobals->frametime;
+
+		if ( m_HL2Local.m_flTemperature >= 100.0f ) {
+			SetMaxSpeed( HL2_NORM_SPEED );
+			m_HL2Local.m_flTemperature = 100.0f;
+		}
+
+		if ( m_HL2Local.m_flTemperature <= 2.0f ) {
+			SetMaxSpeed( HL2_WALK_SPEED );
+		}
+	}
+	else {
+		m_HL2Local.m_flTemperature = ( m_HL2Local.m_flTemperature * m_flFreezeMultiplier ) - gpGlobals->frametime;
+
+		if ( m_HL2Local.m_flTemperature <= 0.0f ) {
+			SetMaxSpeed( HL2_NORM_SPEED / 2);
+
+			m_HL2Local.m_flTemperature = 0.0f;
+		}
+	}
 }
 
 
