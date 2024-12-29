@@ -5719,6 +5719,7 @@ void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
 		if ( hOther->IsPlayer() ) {
 			CBasePlayer* pPlayer = ToBasePlayer( hOther );
 
+			pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
 			DevMsg( "Player %s entered trigger_hurt\n", pPlayer->GetPlayerName() );
 		}
 	}
