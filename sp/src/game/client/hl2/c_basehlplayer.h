@@ -73,8 +73,6 @@ public:
 	float				m_flSpeedModTime;
 	bool				m_fIsSprinting;
 
-	float				m_flFreezeMultiplier;
-
 private:
 	C_BaseHLPlayer( const C_BaseHLPlayer & ); // not defined, not accessible
 	
