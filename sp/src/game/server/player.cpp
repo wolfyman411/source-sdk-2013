@@ -488,6 +488,9 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_hColorCorrectionCtrl, FIELD_EHANDLE ),
 #endif
 
+	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
+	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+
 	// DEFINE_FIELD( m_nBodyPitchPoseParam, FIELD_INTEGER ),
 	// DEFINE_ARRAY( m_StepSoundCache, StepSoundCache_t,  2  ),
 
@@ -737,7 +740,7 @@ CBasePlayer::CBasePlayer( )
 
 	m_hZoomOwner = NULL;
 
-	m_nUpdateRate = 20;  // cl_updaterate defualt
+	m_nUpdateRate = 20;  // cl_updaterate default
 	m_fLerpTime = 0.1f; // cl_interp default
 	m_bPredictWeapons = true;
 	m_bLagCompensation = false;
@@ -4757,6 +4760,8 @@ void CBasePlayer::UpdateTonemapController( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+extern ConVar sv_infinite_aux_power;
+
 void CBasePlayer::PostThink()
 {
 	m_vecSmoothedVelocity = m_vecSmoothedVelocity * SMOOTHING_FACTOR + GetAbsVelocity() * ( 1 - SMOOTHING_FACTOR );
@@ -4876,6 +4881,9 @@ void CBasePlayer::PostThink()
 	SimulatePlayerSimulatedEntities();
 #endif
 
+	if ( sv_infinite_aux_power.GetBool() == false ) {
+		m_flTemperature = clamp( ( m_flTemperature * m_flFreezeMultiplier ) - gpGlobals->frametime, -20, 20 );
+	}
 }
 
 // handles touching physics objects

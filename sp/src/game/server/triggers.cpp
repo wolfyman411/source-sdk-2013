@@ -5676,3 +5676,41 @@ bool IsTriggerClass( CBaseEntity *pEntity )
 	
 	return false;
 }
+
+BEGIN_DATADESC( CTriggerFreeze )
+	DEFINE_KEYFIELD( m_flFreezeMultiplier, FIELD_FLOAT, "freezemultiplier" ),
+END_DATADESC()
+
+LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
+
+void CTriggerFreeze::Spawn( void ) {
+	BaseClass::Spawn();
+
+	InitTrigger();
+
+	SetNextThink( TICK_NEVER_THINK );
+	SetThink( NULL );
+}
+
+
+void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
+	if ( PassesTriggerFilters( pOther ) ) {
+		if ( pOther->IsPlayer() ) {
+			CBasePlayer* pPlayer = ToBasePlayer( pOther );
+			if ( pPlayer ) {
+				pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
+			}
+		}
+	}
+}
+
+void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
+	if ( PassesTriggerFilters( pOther ) ) {
+		if ( pOther->IsPlayer() ) {
+			CBasePlayer* pPlayer = ToBasePlayer( pOther );
+			if ( pPlayer ) {
+				pPlayer->m_flFreezeMultiplier = 1.0f;
+			}
+		}
+	}
+}

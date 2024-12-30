@@ -968,6 +968,9 @@ public:
 	CNetworkVar( bool, m_bInTriggerFall );
 #endif
 
+	float					m_flFreezeMultiplier;
+	float					m_flTemperature;
+
 private:
 
 	Activity				m_Activity;
