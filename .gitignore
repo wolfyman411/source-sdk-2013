@@ -64,6 +64,7 @@ config.cfg
 
 # Backup files
 *.bak
+*.lib
 
 # Build folders
 sp/src/.vs/
@@ -97,4 +98,3 @@ sp/src/devtools/gcc9+support.o
 sp/game/mod_episodic/ep1_gamestats.dat
 sp/game/mod_episodic/gamestate.txt
 sp/game/mod_episodic/cfg/config.cfg
-/sp/src/lib
