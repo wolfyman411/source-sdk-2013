@@ -95,3 +95,5 @@ sp/src/devtools/gcc9+support.o
 /sp/src/vgui2/vgui_controls
 /sp/src/responserules
 sp/game/mod_episodic/ep1_gamestats.dat
+sp/game/mod_episodic/gamestate.txt
+sp/game/mod_episodic/cfg/config.cfg
