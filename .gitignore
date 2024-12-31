@@ -1,6 +1,6 @@
 # Files to ignore when considering what GIT should commit.
 
-# Visual Studio 
+# Visual Studio
 *.suo
 *.user
 *.sln.docstates
@@ -91,3 +91,9 @@ sp/src/vgui2/*.pdb
 
 # Build support files
 sp/src/devtools/gcc9+support.o
+/sp/src/lib
+/sp/src/vgui2/vgui_controls
+/sp/src/responserules
+sp/game/mod_episodic/ep1_gamestats.dat
+sp/game/mod_episodic/gamestate.txt
+sp/game/mod_episodic/cfg/config.cfg
