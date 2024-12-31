@@ -64,7 +64,6 @@ config.cfg
 
 # Backup files
 *.bak
-*.lib
 
 # Build folders
 sp/src/.vs/
