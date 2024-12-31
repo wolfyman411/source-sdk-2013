@@ -1,0 +1,64 @@
+@include "base.fgd"
+@include "halflife2.fgd"
+
+@NPCClass base(BaseCombine) studio() = npc_combine_s : "Combine Soldier"
+[
+	model(choices) : "Model" : "models/combine_soldier.mdl" : "Sets this soldier's model." =
+	[
+		"models/combine_soldier.mdl" : "Regular Soldier"
+		"models/combine_soldier_prisonguard.mdl" : "Nova Prospekt Soldier"
+		"models/combine_super_soldier.mdl" : "Elite Soldier"
+		"models/combine_soldirt.mdl" : "Dirty Soldier/EP2 Soldier"
+		"models/combine_super_soldirt.mdl" : "Dirty Elite Soldier/EP2 Elite"
+		"models/combine_soldirt_prisonguard.mdl" : "Dirty Nova Prospekt Soldier"
+		"models/baresoldier/baresoldier.mdl" : "Stripped Soldier"
+	]
+
+	tacticalvariant(choices) : "Tactical Variant" : "0" =
+	[
+		"0" : "Normal Tactics"
+		"1" : "Pressure the enemy (Keep advancing)"
+		"2" : "Pressure until within 30ft, then normal"
+		"3" : "Grenade Happy"
+	]
+
+	usemarch(choices) : "Use March" : "0" : "When true, will use a special walking animation which blends itself between the idle walking animation and the regular walking animation, allowing for a variety of casual walking animations instead of the standard walk. Used in EP2 for the soldiers in the bridge convoy. WARNING: This animation only has a north component, so it can't sidestep or walk backwards. This keyvalue was previously named 'Walk Easy', but it was changed to avoid confusion with ACT_WALK_EASY, the main idle walking animation." =
+	[
+		"0" : "No"
+		"2" : "Yes"
+	]
+
+	input Assault(target_destination) : "Start an assault. Parameter passed in should be the name of the rally point."
+	input SetTacticalVariant(integer) : "Sets this soldier's tactical variant based on integer value."
+]
+
+@PointClass base(EnvGlobal) iconsprite("editor/env_global.vmt") = env_global :
+	"An entity to control a game-specific global states."
+[
+	globalstate(choices) : "Global State to Set" =
+	[
+		"gordon_precriminal" : "Gordon pre-criminal"
+		"antlion_allied" : "Antlions are player allies"
+//		"player_stealth" : "Player in APC is disguised as combine"
+		"suit_no_sprint" : "Suit sprint function not yet enabled"
+		"super_phys_gun" : "Super phys gun is enabled (Mapbase: Counter 1 prevents item dissolve)"
+		"friendly_encounter" : "Friendly encounter sequence (lower weapons, etc.)"
+//		"citizens_passive" : "Citizens are *not* player allies (cannot be commanded)"
+		"gordon_invulnerable" : "Gordon is invulnerable"
+		"no_seagulls_on_jeep" : "Don't spawn seagulls on the jeep"
+		"ep2_alyx_injured" : "Episode 2: Alyx injured"
+		"ep_alyx_darknessmode" : "Episodic: Alyx darkness mode"
+		"hunters_to_run_over" : "Ep2 Counter: Hunters to run over before they dodge"
+		"friendly_fire_override" : "Mapbase: Friendly fire override (on = enabled, off = disabled, dead = no override)"
+		"antlion_noinstakill" : "Mapbase: Antlion-to-soldier insta-kill disabled"
+		"gordon_freezing" : "IF: Gordon is freezing"
+	]
+]
+
+@SolidClass base(Trigger, Targetname) = trigger_freeze :
+	"A trigger volume that freezes the player."
+[
+	freezemultiplier(float) : "Freeze Multiplayer" : "-2.0" : "Freeze the player multiplier. (Idk)"
+]
+
+@PointClass base(Weapon) studio("models/weapons/w_iceaxe.mdl") = weapon_iceaxe: "Ice Axe" []
