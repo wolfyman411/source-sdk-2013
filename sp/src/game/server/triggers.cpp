@@ -5696,7 +5696,8 @@ void CTriggerFreeze::Spawn( void ) {
 void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
 	if ( PassesTriggerFilters( pOther ) ) {
 		if ( pOther->IsPlayer() ) {
-			CBasePlayer* pPlayer = ToBasePlayer( pOther );
+			CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
+
 			if ( pPlayer ) {
 				pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
 			}
@@ -5707,9 +5708,9 @@ void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
 void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
 	if ( PassesTriggerFilters( pOther ) ) {
 		if ( pOther->IsPlayer() ) {
-			CBasePlayer* pPlayer = ToBasePlayer( pOther );
+			CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
 			if ( pPlayer ) {
-				pPlayer->m_flFreezeMultiplier = 1.0f;
+				pPlayer->m_flFreezeMultiplier = 2.0f;
 			}
 		}
 	}

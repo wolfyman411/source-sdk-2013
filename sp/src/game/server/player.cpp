@@ -488,9 +488,6 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_hColorCorrectionCtrl, FIELD_EHANDLE ),
 #endif
 
-	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
-	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
-
 	// DEFINE_FIELD( m_nBodyPitchPoseParam, FIELD_INTEGER ),
 	// DEFINE_ARRAY( m_StepSoundCache, StepSoundCache_t,  2  ),
 
@@ -4880,10 +4877,6 @@ void CBasePlayer::PostThink()
 	// Even if dead simulate entities
 	SimulatePlayerSimulatedEntities();
 #endif
-
-	if ( sv_infinite_aux_power.GetBool() == false ) {
-		m_flTemperature = clamp( ( m_flTemperature * m_flFreezeMultiplier ) - gpGlobals->frametime, -20, 20 );
-	}
 }
 
 // handles touching physics objects
