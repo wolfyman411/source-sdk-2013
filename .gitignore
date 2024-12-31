@@ -1,6 +1,6 @@
 # Files to ignore when considering what GIT should commit.
 
-# Visual Studio 
+# Visual Studio
 *.suo
 *.user
 *.sln.docstates
@@ -92,3 +92,5 @@ sp/src/vgui2/*.pdb
 # Build support files
 sp/src/devtools/gcc9+support.o
 /sp/src/lib
+/sp/src/vgui2/vgui_controls
+/sp/src/responserules
