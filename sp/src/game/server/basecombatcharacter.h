@@ -382,6 +382,9 @@ public:
 
 	virtual void			SetLightingOriginRelative( CBaseEntity *pLightingOrigin );
 
+	float					m_flTemperature;
+	float					m_flFreezeMultiplier;
+
 protected:
 	Relationship_t			*FindEntityRelationship( CBaseEntity *pTarget );
 

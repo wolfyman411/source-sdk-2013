@@ -5713,5 +5713,10 @@ void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
 				pPlayer->m_flFreezeMultiplier = 2.0f;
 			}
 		}
+		else if ( pOther->IsCombatCharacter() ) {
+			CBaseCombatCharacter* pCombatChar = dynamic_cast< CBaseCombatCharacter* >( pOther );
+			if ( pCombatChar ) {
+				pCombatChar->m_flFreezeMultiplier = 2.0f;
+			}
 	}
 }
