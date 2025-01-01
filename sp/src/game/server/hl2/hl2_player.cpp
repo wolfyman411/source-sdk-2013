@@ -641,6 +641,8 @@ CHL2_Player::CHL2_Player()
 
 	m_flArmorReductionTime = 0.0f;
 	m_iArmorReductionFrom = 0;
+
+	m_flTemperature = 20.0f;
 }
 
 //
@@ -1173,6 +1175,7 @@ void CHL2_Player::PostThink( void )
 #endif
 
 	if ( sv_infinite_aux_power.GetBool() == false ) {
+		DevMsg("Temperature %f\nFreeze Multiplier: %f\n", m_flTemperature, m_flFreezeMultiplier);
 		m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
 
 		if ( m_flTemperature <= -10.0f ) {
