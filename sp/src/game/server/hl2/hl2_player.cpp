@@ -1175,16 +1175,16 @@ void CHL2_Player::PostThink( void )
 	if ( sv_infinite_aux_power.GetBool() == false ) {
 		m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
 
-		DevMsg( "Freeze Multiplier: %f\n", m_flFreezeMultiplier );
-		DevMsg( "Temperature: %f\n", m_flTemperature );
-
-		if ( m_flTemperature <= 0.0f ) {
+		if ( m_flTemperature <= -10.0f ) {
 			SetMaxSpeed( HL2_WALK_SPEED );
 
-			m_flTemperature = 0.0f;
-		} else if ( m_flTemperature >= 20.0f ) {
+			m_flTemperature = -10.0f;
+		} else if ( m_flTemperature >= 5.0f ) {
 			SetMaxSpeed( HL2_NORM_SPEED );
-			m_flTemperature = 20.0f;
+
+			if ( m_flTemperature >= 20.0f ) {
+				m_flTemperature = 20.0f;
+			}
 		}
 	}
 	else {
