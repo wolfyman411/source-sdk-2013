@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8869"
-	"mapversion" "4"
+	"mapversion" "5"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -89,7 +89,7 @@ bgimages_plus
 world
 {
 	"id" "1"
-	"mapversion" "4"
+	"mapversion" "5"
 	"classname" "worldspawn"
 	"chaptertitlenomessage" "1"
 	"detailmaterial" "detail/detailsprites"
@@ -958,7 +958,7 @@ entity
 {
 	"id" "72"
 	"classname" "trigger_freeze"
-	"freezemultiplier" "2.0"
+	"freezemultiplier" "1.25"
 	"origin" "-708 -56 107.71"
 	"spawnflags" "1"
 	"StartDisabled" "0"
