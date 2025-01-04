@@ -8045,10 +8045,13 @@ int CAI_BaseNPC::UnholsterWeapon( void )
 	if (i == -1)
 	{
 		// Set i to the first weapon you can find
-		for (i = 0; i < WeaponCount(); i++)
+		for (i = 0;;)
 		{
 			if (GetWeapon(i))
 				break;
+
+			if (++i >= WeaponCount())
+				return -1;
 		}
 	}
 #else
