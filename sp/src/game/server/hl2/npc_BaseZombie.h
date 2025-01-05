@@ -20,6 +20,10 @@
 
 #define	ENVELOPE_CONTROLLER		(CSoundEnvelopeController::GetController())
 
+#ifndef MAPBASE
+	#define ZOMBIE_MELEE_REACH	55
+#endif
+
 extern int AE_ZOMBIE_ATTACK_RIGHT;
 extern int AE_ZOMBIE_ATTACK_LEFT;
 extern int AE_ZOMBIE_ATTACK_BOTH;
@@ -42,8 +46,8 @@ extern int AE_ZOMBIE_POUND;
 #define ZOMBIE_BLOOD_BITE			3
 
 #ifdef MAPBASE
-#define SF_ZOMBIE_NO_TORSO ( 1 << 15 )
-#define SF_ZOMBIE_NO_HEADCRAB_SPAWN ( 1 << 16 )
+	#define SF_ZOMBIE_NO_TORSO ( 1 << 15 )
+	#define SF_ZOMBIE_NO_HEADCRAB_SPAWN ( 1 << 16 )
 #endif
 	
 
@@ -140,7 +144,14 @@ public:
 	}
 
 	int MeleeAttack1Conditions ( float flDot, float flDist );
-	virtual float GetClawAttackRange() const { return m_flMeleeReach; }
+	virtual float GetClawAttackRange() const 
+	{ 
+#ifdef MAPBASE
+		return m_iMeleeReach; 
+#else
+		return ZOMBIE_MELEE_REACH;
+#endif
+	}
 
 	// No range attacks
 	int RangeAttack1Conditions ( float flDot, float flDist ) { return( 0 ); }
@@ -256,7 +267,9 @@ protected:
 
 	float	m_flNextFlinch;
 
-	float m_flMeleeReach;
+#ifdef MAPBASE
+	int m_iMeleeReach;
+#endif
 
 	bool m_bHeadShot;			// Used to determine the survival of our crab beyond our death.
 

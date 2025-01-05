@@ -211,7 +211,7 @@ BEGIN_DATADESC( CNPC_BaseZombie )
 	DEFINE_FIELD( m_fIsTorso, FIELD_BOOLEAN ),
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_fIsHeadless, FIELD_BOOLEAN, "Headless" ),
-	DEFINE_KEYFIELD( m_flMeleeReach, FIELD_FLOAT, "MeleeReach" ),
+	DEFINE_KEYFIELD( m_iMeleeReach, FIELD_INTEGER, "MeleeReach" ),
 #else
 	DEFINE_FIELD( m_fIsHeadless, FIELD_BOOLEAN ),
 #endif
@@ -256,6 +256,10 @@ CNPC_BaseZombie::CNPC_BaseZombie()
 	// other, they will definitely not pick the same
 	// moan loop.
 	m_iMoanSound = g_numZombies;
+
+#ifdef MAPBASE
+	m_iMeleeReach = 55;
+#endif
 
 	g_numZombies++;
 }
