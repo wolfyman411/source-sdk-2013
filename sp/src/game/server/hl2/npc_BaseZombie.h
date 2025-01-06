@@ -269,6 +269,8 @@ protected:
 
 #ifdef MAPBASE
 	int m_iMeleeReach;
+	int m_iMaxPlayerDistToSwat;
+	int m_iMaxObjWeightToSwat;
 #endif
 
 	bool m_bHeadShot;			// Used to determine the survival of our crab beyond our death.

@@ -85,8 +85,15 @@ envelopePoint_t envDefaultZombieMoanVolume[] =
 #define ZOMBIE_FARTHEST_PHYSICS_OBJECT	40.0*12.0
 #define ZOMBIE_PHYSICS_SEARCH_DEPTH	100
 
+#ifndef MAPBASE
+
 // Don't swat objects unless player is closer than this.
 #define ZOMBIE_PLAYER_MAX_SWAT_DIST		1000
+
+// The heaviest physics object that a zombie should try to swat. (kg)
+#define ZOMBIE_MAX_PHYSOBJ_MASS		60
+
+#endif
 
 //
 // How much health a Zombie torso gets when a whole zombie is broken
@@ -97,10 +104,6 @@ envelopePoint_t envDefaultZombieMoanVolume[] =
 // When the zombie has health < m_iMaxHealth * this value, it will
 // try to release its headcrab.
 #define ZOMBIE_RELEASE_HEALTH_FACTOR	0.5
-
-//
-// The heaviest physics object that a zombie should try to swat. (kg)
-#define ZOMBIE_MAX_PHYSOBJ_MASS		60
 
 //
 // Zombie tries to get this close to a physics object's origin to swat it
@@ -212,6 +215,8 @@ BEGIN_DATADESC( CNPC_BaseZombie )
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_fIsHeadless, FIELD_BOOLEAN, "Headless" ),
 	DEFINE_KEYFIELD( m_iMeleeReach, FIELD_INTEGER, "MeleeReach" ),
+	DEFINE_KEYFIELD( m_iMaxPlayerDistToSwat, FIELD_INTEGER, "MaxPlayerDistToSwat" ),
+	DEFINE_KEYFIELD( m_iMaxObjWeightToSwat, FIELD_INTEGER, "MaxObjWeightToSwat" ),
 #else
 	DEFINE_FIELD( m_fIsHeadless, FIELD_BOOLEAN ),
 #endif
@@ -259,6 +264,8 @@ CNPC_BaseZombie::CNPC_BaseZombie()
 
 #ifdef MAPBASE
 	m_iMeleeReach = 55;
+	m_iMaxPlayerDistToSwat = 1000;
+	m_iMaxObjWeightToSwat = 60;
 #endif
 
 	g_numZombies++;
@@ -300,7 +307,11 @@ bool CNPC_BaseZombie::FindNearestPhysicsObject( int iMaxMass )
 	float dist = VectorNormalize(vecDirToEnemy);
 	vecDirToEnemy.z = 0;
 
-	if( dist > ZOMBIE_PLAYER_MAX_SWAT_DIST )
+#ifndef MAPBASE
+	if (dist > ZOMBIE_PLAYER_MAX_SWAT_DIST)
+#else
+	if (dist > m_iMaxPlayerDistToSwat)
+#endif
 	{
 		// Player is too far away. Don't bother 
 		// trying to swat anything at them until
@@ -2159,7 +2170,11 @@ void CNPC_BaseZombie::GatherConditions( void )
 		// between him and the object he's heading for already. 
 		if( gpGlobals->curtime >= m_flNextSwatScan && (m_hPhysicsEnt == NULL) )
 		{
+#ifdef MAPBASE
+			FindNearestPhysicsObject( m_iMaxObjWeightToSwat );
+#else
 			FindNearestPhysicsObject( ZOMBIE_MAX_PHYSOBJ_MASS );
+#endif			
 			m_flNextSwatScan = gpGlobals->curtime + 2.0;
 		}
 	}
