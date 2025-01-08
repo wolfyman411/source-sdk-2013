@@ -20,9 +20,7 @@
 
 #define	ENVELOPE_CONTROLLER		(CSoundEnvelopeController::GetController())
 
-#ifndef MAPBASE
-	#define ZOMBIE_MELEE_REACH	55
-#endif
+#define ZOMBIE_MELEE_REACH	55
 
 extern int AE_ZOMBIE_ATTACK_RIGHT;
 extern int AE_ZOMBIE_ATTACK_LEFT;
@@ -270,7 +268,7 @@ protected:
 #ifdef MAPBASE
 	int m_iMeleeReach;
 	int m_iMaxPlayerDistToSwat;
-	int m_iMaxObjWeightToSwat;
+	int m_iMaxObjMassToSwat;
 #endif
 
 	bool m_bHeadShot;			// Used to determine the survival of our crab beyond our death.

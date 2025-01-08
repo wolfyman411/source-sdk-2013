@@ -85,15 +85,8 @@ envelopePoint_t envDefaultZombieMoanVolume[] =
 #define ZOMBIE_FARTHEST_PHYSICS_OBJECT	40.0*12.0
 #define ZOMBIE_PHYSICS_SEARCH_DEPTH	100
 
-#ifndef MAPBASE
-
 // Don't swat objects unless player is closer than this.
 #define ZOMBIE_PLAYER_MAX_SWAT_DIST		1000
-
-// The heaviest physics object that a zombie should try to swat. (kg)
-#define ZOMBIE_MAX_PHYSOBJ_MASS		60
-
-#endif
 
 //
 // How much health a Zombie torso gets when a whole zombie is broken
@@ -104,6 +97,10 @@ envelopePoint_t envDefaultZombieMoanVolume[] =
 // When the zombie has health < m_iMaxHealth * this value, it will
 // try to release its headcrab.
 #define ZOMBIE_RELEASE_HEALTH_FACTOR	0.5
+
+//
+// The heaviest physics object that a zombie should try to swat. (kg)
+#define ZOMBIE_MAX_PHYSOBJ_MASS		60
 
 //
 // Zombie tries to get this close to a physics object's origin to swat it
@@ -216,7 +213,7 @@ BEGIN_DATADESC( CNPC_BaseZombie )
 	DEFINE_KEYFIELD( m_fIsHeadless, FIELD_BOOLEAN, "Headless" ),
 	DEFINE_KEYFIELD( m_iMeleeReach, FIELD_INTEGER, "MeleeReach" ),
 	DEFINE_KEYFIELD( m_iMaxPlayerDistToSwat, FIELD_INTEGER, "MaxPlayerDistToSwat" ),
-	DEFINE_KEYFIELD( m_iMaxObjWeightToSwat, FIELD_INTEGER, "MaxObjWeightToSwat" ),
+	DEFINE_KEYFIELD( m_iMaxObjMassToSwat, FIELD_INTEGER, "MaxObjMassToSwat" ),
 #else
 	DEFINE_FIELD( m_fIsHeadless, FIELD_BOOLEAN ),
 #endif
@@ -263,9 +260,9 @@ CNPC_BaseZombie::CNPC_BaseZombie()
 	m_iMoanSound = g_numZombies;
 
 #ifdef MAPBASE
-	m_iMeleeReach = 55;
-	m_iMaxPlayerDistToSwat = 1000;
-	m_iMaxObjWeightToSwat = 60;
+	m_iMeleeReach = ZOMBIE_MELEE_REACH;
+	m_iMaxPlayerDistToSwat = ZOMBIE_PLAYER_MAX_SWAT_DIST;
+	m_iMaxObjMassToSwat = ZOMBIE_MAX_PHYSOBJ_MASS;
 #endif
 
 	g_numZombies++;
@@ -2171,7 +2168,7 @@ void CNPC_BaseZombie::GatherConditions( void )
 		if( gpGlobals->curtime >= m_flNextSwatScan && (m_hPhysicsEnt == NULL) )
 		{
 #ifdef MAPBASE
-			FindNearestPhysicsObject( m_iMaxObjWeightToSwat );
+			FindNearestPhysicsObject(m_iMaxObjMassToSwat);
 #else
 			FindNearestPhysicsObject( ZOMBIE_MAX_PHYSOBJ_MASS );
 #endif			
