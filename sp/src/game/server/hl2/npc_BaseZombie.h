@@ -145,7 +145,7 @@ public:
 	virtual float GetClawAttackRange() const 
 	{ 
 #ifdef MAPBASE
-		return m_iMeleeReach; 
+		return m_flMeleeReach; 
 #else
 		return ZOMBIE_MELEE_REACH;
 #endif
@@ -266,8 +266,8 @@ protected:
 	float	m_flNextFlinch;
 
 #ifdef MAPBASE
-	int m_iMeleeReach;
-	int m_iMaxPlayerDistToSwat;
+	float m_flMeleeReach;
+	float m_flMaxDistToSwat;
 	int m_iMaxObjMassToSwat;
 #endif
 

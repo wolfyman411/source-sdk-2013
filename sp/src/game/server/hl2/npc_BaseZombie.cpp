@@ -211,8 +211,8 @@ BEGIN_DATADESC( CNPC_BaseZombie )
 	DEFINE_FIELD( m_fIsTorso, FIELD_BOOLEAN ),
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_fIsHeadless, FIELD_BOOLEAN, "Headless" ),
-	DEFINE_KEYFIELD( m_iMeleeReach, FIELD_INTEGER, "MeleeReach" ),
-	DEFINE_KEYFIELD( m_iMaxPlayerDistToSwat, FIELD_INTEGER, "MaxPlayerDistToSwat" ),
+	DEFINE_KEYFIELD( m_flMeleeReach, FIELD_FLOAT, "MeleeReach" ),
+	DEFINE_KEYFIELD( m_flMaxDistToSwat, FIELD_FLOAT, "MaxDistToSwat" ),
 	DEFINE_KEYFIELD( m_iMaxObjMassToSwat, FIELD_INTEGER, "MaxObjMassToSwat" ),
 #else
 	DEFINE_FIELD( m_fIsHeadless, FIELD_BOOLEAN ),
@@ -260,8 +260,8 @@ CNPC_BaseZombie::CNPC_BaseZombie()
 	m_iMoanSound = g_numZombies;
 
 #ifdef MAPBASE
-	m_iMeleeReach = ZOMBIE_MELEE_REACH;
-	m_iMaxPlayerDistToSwat = ZOMBIE_PLAYER_MAX_SWAT_DIST;
+	m_flMeleeReach = ZOMBIE_MELEE_REACH;
+	m_flMaxDistToSwat = ZOMBIE_PLAYER_MAX_SWAT_DIST;
 	m_iMaxObjMassToSwat = ZOMBIE_MAX_PHYSOBJ_MASS;
 #endif
 
@@ -307,7 +307,7 @@ bool CNPC_BaseZombie::FindNearestPhysicsObject( int iMaxMass )
 #ifndef MAPBASE
 	if (dist > ZOMBIE_PLAYER_MAX_SWAT_DIST)
 #else
-	if (dist > m_iMaxPlayerDistToSwat)
+	if (dist > m_flMaxDistToSwat)
 #endif
 	{
 		// Player is too far away. Don't bother 
