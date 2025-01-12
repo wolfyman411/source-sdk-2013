@@ -131,6 +131,7 @@ jobs:
       working-directory: '${{inputs.branch}}/src'
       shell: cmd
       run: |
+        msbuild -m -p:Configuration=${{inputs.configuration}} vgui2\vgui_controls\vgui_controls.vcxproj || exit /b
         msbuild -m -p:Configuration=${{inputs.configuration}} responserules\runtime\responserules.vcxproj || exit /b
         msbuild -m -p:Configuration=${{inputs.configuration}} materialsystem\stdshaders\game_shader_dx9_episodic.vcxproj || exit /b
         msbuild -m -p:Configuration=${{inputs.configuration}} materialsystem\stdshaders\game_shader_dx9_hl2.vcxproj || exit /b
