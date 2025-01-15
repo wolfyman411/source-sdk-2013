@@ -1178,7 +1178,19 @@ void CHL2_Player::PostThink( void )
 
 	if ( sv_infinite_aux_power.GetBool() == false ) {
 		if ( sv_temperature_water_affect.GetBool() && GetWaterLevel() > 0 ) {
-			m_flFreezeMultiplier *= 0.6 * GetWaterLevel();
+			switch ( GetWaterLevel() ) {
+			case 1:
+				m_flTemperature -= m_flFreezeMultiplier * 0.5f * gpGlobals->frametime;
+				break;
+			case 2:
+				m_flTemperature -= m_flFreezeMultiplier * 1.0f * gpGlobals->frametime;
+				break;
+			case 3:
+				m_flTemperature -= m_flFreezeMultiplier * 2.0f * gpGlobals->frametime;
+				break;
+			default:
+				break;
+			}
 		}
 
 		m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
