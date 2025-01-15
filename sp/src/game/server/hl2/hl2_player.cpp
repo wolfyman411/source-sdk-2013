@@ -1155,6 +1155,8 @@ void CHL2_Player::PreThink(void)
 	}
 }
 
+ConVar sv_temperature_water_affect( "sv_temperature_water_affect", "1", FCVAR_REPLICATED, "Should the player slowly freeze in water." );
+
 void CHL2_Player::PostThink( void )
 {
 	BaseClass::PostThink();
@@ -1175,7 +1177,10 @@ void CHL2_Player::PostThink( void )
 #endif
 
 	if ( sv_infinite_aux_power.GetBool() == false ) {
-		DevMsg("Temperature %f\nFreeze Multiplier: %f\n", m_flTemperature, m_flFreezeMultiplier);
+		if ( sv_temperature_water_affect.GetBool() && GetWaterLevel() > 0 ) {
+			m_flFreezeMultiplier *= 1.1f;
+		}
+
 		m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
 
 		if ( m_flTemperature <= -10.0f ) {
