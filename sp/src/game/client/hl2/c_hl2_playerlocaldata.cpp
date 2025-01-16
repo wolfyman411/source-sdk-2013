@@ -52,7 +52,7 @@ C_HL2PlayerLocalData::C_HL2PlayerLocalData()
 	m_vecLocatorOrigin = vec3_origin;
 #endif
 
-	m_flTemperature = 20.0f;
-	m_flFreezeMultiplier = 0.0f;
+	m_flTemperature = 33.0f;
+	m_flFreezeMultiplier = -1.25f;
 }
 

@@ -642,7 +642,9 @@ CHL2_Player::CHL2_Player()
 	m_flArmorReductionTime = 0.0f;
 	m_iArmorReductionFrom = 0;
 
-	m_flTemperature = 20.0f;
+	m_flTemperature = 33.0f;
+	m_flFreezeMultiplier = -1.25f;
+	m_flTemperatureNextHurt = 0.0f;
 }
 
 //
@@ -1194,21 +1196,35 @@ void CHL2_Player::PostThink( void )
 		}
 
 		m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
+		m_HL2Local.m_flTemperature = m_flTemperature;
+
+		if ( m_flTemperature <= -5 && m_flTemperatureNextHurt <= gpGlobals->curtime ) {
+			CTakeDamageInfo dmgInfo;
+
+			dmgInfo.SetAttacker( this );
+			dmgInfo.SetDamage( RandomInt( 1, 6 ) );
+			dmgInfo.SetDamageType( DMG_DIRECT );
+			dmgInfo.SetDamageForce( vec3_origin );
+			dmgInfo.SetDamagePosition( GetAbsOrigin() );
+
+			TakeDamage( dmgInfo );
+			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
+		}
 
 		if ( m_flTemperature <= -10.0f ) {
 			SetMaxSpeed( HL2_WALK_SPEED );
 
-			m_flTemperature = -10.0f;
+			m_flTemperature = -10.0f;	
 		} else if ( m_flTemperature >= 5.0f ) {
 			SetMaxSpeed( HL2_NORM_SPEED );
 
-			if ( m_flTemperature >= 20.0f ) {
-				m_flTemperature = 20.0f;
+			if ( m_flTemperature >= 33.0f ) {
+				m_flTemperature = 33.0f;
 			}
 		}
 	}
 	else {
-		m_flTemperature = 20.0f;
+		m_flTemperature = 33.0f;
 		SetMaxSpeed( HL2_NORM_SPEED );
 	}
 }

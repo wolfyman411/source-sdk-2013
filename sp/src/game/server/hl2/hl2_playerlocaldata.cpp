@@ -71,5 +71,8 @@ CHL2PlayerLocalData::CHL2PlayerLocalData()
 #ifdef HL2_EPISODIC
 	m_flFlashBattery = 0.0f;
 #endif
+
+	m_flTemperature = 33.0f;
+	m_flFreezeMultiplier = 0.0f;
 }
 

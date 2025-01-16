@@ -32,6 +32,7 @@ using namespace vgui;
 #include "convar.h"
 
 #include "c_hl2_playerlocaldata.h"
+#include "c_basehlplayer.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -93,7 +94,7 @@ void CHudTemperature::Reset()
 	}
 	else
 	{
-		SetLabelText(L"TEMPERATURE");
+		SetLabelText(L"TEMP");
 	}
 	SetDisplayValue( m_iTemperature );
 }
@@ -112,17 +113,19 @@ void CHudTemperature::VidInit()
 void CHudTemperature::OnThink()
 {
 	int newTemperature = 20;
-	C_BasePlayer *local = C_BasePlayer::GetLocalPlayer();
-	C_HL2PlayerLocalData* localData = dynamic_cast< C_HL2PlayerLocalData* >( local );
+
+	C_BaseHLPlayer* local = dynamic_cast< C_BaseHLPlayer* >( C_BasePlayer::GetLocalPlayer() );
+	if ( !local )
+		return;
 
 	if ( local )
 	{
 		// Never below zero
-		newTemperature = MAX( localData->m_flTemperature, 0 );
+		newTemperature = MAX( local->m_HL2Local.m_flTemperature, -10.0f );
 	}
 
 	// Only update the fade if we've changed temperature
-	if ( newTemperature == localData->m_flTemperature )
+	if ( newTemperature == local->m_HL2Local.m_flTemperature )
 	{
 		return;
 	}

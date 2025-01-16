@@ -365,6 +365,7 @@ public:
 
 	float				m_flTemperature;
 	float				m_flFreezeMultiplier;
+	float				m_flTemperatureNextHurt;
 
 protected:
 	virtual void		PreThink( void );
