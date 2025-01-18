@@ -593,8 +593,8 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 		DEFINE_INPUTFUNC( FIELD_VOID, "HideSquadHUD", InputHideSquadHUD ),
 #endif
 
-		DEFINE_INPUTFUNC( FIELD_VOID, "SetMaxTemperature", SetMaxTemperature ),
-		DEFINE_INPUTFUNC( FIELD_VOID, "SetMinTemperature", SetMinTemperature ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", SetMaxTemperature ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", SetMinTemperature ),
 
 		DEFINE_SOUNDPATCH( m_sndLeeches ),
 		DEFINE_SOUNDPATCH( m_sndWaterSplashes ),
@@ -1208,8 +1208,7 @@ void CHL2_Player::PostThink( void )
 		m_HL2Local.m_flMaxTemperature = m_flMaxTemperature;
 		m_HL2Local.m_flMinTemperature = m_flMinTemperature;
 
-		if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
-		else if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
+		m_flTemperature = clamp( m_flTemperature, m_flMinTemperature, m_flMaxTemperature );
 
 		if ( m_flTemperature <= m_flMinTemperature ) {
 			SetMaxSpeed( HL2_WALK_SPEED );
@@ -1222,9 +1221,9 @@ void CHL2_Player::PostThink( void )
 			CTakeDamageInfo dmgInfo;
 
 			dmgInfo.SetAttacker( this );
-			dmgInfo.SetDamage( RandomInt( 1, 6 ) );
+			dmgInfo.SetDamage( RandomInt( 1, 4 ) );
 			dmgInfo.SetDamageType( DMG_DIRECT );
-			dmgInfo.SetDamageForce( vec3_origin );
+			dmgInfo.SetDamageForce( Vector( 1.0f, 1.0f, 1.0f ) );
 			dmgInfo.SetDamagePosition( GetAbsOrigin() );
 
 			TakeDamage( dmgInfo );
