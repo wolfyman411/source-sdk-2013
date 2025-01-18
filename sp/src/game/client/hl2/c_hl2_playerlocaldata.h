@@ -52,6 +52,9 @@ public:
 
 	float	m_flTemperature;
 	float	m_flFreezeMultiplier;
+	float	m_flTemperatureNextHurt;
+	float	m_flMaxTemperature;
+	float	m_flMinTemperature;
 };
 
 

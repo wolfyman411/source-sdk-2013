@@ -366,6 +366,11 @@ public:
 	float				m_flTemperature;
 	float				m_flFreezeMultiplier;
 	float				m_flTemperatureNextHurt;
+	float				m_flMaxTemperature;
+	float				m_flMinTemperature;
+
+	void				SetMaxTemperature( inputdata_t& inputdata );
+	void				SetMinTemperature( inputdata_t& inputdata );
 
 protected:
 	virtual void		PreThink( void );

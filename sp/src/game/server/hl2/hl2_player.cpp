@@ -593,6 +593,9 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 		DEFINE_INPUTFUNC( FIELD_VOID, "HideSquadHUD", InputHideSquadHUD ),
 #endif
 
+		DEFINE_INPUTFUNC( FIELD_VOID, "SetMaxTemperature", SetMaxTemperature ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "SetMinTemperature", SetMinTemperature ),
+
 		DEFINE_SOUNDPATCH( m_sndLeeches ),
 		DEFINE_SOUNDPATCH( m_sndWaterSplashes ),
 
@@ -609,6 +612,9 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 
 		DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
 		DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
+		DEFINE_FIELD( m_flTemperatureNextHurt, FIELD_FLOAT ),
+		DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
+		DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
 
 END_DATADESC()
 
@@ -645,6 +651,8 @@ CHL2_Player::CHL2_Player()
 	m_flTemperature = 33.0f;
 	m_flFreezeMultiplier = -1.25f;
 	m_flTemperatureNextHurt = 0.0f;
+	m_flMaxTemperature = 33.0f;
+	m_flMinTemperature = -10.0f;
 }
 
 //
@@ -1197,8 +1205,20 @@ void CHL2_Player::PostThink( void )
 
 		m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
 		m_HL2Local.m_flTemperature = m_flTemperature;
+		m_HL2Local.m_flMaxTemperature = m_flMaxTemperature;
+		m_HL2Local.m_flMinTemperature = m_flMinTemperature;
 
-		if ( m_flTemperature <= -5 && m_flTemperatureNextHurt <= gpGlobals->curtime ) {
+		if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
+		else if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
+
+		if ( m_flTemperature <= m_flMinTemperature ) {
+			SetMaxSpeed( HL2_WALK_SPEED );
+	
+		} else if ( m_flTemperature >= 5.0f ) {
+			SetMaxSpeed( HL2_NORM_SPEED );	
+		}
+
+		if ( m_flTemperature <= -5.0f && m_flTemperatureNextHurt <= gpGlobals->curtime ) {
 			CTakeDamageInfo dmgInfo;
 
 			dmgInfo.SetAttacker( this );
@@ -1210,23 +1230,19 @@ void CHL2_Player::PostThink( void )
 			TakeDamage( dmgInfo );
 			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
 		}
-
-		if ( m_flTemperature <= -10.0f ) {
-			SetMaxSpeed( HL2_WALK_SPEED );
-
-			m_flTemperature = -10.0f;	
-		} else if ( m_flTemperature >= 5.0f ) {
-			SetMaxSpeed( HL2_NORM_SPEED );
-
-			if ( m_flTemperature >= 33.0f ) {
-				m_flTemperature = 33.0f;
-			}
-		}
 	}
 	else {
-		m_flTemperature = 33.0f;
+		m_flTemperature = m_flMaxTemperature;
 		SetMaxSpeed( HL2_NORM_SPEED );
 	}
+}
+
+void CHL2_Player::SetMaxTemperature( inputdata_t& inputdata ) {
+	m_flMaxTemperature = inputdata.value.Float();
+}
+
+void CHL2_Player::SetMinTemperature( inputdata_t& inputdata ) {
+	m_flMinTemperature = inputdata.value.Float();
 }
 
 void CHL2_Player::StartAdmireGlovesAnimation( void )

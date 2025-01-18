@@ -37,7 +37,7 @@ using namespace vgui;
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define INIT_TEMPERATURE 20
+#define INIT_TEMPERATURE 33.0f
 
 //-----------------------------------------------------------------------------
 // Purpose: Temperature panel
@@ -55,9 +55,7 @@ public:
 
 private:
 	// old variables
-	int		m_iTemperature;
-	
-	int		m_bitsDamage;
+	float		m_iTemperature;
 };	
 
 DECLARE_HUDELEMENT( CHudTemperature );
@@ -84,7 +82,6 @@ void CHudTemperature::Init()
 void CHudTemperature::Reset()
 {
 	m_iTemperature		= INIT_TEMPERATURE;
-	m_bitsDamage	= 0;
 
 	wchar_t *tempString = g_pVGuiLocalize->Find("#Valve_Hud_TEMPERATURE");
 
@@ -96,6 +93,7 @@ void CHudTemperature::Reset()
 	{
 		SetLabelText(L"TEMP");
 	}
+
 	SetDisplayValue( m_iTemperature );
 }
 
@@ -112,25 +110,29 @@ void CHudTemperature::VidInit()
 //-----------------------------------------------------------------------------
 void CHudTemperature::OnThink()
 {
-	int newTemperature = 20;
-
 	C_BaseHLPlayer* local = dynamic_cast< C_BaseHLPlayer* >( C_BasePlayer::GetLocalPlayer() );
 	if ( !local )
 		return;
 
-	if ( local )
-	{
-		// Never below zero
-		newTemperature = MAX( local->m_HL2Local.m_flTemperature, -10.0f );
-	}
+	C_HL2PlayerLocalData localData = local->m_HL2Local;
+
+	int newTemperature = localData.m_flTemperature;
+	newTemperature = MAX( localData.m_flTemperature, localData.m_flMinTemperature );
 
 	// Only update the fade if we've changed temperature
-	if ( newTemperature == local->m_HL2Local.m_flTemperature )
-	{
-		return;
-	}
+	if ( newTemperature == localData.m_flTemperature ) return;
 
 	m_iTemperature = newTemperature;
+
+	if ( m_iTemperature <= localData.m_flMinTemperature ) {
+		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureMinimum" );
+	}
+	else if ( m_iTemperature >= localData.m_flMaxTemperature ) {
+		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureMaximum" );
+	}
+	else if ( m_iTemperature >= localData.m_flMaxTemperature / 2 ) {
+		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureHalf" );
+	}
 
 	SetDisplayValue(m_iTemperature);
 }
