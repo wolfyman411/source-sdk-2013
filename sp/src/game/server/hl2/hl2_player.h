@@ -371,6 +371,7 @@ public:
 
 	void				SetMaxTemperature( inputdata_t& inputdata );
 	void				SetMinTemperature( inputdata_t& inputdata );
+	void				HandleTemperature( void );
 
 protected:
 	virtual void		PreThink( void );

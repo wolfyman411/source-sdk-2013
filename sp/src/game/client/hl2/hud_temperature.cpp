@@ -114,23 +114,21 @@ void CHudTemperature::OnThink()
 	if ( !local )
 		return;
 
-	C_HL2PlayerLocalData localData = local->m_HL2Local;
-
-	int newTemperature = localData.m_flTemperature;
-	newTemperature = MAX( localData.m_flTemperature, localData.m_flMinTemperature );
+	int newTemperature = local->m_HL2Local.m_flTemperature;
+	newTemperature = clamp(newTemperature, local->m_HL2Local.m_flMinTemperature, local->m_HL2Local.m_flMaxTemperature);
 
 	// Only update the fade if we've changed temperature
-	if ( newTemperature == localData.m_flTemperature ) return;
+	if ( newTemperature == local->m_HL2Local.m_flTemperature ) return;
 
-	m_iTemperature = newTemperature;
+	m_iTemperature = local->m_HL2Local.m_flTemperature;
 
-	if ( m_iTemperature <= localData.m_flMinTemperature ) {
+	if ( m_iTemperature <= local->m_HL2Local.m_flMinTemperature ) {
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureMinimum" );
 	}
-	else if ( m_iTemperature >= localData.m_flMaxTemperature ) {
+	else if ( m_iTemperature >= local->m_HL2Local.m_flMaxTemperature ) {
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureMaximum" );
 	}
-	else if ( m_iTemperature >= localData.m_flMaxTemperature / 2 ) {
+	else if ( m_iTemperature >= local->m_HL2Local.m_flMaxTemperature / 2 ) {
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureHalf" );
 	}
 

@@ -1165,8 +1165,6 @@ void CHL2_Player::PreThink(void)
 	}
 }
 
-ConVar sv_temperature_water_affect( "sv_temperature_water_affect", "1", FCVAR_REPLICATED, "Should the player slowly freeze in water." );
-
 void CHL2_Player::PostThink( void )
 {
 	BaseClass::PostThink();
@@ -1186,53 +1184,62 @@ void CHL2_Player::PostThink( void )
 	}
 #endif
 
-	if ( sv_infinite_aux_power.GetBool() == false ) {
-		if ( sv_temperature_water_affect.GetBool() && GetWaterLevel() > 0 ) {
-			switch ( GetWaterLevel() ) {
-			case 1:
-				m_flTemperature -= m_flFreezeMultiplier * 0.5f * gpGlobals->frametime;
-				break;
-			case 2:
-				m_flTemperature -= m_flFreezeMultiplier * 1.0f * gpGlobals->frametime;
-				break;
-			case 3:
-				m_flTemperature -= m_flFreezeMultiplier * 2.0f * gpGlobals->frametime;
-				break;
-			default:
-				break;
-			}
+	HandleTemperature();
+}
+
+ConVar sv_temperature_water_affect( "sv_temperature_water_affect", "1", FCVAR_REPLICATED, "Should the player slowly freeze in water." );
+ConVar sv_temperature_take_damage( "sv_temperature_take_damage", "1", FCVAR_REPLICATED, "Should the player take damage depending on his temperature." );
+ConVar sv_temperature_damage_temp_min( "sv_temperature_damage_temp_min", "-5.0", FCVAR_REPLICATED, "Below what temperature should the player start taking damage");
+ConVar sv_temperature_damage_temp_max( "sv_temperature_damage_temp_max", "40.0", FCVAR_REPLICATED, "Above what temperature should the player start taking damage" );
+
+void CHL2_Player::HandleTemperature( void ) {
+	if ( sv_infinite_aux_power.GetBool() ) {
+		SetMaxSpeed( HL2_NORM_SPEED );
+		m_flTemperature = m_flMaxTemperature;
+		m_HL2Local.m_flTemperature = m_flMaxTemperature;
+
+		return;
+	}
+
+	if ( sv_temperature_water_affect.GetBool() ) {
+		switch ( GetWaterLevel() ) {
+		case 1:
+			//m_flFreezeMultiplier *= 1.5f;
+			break;
+		case 2:
+			//m_flFreezeMultiplier *= 2.0f;
+			break;
+		case 3:
+			//m_flFreezeMultiplier *= 3.0f;
+			break;
 		}
+	}
 
-		m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
-		m_HL2Local.m_flTemperature = m_flTemperature;
-		m_HL2Local.m_flMaxTemperature = m_flMaxTemperature;
-		m_HL2Local.m_flMinTemperature = m_flMinTemperature;
-
-		m_flTemperature = clamp( m_flTemperature, m_flMinTemperature, m_flMaxTemperature );
-
-		if ( m_flTemperature <= m_flMinTemperature ) {
-			SetMaxSpeed( HL2_WALK_SPEED );
+	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
 	
-		} else if ( m_flTemperature >= 5.0f ) {
-			SetMaxSpeed( HL2_NORM_SPEED );	
-		}
+	if ( m_flTemperature > m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
+	else if ( m_flTemperature < m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
 
-		if ( m_flTemperature <= -5.0f && m_flTemperatureNextHurt <= gpGlobals->curtime ) {
+	m_HL2Local.m_flTemperature = m_flTemperature;
+	m_HL2Local.m_flMaxTemperature = m_flMaxTemperature;
+	m_HL2Local.m_flMinTemperature = m_flMinTemperature;
+
+	SetMaxSpeed( m_flTemperature <= m_flMinTemperature ? HL2_WALK_SPEED : HL2_NORM_SPEED );
+
+	if ( sv_temperature_take_damage.GetBool() ) {
+		if ( ( m_flTemperature <= sv_temperature_damage_temp_min.GetFloat() || m_flTemperature >= sv_temperature_damage_temp_max.GetFloat() ) && m_flTemperatureNextHurt <= gpGlobals->curtime ) {
 			CTakeDamageInfo dmgInfo;
 
-			dmgInfo.SetAttacker( this );
-			dmgInfo.SetDamage( RandomInt( 1, 4 ) );
+			dmgInfo.SetDamage( sv_temperature_take_damage.GetFloat() );
+			dmgInfo.SetDamageForce( Vector( 1, 1, 1 ) );
 			dmgInfo.SetDamageType( DMG_DIRECT );
-			dmgInfo.SetDamageForce( Vector( 1.0f, 1.0f, 1.0f ) );
 			dmgInfo.SetDamagePosition( GetAbsOrigin() );
+			dmgInfo.SetAttacker( this );
+			dmgInfo.SetInflictor( this );
 
 			TakeDamage( dmgInfo );
 			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
-		}
-	}
-	else {
-		m_flTemperature = m_flMaxTemperature;
-		SetMaxSpeed( HL2_NORM_SPEED );
+		}	
 	}
 }
 
