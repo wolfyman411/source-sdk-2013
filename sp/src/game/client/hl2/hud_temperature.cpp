@@ -114,11 +114,18 @@ void CHudTemperature::OnThink()
 	if ( !local )
 		return;
 
-	int newTemperature = local->m_HL2Local.m_flTemperature;
-	newTemperature = clamp(newTemperature, local->m_HL2Local.m_flMinTemperature, local->m_HL2Local.m_flMaxTemperature);
+	float newTemperature = local->m_HL2Local.m_flTemperature;
+
+	DevMsg( "[ CLIENT ] Temperature: %f\n", local->m_HL2Local.m_flTemperature );
+	
+	if ( local->m_HL2Local.m_flTemperature >= local->m_HL2Local.m_flMaxTemperature ) {
+		newTemperature = local->m_HL2Local.m_flMaxTemperature;
+	} else if ( local->m_HL2Local.m_flTemperature <= local->m_HL2Local.m_flMinTemperature ) {
+		newTemperature = local->m_HL2Local.m_flMinTemperature;
+	}
 
 	// Only update the fade if we've changed temperature
-	if ( newTemperature == local->m_HL2Local.m_flTemperature ) return;
+	if ( newTemperature == m_iTemperature ) return;
 
 	m_iTemperature = local->m_HL2Local.m_flTemperature;
 
