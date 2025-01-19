@@ -1217,8 +1217,8 @@ void CHL2_Player::HandleTemperature( void ) {
 
 	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
 	
-	if ( m_flTemperature > m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
-	else if ( m_flTemperature < m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
+	if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
+	else if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
 
 	m_HL2Local.m_flTemperature = m_flTemperature;
 	m_HL2Local.m_flMaxTemperature = m_flMaxTemperature;
