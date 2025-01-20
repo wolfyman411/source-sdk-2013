@@ -12188,10 +12188,20 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_KEYFIELD( m_flIgniteTemperature, FIELD_FLOAT, "IgniteTemperature" ),
 
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetFreezeTemperature", InputSetFreezeTemperature ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIgniteTemperature", InputSetIgniteTemperature ),
 
 	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
 	DEFINE_OUTPUT( m_OnUnFrozen, "OnUnFrozen" ),
 	DEFINE_OUTPUT( m_OnBurnFromTemperature, "OnBurnFromTemperature" ),
+	DEFINE_OUTPUT( m_OnChangeTemperature, "OnChangeTemperature" ),
+	DEFINE_OUTPUT( m_OnChangeIgniteTemperature, "OnChangeIgniteTemperature" ),
+	DEFINE_OUTPUT( m_OnChangeFreezeTemperature, "OnChangeFreezeTemperature" ),
+	DEFINE_OUTPUT( m_OnChangeMaxTemperature, "OnChangeMaxTemperature" ),
+	DEFINE_OUTPUT( m_OnChangeMinTemperature, "OnChangeMinTemperature" ),
 
 	// Satisfy classcheck
 	// DEFINE_FIELD( m_ScheduleHistory, CUtlVector < AIScheduleChoice_t > ),
@@ -16774,4 +16784,29 @@ void CAI_BaseNPC::OnUnFrozen( void ) {
 void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
 	if ( inputdata.value.Bool() && !IsFrozen() ) OnFrozen();
 	else if ( !inputdata.value.Bool() && IsFrozen() ) OnUnFrozen();
+}
+
+void CAI_BaseNPC::InputSetTemperature( inputdata_t& inputdata ) {
+	m_flTemperature = inputdata.value.Float();
+	m_OnChangeTemperature.FireOutput( this, this );
+}
+
+void CAI_BaseNPC::InputSetMaxTemperature( inputdata_t& inputdata ) {
+	m_flMaxTemperature = inputdata.value.Float();
+	m_OnChangeMaxTemperature.FireOutput( this, this );
+}
+
+void CAI_BaseNPC::InputSetMinTemperature( inputdata_t& inputdata ) {
+	m_flMinTemperature = inputdata.value.Float();
+	m_OnChangeMinTemperature.FireOutput( this, this );
+}
+
+void CAI_BaseNPC::InputSetFreezeTemperature( inputdata_t& inputdata ) {
+	m_flFreezeTemperature = inputdata.value.Float();
+	m_OnChangeFreezeTemperature.FireOutput( this, this );
+}
+
+void CAI_BaseNPC::InputSetIgniteTemperature( inputdata_t& inputdata ) {
+	m_flIgniteTemperature = inputdata.value.Float();
+	m_OnChangeIgniteTemperature.FireOutput( this, this );
 }

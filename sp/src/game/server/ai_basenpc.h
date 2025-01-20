@@ -707,11 +707,22 @@ public:
 	virtual void		OnFrozen( void );
 	virtual void		OnUnFrozen( void );
 	virtual bool		IsFrozen( void ) { return m_bIsFrozen; }
+
 	void				InputSetFrozen( inputdata_t& inputdata );
+	void				InputSetTemperature( inputdata_t& inputdata );
+	void				InputSetIgniteTemperature( inputdata_t& inputdata );
+	void				InputSetFreezeTemperature( inputdata_t& inputdata );
+	void				InputSetMaxTemperature( inputdata_t& inputdata );
+	void				InputSetMinTemperature( inputdata_t& inputdata );
 
 	COutputEvent		m_OnFrozen;
 	COutputEvent		m_OnUnFrozen;
 	COutputEvent		m_OnBurnFromTemperature;
+	COutputEvent		m_OnChangeTemperature;
+	COutputEvent		m_OnChangeIgniteTemperature;
+	COutputEvent		m_OnChangeFreezeTemperature;
+	COutputEvent		m_OnChangeMaxTemperature;
+	COutputEvent		m_OnChangeMinTemperature;
 
 protected:
 	// Used by derived classes to chain a task to a task that might not be the 

@@ -193,6 +193,11 @@
 	output OnFrozen(void) : "Fires when the NPC is frozen."
 	output OnUnFrozen(void) : "Fires when the NPC is unfrozen."
 	output OnBurnFromTemperature(void) : "Fires when the NPC is ignited due to their temperature."
+	output OnChangeTemperature(void) : "Fires when the NPC's temperature changes through an input."
+	output OnChangeIgniteTemperature(void) : "Fires when the NPC's ignite temperature changes through an input."
+	output OnChangeFreezeTemperature(void) : "Fires when the NPC's freeze temperature changes through an input."
+	output OnChangeMaxTemperature(void) : "Fires when the NPC's max temperature changes through an input."
+	output OnChangeMinTemperature(void) : "Fires when the NPC's min temperature changes through an input."
 
 	// Inputs
 	input SetEnemyFilter(target_destination) : "Changes this NPC's enemy filter to the named filter."
@@ -243,5 +248,9 @@
 
 	input SetHintGroup(string) : "Sets this NPC's hint group."
 	input SetFrozen(bool) : "Freezes or unfreezes this NPC."
-
+	input SetTemperature(float) : "Sets the temperature of this NPC."
+	input SetMaxTemperature(float) : "Sets the maximum temperature of this NPC."
+	input SetMinTemperature(float) : "Sets the minimum temperature of this NPC."
+	input SetFreezeTemperature(float) : "Sets the temperature at which this NPC will freeze."
+	input SetIgniteTemperature(float) : "Sets the temperature at which this NPC will ignite."
 ]
