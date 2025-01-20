@@ -115,8 +115,6 @@ void CHudTemperature::OnThink()
 		return;
 
 	float newTemperature = local->m_HL2Local.m_flTemperature;
-
-	DevMsg( "[ CLIENT ] Temperature: %f\n", local->m_HL2Local.m_flTemperature );
 	
 	if ( local->m_HL2Local.m_flTemperature >= local->m_HL2Local.m_flMaxTemperature ) {
 		newTemperature = local->m_HL2Local.m_flMaxTemperature;

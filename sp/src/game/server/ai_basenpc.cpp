@@ -162,6 +162,8 @@ ConVar	ai_use_think_optimizations( "ai_use_think_optimizations", "1" );
 
 ConVar	ai_test_moveprobe_ignoresmall( "ai_test_moveprobe_ignoresmall", "0" );
 
+ConVar ai_use_temperature( "ai_use_temperature", "1", FCVAR_NONE, "Enable temperature system for NPCs" );
+
 #ifdef HL2_EPISODIC
 extern ConVar ai_vehicle_avoidance;
 #endif // HL2_EPISODIC
@@ -4342,6 +4344,8 @@ bool CAI_BaseNPC::CheckPVSCondition()
 
 void CAI_BaseNPC::NPCThink( void )
 {
+	HandleTemperature();
+
 	if ( m_bCheckContacts )
 	{
 		CheckPhysicsContacts();
@@ -12173,6 +12177,20 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_FIELD( m_FakeSequenceGestureLayer,	FIELD_INTEGER ),
 #endif
 
+	DEFINE_FIELD( m_flTemperature,				FIELD_FLOAT),
+	DEFINE_FIELD( m_flFreezeMultiplier,			FIELD_FLOAT),
+	DEFINE_FIELD( m_flMaxTemperature,			FIELD_FLOAT),
+	DEFINE_FIELD( m_flMinTemperature,			FIELD_FLOAT),
+	DEFINE_FIELD( m_flFreezeTemperature,		FIELD_FLOAT),
+
+	DEFINE_KEYFIELD( m_flTemperature, FIELD_FLOAT, "Temperature" ),
+	DEFINE_KEYFIELD( m_flMaxTemperature, FIELD_FLOAT, "MaxTemperature" ),
+	DEFINE_KEYFIELD( m_flMinTemperature, FIELD_FLOAT, "MinTemperature" ),
+	DEFINE_KEYFIELD( m_flFreezeTemperature, FIELD_FLOAT, "FreezeTemperature" ),
+	
+	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
+	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
+
 	// Satisfy classcheck
 	// DEFINE_FIELD( m_ScheduleHistory, CUtlVector < AIScheduleChoice_t > ),
 
@@ -16714,4 +16732,40 @@ void CAI_BaseNPC::DesireCrouch( void )
 bool CAI_BaseNPC::IsInChoreo() const
 {
 	return m_bInChoreo;
+}
+
+void CAI_BaseNPC::HandleTemperature( void ) {
+	if ( !ai_use_temperature.GetBool() || !HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) return;
+
+	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->curtime;
+
+	if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
+	else if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
+
+	if ( m_flTemperature >= m_flFreezeTemperature ) {
+		if ( !IsFrozen() ) {
+			OnFrozen();
+		}
+	}
+	else if ( m_flTemperature <= m_flIgniteTemperature ) {
+		if ( !IsOnFire() ) {
+			Ignite( 0.0f, true );
+		}
+	}
+}
+
+void CAI_BaseNPC::OnFrozen( void ) {
+	m_bIsFrozen = true;
+	m_OnFrozen.FireOutput( this, this );
+
+	SetThink( NULL );
+	SetNextThink( TICK_NEVER_THINK );
+}
+
+void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
+	if ( IsFrozen() ) return;
+
+	if ( inputdata.value.Bool() ) {
+		OnFrozen();
+	}
 }

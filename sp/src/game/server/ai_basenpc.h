@@ -174,7 +174,7 @@ enum Interruptability_t
 #define SF_NPC_FALL_TO_GROUND			( 1 << 2  )	// used my NPC_Maker
 #define SF_NPC_DROP_HEALTHKIT			( 1 << 3  )	// Drop a healthkit upon death
 #define SF_NPC_START_EFFICIENT			( 1 << 4  ) // Set into efficiency mode from spawn
-//										( 1 << 5  )
+#define SF_NPC_USE_TEMPERATURE			( 1 << 5 )	// This NPC will use the temperature system
 //										( 1 << 6  )
 #define SF_NPC_WAIT_FOR_SCRIPT			( 1 << 7  )	// spawnflag that makes npcs wait to check for attacking until the script is done or they've been attacked
 #define SF_NPC_LONG_RANGE				( 1 << 8  )	// makes npcs look far and relaxes weapon range limit 
@@ -183,7 +183,7 @@ enum Interruptability_t
 #define SF_NPC_TEMPLATE					( 1 << 11 )	// This NPC will be used as a template by an npc_maker -- do not spawn.
 #define SF_NPC_ALTCOLLISION				( 1 << 12 )
 #define SF_NPC_NO_WEAPON_DROP			( 1 << 13 )	// This NPC will not actually drop a weapon that can be picked up
-#define SF_NPC_NO_PLAYER_PUSHAWAY		( 1 << 14 )	
+#define SF_NPC_NO_PLAYER_PUSHAWAY		( 1 << 14 )
 //										( 1 << 15 )	
 // !! Flags above ( 1 << 15 )	 are reserved for NPC sub-classes
 
@@ -628,6 +628,8 @@ public:
 	//
 	//-----------------------------------------------------
 	void				CallNPCThink( void );
+
+	virtual void		HandleTemperature( void );
 	
 	// Thinking, including core thinking, movement, animation
 	virtual void		NPCThink( void );
@@ -692,6 +694,22 @@ public:
 		NEXT_TASK		= LAST_SHARED_TASK,
 		NEXT_CONDITION 	= LAST_SHARED_CONDITION,
 	};
+
+	float				m_flTemperature;
+	float				m_flFreezeMultiplier;
+	float				m_flMaxTemperature;
+	float				m_flMinTemperature;
+	float				m_flFreezeTemperature;
+	float				m_flIgniteTemperature;
+
+	bool				m_bIsFrozen;
+
+	virtual void		OnFrozen( void );
+	virtual bool		IsFrozen( void ) { return m_bIsFrozen; }
+	void				InputSetFrozen( inputdata_t& inputdata );
+
+	COutputEvent		m_OnFrozen;
+	COutputEvent		m_OnIgnoreFromTemperature;
 
 protected:
 	// Used by derived classes to chain a task to a task that might not be the 

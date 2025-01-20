@@ -124,7 +124,6 @@ public:
 #endif
 
 public:
-
 	virtual void		Spawn( void );
 	virtual void		Precache();
 
