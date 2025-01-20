@@ -81,6 +81,7 @@
 		4 : "[4] Fall to ground (unchecked means *teleport* to ground)" : 1
 		8 : "[8] Drop Healthkit (drops health vial on death)" : 0
 		16 : "[16] Efficient - Don't acquire enemies or avoid obstacles" : 0
+		32 : "[32] Use Temperature - Use the Temperature System" : 0
 		128 : "[128] Wait For Script" : 0
 		256 : "[256] Long Visibility/Shoot" : 0
 		512 : "[512] Fade Corpse" : 1
