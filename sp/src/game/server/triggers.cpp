@@ -5678,7 +5678,7 @@ bool IsTriggerClass( CBaseEntity *pEntity )
 }
 
 BEGIN_DATADESC( CTriggerFreeze )
-	DEFINE_KEYFIELD( m_flFreezeMultiplier, FIELD_FLOAT, "freezemultiplier" ),
+	DEFINE_KEYFIELD( m_flFreezeMultiplier, FIELD_FLOAT, "FreezeMultiplier" ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
@@ -5694,38 +5694,31 @@ void CTriggerFreeze::Spawn( void ) {
 
 
 void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
-	if ( PassesTriggerFilters( pOther ) ) {
-		if ( pOther->IsPlayer() ) {
-			CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
-
-			if ( pPlayer ) {
-				pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
-			}
+	if ( pOther->IsPlayer() ) {
+		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
+		if ( pPlayer ) {
+			pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
 		}
-		else if ( pOther->IsCombatCharacter() ) {
-			CBaseCombatCharacter* pCombatChar = dynamic_cast< CBaseCombatCharacter* >( pOther );
-
-			if ( pCombatChar ) {
-				pCombatChar->m_flFreezeMultiplier = m_flFreezeMultiplier;
-			}
+	}
+	else if ( pOther->IsNPC() ) {
+		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
+		if ( pNPC ) {
+			pNPC->m_flFreezeMultiplier = m_flFreezeMultiplier;
 		}
 	}
 }
 
 void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
-	if ( PassesTriggerFilters( pOther ) ) {
-		if ( pOther->IsPlayer() ) {
-			CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
-			if ( pPlayer ) {
-				pPlayer->m_flFreezeMultiplier = -1.25;
-			}
+	if ( pOther->IsPlayer() ) {
+		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
+		if ( pPlayer ) {
+			pPlayer->m_flFreezeMultiplier = -1.25;
 		}
-		else if ( pOther->IsCombatCharacter() ) {
-			CBaseCombatCharacter* pCombatChar = dynamic_cast< CBaseCombatCharacter* >( pOther );
-
-			if ( pCombatChar ) {
-				pCombatChar->m_flFreezeMultiplier = -1.25f;
-			}
+	}
+	else if ( pOther->IsNPC() ) {
+		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
+		if ( pNPC ) {
+			pNPC->m_flFreezeMultiplier = -1.25;
 		}
 	}
 }

@@ -58,7 +58,7 @@
 @SolidClass base(Trigger, Targetname) = trigger_freeze :
 	"A trigger volume that freezes the player."
 [
-	freezemultiplier(float) : "Freeze Multiplayer" : "1.25" : "The rate at which the player freezes."
+	FreezeMultiplier(float) : "Freeze Multiplayer" : "1.25" : "The rate at which the player freezes."
 ]
 
 @PointClass base(Weapon) studio("models/weapons/w_iceaxe.mdl") = weapon_iceaxe: "Ice Axe" []

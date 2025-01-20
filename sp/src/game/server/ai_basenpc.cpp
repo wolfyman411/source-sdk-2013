@@ -4344,7 +4344,7 @@ bool CAI_BaseNPC::CheckPVSCondition()
 
 void CAI_BaseNPC::NPCThink( void )
 {
-	if ( ai_use_temperature.GetBool() && HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) {
+	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) ) {
 		HandleTemperature();
 	}
 
@@ -16751,10 +16751,15 @@ bool CAI_BaseNPC::IsInChoreo() const
 }
 
 void CAI_BaseNPC::HandleTemperature( void ) {
-	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->curtime;
+	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
 
 	if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
 	else if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
+
+	if ( m_flTemperature <= m_flFreezeTemperature * 0.9f ) {
+		//SetPlaybackRate( 0.0f );
+		DevMsg( "Frozen\n" );
+	}
 
 	if ( m_flTemperature <= m_flFreezeTemperature ) {
 		if ( !IsFrozen() ) {
@@ -16772,6 +16777,9 @@ void CAI_BaseNPC::HandleTemperature( void ) {
 			m_OnBurnFromTemperature.FireOutput( this, this );
 		}
 	}
+
+	DevMsg( "%.2f\n", m_flFreezeTemperature * 0.9f );
+	DevMsg( "%s: Temperature: %.2f\n", GetDebugName(), m_flTemperature );
 }
 
 void CAI_BaseNPC::OnFrozen( void ) {
@@ -16780,12 +16788,9 @@ void CAI_BaseNPC::OnFrozen( void ) {
 
 	SetCondition( COND_NPC_FREEZE );
 	SetMoveType( MOVETYPE_NONE );
-	SetGravity( 0 );
+	SetGravity( 0.0f );
 	SetLocalAngularVelocity( vec3_angle );
 	SetAbsVelocity( vec3_origin );
-
-	SetThink( NULL );
-	SetNextThink( TICK_NEVER_THINK );
 }
 
 void CAI_BaseNPC::OnUnFrozen( void ) {
@@ -16794,15 +16799,8 @@ void CAI_BaseNPC::OnUnFrozen( void ) {
 
 	SetCondition( COND_NPC_UNFREEZE );
 	m_Activity = ACT_RESET;
-
-	// BUGBUG: this might not be the correct movetype!
-	SetMoveType( MOVETYPE_WALK );
-
-	// Doesn't restore gravity to the original value, but who cares?
+	SetMoveType( MOVETYPE_STEP );
 	SetGravity( 1.0f );
-
-	SetThink( &CAI_BaseNPC::HandleTemperature );
-	SetNextThink( gpGlobals->curtime + 1.0f );
 }
 
 void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
