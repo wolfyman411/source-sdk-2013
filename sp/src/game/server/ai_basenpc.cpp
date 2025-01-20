@@ -16785,7 +16785,6 @@ void CAI_BaseNPC::HandleTemperature( void ) {
 
 	if ( m_flTemperature <= m_flFreezeTemperature * 0.9f ) {
 		//SetPlaybackRate( 0.0f );
-		DevMsg( "Frozen\n" );
 	}
 
 	if ( m_flTemperature <= m_flFreezeTemperature ) {
@@ -16804,9 +16803,6 @@ void CAI_BaseNPC::HandleTemperature( void ) {
 			m_OnBurnFromTemperature.FireOutput( this, this );
 		}
 	}
-
-	DevMsg( "%.2f\n", m_flFreezeTemperature * 0.9f );
-	DevMsg( "%s: Temperature: %.2f\n", GetDebugName(), m_flTemperature );
 }
 
 void CAI_BaseNPC::OnFrozen( void ) {
