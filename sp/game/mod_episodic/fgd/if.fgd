@@ -162,7 +162,9 @@
 	MaxTemperature(float) : "Max Temperature" : "40.0" : "The maximum temperature of this NPC. Used for temperature system."
 	MinTemperature(float) : "Min Temperature" : "25.0" : "The minimum temperature of this NPC. Used for temperature system."
 	FreezeTemperature(float) : "Freeze Temperature" : "25.0" : "The temperature at which this NPC will freeze. Used for temperature system."
+	UnFreezeTemperature(float) : "Unfreeze Temperature" : "30.0" : "The temperature at which this NPC will unfreeze. Used for temperature system."
 	IgniteTemperature(float) : "Ignite Temperature" : "40.0" : "The temperature at which this NPC will ignite. Used for temperature system."
+	Frozen(bool) : "Frozen" : "0" : "Whether this NPC is frozen. Used for temperature system."
 
 	// Outputs
 	output OnDamaged(void) : "Fired when this NPC takes damage."
