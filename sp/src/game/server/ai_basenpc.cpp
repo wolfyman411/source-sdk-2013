@@ -12187,6 +12187,7 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_KEYFIELD( m_flFreezeTemperature, FIELD_FLOAT, "FreezeTemperature" ),
 	
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
+
 	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
 	DEFINE_OUTPUT( m_OnUnFrozen, "OnUnFrozen" ),
 	DEFINE_OUTPUT( m_OnBurnFromTemperature, "OnBurnFromTemperature" ),
