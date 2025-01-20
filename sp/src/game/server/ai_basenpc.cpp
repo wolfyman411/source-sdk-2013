@@ -12179,11 +12179,7 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_FIELD( m_FakeSequenceGestureLayer,	FIELD_INTEGER ),
 #endif
 
-	DEFINE_FIELD( m_flTemperature,				FIELD_FLOAT),
 	DEFINE_FIELD( m_flFreezeMultiplier,			FIELD_FLOAT),
-	DEFINE_FIELD( m_flMaxTemperature,			FIELD_FLOAT),
-	DEFINE_FIELD( m_flMinTemperature,			FIELD_FLOAT),
-	DEFINE_FIELD( m_flFreezeTemperature,		FIELD_FLOAT),
 
 	DEFINE_KEYFIELD( m_flTemperature, FIELD_FLOAT, "Temperature" ),
 	DEFINE_KEYFIELD( m_flMaxTemperature, FIELD_FLOAT, "MaxTemperature" ),
@@ -12192,6 +12188,8 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
 	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
+	DEFINE_OUTPUT( m_OnUnFrozen, "OnUnFrozen" ),
+	DEFINE_OUTPUT( m_OnBurnFromTemperature, "OnBurnFromTemperature" ),
 
 	// Satisfy classcheck
 	// DEFINE_FIELD( m_ScheduleHistory, CUtlVector < AIScheduleChoice_t > ),
@@ -16750,6 +16748,7 @@ void CAI_BaseNPC::HandleTemperature( void ) {
 	else if ( m_flTemperature <= m_flIgniteTemperature ) {
 		if ( !IsOnFire() ) {
 			Ignite( 0.0f, true );
+			m_OnBurnFromTemperature.FireOutput( this, this );
 		}
 	}
 }
@@ -16762,10 +16761,15 @@ void CAI_BaseNPC::OnFrozen( void ) {
 	SetNextThink( TICK_NEVER_THINK );
 }
 
-void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
-	if ( IsFrozen() ) return;
+void CAI_BaseNPC::OnUnFrozen( void ) {
+	m_bIsFrozen = false;
+	m_OnUnFrozen.FireOutput( this, this );
 
-	if ( inputdata.value.Bool() ) {
-		OnFrozen();
-	}
+	SetThink( &CAI_BaseNPC::HandleTemperature );
+	SetNextThink( gpGlobals->curtime + 1.0f );
+}
+
+void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
+	if ( inputdata.value.Bool() && !IsFrozen() ) OnFrozen();
+	else if ( !inputdata.value.Bool() && IsFrozen() ) OnUnFrozen();
 }

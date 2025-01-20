@@ -628,8 +628,6 @@ public:
 	//
 	//-----------------------------------------------------
 	void				CallNPCThink( void );
-
-	virtual void		HandleTemperature( void );
 	
 	// Thinking, including core thinking, movement, animation
 	virtual void		NPCThink( void );
@@ -695,6 +693,8 @@ public:
 		NEXT_CONDITION 	= LAST_SHARED_CONDITION,
 	};
 
+	virtual void		HandleTemperature( void );
+
 	float				m_flTemperature;
 	float				m_flFreezeMultiplier;
 	float				m_flMaxTemperature;
@@ -705,11 +705,13 @@ public:
 	bool				m_bIsFrozen;
 
 	virtual void		OnFrozen( void );
+	virtual void		OnUnFrozen( void );
 	virtual bool		IsFrozen( void ) { return m_bIsFrozen; }
 	void				InputSetFrozen( inputdata_t& inputdata );
 
 	COutputEvent		m_OnFrozen;
-	COutputEvent		m_OnIgnoreFromTemperature;
+	COutputEvent		m_OnUnFrozen;
+	COutputEvent		m_OnBurnFromTemperature;
 
 protected:
 	// Used by derived classes to chain a task to a task that might not be the 
