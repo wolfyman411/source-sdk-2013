@@ -4344,7 +4344,9 @@ bool CAI_BaseNPC::CheckPVSCondition()
 
 void CAI_BaseNPC::NPCThink( void )
 {
-	HandleTemperature();
+	if ( ai_use_temperature.GetBool() && HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) {
+		HandleTemperature();
+	}
 
 	if ( m_bCheckContacts )
 	{
@@ -16735,8 +16737,6 @@ bool CAI_BaseNPC::IsInChoreo() const
 }
 
 void CAI_BaseNPC::HandleTemperature( void ) {
-	if ( !ai_use_temperature.GetBool() || !HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) return;
-
 	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->curtime;
 
 	if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
