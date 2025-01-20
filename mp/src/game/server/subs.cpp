@@ -38,11 +38,6 @@ void CNullEntity::Spawn( void )
 }
 LINK_ENTITY_TO_CLASS(info_null,CNullEntity);
 
-#ifdef MAPBASE
-// Eh, good enough.
-LINK_ENTITY_TO_CLASS(func_null,CNullEntity);
-#endif
-
 class CBaseDMStart : public CPointEntity
 {
 public:

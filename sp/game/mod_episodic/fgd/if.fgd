@@ -256,3 +256,5 @@
 	input SetFreezeTemperature(float) : "Sets the temperature at which this NPC will freeze."
 	input SetIgniteTemperature(float) : "Sets the temperature at which this NPC will ignite."
 ]
+
+@PointClass base(Weapon) studio("models/weapons/w_iceaxe.mdl") = weapon_iceaxe: "Ice Axe" []
