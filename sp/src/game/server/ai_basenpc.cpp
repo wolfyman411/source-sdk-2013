@@ -12185,13 +12185,16 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_KEYFIELD( m_flMaxTemperature, FIELD_FLOAT, "MaxTemperature" ),
 	DEFINE_KEYFIELD( m_flMinTemperature, FIELD_FLOAT, "MinTemperature" ),
 	DEFINE_KEYFIELD( m_flFreezeTemperature, FIELD_FLOAT, "FreezeTemperature" ),
+	DEFINE_KEYFIELD( m_flUnFreezeTemperature, FIELD_FLOAT, "UnFreezeTemperature" ),
 	DEFINE_KEYFIELD( m_flIgniteTemperature, FIELD_FLOAT, "IgniteTemperature" ),
+	DEFINE_KEYFIELD( m_bIsFrozen, FIELD_BOOLEAN, "Frozen"),
 
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetFreezeTemperature", InputSetFreezeTemperature ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetUnFreezeTemperature", InputSetUnFreezeTemperature ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIgniteTemperature", InputSetIgniteTemperature ),
 
 	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
@@ -12200,6 +12203,7 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_OUTPUT( m_OnChangeTemperature, "OnChangeTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeIgniteTemperature, "OnChangeIgniteTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeFreezeTemperature, "OnChangeFreezeTemperature" ),
+	DEFINE_OUTPUT( m_OnChangeUnFreezeTemperature, "OnChangeUnFreezeTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeMaxTemperature, "OnChangeMaxTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeMinTemperature, "OnChangeMinTemperature" ),
 
@@ -16752,12 +16756,17 @@ void CAI_BaseNPC::HandleTemperature( void ) {
 	if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
 	else if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
 
-	if ( m_flTemperature >= m_flFreezeTemperature ) {
+	if ( m_flTemperature <= m_flFreezeTemperature ) {
 		if ( !IsFrozen() ) {
 			OnFrozen();
 		}
 	}
-	else if ( m_flTemperature <= m_flIgniteTemperature ) {
+	else if ( m_flTemperature >= m_flUnFreezeTemperature ) {
+		if ( IsFrozen() ) {
+			OnUnFrozen();
+		}
+	}
+	else if ( m_flTemperature >= m_flIgniteTemperature ) {
 		if ( !IsOnFire() ) {
 			Ignite( 0.0f, true );
 			m_OnBurnFromTemperature.FireOutput( this, this );
@@ -16769,6 +16778,12 @@ void CAI_BaseNPC::OnFrozen( void ) {
 	m_bIsFrozen = true;
 	m_OnFrozen.FireOutput( this, this );
 
+	SetCondition( COND_NPC_FREEZE );
+	SetMoveType( MOVETYPE_NONE );
+	SetGravity( 0 );
+	SetLocalAngularVelocity( vec3_angle );
+	SetAbsVelocity( vec3_origin );
+
 	SetThink( NULL );
 	SetNextThink( TICK_NEVER_THINK );
 }
@@ -16776,6 +16791,15 @@ void CAI_BaseNPC::OnFrozen( void ) {
 void CAI_BaseNPC::OnUnFrozen( void ) {
 	m_bIsFrozen = false;
 	m_OnUnFrozen.FireOutput( this, this );
+
+	SetCondition( COND_NPC_UNFREEZE );
+	m_Activity = ACT_RESET;
+
+	// BUGBUG: this might not be the correct movetype!
+	SetMoveType( MOVETYPE_WALK );
+
+	// Doesn't restore gravity to the original value, but who cares?
+	SetGravity( 1.0f );
 
 	SetThink( &CAI_BaseNPC::HandleTemperature );
 	SetNextThink( gpGlobals->curtime + 1.0f );
@@ -16789,6 +16813,11 @@ void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
 void CAI_BaseNPC::InputSetTemperature( inputdata_t& inputdata ) {
 	m_flTemperature = inputdata.value.Float();
 	m_OnChangeTemperature.FireOutput( this, this );
+}
+
+void CAI_BaseNPC::InputSetUnFreezeTemperature( inputdata_t& inputdata ) {
+	m_flUnFreezeTemperature = inputdata.value.Float();
+	m_OnChangeUnFreezeTemperature.FireOutput( this, this );
 }
 
 void CAI_BaseNPC::InputSetMaxTemperature( inputdata_t& inputdata ) {
