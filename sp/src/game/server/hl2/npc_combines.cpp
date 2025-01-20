@@ -28,16 +28,16 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar	sk_combine_s_health( "sk_combine_s_health","0");
-ConVar	sk_combine_s_kick( "sk_combine_s_kick","0");
+ConVar	sk_combine_s_health( "sk_combine_s_health", "0" );
+ConVar	sk_combine_s_kick( "sk_combine_s_kick", "0" );
 
-ConVar sk_combine_guard_health( "sk_combine_guard_health", "0");
-ConVar sk_combine_guard_kick( "sk_combine_guard_kick", "0");
- 
+ConVar sk_combine_guard_health( "sk_combine_guard_health", "0" );
+ConVar sk_combine_guard_kick( "sk_combine_guard_kick", "0" );
+
 // Whether or not the combine guard should spawn health on death
 ConVar combine_guard_spawn_health( "combine_guard_spawn_health", "1" );
 
-extern ConVar sk_plr_dmg_buckshot;	
+extern ConVar sk_plr_dmg_buckshot;
 extern ConVar sk_plr_num_shotgun_pellets;
 
 //Whether or not the combine should spawn health on death
@@ -59,12 +59,17 @@ void CNPC_CombineS::Spawn( void )
 	Precache();
 	SetModel( STRING( GetModelName() ) );
 
-	if( IsElite() )
+	if ( IsElite() )
 	{
 		// Stronger, tougher.
 		SetHealth( sk_combine_guard_health.GetFloat() );
 		SetMaxHealth( sk_combine_guard_health.GetFloat() );
 		SetKickDamage( sk_combine_guard_kick.GetFloat() );
+	}
+	else if ( IsArmorless() ) {
+		SetHealth( sk_combine_s_health.GetFloat() / 2 );
+		SetMaxHealth( sk_combine_s_health.GetFloat() / 2 );
+		SetKickDamage( sk_combine_s_kick.GetFloat() );
 	}
 	else
 	{
@@ -73,14 +78,14 @@ void CNPC_CombineS::Spawn( void )
 		SetKickDamage( sk_combine_s_kick.GetFloat() );
 	}
 
-	CapabilitiesAdd( bits_CAP_ANIMATEDFACE );
+	CapabilitiesAdd( bits_CAP_ANIMATEDFACE | bits_CAP_TURN_HEAD );
 	CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
 	CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
 	BaseClass::Spawn();
 
 #if HL2_EPISODIC
-	if (m_iUseMarch && !HasSpawnFlags(SF_NPC_START_EFFICIENT))
+	if ( m_iUseMarch && !HasSpawnFlags( SF_NPC_START_EFFICIENT ) )
 	{
 		Msg( "Soldier %s is set to use march anim, but is not an efficient AI. The blended march anim can only be used for dead-ahead walks!\n", GetDebugName() );
 	}
@@ -94,13 +99,13 @@ void CNPC_CombineS::Spawn( void )
 //-----------------------------------------------------------------------------
 void CNPC_CombineS::Precache()
 {
-	const char *pModelName = STRING( GetModelName() );
+	const char* pModelName = STRING( GetModelName() );
 
 #ifdef MAPBASE
 	// Need to do this for dirt variant
-	if( !Q_strnicmp( pModelName, "models/combine_super_sold", 25 ) )
+	if ( !Q_strnicmp( pModelName, "models/combine_super_sold", 25 ) )
 #else
-	if( !Q_stricmp( pModelName, "models/combine_super_soldier.mdl" ) )
+	if ( !Q_stricmp( pModelName, "models/combine_super_soldier.mdl" ) )
 #endif
 	{
 		m_fIsElite = true;
@@ -110,7 +115,14 @@ void CNPC_CombineS::Precache()
 		m_fIsElite = false;
 	}
 
-	if( !GetModelName() )
+	if ( !Q_stricmp( pModelName, "models/baresoldier/baresoldier.mdl" ) ) {
+		m_fIsArmorless = true;
+	}
+	else {
+		m_fIsArmorless = false;
+	}
+
+	if ( !GetModelName() )
 	{
 		SetModelName( MAKE_STRING( "models/combine_soldier.mdl" ) );
 	}
@@ -125,18 +137,18 @@ void CNPC_CombineS::Precache()
 }
 
 
-void CNPC_CombineS::DeathSound( const CTakeDamageInfo &info )
+void CNPC_CombineS::DeathSound( const CTakeDamageInfo& info )
 {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
 	AI_CriteriaSet set;
-	ModifyOrAppendDamageCriteria(set, info);
+	ModifyOrAppendDamageCriteria( set, info );
 	SpeakIfAllowed( TLK_CMB_DIE, set, SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
 #else
 	// NOTE: The response system deals with this at the moment
 	if ( GetFlags() & FL_DISSOLVING )
 		return;
 
-	GetSentences()->Speak( "COMBINE_DIE", SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS ); 
+	GetSentences()->Speak( "COMBINE_DIE", SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
 #endif
 }
 
@@ -149,14 +161,14 @@ void CNPC_CombineS::DeathSound( const CTakeDamageInfo &info )
 //			that determines whether a grenade can be thrown, so prevent the 
 //			base class from clearing it out. (sjb)
 //-----------------------------------------------------------------------------
-void CNPC_CombineS::ClearAttackConditions( )
+void CNPC_CombineS::ClearAttackConditions()
 {
 	bool fCanRangeAttack2 = HasCondition( COND_CAN_RANGE_ATTACK2 );
 
 	// Call the base class.
 	BaseClass::ClearAttackConditions();
 
-	if( fCanRangeAttack2 )
+	if ( fCanRangeAttack2 )
 	{
 		// We don't allow the base class to clear this condition because we
 		// don't sense for it every frame.
@@ -209,20 +221,23 @@ void CNPC_CombineS::BuildScheduleTestBits( void )
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-int CNPC_CombineS::SelectSchedule ( void )
+int CNPC_CombineS::SelectSchedule( void )
 {
 	return BaseClass::SelectSchedule();
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float CNPC_CombineS::GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDamageInfo &info )
+float CNPC_CombineS::GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDamageInfo& info )
 {
-	switch( iHitGroup )
+	switch ( iHitGroup )
 	{
-	case HITGROUP_HEAD:
+		case HITGROUP_HEAD:
 		{
-			// Soldiers take double headshot damage
+			if ( IsArmorless() ) {
+				return 3.0f;
+			}
+
 			return 2.0f;
 		}
 	}
@@ -233,9 +248,9 @@ float CNPC_CombineS::GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDama
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void CNPC_CombineS::HandleAnimEvent( animevent_t *pEvent )
+void CNPC_CombineS::HandleAnimEvent( animevent_t* pEvent )
 {
-	switch( pEvent->event )
+	switch ( pEvent->event )
 	{
 	case AE_SOLDIER_BLOCK_PHYSICS:
 		DevMsg( "BLOCKING!\n" );
@@ -258,9 +273,9 @@ void CNPC_CombineS::OnChangeActivity( Activity eNewActivity )
 #if HL2_EPISODIC
 	// Give each trooper a varied look for his march. Done here because if you do it earlier (eg Spawn, StartTask), the
 	// pose param gets overwritten.
-	if (m_iUseMarch)
+	if ( m_iUseMarch )
 	{
-		SetPoseParameter("casual", RandomFloat());
+		SetPoseParameter( "casual", RandomFloat() );
 	}
 #endif
 }
@@ -281,7 +296,7 @@ void CNPC_CombineS::OnListened()
 #if 0
 	if ( HasCondition( COND_HEAR_DANGER ) && !HasInterruptCondition( COND_HEAR_DANGER ) )
 	{
-		DevMsg("Ignore danger in %s\n", GetCurSchedule()->GetName() );
+		DevMsg( "Ignore danger in %s\n", GetCurSchedule()->GetName() );
 	}
 #endif
 }
@@ -291,7 +306,7 @@ void CNPC_CombineS::OnListened()
 // Input  : &info - 
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
-void CNPC_CombineS::Event_Killed( const CTakeDamageInfo &info )
+void CNPC_CombineS::Event_Killed( const CTakeDamageInfo& info )
 {
 	// Don't bother if we've been told not to, or the player has a megaphyscannon
 	if ( combine_spawn_health.GetBool() == false || PlayerHasMegaPhysCannon() )
@@ -300,54 +315,54 @@ void CNPC_CombineS::Event_Killed( const CTakeDamageInfo &info )
 		return;
 	}
 
-	CBasePlayer *pPlayer = ToBasePlayer( info.GetAttacker() );
+	CBasePlayer* pPlayer = ToBasePlayer( info.GetAttacker() );
 
 	if ( !pPlayer )
 	{
-		CPropVehicleDriveable *pVehicle = dynamic_cast<CPropVehicleDriveable *>( info.GetAttacker() ) ;
+		CPropVehicleDriveable* pVehicle = dynamic_cast< CPropVehicleDriveable* >( info.GetAttacker() );
 		if ( pVehicle && pVehicle->GetDriver() && pVehicle->GetDriver()->IsPlayer() )
 		{
-			pPlayer = assert_cast<CBasePlayer *>( pVehicle->GetDriver() );
+			pPlayer = assert_cast< CBasePlayer* >( pVehicle->GetDriver() );
 		}
 	}
 
 	if ( pPlayer != NULL )
 	{
 		// Elites drop alt-fire ammo, so long as they weren't killed by dissolving.
-		if( IsElite() )
+		if ( IsElite() )
 		{
 #ifdef HL2_EPISODIC
 			if ( HasSpawnFlags( SF_COMBINE_NO_AR2DROP ) == false )
 #endif
 			{
 #ifdef MAPBASE
-				CBaseEntity *pItem;
-				if (GetActiveWeapon() && FClassnameIs(GetActiveWeapon(), "weapon_smg1"))
-					pItem = DropItem( "item_ammo_smg1_grenade", WorldSpaceCenter()+RandomVector(-4,4), RandomAngle(0,360) );
+				CBaseEntity* pItem;
+				if ( GetActiveWeapon() && FClassnameIs( GetActiveWeapon(), "weapon_smg1" ) )
+					pItem = DropItem( "item_ammo_smg1_grenade", WorldSpaceCenter() + RandomVector( -4, 4 ), RandomAngle( 0, 360 ) );
 				else
-					pItem = DropItem( "item_ammo_ar2_altfire", WorldSpaceCenter()+RandomVector(-4,4), RandomAngle(0,360) );
+					pItem = DropItem( "item_ammo_ar2_altfire", WorldSpaceCenter() + RandomVector( -4, 4 ), RandomAngle( 0, 360 ) );
 #else
-				CBaseEntity *pItem = DropItem( "item_ammo_ar2_altfire", WorldSpaceCenter()+RandomVector(-4,4), RandomAngle(0,360) );
+				CBaseEntity* pItem = DropItem( "item_ammo_ar2_altfire", WorldSpaceCenter() + RandomVector( -4, 4 ), RandomAngle( 0, 360 ) );
 #endif
 
 				if ( pItem )
 				{
-					IPhysicsObject *pObj = pItem->VPhysicsGetObject();
+					IPhysicsObject* pObj = pItem->VPhysicsGetObject();
 
 					if ( pObj )
 					{
-						Vector			vel		= RandomVector( -64.0f, 64.0f );
-						AngularImpulse	angImp	= RandomAngularImpulse( -300.0f, 300.0f );
+						Vector			vel = RandomVector( -64.0f, 64.0f );
+						AngularImpulse	angImp = RandomAngularImpulse( -300.0f, 300.0f );
 
-						vel[2] = 0.0f;
+						vel[ 2 ] = 0.0f;
 						pObj->AddVelocity( &vel, &angImp );
 					}
 
-					if( info.GetDamageType() & DMG_DISSOLVE )
+					if ( info.GetDamageType() & DMG_DISSOLVE )
 					{
-						CBaseAnimating *pAnimating = dynamic_cast<CBaseAnimating*>(pItem);
+						CBaseAnimating* pAnimating = dynamic_cast< CBaseAnimating* >( pItem );
 
-						if( pAnimating )
+						if ( pAnimating )
 						{
 							pAnimating->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
 						}
@@ -360,21 +375,21 @@ void CNPC_CombineS::Event_Killed( const CTakeDamageInfo &info )
 			}
 		}
 
-		CHalfLife2 *pHL2GameRules = static_cast<CHalfLife2 *>(g_pGameRules);
+		CHalfLife2* pHL2GameRules = static_cast< CHalfLife2* >( g_pGameRules );
 
 		// Attempt to drop health
 		if ( pHL2GameRules->NPC_ShouldDropHealth( pPlayer ) )
 		{
-			DropItem( "item_healthvial", WorldSpaceCenter()+RandomVector(-4,4), RandomAngle(0,360) );
+			DropItem( "item_healthvial", WorldSpaceCenter() + RandomVector( -4, 4 ), RandomAngle( 0, 360 ) );
 			pHL2GameRules->NPC_DroppedHealth();
 		}
-		
+
 		if ( HasSpawnFlags( SF_COMBINE_NO_GRENADEDROP ) == false )
 		{
 			// Attempt to drop a grenade
 			if ( pHL2GameRules->NPC_ShouldDropGrenade( pPlayer ) )
 			{
-				DropItem( "weapon_frag", WorldSpaceCenter()+RandomVector(-4,4), RandomAngle(0,360) );
+				DropItem( "weapon_frag", WorldSpaceCenter() + RandomVector( -4, 4 ), RandomAngle( 0, 360 ) );
 				pHL2GameRules->NPC_DroppedGrenade();
 			}
 		}
@@ -388,7 +403,7 @@ void CNPC_CombineS::Event_Killed( const CTakeDamageInfo &info )
 // Input  : &info - 
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
-bool CNPC_CombineS::IsLightDamage( const CTakeDamageInfo &info )
+bool CNPC_CombineS::IsLightDamage( const CTakeDamageInfo& info )
 {
 	return BaseClass::IsLightDamage( info );
 }
@@ -398,14 +413,14 @@ bool CNPC_CombineS::IsLightDamage( const CTakeDamageInfo &info )
 // Input  : &info - 
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
-bool CNPC_CombineS::IsHeavyDamage( const CTakeDamageInfo &info )
+bool CNPC_CombineS::IsHeavyDamage( const CTakeDamageInfo& info )
 {
 	// Combine considers AR2 fire to be heavy damage
-	if ( info.GetAmmoType() == GetAmmoDef()->Index("AR2") )
+	if ( info.GetAmmoType() == GetAmmoDef()->Index( "AR2" ) )
 		return true;
 
 	// 357 rounds are heavy damage
-	if ( info.GetAmmoType() == GetAmmoDef()->Index("357") )
+	if ( info.GetAmmoType() == GetAmmoDef()->Index( "357" ) )
 		return true;
 
 	// Shotgun blasts where at least half the pellets hit me are heavy damage
@@ -417,7 +432,7 @@ bool CNPC_CombineS::IsHeavyDamage( const CTakeDamageInfo &info )
 	}
 
 	// Rollermine shocks
-	if( (info.GetDamageType() & DMG_SHOCK) && hl2_episodic.GetBool() )
+	if ( ( info.GetDamageType() & DMG_SHOCK ) && hl2_episodic.GetBool() )
 	{
 		return true;
 	}
@@ -446,7 +461,7 @@ Activity CNPC_CombineS::NPC_TranslateActivity( Activity eNewActivity )
 //---------------------------------------------------------
 BEGIN_DATADESC( CNPC_CombineS )
 
-	DEFINE_KEYFIELD( m_iUseMarch, FIELD_INTEGER, "usemarch" ),
+DEFINE_KEYFIELD( m_iUseMarch, FIELD_INTEGER, "usemarch" ),
 
 END_DATADESC()
 #endif
