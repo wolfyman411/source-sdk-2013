@@ -16827,8 +16827,12 @@ void CAI_BaseNPC::OnUnFrozen( void ) {
 }
 
 void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
-	if ( inputdata.value.Bool() && !IsFrozen() ) OnFrozen();
-	else if ( !inputdata.value.Bool() && IsFrozen() ) OnUnFrozen();
+	if ( inputdata.value.Bool() ) {
+		if ( !IsFrozen() ) OnFrozen();
+	}
+	else {
+		if ( IsFrozen() ) OnUnFrozen();
+	}
 }
 
 void CAI_BaseNPC::InputSetTemperature( inputdata_t& inputdata ) {

@@ -5714,13 +5714,13 @@ void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
 	if ( pOther->IsPlayer() ) {
 		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
 		if ( pPlayer ) {
-			pPlayer->m_flFreezeMultiplier = -1.25;
+			pPlayer->m_flFreezeMultiplier = -1.25f;
 		}
 	}
 	else if ( pOther->IsNPC() ) {
 		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
 		if ( pNPC ) {
-			pNPC->m_flFreezeMultiplier = -1.25;
+			pNPC->m_flFreezeMultiplier = -1.25f;
 		}
 	}
 }
