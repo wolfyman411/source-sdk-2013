@@ -616,6 +616,9 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 		DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
 		DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
 
+		DEFINE_OUTPUT( m_OnTemperatureHurt, "OnTemperatureHurt" ),
+		DEFINE_OUTPUT( m_OnChangeMinTemperature, "OnChangeMinTemperature" ),
+		DEFINE_OUTPUT( m_OnChangeMaxTemperature, "OnChangeMaxTemperature" ),
 END_DATADESC()
 
 #ifdef MAPBASE_VSCRIPT
@@ -1238,6 +1241,8 @@ void CHL2_Player::HandleTemperature( void ) {
 			dmgInfo.SetInflictor( this );
 
 			TakeDamage( dmgInfo );
+
+			m_OnTemperatureHurt.FireOutput( this, this );
 			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
 		}	
 	}
@@ -1245,10 +1250,12 @@ void CHL2_Player::HandleTemperature( void ) {
 
 void CHL2_Player::SetMaxTemperature( inputdata_t& inputdata ) {
 	m_flMaxTemperature = inputdata.value.Float();
+	m_OnChangeMaxTemperature.FireOutput( this, this );
 }
 
 void CHL2_Player::SetMinTemperature( inputdata_t& inputdata ) {
 	m_flMinTemperature = inputdata.value.Float();
+	m_OnChangeMinTemperature.FireOutput( this, this );
 }
 
 void CHL2_Player::StartAdmireGlovesAnimation( void )
@@ -4654,6 +4661,7 @@ BEGIN_DATADESC( CLogicPlayerProxy )
 	DEFINE_OUTPUT( m_RequestedPlayerFlashBattery, "PlayerFlashBattery" ),
 	DEFINE_OUTPUT( m_OnPlayerSpawn, "OnPlayerSpawn" ),
 #endif
+
 	DEFINE_INPUTFUNC( FIELD_VOID,	"RequestPlayerHealth",	InputRequestPlayerHealth ),
 	DEFINE_INPUTFUNC( FIELD_VOID,	"SetFlashlightSlowDrain",	InputSetFlashlightSlowDrain ),
 	DEFINE_INPUTFUNC( FIELD_VOID,	"SetFlashlightNormalDrain",	InputSetFlashlightNormalDrain ),

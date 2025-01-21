@@ -373,6 +373,10 @@ public:
 	void				SetMinTemperature( inputdata_t& inputdata );
 	void				HandleTemperature( void );
 
+	COutputEvent		m_OnTemperatureHurt;
+	COutputEvent		m_OnChangeMaxTemperature;
+	COutputEvent		m_OnChangeMinTemperature;
+
 protected:
 	virtual void		PreThink( void );
 	virtual	void		PostThink( void );
