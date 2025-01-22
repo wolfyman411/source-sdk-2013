@@ -51,7 +51,6 @@
 		"hunters_to_run_over" : "Ep2 Counter: Hunters to run over before they dodge"
 		"friendly_fire_override" : "Mapbase: Friendly fire override (on = enabled, off = disabled, dead = no override)"
 		"antlion_noinstakill" : "Mapbase: Antlion-to-soldier insta-kill disabled"
-		"gordon_freezing" : "IF: Gordon is freezing"
 	]
 ]
 
@@ -164,7 +163,11 @@
 	FreezeTemperature(float) : "Freeze Temperature" : "25.0" : "The temperature at which this NPC will freeze. Used for temperature system."
 	UnFreezeTemperature(float) : "Unfreeze Temperature" : "30.0" : "The temperature at which this NPC will unfreeze. Used for temperature system."
 	IgniteTemperature(float) : "Ignite Temperature" : "40.0" : "The temperature at which this NPC will ignite. Used for temperature system."
-	Frozen(bool) : "Frozen" : "0" : "Whether this NPC is frozen. Used for temperature system."
+	Frozen(choices) : "Frozen" : 0 : "Whether this NPC is frozen. Used for temperature system." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 
 	// Outputs
 	output OnDamaged(void) : "Fired when this NPC takes damage."
@@ -239,7 +242,7 @@
 	input SetFriendlyFire(integer) : "Overrides our friendly fire. 0 = No friendly fire, 1 = Friendly fire enabled, 2 = Default (No override)"
 	input SetDynamicInteractions(integer) : "Sets whether we could use dynamic interactions. 0 = Disabled, 1 = Enabled, 2 = Default."
 	input SetProficiencyOverride(integer) : "Sets our weapon's proficiency. Use integer."
-	input SetForceServerRagdoll(bool) : "Sets whether we should be a serverside ragdoll when we die."
+	input SetForceServerRagdoll(boolean) : "Sets whether we should be a serverside ragdoll when we die."
 
 	input SetThinkNPC(float) : "Sets this entity's general think function to CallNPCThink. This is only necessary if it was disabled by SetThinkNull before."
 
@@ -249,7 +252,7 @@
 	input SetSpeedModifier(float) : "Set a float value to multiply movement animation speed."
 
 	input SetHintGroup(string) : "Sets this NPC's hint group."
-	input SetFrozen(bool) : "Freezes or unfreezes this NPC."
+	input SetFrozen(boolean) : "Freezes or unfreezes this NPC."
 	input SetTemperature(float) : "Sets the temperature of this NPC."
 	input SetMaxTemperature(float) : "Sets the maximum temperature of this NPC."
 	input SetMinTemperature(float) : "Sets the minimum temperature of this NPC."
