@@ -242,7 +242,7 @@
 	input SetFriendlyFire(integer) : "Overrides our friendly fire. 0 = No friendly fire, 1 = Friendly fire enabled, 2 = Default (No override)"
 	input SetDynamicInteractions(integer) : "Sets whether we could use dynamic interactions. 0 = Disabled, 1 = Enabled, 2 = Default."
 	input SetProficiencyOverride(integer) : "Sets our weapon's proficiency. Use integer."
-	input SetForceServerRagdoll(boolean) : "Sets whether we should be a serverside ragdoll when we die."
+	input SetForceServerRagdoll(integer) : "Sets whether we should be a serverside ragdoll when we die."
 
 	input SetThinkNPC(float) : "Sets this entity's general think function to CallNPCThink. This is only necessary if it was disabled by SetThinkNull before."
 
@@ -252,7 +252,7 @@
 	input SetSpeedModifier(float) : "Set a float value to multiply movement animation speed."
 
 	input SetHintGroup(string) : "Sets this NPC's hint group."
-	input SetFrozen(boolean) : "Freezes or unfreezes this NPC."
+	input SetFrozen(integer) : "Freezes or unfreezes this NPC."
 	input SetTemperature(float) : "Sets the temperature of this NPC."
 	input SetMaxTemperature(float) : "Sets the maximum temperature of this NPC."
 	input SetMinTemperature(float) : "Sets the minimum temperature of this NPC."
