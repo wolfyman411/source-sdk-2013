@@ -4355,7 +4355,7 @@ bool CAI_BaseNPC::CheckPVSCondition()
 
 void CAI_BaseNPC::NPCThink( void )
 {
-	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) ) {
+	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) && ( GlobalEntity_GetIndex( "game_temperature" ) == 2 || GlobalEntity_GetIndex( "game_temperature" ) == 1 ) ) {
 		HandleTemperature();
 	}
 

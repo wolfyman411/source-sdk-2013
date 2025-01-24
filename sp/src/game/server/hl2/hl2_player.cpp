@@ -1196,6 +1196,8 @@ ConVar sv_temperature_damage_temp_min( "sv_temperature_damage_temp_min", "-5.0",
 ConVar sv_temperature_damage_temp_max( "sv_temperature_damage_temp_max", "40.0", FCVAR_REPLICATED, "Above what temperature should the player start taking damage" );
 
 void CHL2_Player::HandleTemperature( void ) {
+	if ( GlobalEntity_GetIndex( "game_temperature" ) == -1 || GlobalEntity_GetIndex( "game_temperature" ) == 1 ) return;
+
 	if ( sv_infinite_aux_power.GetBool() ) {
 		SetMaxSpeed( HL2_NORM_SPEED );
 		m_flTemperature = m_flMaxTemperature;
