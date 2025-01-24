@@ -612,7 +612,7 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 
 		DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
 		DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
-		DEFINE_FIELD( m_flTemperatureNextHurt, FIELD_FLOAT ),
+		DEFINE_FIELD( m_flTemperatureNextHurt, FIELD_TIME ),
 		DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
 		DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
 
