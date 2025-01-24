@@ -3392,9 +3392,16 @@ bool CAI_BaseNPC::PreThink( void )
 		NDebugOverlay::Line( EyePosition(), m_hOpeningDoor->WorldSpaceCenter(), 255, 255, 255, false, .1 );
 	}
 
-	if ( IsFrozen() ) {
-		return false;
+	if ( ai_use_temperature.GetBool() ) {
+		if ( m_flTemperature <= m_flFreezeTemperature * 1.2f ) {
+			m_flPlaybackRate = 0.6;
+		}
+
+		if ( IsFrozen() ) {
+			return false;
+		}
 	}
+	
 
 	return true;
 }
@@ -16786,10 +16793,6 @@ void CAI_BaseNPC::HandleTemperature( void ) {
 
 	if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
 	else if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
-
-	if ( m_flTemperature <= m_flFreezeTemperature * 0.9f ) {
-		//SetPlaybackRate( 0.0f );
-	}
 
 	if ( m_flTemperature <= m_flFreezeTemperature ) {
 		if ( !IsFrozen() ) {
