@@ -4363,13 +4363,7 @@ bool CAI_BaseNPC::CheckPVSCondition()
 
 void CAI_BaseNPC::NPCThink( void )
 {
-	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) ) {
-		if ( !DEBUG ) {
-			if ( GlobalEntity_GetIndex( "game_temperature" ) == 2 || GlobalEntity_GetIndex( "game_temperature" ) == 1 ) {
-				return;
-			}
-		}
-		DevMsg( "Running Temperature...\n" );
+	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NPC ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		HandleTemperature();
 	}
 

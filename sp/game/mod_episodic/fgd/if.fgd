@@ -1,68 +1,6 @@
 @include "base.fgd"
 @include "halflife2.fgd"
 
-@NPCClass base(BaseCombine) studio() = npc_combine_s : "Combine Soldier"
-[
-	model(choices) : "Model" : "models/combine_soldier.mdl" : "Sets this soldier's model." =
-	[
-		"models/combine_soldier.mdl" : "Regular Soldier"
-		"models/combine_soldier_prisonguard.mdl" : "Nova Prospekt Soldier"
-		"models/combine_super_soldier.mdl" : "Elite Soldier"
-		"models/combine_soldirt.mdl" : "Dirty Soldier/EP2 Soldier"
-		"models/combine_super_soldirt.mdl" : "Dirty Elite Soldier/EP2 Elite"
-		"models/combine_soldirt_prisonguard.mdl" : "Dirty Nova Prospekt Soldier"
-		"models/baresoldier/baresoldier.mdl" : "Stripped Soldier"
-	]
-
-	tacticalvariant(choices) : "Tactical Variant" : "0" =
-	[
-		"0" : "Normal Tactics"
-		"1" : "Pressure the enemy (Keep advancing)"
-		"2" : "Pressure until within 30ft, then normal"
-		"3" : "Grenade Happy"
-	]
-
-	usemarch(choices) : "Use March" : "0" : "When true, will use a special walking animation which blends itself between the idle walking animation and the regular walking animation, allowing for a variety of casual walking animations instead of the standard walk. Used in EP2 for the soldiers in the bridge convoy. WARNING: This animation only has a north component, so it can't sidestep or walk backwards. This keyvalue was previously named 'Walk Easy', but it was changed to avoid confusion with ACT_WALK_EASY, the main idle walking animation." =
-	[
-		"0" : "No"
-		"2" : "Yes"
-	]
-
-	input Assault(target_destination) : "Start an assault. Parameter passed in should be the name of the rally point."
-	input SetTacticalVariant(integer) : "Sets this soldier's tactical variant based on integer value."
-]
-
-@PointClass base(EnvGlobal) iconsprite("editor/env_global.vmt") = env_global :
-	"An entity to control a game-specific global states."
-[
-	globalstate(choices) : "Global State to Set" =
-	[
-		"gordon_precriminal" : "Gordon pre-criminal"
-		"antlion_allied" : "Antlions are player allies"
-//		"player_stealth" : "Player in APC is disguised as combine"
-		"suit_no_sprint" : "Suit sprint function not yet enabled"
-		"super_phys_gun" : "Super phys gun is enabled (Mapbase: Counter 1 prevents item dissolve)"
-		"friendly_encounter" : "Friendly encounter sequence (lower weapons, etc.)"
-//		"citizens_passive" : "Citizens are *not* player allies (cannot be commanded)"
-		"gordon_invulnerable" : "Gordon is invulnerable"
-		"no_seagulls_on_jeep" : "Don't spawn seagulls on the jeep"
-		"ep2_alyx_injured" : "Episode 2: Alyx injured"
-		"ep_alyx_darknessmode" : "Episodic: Alyx darkness mode"
-		"hunters_to_run_over" : "Ep2 Counter: Hunters to run over before they dodge"
-		"friendly_fire_override" : "Mapbase: Friendly fire override (on = enabled, off = disabled, dead = no override)"
-		"antlion_noinstakill" : "Mapbase: Antlion-to-soldier insta-kill disabled"
-		"game_temperature" : "Infinite Finality: Temperature system enabled"
-	]
-]
-
-@SolidClass base(Trigger, Targetname) = trigger_freeze :
-	"A trigger volume that freezes the player."
-[
-	FreezeMultiplier(float) : "Freeze Multiplayer" : "1.25" : "The rate at which the player freezes."
-]
-
-@PointClass base(Weapon) studio("models/weapons/w_iceaxe.mdl") = weapon_iceaxe: "Ice Axe" []
-
 @BaseClass base(Targetname, Parentname, Angles, RenderFields, DamageFilter, ResponseContext, Shadow, CombatCharacterFields, StudiomodelBase) color(0 200 200) = BaseNPC
 [
 	target(target_destination) : "Target Path Corner" : : "If set, the name of a path corner entity that this NPC will walk to, after spawning."
@@ -261,4 +199,144 @@
 	input SetIgniteTemperature(float) : "Sets the temperature at which this NPC will ignite."
 ]
 
+@NPCClass base(BaseCombine) studio() = npc_combine_s : "Combine Soldier"
+[
+	model(choices) : "Model" : "models/combine_soldier.mdl" : "Sets this soldier's model." =
+	[
+		"models/combine_soldier.mdl" : "Regular Soldier"
+		"models/combine_soldier_prisonguard.mdl" : "Nova Prospekt Soldier"
+		"models/combine_super_soldier.mdl" : "Elite Soldier"
+		"models/combine_soldirt.mdl" : "Dirty Soldier/EP2 Soldier"
+		"models/combine_super_soldirt.mdl" : "Dirty Elite Soldier/EP2 Elite"
+		"models/combine_soldirt_prisonguard.mdl" : "Dirty Nova Prospekt Soldier"
+		"models/baresoldier/baresoldier.mdl" : "Stripped Soldier"
+	]
+
+	tacticalvariant(choices) : "Tactical Variant" : "0" =
+	[
+		"0" : "Normal Tactics"
+		"1" : "Pressure the enemy (Keep advancing)"
+		"2" : "Pressure until within 30ft, then normal"
+		"3" : "Grenade Happy"
+	]
+
+	usemarch(choices) : "Use March" : "0" : "When true, will use a special walking animation which blends itself between the idle walking animation and the regular walking animation, allowing for a variety of casual walking animations instead of the standard walk. Used in EP2 for the soldiers in the bridge convoy. WARNING: This animation only has a north component, so it can't sidestep or walk backwards. This keyvalue was previously named 'Walk Easy', but it was changed to avoid confusion with ACT_WALK_EASY, the main idle walking animation." =
+	[
+		"0" : "No"
+		"2" : "Yes"
+	]
+
+	input Assault(target_destination) : "Start an assault. Parameter passed in should be the name of the rally point."
+	input SetTacticalVariant(integer) : "Sets this soldier's tactical variant based on integer value."
+]
+
+@PointClass base(EnvGlobal) iconsprite("editor/env_global.vmt") = env_global :
+	"An entity to control a game-specific global states."
+[
+	globalstate(choices) : "Global State to Set" =
+	[
+		"gordon_precriminal" : "Gordon pre-criminal"
+		"antlion_allied" : "Antlions are player allies"
+//		"player_stealth" : "Player in APC is disguised as combine"
+		"suit_no_sprint" : "Suit sprint function not yet enabled"
+		"super_phys_gun" : "Super phys gun is enabled (Mapbase: Counter 1 prevents item dissolve)"
+		"friendly_encounter" : "Friendly encounter sequence (lower weapons, etc.)"
+//		"citizens_passive" : "Citizens are *not* player allies (cannot be commanded)"
+		"gordon_invulnerable" : "Gordon is invulnerable"
+		"no_seagulls_on_jeep" : "Don't spawn seagulls on the jeep"
+		"ep2_alyx_injured" : "Episode 2: Alyx injured"
+		"ep_alyx_darknessmode" : "Episodic: Alyx darkness mode"
+		"hunters_to_run_over" : "Ep2 Counter: Hunters to run over before they dodge"
+		"friendly_fire_override" : "Mapbase: Friendly fire override (on = enabled, off = disabled, dead = no override)"
+		"antlion_noinstakill" : "Mapbase: Antlion-to-soldier insta-kill disabled"
+		"game_temperature" : "Infinite Finality: Temperature system enabled"
+	]
+]
+
+@SolidClass base(Trigger, Targetname) = trigger_freeze :
+	"A trigger volume that freezes the player."
+[
+	FreezeMultiplier(float) : "Freeze Multiplayer" : "1.25" : "The rate at which the player freezes."
+]
+
 @PointClass base(Weapon) studio("models/weapons/w_iceaxe.mdl") = weapon_iceaxe: "Ice Axe" []
+
+@BaseClass = Targetname
+[
+	targetname(target_source) : "Name" : : "The name that other entities refer to this entity by."
+
+	vscripts(string) : "Entity Scripts" : "" : "Name(s) of script files that are executed after all entities have spawned."
+	thinkfunction(string) : "Script think function" : "" : "Name of a function in this entity's script scope which will be called automatically."
+
+	input RunScriptFile(string) : "Execute a game script file from disk"
+	input RunScriptCode(string) : "Execute a string of script source code"
+	input RunScriptCodeQuotable(string) : "Execute a string of script source code which converts double apostrophes ('') to quotation marks for strings"
+	input CallScriptFunction(string) : "Call a named function from this entity's Activation Script"
+	input ClearScriptScope(void) : "Clears this entity's script scope"
+
+
+	// Inputs
+	input Kill(void) : "Removes this entity from the world."
+	input KillHierarchy(void) : "Removes this entity and all its children from the world."
+	input KillIfNotVisible(void) : "Removes this entity if it is not in a player's viewcone."
+	input KillWhenNotVisible(float) : "Removes this entity when it is not in a player's viewcone. You can pass a time for when this should start."
+	input AddOutput(string) : "Adds an entity I/O connection or a keyvalue to this entity. Format: '<output name> <targetname>:<inputname>:<parameter>:<delay>:<max times to fire (-1 == infinite)>'. You could also use it on regular keyvalues: '<key name> <key value>'. Very dangerous, use with care."
+	input ChangeVariable(string) : "Similar to AddOutput, except it changes an internal variable similar to logic_datadesc_accessor instead. Very dangerous, use with care."
+	input FireUser1(void) : "Causes this entity's OnUser1 output to be fired."
+	input FireUser2(void) : "Causes this entity's OnUser2 output to be fired."
+	input FireUser3(void) : "Causes this entity's OnUser3 output to be fired."
+	input FireUser4(void) : "Causes this entity's OnUser4 output to be fired."
+	// Mapbase -- New User I
+	input PassUser1(string) : "Causes this entity's OutUser1 output to be fired. Can pass any parameter."
+	input PassUser2(string) : "Causes this entity's OutUser2 output to be fired. Can pass any parameter."
+	input PassUser3(string) : "Causes this entity's OutUser3 output to be fired. Can pass any parameter."
+	input PassUser4(string) : "Causes this entity's OutUser4 output to be fired. Can pass any parameter."
+
+	input FireRandomUser(void) : "Fires OnUser1, OnUser2, OnUser3, or OnUser4 with a 25% chance of each."
+	input PassRandomUser(string) : "Fires OutUser1, OutUser2, OutUser3, or OutUser4 with a 25% chance of each. Can pass any parameter."
+
+	// Mapbase -- BaseEntity I/O
+	input FireOutput(string) : "Fires the named output on this entity. Format: '<output name>:<activator>:<caller>:<parameter>:<delay>' (OnDeath:hl3cardgame:gaben). Everything beyond the output name is optional."
+	input RemoveOutput(string) : "Removes all instances of the named output on this entity. Wildcards are supported, meaning you could just pass '*' to wipe all outputs from this entity."
+	input AcceptInput(string) : "Fires the named input on this entity. Format: '<input name>:<parameter>:<activator>:<caller>:<output ID>' (SetTarget:cheese). Everything beyond the input name is optional. Mind the fact this is arranged differently from FireOutput, having the parameter right after the input name."
+	input CancelPending(void) : "Cancels any events fired by this entity that are currently pending in the I/O event queue."
+	input SetLocalOrigin(vector) : "Sets this entity's origin in local space, relative to its parent if one exists. Otherwise relative to the world."
+	input SetAbsOrigin(vector) : "Sets this entity's origin in the map, always relative to the world origin."
+	input SetLocalVelocity(vector) : "Sets this entity's current velocity."
+	input SetLocalAngularVelocity(vector) : "Sets this entity's current angular velocity."
+
+	input AddSpawnFlags(integer) : "Adds spawnflag(s) to this entity. Many spawnflags have their respective numbers suffixed in this FGD."
+	input RemoveSpawnFlags(integer) : "Removes spawnflag(s) from this entity. Many spawnflags have their respective numbers suffixed in this FGD."
+
+	input AddSolidFlags(integer) : "Adds solid flags to this entity."
+	input RemoveSolidFlags(integer) : "Removes solid flags from this entity."
+
+	input SetHealth(integer) : "Sets this entity's health."
+	input AddHealth(integer) : "Adds to this entity's health."
+	input RemoveHealth(integer) : "Removes from this entity's health."
+
+	input SetMaxHealth(integer) : "Sets this entity's max health."
+
+	input SetEntityName(target_destination) : "Sets this entity's name that other entities should refer to it by."
+
+	input SetTarget(target_destination) : "Sets this entity's target. This is specific to certain entities, particularly logic entities that involve a target."
+	input SetOwnerEntity(target_destination) : "Sets this entity's owner entity. This has nothing to do with parenting and has more to do with collision and kill credits."
+
+	input SetThinkNull(void) : "Sets this entity's general think function to null. Behavior varies from entity to entity.."
+
+	input Use(void) : "More or less replicates the player interacting with an entity. (+USE)"
+	input Touch(target_destination) : "Simulates this entity touching the specified entity."
+
+	output OnKilled(void) : "Fires when this entity is removed with the 'Kill' input."
+
+	// Outputs
+	output OnUser1(void) : "Fires in response to FireUser1 input."
+	output OnUser2(void) : "Fires in response to FireUser2 input."
+	output OnUser3(void) : "Fires in response to FireUser3 input."
+	output OnUser4(void) : "Fires in response to FireUser4 input."
+	// Mapbase -- New User O
+	output OutUser1(string) : "Fires in response to PassUser1 input. Can pass any parameter."
+	output OutUser2(string) : "Fires in response to PassUser2 input. Can pass any parameter."
+	output OutUser3(string) : "Fires in response to PassUser3 input. Can pass any parameter."
+	output OutUser4(string) : "Fires in response to PassUser4 input. Can pass any parameter."
+]
