@@ -873,6 +873,10 @@ HSCRIPT CAI_BaseNPC::VScriptGetSquad()
 
 bool CAI_BaseNPC::PassesDamageFilter( const CTakeDamageInfo &info )
 {
+	if ( ai_use_temperature.GetBool() && IsFrozen() ) {
+		return false;
+	}
+
 	if ( ai_block_damage.GetBool() )
 		return false;
 	// FIXME: hook a friendly damage filter to the npc instead?
