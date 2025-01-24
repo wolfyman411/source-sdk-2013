@@ -5696,13 +5696,14 @@ void CTriggerFreeze::Spawn( void ) {
 
 
 void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
-	if ( pOther->IsPlayer() ) {
+	if ( GlobalEntity_GetIndex( "game_temperature" ) == -1 ) return;
+
+	if ( pOther->IsPlayer() && ( GlobalEntity_GetIndex( "game_temperature" ) == 0 || GlobalEntity_GetIndex( "game_temperature" ) == 2 ) ) {
 		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
 		if ( pPlayer ) {
 			pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
 		}
-	}
-	else if ( pOther->IsNPC() ) {
+	} else if ( pOther->IsNPC() && ( GlobalEntity_GetIndex( "game_temperature" ) == 1 || GlobalEntity_GetIndex( "game_temperature" ) == 2 ) ) {
 		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
 		if ( pNPC ) {
 			pNPC->m_flFreezeMultiplier = m_flFreezeMultiplier;
@@ -5711,13 +5712,15 @@ void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
 }
 
 void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
-	if ( pOther->IsPlayer() ) {
+	if ( GlobalEntity_GetIndex( "game_temperature" ) == -1 ) return;
+
+	if ( pOther->IsPlayer() && ( GlobalEntity_GetIndex("game_temperature") == 0 || GlobalEntity_GetIndex( "game_temperature" ) == 2 ) ) {
 		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
 		if ( pPlayer ) {
 			pPlayer->m_flFreezeMultiplier = -1.25f;
 		}
 	}
-	else if ( pOther->IsNPC() ) {
+	else if ( pOther->IsNPC() && ( GlobalEntity_GetIndex( "game_temperature" ) == 1 || GlobalEntity_GetIndex( "game_temperature" ) == 2 ) ) {
 		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
 		if ( pNPC ) {
 			pNPC->m_flFreezeMultiplier = -1.25f;
