@@ -5696,14 +5696,15 @@ void CTriggerFreeze::Spawn( void ) {
 
 
 void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
-	if ( GlobalEntity_GetIndex( "game_temperature" ) == -1 ) return;
+	if ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NONE ) ) return;
 
-	if ( pOther->IsPlayer() && ( GlobalEntity_GetIndex( "game_temperature" ) == 0 || GlobalEntity_GetIndex( "game_temperature" ) == 2 ) ) {
+	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
 		if ( pPlayer ) {
 			pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
 		}
-	} else if ( pOther->IsNPC() && ( GlobalEntity_GetIndex( "game_temperature" ) == 1 || GlobalEntity_GetIndex( "game_temperature" ) == 2 ) ) {
+	}
+	else if ( pOther->IsNPC() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NPC ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
 		if ( pNPC ) {
 			pNPC->m_flFreezeMultiplier = m_flFreezeMultiplier;
@@ -5712,15 +5713,15 @@ void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
 }
 
 void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
-	if ( GlobalEntity_GetIndex( "game_temperature" ) == -1 ) return;
+	if ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NONE) ) return;
 
-	if ( pOther->IsPlayer() && ( GlobalEntity_GetIndex("game_temperature") == 0 || GlobalEntity_GetIndex( "game_temperature" ) == 2 ) ) {
+	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
 		if ( pPlayer ) {
 			pPlayer->m_flFreezeMultiplier = -1.25f;
 		}
 	}
-	else if ( pOther->IsNPC() && ( GlobalEntity_GetIndex( "game_temperature" ) == 1 || GlobalEntity_GetIndex( "game_temperature" ) == 2 ) ) {
+	else if ( pOther->IsNPC() && ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NPC) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
 		if ( pNPC ) {
 			pNPC->m_flFreezeMultiplier = -1.25f;
