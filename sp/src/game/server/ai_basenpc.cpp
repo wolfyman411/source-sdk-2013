@@ -3392,6 +3392,10 @@ bool CAI_BaseNPC::PreThink( void )
 		NDebugOverlay::Line( EyePosition(), m_hOpeningDoor->WorldSpaceCenter(), 255, 255, 255, false, .1 );
 	}
 
+	if ( IsFrozen() ) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -16809,21 +16813,15 @@ void CAI_BaseNPC::OnFrozen( void ) {
 	m_bIsFrozen = true;
 	m_OnFrozen.FireOutput( this, this );
 
-	SetCondition( COND_NPC_FREEZE );
-	SetMoveType( MOVETYPE_NONE );
-	SetGravity( 0.0f );
-	SetLocalAngularVelocity( vec3_angle );
-	SetAbsVelocity( vec3_origin );
+	SetRenderColor( 0, 0, 255 );
+	SetActivity( ACT_IDLE );
 }
 
 void CAI_BaseNPC::OnUnFrozen( void ) {
 	m_bIsFrozen = false;
 	m_OnUnFrozen.FireOutput( this, this );
 
-	SetCondition( COND_NPC_UNFREEZE );
-	m_Activity = ACT_RESET;
-	SetMoveType( MOVETYPE_STEP );
-	SetGravity( 1.0f );
+	SetRenderColor( 255, 255, 255 );
 }
 
 void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
