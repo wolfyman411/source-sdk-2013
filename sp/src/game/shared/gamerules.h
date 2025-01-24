@@ -434,13 +434,16 @@ public:
 
 #ifndef CLIENT_DLL
 	virtual bool IsTemperatureEnabled( int mode ) {
-		if ( DEBUG ) return true;
+	#ifndef _DEBUG
 		if ( GlobalEntity_GetIndex( "game_temperature" ) == TEMPERATURE_MODE_NONE ) return false;
 		else if ( GlobalEntity_GetIndex( "game_temperature" ) == TEMPERATURE_MODE_ALL ) return true;
 
 		if ( mode > 2 || mode < -1 ) DevMsg( "Mode must be between -1 and 2!" ); return false;
 
 		return GlobalEntity_GetIndex( "game_temperature" ) == mode;
+	#endif
+
+		return true;
 	}
 #endif
 

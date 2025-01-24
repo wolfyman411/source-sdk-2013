@@ -5696,7 +5696,7 @@ void CTriggerFreeze::Spawn( void ) {
 
 
 void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
-	if ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NONE ) ) return;
+	if ( !PassesTriggerFilters( pOther ) ) return;
 
 	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
@@ -5713,7 +5713,7 @@ void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
 }
 
 void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
-	if ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NONE) ) return;
+	if ( !PassesTriggerFilters( pOther ) ) return;
 
 	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );

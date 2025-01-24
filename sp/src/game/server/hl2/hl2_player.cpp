@@ -1194,7 +1194,9 @@ ConVar sv_temperature_water_affect( "sv_temperature_water_affect", "1", FCVAR_RE
 ConVar sv_temperature_take_damage( "sv_temperature_take_damage", "1", FCVAR_REPLICATED, "Should the player take damage depending on his temperature." );
 ConVar sv_temperature_damage_temp_min( "sv_temperature_damage_temp_min", "-5.0", FCVAR_REPLICATED, "Below what temperature should the player start taking damage");
 ConVar sv_temperature_damage_temp_max( "sv_temperature_damage_temp_max", "40.0", FCVAR_REPLICATED, "Above what temperature should the player start taking damage" );
+ConVar sv_temperature_debug( "sv_temperature_debug", "0", FCVAR_REPLICATED, "Should the debugging mode for the temperature system be enabled" );
 
+int nextPrint = 0;
 void CHL2_Player::HandleTemperature( void ) {
 	if ( !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) return;
 
@@ -1220,6 +1222,13 @@ void CHL2_Player::HandleTemperature( void ) {
 		}
 	}
 
+	if ( sv_temperature_debug.GetBool() && nextPrint && nextPrint <= gpGlobals->curtime  ) {
+		ConDColorMsg( Color( 100, 100, 100 ), "Player Temperature %f\n", m_flTemperature );
+		ConDColorMsg( Color( 100, 100, 100 ), "Player Temperature Multiplier %f\n", m_flFreezeMultiplier );
+		ConDColorMsg( Color( 100, 100, 100 ), "Player Minimum Temperature %f\n", m_flMinTemperature );
+		ConDColorMsg( Color( 100, 100, 100 ), "Player Minimum Temperature %f\n", m_flMaxTemperature );
+	}
+
 	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
 	
 	if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
@@ -1235,7 +1244,7 @@ void CHL2_Player::HandleTemperature( void ) {
 		if ( ( m_flTemperature <= sv_temperature_damage_temp_min.GetFloat() || m_flTemperature >= sv_temperature_damage_temp_max.GetFloat() ) && m_flTemperatureNextHurt <= gpGlobals->curtime ) {
 			CTakeDamageInfo dmgInfo;
 
-			dmgInfo.SetDamage( sv_temperature_take_damage.GetFloat() );
+			dmgInfo.SetDamage( sv_temperature_take_damage.GetInt() );
 			dmgInfo.SetDamageForce( Vector( 1, 1, 1 ) );
 			dmgInfo.SetDamageType( DMG_DIRECT );
 			dmgInfo.SetDamagePosition( GetAbsOrigin() );
@@ -1246,8 +1255,14 @@ void CHL2_Player::HandleTemperature( void ) {
 
 			m_OnTemperatureHurt.FireOutput( this, this );
 			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
+
+			if ( sv_temperature_debug.GetBool() && nextPrint && nextPrint <= gpGlobals->curtime ) {
+				ConDColorMsg( Color(100, 100, 100), "Player taken damage from temperature: %i", sv_temperature_take_damage.GetInt() );
+			}
 		}	
 	}
+
+	nextPrint = gpGlobals->curtime + 1;
 }
 
 void CHL2_Player::SetMaxTemperature( inputdata_t& inputdata ) {

@@ -163,6 +163,7 @@ ConVar	ai_use_think_optimizations( "ai_use_think_optimizations", "1" );
 ConVar	ai_test_moveprobe_ignoresmall( "ai_test_moveprobe_ignoresmall", "0" );
 
 ConVar ai_use_temperature( "ai_use_temperature", "1", FCVAR_NONE, "Enable temperature system for NPCs" );
+ConVar ai_debug_temperature( "ai_debug_temperature", "0", FCVAR_NONE, "Enable temperature system debugging for NPC" );
 
 #ifdef HL2_EPISODIC
 extern ConVar ai_vehicle_avoidance;
@@ -3339,6 +3340,7 @@ void CAI_BaseNPC::PostMovement()
 float g_AINextDisabledMessageTime;
 extern bool IsInCommentaryMode( void );
 
+int nextTempDebugPrint = 0;
 bool CAI_BaseNPC::PreThink( void )
 {
 	// ----------------------------------------------------------
@@ -3401,7 +3403,13 @@ bool CAI_BaseNPC::PreThink( void )
 	}
 
 	if ( ai_use_temperature.GetBool() ) {
+
 		if ( m_flTemperature <= m_flFreezeTemperature * 1.2f ) {
+			if ( ai_debug_temperature.GetBool() && nextTempDebugPrint <= gpGlobals->curtime ) {
+				ConDColorMsg( Color( 100, 100, 100 ), "[AI] Freezing from temperature - Playback Animation Reduced" );
+				nextTempDebugPrint = gpGlobals->curtime + 1;
+			}
+
 			m_flPlaybackRate = 0.6;
 		}
 
