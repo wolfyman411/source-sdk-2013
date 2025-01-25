@@ -12223,8 +12223,6 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_KEYFIELD( m_flMaxTemperature, FIELD_FLOAT, "MaxTemperature" ),
 	DEFINE_KEYFIELD( m_flMinTemperature, FIELD_FLOAT, "MinTemperature" ),
 	DEFINE_KEYFIELD( m_flFreezeTemperature, FIELD_FLOAT, "FreezeTemperature" ),
-	DEFINE_KEYFIELD( m_flUnFreezeTemperature, FIELD_FLOAT, "UnFreezeTemperature" ),
-	DEFINE_KEYFIELD( m_flIgniteTemperature, FIELD_FLOAT, "IgniteTemperature" ),
 	DEFINE_KEYFIELD( m_bIsFrozen, FIELD_BOOLEAN, "Frozen"),
 
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
@@ -12232,16 +12230,11 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetFreezeTemperature", InputSetFreezeTemperature ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetUnFreezeTemperature", InputSetUnFreezeTemperature ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIgniteTemperature", InputSetIgniteTemperature ),
 
 	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
 	DEFINE_OUTPUT( m_OnUnFrozen, "OnUnFrozen" ),
-	DEFINE_OUTPUT( m_OnBurnFromTemperature, "OnBurnFromTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeTemperature, "OnChangeTemperature" ),
-	DEFINE_OUTPUT( m_OnChangeIgniteTemperature, "OnChangeIgniteTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeFreezeTemperature, "OnChangeFreezeTemperature" ),
-	DEFINE_OUTPUT( m_OnChangeUnFreezeTemperature, "OnChangeUnFreezeTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeMaxTemperature, "OnChangeMaxTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeMinTemperature, "OnChangeMinTemperature" ),
 
@@ -16815,17 +16808,6 @@ void CAI_BaseNPC::HandleTemperature( void ) {
 			OnFrozen();
 		}
 	}
-	else if ( m_flTemperature >= m_flUnFreezeTemperature ) {
-		if ( IsFrozen() ) {
-			OnUnFrozen();
-		}
-	}
-	else if ( m_flTemperature >= m_flIgniteTemperature ) {
-		if ( !IsOnFire() ) {
-			Ignite( 0.0f, true );
-			m_OnBurnFromTemperature.FireOutput( this, this );
-		}
-	}
 }
 
 void CAI_BaseNPC::OnFrozen( void ) {
@@ -16857,11 +16839,6 @@ void CAI_BaseNPC::InputSetTemperature( inputdata_t& inputdata ) {
 	m_OnChangeTemperature.FireOutput( this, this );
 }
 
-void CAI_BaseNPC::InputSetUnFreezeTemperature( inputdata_t& inputdata ) {
-	m_flUnFreezeTemperature = inputdata.value.Float();
-	m_OnChangeUnFreezeTemperature.FireOutput( this, this );
-}
-
 void CAI_BaseNPC::InputSetMaxTemperature( inputdata_t& inputdata ) {
 	m_flMaxTemperature = inputdata.value.Float();
 	m_OnChangeMaxTemperature.FireOutput( this, this );
@@ -16875,9 +16852,4 @@ void CAI_BaseNPC::InputSetMinTemperature( inputdata_t& inputdata ) {
 void CAI_BaseNPC::InputSetFreezeTemperature( inputdata_t& inputdata ) {
 	m_flFreezeTemperature = inputdata.value.Float();
 	m_OnChangeFreezeTemperature.FireOutput( this, this );
-}
-
-void CAI_BaseNPC::InputSetIgniteTemperature( inputdata_t& inputdata ) {
-	m_flIgniteTemperature = inputdata.value.Float();
-	m_OnChangeIgniteTemperature.FireOutput( this, this );
 }
