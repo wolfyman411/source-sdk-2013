@@ -3402,13 +3402,18 @@ bool CAI_BaseNPC::PreThink( void )
 		NDebugOverlay::Line( EyePosition(), m_hOpeningDoor->WorldSpaceCenter(), 255, 255, 255, false, .1 );
 	}
 
-	if ( ai_use_temperature.GetBool() ) {
-
+	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) && ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NPC) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		if ( m_flTemperature <= m_flFreezeTemperature * 1.2f ) {
 			if ( ai_debug_temperature.GetBool() && nextTempDebugPrint <= gpGlobals->curtime ) {
-				ConDColorMsg( Color( 100, 100, 100 ), "[AI] Freezing from temperature - Playback Animation Reduced" );
+				ConDColorMsg( Color( 100, 100, 100 ), "[AI] Freezing from temperature - Playback Animation Reduced\n" );
 				nextTempDebugPrint = gpGlobals->curtime + 1;
 			}
+
+			float temperatureRange = m_flMaxTemperature - m_flMinTemperature;
+			float normalizedTemperature = ( m_flTemperature - m_flMinTemperature ) / temperatureRange;
+			byte blueValue = 255 * ( 1.0f - normalizedTemperature );
+
+			SetRenderColor( 0, 0, blueValue );
 
 			m_flPlaybackRate = 0.6;
 		}
@@ -16814,8 +16819,16 @@ void CAI_BaseNPC::OnFrozen( void ) {
 	m_bIsFrozen = true;
 	m_OnFrozen.FireOutput( this, this );
 
-	SetRenderColor( 0, 0, 255 );
-	SetActivity( ACT_IDLE );
+	//SetRenderColor( 0, 0, 255 );
+	//SetActivity( ACT_IDLE );
+
+	CBaseEntity* pRagdoll = CreateServerRagdoll( MyNPCPointer(), 0, CTakeDamageInfo(), COLLISION_GROUP_INTERACTIVE_DEBRIS, true);
+	PhysSetEntityGameFlags( pRagdoll, FVPHYSICS_NO_SELF_COLLISIONS );
+
+	pRagdoll->SetCollisionBounds( CollisionProp()->OBBMins(), CollisionProp()->OBBMaxs() );
+	pRagdoll->SetRenderColor( 0, 0, 255 );
+
+	Remove();
 }
 
 void CAI_BaseNPC::OnUnFrozen( void ) {
