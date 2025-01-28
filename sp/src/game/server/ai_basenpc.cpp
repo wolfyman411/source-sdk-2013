@@ -3403,7 +3403,7 @@ bool CAI_BaseNPC::PreThink( void )
 	}
 
 	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) && ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NPC) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
-		if ( m_flTemperature <= m_flFreezeTemperature * 1.2f ) {
+		if ( m_flTemperature <= m_flMinTemperature * 1.2f ) {
 			if ( ai_debug_temperature.GetBool() && nextTempDebugPrint <= gpGlobals->curtime ) {
 				ConDColorMsg( Color( 100, 100, 100 ), "[AI] Freezing from temperature - Playback Animation Reduced\n" );
 				nextTempDebugPrint = gpGlobals->curtime + 1;
@@ -12227,19 +12227,16 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_KEYFIELD( m_flTemperature, FIELD_FLOAT, "Temperature" ),
 	DEFINE_KEYFIELD( m_flMaxTemperature, FIELD_FLOAT, "MaxTemperature" ),
 	DEFINE_KEYFIELD( m_flMinTemperature, FIELD_FLOAT, "MinTemperature" ),
-	DEFINE_KEYFIELD( m_flFreezeTemperature, FIELD_FLOAT, "FreezeTemperature" ),
 	DEFINE_KEYFIELD( m_bIsFrozen, FIELD_BOOLEAN, "Frozen"),
 
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetFreezeTemperature", InputSetFreezeTemperature ),
 
 	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
 	DEFINE_OUTPUT( m_OnUnFrozen, "OnUnFrozen" ),
 	DEFINE_OUTPUT( m_OnChangeTemperature, "OnChangeTemperature" ),
-	DEFINE_OUTPUT( m_OnChangeFreezeTemperature, "OnChangeFreezeTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeMaxTemperature, "OnChangeMaxTemperature" ),
 	DEFINE_OUTPUT( m_OnChangeMinTemperature, "OnChangeMinTemperature" ),
 
@@ -13125,6 +13122,10 @@ CAI_BaseNPC::CAI_BaseNPC(void)
 
 	m_FakeSequenceGestureLayer = -1;
 #endif
+
+	m_flTemperature = 33.0f;
+	m_flMaxTemperature = 40.0f;
+	m_flMinTemperature = 20.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -16808,7 +16809,7 @@ void CAI_BaseNPC::HandleTemperature( void ) {
 	if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
 	else if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
 
-	if ( m_flTemperature <= m_flFreezeTemperature ) {
+	if ( m_flTemperature <= m_flMinTemperature ) {
 		if ( !IsFrozen() ) {
 			OnFrozen();
 		}
@@ -16876,9 +16877,4 @@ void CAI_BaseNPC::InputSetMaxTemperature( inputdata_t& inputdata ) {
 void CAI_BaseNPC::InputSetMinTemperature( inputdata_t& inputdata ) {
 	m_flMinTemperature = inputdata.value.Float();
 	m_OnChangeMinTemperature.FireOutput( this, this );
-}
-
-void CAI_BaseNPC::InputSetFreezeTemperature( inputdata_t& inputdata ) {
-	m_flFreezeTemperature = inputdata.value.Float();
-	m_OnChangeFreezeTemperature.FireOutput( this, this );
 }

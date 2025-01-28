@@ -99,9 +99,6 @@
 	Temperature(float) : "Temperature" : "33.0" : "The temperature of this NPC. Used for temperature system."
 	MaxTemperature(float) : "Max Temperature" : "40.0" : "The maximum temperature of this NPC. Used for temperature system."
 	MinTemperature(float) : "Min Temperature" : "25.0" : "The minimum temperature of this NPC. Used for temperature system."
-	FreezeTemperature(float) : "Freeze Temperature" : "25.0" : "The temperature at which this NPC will freeze. Used for temperature system."
-	UnFreezeTemperature(float) : "Unfreeze Temperature" : "30.0" : "The temperature at which this NPC will unfreeze. Used for temperature system."
-	IgniteTemperature(float) : "Ignite Temperature" : "40.0" : "The temperature at which this NPC will ignite. Used for temperature system."
 	Frozen(choices) : "Frozen" : 0 : "Whether this NPC is frozen. Used for temperature system." =
 	[
 		0 : "No"
@@ -195,7 +192,6 @@
 	input SetTemperature(float) : "Sets the temperature of this NPC."
 	input SetMaxTemperature(float) : "Sets the maximum temperature of this NPC."
 	input SetMinTemperature(float) : "Sets the minimum temperature of this NPC."
-	input SetFreezeTemperature(float) : "Sets the temperature at which this NPC will freeze."
 	input SetIgniteTemperature(float) : "Sets the temperature at which this NPC will ignite."
 ]
 
@@ -256,7 +252,8 @@
 @SolidClass base(Trigger, Targetname) = trigger_freeze :
 	"A trigger volume that freezes the player."
 [
-	FreezeMultiplier(float) : "Freeze Multiplayer" : "1.25" : "The rate at which the player freezes."
+	FreezeMultiplier(float) : "Freeze Multiplayer" : "2.0" : "The rate at which the player/NPC freezes."
+	WarmthMultiplier(float) : "Warmth Multiplier" : "1.25" : "The rate at which the player/NPC warms up."
 ]
 
 @PointClass base(Weapon) studio("models/weapons/w_iceaxe.mdl") = weapon_iceaxe: "Ice Axe" []

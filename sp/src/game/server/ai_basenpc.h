@@ -699,7 +699,6 @@ public:
 	float				m_flFreezeMultiplier;
 	float				m_flMaxTemperature;
 	float				m_flMinTemperature;
-	float				m_flFreezeTemperature;
 
 	bool				m_bIsFrozen;
 
@@ -709,14 +708,12 @@ public:
 
 	void				InputSetFrozen( inputdata_t& inputdata );
 	void				InputSetTemperature( inputdata_t& inputdata );
-	void				InputSetFreezeTemperature( inputdata_t& inputdata );
 	void				InputSetMaxTemperature( inputdata_t& inputdata );
 	void				InputSetMinTemperature( inputdata_t& inputdata );
 
 	COutputEvent		m_OnFrozen;
 	COutputEvent		m_OnUnFrozen;
 	COutputEvent		m_OnChangeTemperature;
-	COutputEvent		m_OnChangeFreezeTemperature;
 	COutputEvent		m_OnChangeMaxTemperature;
 	COutputEvent		m_OnChangeMinTemperature;
 

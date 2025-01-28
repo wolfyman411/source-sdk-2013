@@ -5681,6 +5681,7 @@ bool IsTriggerClass( CBaseEntity *pEntity )
 
 BEGIN_DATADESC( CTriggerFreeze )
 	DEFINE_KEYFIELD( m_flFreezeMultiplier, FIELD_FLOAT, "FreezeMultiplier" ),
+	DEFINE_KEYFIELD( m_flWarmMultiplier, FIELD_FLOAT, "WarmthMultiplier" ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
@@ -5718,13 +5719,13 @@ void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
 	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
 		if ( pPlayer ) {
-			pPlayer->m_flFreezeMultiplier = -1.25f;
+			pPlayer->m_flFreezeMultiplier = -m_flWarmMultiplier;
 		}
 	}
 	else if ( pOther->IsNPC() && ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NPC) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
 		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
 		if ( pNPC ) {
-			pNPC->m_flFreezeMultiplier = -1.25f;
+			pNPC->m_flFreezeMultiplier = -m_flWarmMultiplier;
 		}
 	}
 }

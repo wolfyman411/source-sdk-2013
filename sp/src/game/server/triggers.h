@@ -363,6 +363,7 @@ class CTriggerFreeze : public CBaseTrigger
 public:
 	CTriggerFreeze() {
 		m_flFreezeMultiplier = 2.0;
+		m_flWarmMultiplier = 1.25;
 	}
 
 	DECLARE_CLASS( CTriggerFreeze, CBaseTrigger );
@@ -374,4 +375,5 @@ public:
 	DECLARE_DATADESC();
 
 	float	m_flFreezeMultiplier;
+	float	m_flWarmMultiplier;
 };
