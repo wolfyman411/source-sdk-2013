@@ -16822,13 +16822,29 @@ void CAI_BaseNPC::OnFrozen( void ) {
 	//SetRenderColor( 0, 0, 255 );
 	//SetActivity( ACT_IDLE );
 
-	CBaseEntity* pRagdoll = CreateServerRagdoll( MyNPCPointer(), 0, CTakeDamageInfo(), COLLISION_GROUP_INTERACTIVE_DEBRIS, true);
-	PhysSetEntityGameFlags( pRagdoll, FVPHYSICS_NO_SELF_COLLISIONS );
+	/*
+		CBaseEntity* pFrozenCorpse = CreateEntityByName("prop_dynamic");
+		pFrozenCorpse->SetModel( STRING( GetModelName() ) );
+		pFrozenCorpse->SetAbsOrigin( GetAbsOrigin() );
+		pFrozenCorpse->SetAbsAngles( GetAbsAngles() );
+		pFrozenCorpse->SetSolid( SOLID_BBOX );
+		pFrozenCorpse->VPhysicsInitNormal(SOLID_BBOX, 0, false, 0);
+		DispatchSpawn( pFrozenCorpse );
 
-	pRagdoll->SetCollisionBounds( CollisionProp()->OBBMins(), CollisionProp()->OBBMaxs() );
-	pRagdoll->SetRenderColor( 0, 0, 255 );
+		if ( pFrozenCorpse ) {
+			IPhysicsObject* physObj = pFrozenCorpse->VPhysicsGetObject();
+			if ( physObj ) {
+				physObj->EnableMotion( false );
+			}
 
-	Remove();
+			pFrozenCorpse->SetCollisionBounds( CollisionProp()->OBBMins(), CollisionProp()->OBBMaxs() );
+			pFrozenCorpse->SetRenderColor( 0, 0, 255 );
+
+			Remove();
+		}
+	*/
+
+	// bloodycop: Someone more experiences gotta make a frozen statue ;9
 }
 
 void CAI_BaseNPC::OnUnFrozen( void ) {
