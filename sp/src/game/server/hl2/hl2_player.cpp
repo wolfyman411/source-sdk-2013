@@ -243,6 +243,10 @@ public:
 	COutputEvent m_OnPlayerSpawn;
 #endif
 
+	COutputEvent		m_OnPlayerTemperatureHurt;
+	COutputEvent		m_OnPlayerChangeMaxTemperature;
+	COutputEvent		m_OnPlayerChangeMinTemperature;
+
 	void InputRequestPlayerHealth( inputdata_t &inputdata );
 	void InputSetFlashlightSlowDrain( inputdata_t &inputdata );
 	void InputSetFlashlightNormalDrain( inputdata_t &inputdata );
@@ -615,10 +619,6 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 		DEFINE_FIELD( m_flTemperatureNextHurt, FIELD_TIME ),
 		DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
 		DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
-
-		DEFINE_OUTPUT( m_OnTemperatureHurt, "OnTemperatureHurt" ),
-		DEFINE_OUTPUT( m_OnChangeMinTemperature, "OnChangeMinTemperature" ),
-		DEFINE_OUTPUT( m_OnChangeMaxTemperature, "OnChangeMaxTemperature" ),
 END_DATADESC()
 
 #ifdef MAPBASE_VSCRIPT
@@ -655,7 +655,7 @@ CHL2_Player::CHL2_Player()
 	m_flFreezeMultiplier = -1.25f;
 	m_flTemperatureNextHurt = 0.0f;
 	m_flMaxTemperature = 33.0f;
-	m_flMinTemperature = -10.0f;
+	m_flMinTemperature = -20.0f;
 }
 
 //
@@ -1190,11 +1190,12 @@ void CHL2_Player::PostThink( void )
 	HandleTemperature();
 }
 
-ConVar sv_temperature_water_affect( "sv_temperature_water_affect", "1", FCVAR_REPLICATED, "Should the player slowly freeze in water." );
-ConVar sv_temperature_take_damage( "sv_temperature_take_damage", "1", FCVAR_REPLICATED, "Should the player take damage depending on his temperature." );
-ConVar sv_temperature_damage_temp_min( "sv_temperature_damage_temp_min", "-5.0", FCVAR_REPLICATED, "Below what temperature should the player start taking damage");
-ConVar sv_temperature_damage_temp_max( "sv_temperature_damage_temp_max", "40.0", FCVAR_REPLICATED, "Above what temperature should the player start taking damage" );
+ConVar sv_temperature_water_affect( "sv_temperature_water_affect", "1", FCVAR_REPLICATED| FCVAR_CHEAT, "Should the player slowly freeze in water." );
+ConVar sv_temperature_take_damage( "sv_temperature_take_damage", "1", FCVAR_REPLICATED| FCVAR_CHEAT, "Should the player take damage depending on his temperature." );
+ConVar sv_temperature_damage_temp_min( "sv_temperature_damage_temp_min", "-5.0", FCVAR_REPLICATED| FCVAR_CHEAT, "Below what temperature should the player start taking damage");
+ConVar sv_temperature_damage_temp_max( "sv_temperature_damage_temp_max", "40.0", FCVAR_REPLICATED| FCVAR_CHEAT, "Above what temperature should the player start taking damage" );
 ConVar sv_temperature_debug( "sv_temperature_debug", "0", FCVAR_REPLICATED, "Should the debugging mode for the temperature system be enabled" );
+ConVar sv_temperature_affect_speed( "sv_temperature_affect_speed", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Should the player speed be affected by temperature");
 
 int nextPrint = 0;
 void CHL2_Player::HandleTemperature( void ) {
@@ -1222,7 +1223,7 @@ void CHL2_Player::HandleTemperature( void ) {
 		}
 	}
 
-	if ( sv_temperature_debug.GetBool() && nextPrint && nextPrint <= gpGlobals->curtime  ) {
+	if ( sv_temperature_debug.GetBool() && nextPrint <= gpGlobals->curtime  ) {
 		ConDColorMsg( Color( 100, 100, 100 ), "Player Temperature %f\n", m_flTemperature );
 		ConDColorMsg( Color( 100, 100, 100 ), "Player Temperature Multiplier %f\n", m_flFreezeMultiplier );
 		ConDColorMsg( Color( 100, 100, 100 ), "Player Minimum Temperature %f\n", m_flMinTemperature );
@@ -1253,12 +1254,13 @@ void CHL2_Player::HandleTemperature( void ) {
 
 			TakeDamage( dmgInfo );
 
-			m_OnTemperatureHurt.FireOutput( this, this );
-			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
+			GetPlayerProxy()->m_OnPlayerTemperatureHurt.FireOutput(this, this);
 
-			if ( sv_temperature_debug.GetBool() && nextPrint && nextPrint <= gpGlobals->curtime ) {
+			if ( sv_temperature_debug.GetBool() && nextPrint <= gpGlobals->curtime ) {
 				ConDColorMsg( Color(100, 100, 100), "Player taken damage from temperature: %i", sv_temperature_take_damage.GetInt() );
 			}
+
+			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
 		}	
 	}
 
@@ -1267,12 +1269,12 @@ void CHL2_Player::HandleTemperature( void ) {
 
 void CHL2_Player::SetMaxTemperature( inputdata_t& inputdata ) {
 	m_flMaxTemperature = inputdata.value.Float();
-	m_OnChangeMaxTemperature.FireOutput( this, this );
+	GetPlayerProxy()->m_OnPlayerChangeMaxTemperature.FireOutput(this, this);
 }
 
 void CHL2_Player::SetMinTemperature( inputdata_t& inputdata ) {
 	m_flMinTemperature = inputdata.value.Float();
-	m_OnChangeMinTemperature.FireOutput( this, this );
+	GetPlayerProxy()->m_OnPlayerChangeMinTemperature.FireOutput( this, this );
 }
 
 void CHL2_Player::StartAdmireGlovesAnimation( void )
@@ -4678,6 +4680,10 @@ BEGIN_DATADESC( CLogicPlayerProxy )
 	DEFINE_OUTPUT( m_RequestedPlayerFlashBattery, "PlayerFlashBattery" ),
 	DEFINE_OUTPUT( m_OnPlayerSpawn, "OnPlayerSpawn" ),
 #endif
+
+	DEFINE_OUTPUT(m_OnPlayerTemperatureHurt, "OnPlayerTemperatureHurt"),
+	DEFINE_OUTPUT(m_OnPlayerChangeMaxTemperature, "OnPlayerChangeMaxTemperature"),
+	DEFINE_OUTPUT(m_OnPlayerChangeMinTemperature, "OnPlayerChangeMinTemperature"),
 
 	DEFINE_INPUTFUNC( FIELD_VOID,	"RequestPlayerHealth",	InputRequestPlayerHealth ),
 	DEFINE_INPUTFUNC( FIELD_VOID,	"SetFlashlightSlowDrain",	InputSetFlashlightSlowDrain ),
