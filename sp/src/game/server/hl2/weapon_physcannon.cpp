@@ -40,6 +40,7 @@
 #include "ai_interactions.h"
 #include "rumble_shared.h"
 #include "gamestats.h"
+#include "physconstraint.h"
 #ifdef MAPBASE
 #include "mapbase/GlobalStrings.h"
 #endif
@@ -2501,22 +2502,40 @@ bool CWeaponPhysCannon::AttachObject( CBaseEntity *pObject, const Vector &vPosit
 	bool bIsMegaPhysCannon = IsMegaPhysCannon();
 	if ( bIsMegaPhysCannon )
 	{
-		if ( pObject->IsNPC() && !pObject->IsEFlagSet( EFL_NO_MEGAPHYSCANNON_RAGDOLL ) )
+		if (pObject->IsNPC() && !pObject->IsEFlagSet(EFL_NO_MEGAPHYSCANNON_RAGDOLL))
 		{
-			Assert( pObject->MyNPCPointer()->CanBecomeRagdoll() );
-			CTakeDamageInfo info( GetOwner(), GetOwner(), 1.0f, DMG_GENERIC );
-			CBaseEntity *pRagdoll = CreateServerRagdoll( pObject->MyNPCPointer(), 0, info, COLLISION_GROUP_INTERACTIVE_DEBRIS, true );
-			PhysSetEntityGameFlags( pRagdoll, FVPHYSICS_NO_SELF_COLLISIONS );
+			Assert(pObject->MyNPCPointer()->CanBecomeRagdoll());
+			CTakeDamageInfo info(GetOwner(), GetOwner(), 1.0f, DMG_GENERIC);
+			CBaseEntity* pRagdoll = CreateServerRagdoll(pObject->MyNPCPointer(), 0, info, COLLISION_GROUP_INTERACTIVE_DEBRIS, true);
+			PhysSetEntityGameFlags(pRagdoll, FVPHYSICS_NO_SELF_COLLISIONS);
 
-			pRagdoll->SetCollisionBounds( pObject->CollisionProp()->OBBMins(), pObject->CollisionProp()->OBBMaxs() );
+			pRagdoll->SetCollisionBounds(pObject->CollisionProp()->OBBMins(), pObject->CollisionProp()->OBBMaxs());
 
 			// Necessary to cause it to do the appropriate death cleanup
-			CTakeDamageInfo ragdollInfo( GetOwner(), GetOwner(), 10000.0, DMG_PHYSGUN | DMG_REMOVENORAGDOLL );
-			pObject->TakeDamage( ragdollInfo );
+			CTakeDamageInfo ragdollInfo(GetOwner(), GetOwner(), 10000.0, DMG_PHYSGUN | DMG_REMOVENORAGDOLL);
+			pObject->TakeDamage(ragdollInfo);
 
 			// Now we act on the ragdoll for the remainder of the time
 			pObject = pRagdoll;
 			bKilledByGrab = true;
+
+			//Freeze Code
+			int numPhysObjs = pRagdoll->VPhysicsGetObjectList(nullptr, 0);
+			IPhysicsObject** pPhysObjs = new IPhysicsObject * [numPhysObjs];
+			pRagdoll->VPhysicsGetObjectList(pPhysObjs, numPhysObjs);
+
+			// Freeze limbs
+			for (int i = 0; i < numPhysObjs; i++)
+			{
+				if (pPhysObjs[i])
+				{
+					constraint_fixedparams_t params;
+					params.Defaults();
+
+					IPhysicsConstraint* pConstraint = physenv->CreateFixedConstraint(pPhysObjs[0], pPhysObjs[i],NULL, params);
+					pConstraint->Activate();
+				}
+			}
 		}
 	}
 
