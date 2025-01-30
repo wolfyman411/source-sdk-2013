@@ -1005,7 +1005,6 @@ void CBreakable::Die( void )
 		break;
 	}
 	
-    
 	if ( soundname )
 	{
 		if ( m_hBreaker && m_hBreaker->IsPlayer() )
