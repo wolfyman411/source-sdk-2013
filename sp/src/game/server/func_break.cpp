@@ -1000,7 +1000,11 @@ void CBreakable::Die( void )
 	case matCeilingTile:
 		soundname = "Breakable.Ceiling";
 		break;
+	case matIce:
+		soundname = "Ice.Damage";
+		break;
 	}
+	
     
 	if ( soundname )
 	{
