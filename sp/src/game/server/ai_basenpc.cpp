@@ -3415,7 +3415,8 @@ bool CAI_BaseNPC::PreThink( void )
 
 			SetRenderColor( 0, 0, blueValue );
 
-			m_flPlaybackRate = 0.6;
+			float playbackRate = 1.0f - ( 1.0f - 0.5f ) * ( 1.0f - m_flTemperature / 100.0f );
+			SetPlaybackRate( playbackRate );
 		}
 
 		if ( IsFrozen() ) {
