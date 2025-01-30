@@ -2534,6 +2534,7 @@ bool CWeaponPhysCannon::AttachObject( CBaseEntity *pObject, const Vector &vPosit
 
 					IPhysicsConstraint* pConstraint = physenv->CreateFixedConstraint(pPhysObjs[0], pPhysObjs[i],NULL, params);
 					pConstraint->Activate();
+					//pPhysObjs[i]->EnableMotion(false);
 				}
 			}
 		}
