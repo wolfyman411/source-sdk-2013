@@ -117,6 +117,8 @@ extern ConVar sk_healthkit;
 #include "utlbuffer.h"
 #include "gamestats.h"
 
+#include "props.h" // Addition -TheMaster974
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -4402,6 +4404,44 @@ void CAI_BaseNPC::NPCThink( void )
 
 	//---------------------------------
 	bool bRanDecision = false;
+
+	// If we are frozen solid, don't do anything!
+	if (GetPlaybackRate() <= FLT_EPSILON)
+	{
+		if (!hasFrozen)
+		{
+			Vector center, worldCenter;
+			center = CollisionProp()->OBBCenter();
+			CollisionProp()->CollisionToWorldSpace(center, &worldCenter);
+			VPhysicsDestroyObject();
+
+			CBaseEntity *pNewEnt = CreateEntityByName("prop_physics_frozen");
+//			pNewEnt->KeyValue("model", "models/props_c17/furniturefridge001a.mdl");
+			pNewEnt->KeyValue("model", "models/props_c17/furnituredresser001a.mdl");
+			pNewEnt->SetAbsOrigin(worldCenter);
+			pNewEnt->SetAbsAngles(GetAbsAngles());
+
+			IPhysicsObject* pNewObj = VPhysicsInitNormal(SOLID_BBOX, GetSolidFlags(), false);
+
+			pNewEnt->VPhysicsSetObject(pNewObj);
+			pNewEnt->Spawn();
+			SetParent(pNewEnt);
+			pNewEnt->AddEffects(EF_NODRAW);
+
+			CPhysicsProp* pPhysProp = dynamic_cast<CPhysicsProp*>(pNewEnt);
+			if (pPhysProp)
+			{
+				pPhysProp->pFrozenNPC = this;
+			}
+
+			VPhysicsSwapObject(NULL);
+
+			hasFrozen = true;
+		}
+
+		SetNextThink(TICK_NEVER_THINK);
+		return;
+	}
 
 	if ( GetEfficiency() < AIE_DORMANT && GetSleepState() == AISS_AWAKE )
 	{
@@ -12216,6 +12256,8 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_FIELD( m_bImportanRagdoll,			FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bPlayerAvoidState,			FIELD_BOOLEAN ),
 
+	DEFINE_FIELD( hasFrozen, FIELD_BOOLEAN ),
+
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
 
@@ -12601,6 +12643,10 @@ void CAI_BaseNPC::Precache( void )
 	PrecacheScriptSound( "AI_BaseNPC.BodyDrop_Heavy" );
 	PrecacheScriptSound( "AI_BaseNPC.BodyDrop_Light" );
 	PrecacheScriptSound( "AI_BaseNPC.SentenceStop" );
+
+	// Precache our frozen models here. -TheMaster974
+	// PrecacheModel("models/props_c17/furniturefridge001a.mdl");
+	PrecacheModel("models/props_c17/furnituredresser001a.mdl");
 
 	BaseClass::Precache();
 }
@@ -13127,6 +13173,7 @@ CAI_BaseNPC::CAI_BaseNPC(void)
 	m_flTemperature = 33.0f;
 	m_flMaxTemperature = 40.0f;
 	m_flMinTemperature = 20.0f;
+	hasFrozen = false;
 }
 
 //-----------------------------------------------------------------------------
