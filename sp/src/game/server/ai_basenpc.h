@@ -2021,6 +2021,9 @@ public:
 
 	bool				BBoxFlat( void );
 
+	// Have we started to freeze? -TheMaster974
+	bool 				hasFrozen;
+
 	//---------------------------------
 
 	virtual void		Ignite( float flFlameLifetime, bool bNPCOnly = true, float flSize = 0.0f, bool bCalledByLevelDesigner = false );
