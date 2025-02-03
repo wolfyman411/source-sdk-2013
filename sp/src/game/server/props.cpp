@@ -3053,6 +3053,7 @@ void CInteractableProp::PushThink()
 LINK_ENTITY_TO_CLASS( physics_prop, CPhysicsProp );
 LINK_ENTITY_TO_CLASS( prop_physics, CPhysicsProp );	
 LINK_ENTITY_TO_CLASS( prop_physics_override, CPhysicsProp );	
+LINK_ENTITY_TO_CLASS( prop_physics_frozen, CPhysicsProp ); // For frozen NPCs. -TheMaster974
 
 BEGIN_DATADESC( CPhysicsProp )
 
@@ -3477,6 +3478,13 @@ void CPhysicsProp::OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t Reaso
 
 		PhysSetGameFlags( VPhysicsGetObject(), FVPHYSICS_WAS_THROWN );
 		m_bFirstCollisionAfterLaunch = true;
+
+		// If we are a frozen prop, break when punted. -TheMaster974
+		if (FClassnameIs(this, "prop_physics_frozen"))
+		{
+			CTakeDamageInfo info(pPhysGunUser, pPhysGunUser, 1000, DMG_PHYSGUN);
+			Break(pPhysGunUser, info);
+		}
 	}
 	else if ( Reason == THROWN_BY_PLAYER )
 	{
