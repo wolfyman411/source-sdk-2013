@@ -911,7 +911,7 @@ float CBaseAnimating::GetSequenceMoveDist( CStudioHdr *pStudioHdr, int iSequence
 	
 	::GetSequenceLinearMotion( pStudioHdr, iSequence, GetPoseParameterArray(), &vecReturn );
 
-	return vecReturn.Length();
+	return vecReturn.Length() * GetPlaybackRate();
 }
 
 //-----------------------------------------------------------------------------
