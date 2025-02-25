@@ -431,6 +431,10 @@ public:
 
 	virtual bool IsHolidayActive( /*EHoliday*/ int eHoliday ) const { return false; }
 
+#ifdef GAME_DLL
+	virtual bool IsOfficialMap() { return false; }
+#endif
+
 #ifndef CLIENT_DLL
 private:
 	float m_flNextVerboseLogOutput;
