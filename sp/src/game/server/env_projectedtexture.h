@@ -73,6 +73,7 @@ public:
 #endif
 
 	void InitialThink( void );
+	void MainThink( void ); // Addition. -TheMaster974
 
 	CNetworkHandle( CBaseEntity, m_hTargetEntity );
 #ifdef MAPBASE
