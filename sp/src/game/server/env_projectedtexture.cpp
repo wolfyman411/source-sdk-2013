@@ -87,6 +87,7 @@ BEGIN_DATADESC( CEnvProjectedTexture )
 	DEFINE_INPUTFUNC( FIELD_VOID, "StartFollowingTarget", InputStartFollowingTarget ),
 #endif
 	DEFINE_THINKFUNC( InitialThink ),
+	DEFINE_THINKFUNC( MainThink ), // Addition -TheMaster974
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST( CEnvProjectedTexture, DT_EnvProjectedTexture )
@@ -458,11 +459,24 @@ void CEnvProjectedTexture::SetParent( CBaseEntity* pNewParent, int iAttachment )
 void CEnvProjectedTexture::InitialThink( void )
 {
 	m_hTargetEntity = gEntList.FindEntityByName( NULL, m_target );
+
+	// Additions. -TheMaster974
+	SetThink(&CEnvProjectedTexture::MainThink);
+	SetNextThink(gpGlobals->curtime);
 }
 
 int CEnvProjectedTexture::UpdateTransmitState()
 {
 	return SetTransmitState( FL_EDICT_ALWAYS );
+}
+
+// Here is the function that changes the frames of the projected texture's material. -TheMaster974
+void CEnvProjectedTexture::MainThink( void )
+{
+	m_nSpotlightTextureFrame += 1;
+	if (m_nSpotlightTextureFrame > 50) // TODO: Account for the number of frames in the material?
+		m_nSpotlightTextureFrame = 0;
+	SetNextThink(gpGlobals->curtime + 0.1f); // TODO: Account for custom framerates?
 }
 
 #else
