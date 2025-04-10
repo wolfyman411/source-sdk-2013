@@ -2489,8 +2489,6 @@ void CNPC_Manhack::StartEye( void )
 		return;
 #endif
 
-	printf( "Hacked by Alyx: %i\n", m_bHackedByAlyx );
-
 	//Create our Eye sprite
 	if ( m_pEyeGlow == NULL )
 	{
