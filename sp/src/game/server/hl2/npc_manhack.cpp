@@ -2489,6 +2489,8 @@ void CNPC_Manhack::StartEye( void )
 		return;
 #endif
 
+	printf( "Hacked by Alyx: %i\n", m_bHackedByAlyx );
+
 	//Create our Eye sprite
 	if ( m_pEyeGlow == NULL )
 	{
@@ -2497,8 +2499,8 @@ void CNPC_Manhack::StartEye( void )
 		
 		if( m_bHackedByAlyx )
 		{
-			m_pEyeGlow->SetTransparency( kRenderTransAdd, 0, 255, 0, 128, kRenderFxNoDissipation );
-			m_pEyeGlow->SetColor( 0, 255, 0 );
+			m_pEyeGlow->SetTransparency( kRenderTransAdd, 255, 200, 0, 128, kRenderFxNoDissipation );
+			m_pEyeGlow->SetColor( 255, 200, 0 );
 		}
 		else
 		{
@@ -2519,8 +2521,8 @@ void CNPC_Manhack::StartEye( void )
 
 		if( m_bHackedByAlyx )
 		{
-			m_pLightGlow->SetTransparency( kRenderTransAdd, 0, 255, 0, 128, kRenderFxNoDissipation );
-			m_pLightGlow->SetColor( 0, 255, 0 );
+			m_pLightGlow->SetTransparency( kRenderTransAdd, 255, 200, 0, 128, kRenderFxNoDissipation );
+			m_pLightGlow->SetColor( 255, 200, 0 );
 		}
 		else
 		{
@@ -3275,7 +3277,7 @@ void CNPC_Manhack::SetEyeState( int state )
 				// Makes it easier to distinguish between hostile and friendly manhacks.
 				if( m_bHackedByAlyx )
 				{
-					m_pEyeGlow->SetColor( 0, 0, 255 );
+					m_pEyeGlow->SetColor( 255, 200, 0 );
 					m_pEyeGlow->SetScale( 0.35f, 0.6f );
 				}
 				else
@@ -3296,7 +3298,7 @@ void CNPC_Manhack::SetEyeState( int state )
 #ifdef MAPBASE
 				if( m_bHackedByAlyx )
 				{
-					m_pLightGlow->SetColor( 0, 0, 255 );
+					m_pLightGlow->SetColor( 255, 200, 0 );
 					m_pLightGlow->SetScale( 0.35f, 0.6f );
 				}
 				else
@@ -3324,7 +3326,7 @@ void CNPC_Manhack::SetEyeState( int state )
 				//Toggle our state
 				if( m_bHackedByAlyx )
 				{
-					m_pEyeGlow->SetColor( 0, 255, 0 );
+					m_pEyeGlow->SetColor( 255, 155, 0 );
 				}
 				else
 				{
@@ -3340,7 +3342,7 @@ void CNPC_Manhack::SetEyeState( int state )
 			{
 				if( m_bHackedByAlyx )
 				{
-					m_pLightGlow->SetColor( 0, 255, 0 );
+					m_pLightGlow->SetColor( 255, 155, 0 );
 				}
 				else
 				{
