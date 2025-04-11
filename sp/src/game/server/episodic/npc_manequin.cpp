@@ -1,96 +1,80 @@
-/*
-A manequin NPC that does not move when the player can see it
-*/
-
 #include "cbase.h"
-#include "game.h"
-#include "AI_Default.h"
-#include "AI_Schedule.h"
-#include "AI_Hull.h"
-#include "AI_Navigator.h"
-#include "AI_Route.h"
-#include "AI_Squad.h"
-#include "AI_SquadSlot.h"
-#include "AI_Hint.h"
-#include "NPCEvent.h"
-#include "animation.h"
-#include "npc_manequin.h"
-#include "gib.h"
-#include "soundent.h"
-#include "ndebugoverlay.h"
-#include "vstdlib/random.h"
-#include "engine/IEngineSound.h"
-#include "movevars_shared.h"
-#include "AI_Senses.h"
-#include "animation.h"
-#include "util.h"
-#include "shake.h"
-#include "movevars_shared.h"
-#include "hl2_shareddefs.h"
-#include "particle_parse.h"
+#include "ai_basenpc.h"
+#include "gameinterface.h"
+#include "ai_navigator.h"
+#include "player.h"
 
-//ConVar sk_manequin_health( "sk_manequin_health", "35" ); // bloodycop: Not sure we need that for manequins.
-ConVar sk_manequin_dmg_blast( "sk_manequin_dmg", "15" );
+class CNPC_Mannequin : public CAI_BaseNPC {
+public:
+	DECLARE_CLASS( CNPC_Mannequin, CAI_BaseNPC );
+	DECLARE_DATADESC();
 
-BEGIN_DATADESC(CNPC_Manequin)
-	DEFINE_FIELD( m_bShouldAttack, FIELD_BOOLEAN ),
+	void Spawn();
+	void Precache();
+	void Think();
+	int MeleeAttack1Conditions( float flDot, float flDist );
 
-	DEFINE_INPUTFUNC( FIELD_VOID, "StartAttack", InputStartAttack ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "StopAttack", InputStopAttack ),
+	Class_T Classify( void ) { return CLASS_MANEQUIN; } // No specific classification
+private:
+	bool IsLookedAt( CBasePlayer* pPlayer );
+};
+
+LINK_ENTITY_TO_CLASS( npc_manequin, CNPC_Mannequin );
+
+BEGIN_DATADESC( CNPC_Mannequin )
+	DEFINE_THINKFUNC(Think),
 END_DATADESC()
 
-LINK_ENTITY_TO_CLASS( npc_manequin, CNPC_Manequin );
-
-void CNPC_Manequin::Spawn( void ) {
+void CNPC_Mannequin::Spawn() {
+	BaseClass::Spawn();
 	Precache();
-	SetRenderColor( 255, 255, 255 );
-
 	SetModel( "models/props_junk/gnome.mdl" );
-	SetHullType( HULL_SMALL );
 
 	SetSolid( SOLID_BBOX );
 	SetMoveType( MOVETYPE_STEP );
 
-	CapabilitiesClear();
-	CapabilitiesAdd( bits_CAP_MOVE_GROUND | bits_CAP_INNATE_MELEE_ATTACK1 | bits_CAP_SQUAD );
+	CapabilitiesAdd( bits_CAP_MOVE_GROUND );
 
-	SetBloodColor( DONT_BLEED );
+	ConColorMsg( Color(0, 255, 155), "Mannequin spawned.\n" );
+
+	SetThink( &CNPC_Mannequin::Think );
+	SetNextThink( gpGlobals->curtime + 0.1f );
 }
 
-void CNPC_Manequin::Precache() {
+void CNPC_Mannequin::Precache() {
 	PrecacheModel( "models/props_junk/gnome.mdl" );
 	BaseClass::Precache();
 }
 
-int CNPC_Manequin::MeleeAttack1Conditions( float flDot, float flDist ) {
-	if ( flDist > 64 ) {
-		return COND_TOO_FAR_TO_ATTACK;
+void CNPC_Mannequin::Think() {
+	CBasePlayer* pPlayer = UTIL_GetLocalPlayer();
+	if ( pPlayer && IsLookedAt( pPlayer ) ) {
+		Msg("Player is looking at the mannequin.\n" );
+
+		Vector vecToTarget = GetAbsOrigin() - pPlayer->EyePosition();
+		float flDistance = vecToTarget.Length();
+		Msg("Distance to player: %f\n", flDistance );
+
+		if ( flDistance < 100.0f ) {
+			AI_NavGoal_t goal( pPlayer->GetAbsOrigin() );
+			GetNavigator()->SetGoal( goal );
+		} else {
+			GetNavigator()->StopMoving();
+		}
+	}
+	else {
+		GetNavigator()->StopMoving();
 	}
 
-	if ( flDot < 0.5 ) {
-		return COND_NOT_FACING_ATTACK;
-	}
-
-	return COND_CAN_MELEE_ATTACK1;
+	SetNextThink( gpGlobals->curtime + 0.1f );
 }
 
-void CNPC_Manequin::Think() {
-	if ( m_bShouldAttack ) {
-		SetSchedule( SCHED_MELEE_ATTACK1 );
-	} else {
-		SetSchedule( SCHED_IDLE_STAND );
-	}
-	BaseClass::Think();
-}
+bool CNPC_Mannequin::IsLookedAt( CBasePlayer* pPlayer ) {
+	Vector forward;
+	pPlayer->EyeVectors( &forward );
+	Vector vecToTarget = GetAbsOrigin() - pPlayer->EyePosition();
+	float flDot = forward.Dot( vecToTarget.Normalized() );
+	Msg("Dot product: %f\n", flDot );
 
-bool CNPC_Manequin::Can_Move( void ) {
-	return m_bShouldAttack;
-}
-
-void CNPC_Manequin::InputStartAttack( inputdata_t& inputdata ) {
-	m_bShouldAttack = true;
-}
-
-void CNPC_Manequin::InputStopAttack( inputdata_t& inputdata ) {
-	m_bShouldAttack = false;
+	return ( flDot > 0.9f ); // Adjust the threshold as needed
 }
