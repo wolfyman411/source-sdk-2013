@@ -20,6 +20,7 @@
 #include "ai_behavior_follow.h"
 #include "ai_sentence.h"
 #include "ai_baseactor.h"
+#include "beam_shared.h"
 
 class CNPC_Android;
 
@@ -60,6 +61,10 @@ public:
 	void		ZapThink(void);
 	bool		CreateVPhysics();
 
+	void		KillAttackBeam(void);
+	void		StartAttackBeam(void);
+	void		UpdateAttackBeam(void);
+
 	bool		QuerySeeEntity(CBaseEntity* pEntity, bool bOnlyHateOrFearIfNPC = false);
 	bool		ShouldPlayIdleSound(void);
 	bool		OverrideMoveFacing(const AILocalMoveGoal_t& move, float flInterval);
@@ -68,6 +73,8 @@ public:
 	bool		IsLightDamage(const CTakeDamageInfo& info);
 	bool		CreateBehaviors(void);
 	int			SelectSchedule(void);
+
+	Vector		LaserStartPosition(Vector vStalkerPos);
 
 	void		Touch(CBaseEntity* pOther);
 
@@ -92,6 +99,12 @@ public:
 
 	void	Zap(bool bZapped = false);
 
+	CBeam* m_pBeam;
+	CSprite* m_pLightGlow;
+	Vector	m_vLaserCurPos;
+	float	m_fBeamEndTime;
+	Vector	m_vLaserDir;
+	Vector	m_vLaserTargetPos;
 
 private:
 
@@ -159,6 +172,7 @@ private:
 		SCHED_ANDROID_ZAP_RECOVER,
 		SCHED_ANDROID_BALL,
 		SCHED_ANDROID_UNBALL,
+		SCHED_ANDROID_RANGE_ATTACK,
 	};
 
 	//==================================================

@@ -50,8 +50,10 @@ ConVar sk_android_health("sk_android_health", "125");
 
 int g_interactionAndroidFoundTarget = 0;
 int g_interactionAndroidFiredAtTarget = 0;
+float g_AndroidBeamThinkTime = 0.0;
 
 #define	ANDROID_MODEL			"models/antlion.mdl"
+#define	ANDROID_LASER_ATTACHMENT	1
 
 //==================================================
 // Antlion Activities
@@ -79,6 +81,12 @@ DEFINE_FIELD(m_vecHeardSound, FIELD_POSITION_VECTOR),
 DEFINE_FIELD(m_bHasHeardSound, FIELD_BOOLEAN),
 DEFINE_FIELD(m_bAgitatedSound, FIELD_BOOLEAN),
 DEFINE_FIELD(m_flZapDuration, FIELD_TIME),
+
+DEFINE_FIELD(m_pBeam, FIELD_CLASSPTR),
+DEFINE_FIELD(m_pLightGlow, FIELD_CLASSPTR),
+DEFINE_FIELD(m_vLaserDir, FIELD_VECTOR),
+DEFINE_FIELD(m_vLaserTargetPos, FIELD_POSITION_VECTOR),
+
 DEFINE_KEYFIELD(m_flEludeDistance, FIELD_FLOAT, "eludedist"),
 
 // Function Pointers
@@ -178,6 +186,8 @@ const char* pszAndroidGibs_Small[NUM_ANDROID_GIBS_SMALL] = {
 //-----------------------------------------------------------------------------
 void CNPC_Android::Precache(void)
 {
+	PrecacheModel("sprites/laser.vmt");
+
 	PrecacheModel(ANDROID_MODEL);
 	PropBreakablePrecacheAll(MAKE_STRING(ANDROID_MODEL));
 	PrecacheParticleSystem("blood_impact_antlion_01");
@@ -447,12 +457,74 @@ void CNPC_Android::HandleAnimEvent(animevent_t* pEvent)
 //-----------------------------------------------------------------------------
 void CNPC_Android::StartTask(const Task_t* pTask)
 {
+	CAI_Schedule* pCurrentSchedule = GetCurSchedule();
+	int scheduleId = pCurrentSchedule->GetId();
+	const char* scheduleName = GetSchedulingSymbols()->ScheduleIdToSymbol(scheduleId);
+
+	DevMsg("%s\n", scheduleName);
 	switch (pTask->iTask)
 	{
 		case TASK_ANNOUNCE_ATTACK:
 		{
 			EmitSound("NPC_Antlion.MeleeAttackSingle");
 			TaskComplete();
+			break;
+		}
+		case TASK_RANGE_ATTACK1:
+		{
+			CBaseEntity* pEnemy = GetEnemy();
+			if (pEnemy)
+			{
+				m_vLaserTargetPos = GetEnemyLKP() + pEnemy->GetViewOffset();
+
+				// Never hit target on first try
+				Vector missPos = m_vLaserTargetPos;
+
+				if (pEnemy->Classify() == CLASS_BULLSEYE && hl2_episodic.GetBool())
+				{
+					missPos.x += 60 + 120 * random->RandomInt(-1, 1);
+					missPos.y += 60 + 120 * random->RandomInt(-1, 1);
+				}
+				else
+				{
+					missPos.x += 80 * random->RandomInt(-1, 1);
+					missPos.y += 80 * random->RandomInt(-1, 1);
+				}
+
+				// ----------------------------------------------------------------------
+				// If target is facing me and not running towards me shoot below his feet
+				// so he can see the laser coming
+				// ----------------------------------------------------------------------
+				CBaseCombatCharacter* pBCC = ToBaseCombatCharacter(pEnemy);
+				if (pBCC)
+				{
+					Vector targetToMe = (pBCC->GetAbsOrigin() - GetAbsOrigin());
+					Vector vBCCFacing = pBCC->BodyDirection2D();
+					if ((DotProduct(vBCCFacing, targetToMe) < 0) &&
+						(pBCC->GetSmoothedVelocity().Length() < 50))
+					{
+						missPos.z -= 150;
+					}
+					// --------------------------------------------------------
+					// If facing away or running towards laser,
+					// shoot above target's head 
+					// --------------------------------------------------------
+					else
+					{
+						missPos.z += 60;
+					}
+				}
+				m_vLaserDir = missPos - LaserStartPosition(GetAbsOrigin());
+				VectorNormalize(m_vLaserDir);
+			}
+			else
+			{
+				TaskFail(FAIL_NO_ENEMY);
+				return;
+			}
+
+			StartAttackBeam();
+			SetActivity(ACT_RANGE_ATTACK1);
 			break;
 		}
 		default:
@@ -467,13 +539,19 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 //-----------------------------------------------------------------------------
 void CNPC_Android::RunTask(const Task_t* pTask)
 {
-	/*switch (pTask->iTask)
+	switch (pTask->iTask)
 	{
+		case TASK_RANGE_ATTACK1:
+			UpdateAttackBeam();
+			if (!TaskIsRunning() || HasCondition(COND_TASK_FAILED))
+			{
+				KillAttackBeam();
+			}
+			break;
 		default:
 			BaseClass::RunTask(pTask);
 			break;
-	}*/
-	BaseClass::RunTask(pTask);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -488,6 +566,15 @@ int CNPC_Android::SelectFailSchedule(int failedSchedule, int failedTask, AI_Task
 //-----------------------------------------------------------------------------
 int CNPC_Android::TranslateSchedule(int scheduleType)
 {
+	// Not working for some reason
+	/*switch (scheduleType)
+	{
+		case SCHED_RANGE_ATTACK1:
+		{
+			return SCHED_ANDROID_RANGE_ATTACK;
+		}
+	}*/
+
 	return BaseClass::TranslateSchedule(scheduleType);
 }
 
@@ -546,75 +633,48 @@ int CNPC_Android::SelectSchedule(void)
 		return SCHED_ANDROID_ZAP_RECOVER;
 	}
 
-	if (m_AssaultBehavior.CanSelectSchedule())
+	if (BehaviorSelectSchedule())
 	{
-		DeferSchedulingToBehavior(&m_AssaultBehavior);
 		return BaseClass::SelectSchedule();
 	}
 
-	//Otherwise do basic state schedule selection
-	/*switch (m_NPCState)
+	switch (m_NPCState)
 	{
-		default:
-		{
-			int	moveSched = ChooseMoveSchedule();
+	case NPC_STATE_IDLE:
+	case NPC_STATE_ALERT:
+	{
+		return SCHED_IDLE_STAND;
 
-			if (moveSched != SCHED_NONE)
-				return moveSched;
-
-			if (GetEnemy() == NULL && (HasCondition(COND_LIGHT_DAMAGE) || HasCondition(COND_HEAVY_DAMAGE)))
-			{
-				Vector vecEnemyLKP;
-
-				// Retrieve a memory for the damage taken
-				// Fill in where we're trying to look
-				if (GetEnemies()->Find(AI_UNKNOWN_ENEMY))
-				{
-					vecEnemyLKP = GetEnemies()->LastKnownPosition(AI_UNKNOWN_ENEMY);
-				}
-				else
-				{
-					// Don't have an enemy, so face the direction the last attack came from (don't face north)
-					vecEnemyLKP = WorldSpaceCenter() + (g_vecAttackDir * 128);
-				}
-
-				// If we're already facing the attack direction, then take cover from it
-				if (FInViewCone(vecEnemyLKP))
-				{
-					// Save this position for our cover search
-					m_vSavePosition = vecEnemyLKP;
-				}
-
-				// By default, we'll turn to face the attack
-			}
-		}
 		break;
-	}*/
-
-	if (GetEnemy() == NULL && (HasCondition(COND_LIGHT_DAMAGE) || HasCondition(COND_HEAVY_DAMAGE)))
-	{
-		Vector vecEnemyLKP;
-
-		// Retrieve a memory for the damage taken
-		// Fill in where we're trying to look
-		if (GetEnemies()->Find(AI_UNKNOWN_ENEMY))
-		{
-			vecEnemyLKP = GetEnemies()->LastKnownPosition(AI_UNKNOWN_ENEMY);
-		}
-		else
-		{
-			// Don't have an enemy, so face the direction the last attack came from (don't face north)
-			vecEnemyLKP = WorldSpaceCenter() + (g_vecAttackDir * 128);
-		}
-
-		// If we're already facing the attack direction, then take cover from it
-		if (FInViewCone(vecEnemyLKP))
-		{
-			// Save this position for our cover search
-			m_vSavePosition = vecEnemyLKP;
-		}
 	}
 
+	case NPC_STATE_COMBAT:
+	{
+
+		if (HasCondition(COND_CAN_RANGE_ATTACK1))
+		{
+			if (OccupyStrategySlotRange(SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2))
+			{
+				return SCHED_RANGE_ATTACK1;
+			}
+			else
+			{
+				return SCHED_COMBAT_PATROL;
+			}
+		}
+
+		if (!HasCondition(COND_SEE_ENEMY))
+		{
+			return SCHED_COMBAT_PATROL;
+		}
+
+		return SCHED_COMBAT_FACE;
+
+		break;
+	}
+	}
+
+	// no special cases here, call the base class
 	return BaseClass::SelectSchedule();
 }
 
@@ -1267,6 +1327,130 @@ bool CNPC_Android::CanRunAScriptedNPCInteraction(bool bForced /*= false*/)
 	return BaseClass::CanRunAScriptedNPCInteraction(bForced);
 }
 
+//------------------------------------------------------------------------------
+// Purpose : Draw attack beam and do damage / decals
+// Input   :
+// Output  :
+//------------------------------------------------------------------------------
+void CNPC_Android::KillAttackBeam(void)
+{
+	if (!m_pBeam)
+		return;
+
+	// Kill sound
+	StopSound(m_pBeam->entindex(), "NPC_Stalker.BurnWall");
+	StopSound(m_pBeam->entindex(), "NPC_Stalker.BurnFlesh");
+
+	UTIL_Remove(m_pLightGlow);
+	UTIL_Remove(m_pBeam);
+	m_pBeam = NULL;
+
+	ClearCondition(COND_CAN_RANGE_ATTACK1);
+
+	RelaxAim();
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+Vector CNPC_Android::LaserStartPosition(Vector vStalkerPos)
+{
+	// Get attachment position
+	Vector vAttachPos;
+	GetAttachment(ANDROID_LASER_ATTACHMENT, vAttachPos);
+
+	// Now convert to vStalkerPos
+	vAttachPos = vAttachPos - GetAbsOrigin() + vStalkerPos;
+	return vAttachPos;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CNPC_Android::StartAttackBeam(void)
+{
+	if (!m_pBeam)
+	{
+		Vector vecSrc = LaserStartPosition(GetAbsOrigin());
+		trace_t tr;
+		AI_TraceLine(vecSrc, vecSrc + m_vLaserDir * 99999, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
+		if (tr.fraction >= 1.0)
+		{
+			// too far
+			TaskComplete();
+			return;
+		}
+
+		m_pBeam = CBeam::BeamCreate("sprites/laser.vmt", 2.0);
+		m_pBeam->PointEntInit(tr.endpos, this);
+		m_pBeam->SetEndAttachment(ANDROID_LASER_ATTACHMENT);
+		m_pBeam->SetBrightness(255);
+		m_pBeam->SetNoise(0);
+		m_pBeam->SetColor(255, 0, 0);
+		m_pLightGlow = CSprite::SpriteCreate("sprites/redglow1.vmt", GetAbsOrigin(), FALSE);
+
+		// ----------------------------
+		// Light myself in a red glow
+		// ----------------------------
+		m_pLightGlow->SetTransparency(kRenderGlow, 255, 200, 200, 0, kRenderFxNoDissipation);
+		m_pLightGlow->SetAttachment(this, 1);
+		m_pLightGlow->SetBrightness(255);
+		m_pLightGlow->SetScale(0.65);
+	}
+
+	SetNextThink(gpGlobals->curtime + g_AndroidBeamThinkTime);
+	m_fBeamEndTime = gpGlobals->curtime + 99999;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CNPC_Android::UpdateAttackBeam(void)
+{
+	CBaseEntity* pEnemy = GetEnemy();
+	// If not burning at a target 
+	if (pEnemy)
+	{
+		Vector enemyLKP = GetEnemyLKP();
+		m_vLaserTargetPos = enemyLKP + pEnemy->GetViewOffset();
+
+		// Face my enemy
+		GetMotor()->SetIdealYawToTargetAndUpdate(enemyLKP);
+
+		// ---------------------------------------------
+		//	Get beam end point
+		// ---------------------------------------------
+		Vector vecSrc = LaserStartPosition(GetAbsOrigin());
+		Vector targetDir = m_vLaserTargetPos - vecSrc;
+		VectorNormalize(targetDir);
+		// --------------------------------------------------------
+		//	If beam position and laser dir are way off, end attack
+		// --------------------------------------------------------
+		if (DotProduct(targetDir, m_vLaserDir) < 0.5)
+		{
+			TaskComplete();
+			return;
+		}
+
+		trace_t tr;
+		AI_TraceLine(vecSrc, vecSrc + m_vLaserDir * 99999, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
+		// ---------------------------------------------
+		//  If beam not long enough, stop attacking
+		// ---------------------------------------------
+		if (tr.fraction == 1.0)
+		{
+			TaskComplete();
+			return;
+		}
+
+		CSoundEnt::InsertSound(SOUND_DANGER, tr.endpos, 60, 0.025, this);
+	}
+	else
+	{
+		TaskFail(FAIL_NO_ENEMY);
+	}
+}
+
 AI_BEGIN_CUSTOM_NPC(npc_android, CNPC_Android)
 
 //Conditions
@@ -1301,6 +1485,16 @@ DEFINE_SCHEDULE
 
 	"	Interrupts"
 	"		COND_TASK_FAILED"
+)
+
+DEFINE_SCHEDULE
+(
+	SCHED_ANDROID_RANGE_ATTACK,
+
+	"	Tasks"
+	"		TASK_STOP_MOVING				0"
+	"		TASK_FACE_ENEMY					0"
+	"		TASK_RANGE_ATTACK1				0"
 )
 
 AI_END_CUSTOM_NPC()
