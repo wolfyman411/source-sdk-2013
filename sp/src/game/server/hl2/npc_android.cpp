@@ -53,7 +53,8 @@ int g_interactionAndroidFiredAtTarget = 0;
 float g_AndroidBeamThinkTime = 0.0;
 
 #define	ANDROID_MODEL			"models/antlion.mdl"
-#define	ANDROID_LASER_ATTACHMENT	1
+#define	ANDROID_RIGHT_ARM			2
+#define	ANDROID_LEFT_ARM			1
 
 //==================================================
 // Antlion Activities
@@ -70,6 +71,11 @@ CNPC_Android::CNPC_Android(void)
 }
 
 LINK_ENTITY_TO_CLASS(npc_android, CNPC_Android);
+
+enum
+{
+	SCHED_ANDROID_RANGE_ATTACK,
+};
 
 //==================================================
 // CNPC_Antlion::m_DataDesc
@@ -566,13 +572,14 @@ int CNPC_Android::SelectFailSchedule(int failedSchedule, int failedTask, AI_Task
 //-----------------------------------------------------------------------------
 int CNPC_Android::TranslateSchedule(int scheduleType)
 {
-	// Not working for some reason
+	// FIXME: Custom schedule doesn't work?
 	/*switch (scheduleType)
 	{
 		case SCHED_RANGE_ATTACK1:
 		{
 			return SCHED_ANDROID_RANGE_ATTACK;
 		}
+
 	}*/
 
 	return BaseClass::TranslateSchedule(scheduleType);
@@ -1357,7 +1364,7 @@ Vector CNPC_Android::LaserStartPosition(Vector vStalkerPos)
 {
 	// Get attachment position
 	Vector vAttachPos;
-	GetAttachment(ANDROID_LASER_ATTACHMENT, vAttachPos);
+	GetAttachment(ANDROID_LEFT_ARM, vAttachPos);
 
 	// Now convert to vStalkerPos
 	vAttachPos = vAttachPos - GetAbsOrigin() + vStalkerPos;
@@ -1383,7 +1390,7 @@ void CNPC_Android::StartAttackBeam(void)
 
 		m_pBeam = CBeam::BeamCreate("sprites/laser.vmt", 2.0);
 		m_pBeam->PointEntInit(tr.endpos, this);
-		m_pBeam->SetEndAttachment(ANDROID_LASER_ATTACHMENT);
+		m_pBeam->SetEndAttachment(ANDROID_LEFT_ARM);
 		m_pBeam->SetBrightness(255);
 		m_pBeam->SetNoise(0);
 		m_pBeam->SetColor(255, 0, 0);
@@ -1393,7 +1400,7 @@ void CNPC_Android::StartAttackBeam(void)
 		// Light myself in a red glow
 		// ----------------------------
 		m_pLightGlow->SetTransparency(kRenderGlow, 255, 200, 200, 0, kRenderFxNoDissipation);
-		m_pLightGlow->SetAttachment(this, 1);
+		m_pLightGlow->SetAttachment(this, ANDROID_LEFT_ARM);
 		m_pLightGlow->SetBrightness(255);
 		m_pLightGlow->SetScale(0.65);
 	}
@@ -1407,12 +1414,13 @@ void CNPC_Android::StartAttackBeam(void)
 //-----------------------------------------------------------------------------
 void CNPC_Android::UpdateAttackBeam(void)
 {
+	DevMsg("Update\n");
 	CBaseEntity* pEnemy = GetEnemy();
 	// If not burning at a target 
 	if (pEnemy)
 	{
 		Vector enemyLKP = GetEnemyLKP();
-		m_vLaserTargetPos = enemyLKP + pEnemy->GetViewOffset();
+		m_vLaserTargetPos = pEnemy->GetAbsOrigin();
 
 		// Face my enemy
 		GetMotor()->SetIdealYawToTargetAndUpdate(enemyLKP);
@@ -1441,6 +1449,26 @@ void CNPC_Android::UpdateAttackBeam(void)
 		{
 			TaskComplete();
 			return;
+		}
+
+		// If enemy hits laser, hurt them.
+		if (tr.DidHit())
+		{
+			CBaseEntity* pHitEntity = tr.m_pEnt;
+
+			if (pHitEntity && pHitEntity != this)
+			{
+				if (pHitEntity == pEnemy)
+				{
+					CTakeDamageInfo damageInfo;
+					damageInfo.SetDamage(5.0f);
+					damageInfo.SetAttacker(this);
+					damageInfo.SetInflictor(this);
+					damageInfo.SetDamageType(DMG_DISSOLVE);
+
+					pHitEntity->TakeDamage(damageInfo);
+				}
+			}
 		}
 
 		CSoundEnt::InsertSound(SOUND_DANGER, tr.endpos, 60, 0.025, this);
@@ -1495,6 +1523,15 @@ DEFINE_SCHEDULE
 	"		TASK_STOP_MOVING				0"
 	"		TASK_FACE_ENEMY					0"
 	"		TASK_RANGE_ATTACK1				0"
+	""
+	"	Interrupts"
+	"		COND_CAN_MELEE_ATTACK1"
+	"		COND_HEAVY_DAMAGE"
+	"		COND_REPEATED_DAMAGE"
+	"		COND_HEAR_DANGER"
+	"		COND_NEW_ENEMY"
+	"		COND_ENEMY_DEAD"
+	"		COND_ENEMY_OCCLUDED"	// Don't break on this.  Keep shooting at last location
 )
 
 AI_END_CUSTOM_NPC()
