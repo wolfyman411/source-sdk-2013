@@ -52,7 +52,7 @@ int g_interactionAndroidFoundTarget = 0;
 int g_interactionAndroidFiredAtTarget = 0;
 float g_AndroidBeamThinkTime = 0.0;
 
-#define	ANDROID_MODEL			"models/antlion.mdl"
+#define	ANDROID_MODEL			"models/aperture/android.mdl"
 #define	ANDROID_RIGHT_ARM			2
 #define	ANDROID_LEFT_ARM			1
 
@@ -445,7 +445,7 @@ void CNPC_Android::HandleAnimEvent(animevent_t* pEvent)
 	// Handle the ball event
 	if (pEvent->event == AE_ANDROID_BALL)
 	{
-		
+
 		return;
 	}
 	else if (pEvent->event == AE_ANDROID_UNBALL)
@@ -470,72 +470,72 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 	DevMsg("%s\n", scheduleName);
 	switch (pTask->iTask)
 	{
-		case TASK_ANNOUNCE_ATTACK:
+	case TASK_ANNOUNCE_ATTACK:
+	{
+		EmitSound("NPC_Antlion.MeleeAttackSingle");
+		TaskComplete();
+		break;
+	}
+	case TASK_RANGE_ATTACK1:
+	{
+		CBaseEntity* pEnemy = GetEnemy();
+		if (pEnemy)
 		{
-			EmitSound("NPC_Antlion.MeleeAttackSingle");
-			TaskComplete();
-			break;
-		}
-		case TASK_RANGE_ATTACK1:
-		{
-			CBaseEntity* pEnemy = GetEnemy();
-			if (pEnemy)
+			m_vLaserTargetPos = GetEnemyLKP() + pEnemy->GetViewOffset();
+
+			// Never hit target on first try
+			Vector missPos = m_vLaserTargetPos;
+
+			if (pEnemy->Classify() == CLASS_BULLSEYE && hl2_episodic.GetBool())
 			{
-				m_vLaserTargetPos = GetEnemyLKP() + pEnemy->GetViewOffset();
-
-				// Never hit target on first try
-				Vector missPos = m_vLaserTargetPos;
-
-				if (pEnemy->Classify() == CLASS_BULLSEYE && hl2_episodic.GetBool())
-				{
-					missPos.x += 60 + 120 * random->RandomInt(-1, 1);
-					missPos.y += 60 + 120 * random->RandomInt(-1, 1);
-				}
-				else
-				{
-					missPos.x += 80 * random->RandomInt(-1, 1);
-					missPos.y += 80 * random->RandomInt(-1, 1);
-				}
-
-				// ----------------------------------------------------------------------
-				// If target is facing me and not running towards me shoot below his feet
-				// so he can see the laser coming
-				// ----------------------------------------------------------------------
-				CBaseCombatCharacter* pBCC = ToBaseCombatCharacter(pEnemy);
-				if (pBCC)
-				{
-					Vector targetToMe = (pBCC->GetAbsOrigin() - GetAbsOrigin());
-					Vector vBCCFacing = pBCC->BodyDirection2D();
-					if ((DotProduct(vBCCFacing, targetToMe) < 0) &&
-						(pBCC->GetSmoothedVelocity().Length() < 50))
-					{
-						missPos.z -= 150;
-					}
-					// --------------------------------------------------------
-					// If facing away or running towards laser,
-					// shoot above target's head 
-					// --------------------------------------------------------
-					else
-					{
-						missPos.z += 60;
-					}
-				}
-				m_vLaserDir = missPos - LaserStartPosition(GetAbsOrigin());
-				VectorNormalize(m_vLaserDir);
+				missPos.x += 60 + 120 * random->RandomInt(-1, 1);
+				missPos.y += 60 + 120 * random->RandomInt(-1, 1);
 			}
 			else
 			{
-				TaskFail(FAIL_NO_ENEMY);
-				return;
+				missPos.x += 80 * random->RandomInt(-1, 1);
+				missPos.y += 80 * random->RandomInt(-1, 1);
 			}
 
-			StartAttackBeam();
-			SetActivity(ACT_RANGE_ATTACK1);
-			break;
+			// ----------------------------------------------------------------------
+			// If target is facing me and not running towards me shoot below his feet
+			// so he can see the laser coming
+			// ----------------------------------------------------------------------
+			CBaseCombatCharacter* pBCC = ToBaseCombatCharacter(pEnemy);
+			if (pBCC)
+			{
+				Vector targetToMe = (pBCC->GetAbsOrigin() - GetAbsOrigin());
+				Vector vBCCFacing = pBCC->BodyDirection2D();
+				if ((DotProduct(vBCCFacing, targetToMe) < 0) &&
+					(pBCC->GetSmoothedVelocity().Length() < 50))
+				{
+					missPos.z -= 150;
+				}
+				// --------------------------------------------------------
+				// If facing away or running towards laser,
+				// shoot above target's head 
+				// --------------------------------------------------------
+				else
+				{
+					missPos.z += 60;
+				}
+			}
+			m_vLaserDir = missPos - LaserStartPosition(GetAbsOrigin());
+			VectorNormalize(m_vLaserDir);
 		}
-		default:
-			BaseClass::StartTask(pTask);
-			break;
+		else
+		{
+			TaskFail(FAIL_NO_ENEMY);
+			return;
+		}
+
+		StartAttackBeam();
+		SetActivity(ACT_RANGE_ATTACK1);
+		break;
+	}
+	default:
+		BaseClass::StartTask(pTask);
+		break;
 	}
 }
 
@@ -547,16 +547,16 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 {
 	switch (pTask->iTask)
 	{
-		case TASK_RANGE_ATTACK1:
-			UpdateAttackBeam();
-			if (!TaskIsRunning() || HasCondition(COND_TASK_FAILED))
-			{
-				KillAttackBeam();
-			}
-			break;
-		default:
-			BaseClass::RunTask(pTask);
-			break;
+	case TASK_RANGE_ATTACK1:
+		UpdateAttackBeam();
+		if (!TaskIsRunning() || HasCondition(COND_TASK_FAILED))
+		{
+			KillAttackBeam();
+		}
+		break;
+	default:
+		BaseClass::RunTask(pTask);
+		break;
 	}
 }
 
