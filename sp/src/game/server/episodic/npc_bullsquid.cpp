@@ -261,55 +261,6 @@ Vector CNPC_Bullsquid::VecCheckThrowTolerance( CBaseEntity* pEdict, const Vector
 
 	return vecVelocity;
 }
-// Replace the GetSpitVector and VecCheckThrowTolerance methods to always use a straight line (no lobbing)
-
-bool CNPC_Bullsquid::GetSpitVector( const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut, bool lobbing )
-{
-	// Always use a direct shot, ignore lobbing
-	const float spitSpeed = 800.0f;
-	const float tolerance = 10.0f * 12.0f;
-
-	Vector vecToss = VecCheckThrowTolerance( this, vecStartPos, vecTarget, spitSpeed, tolerance, false );
-
-	if ( vecToss == vec3_origin )
-		return false;
-
-	if ( vecOut )
-		*vecOut = vecToss;
-
-	return true;
-}
-
-Vector CNPC_Bullsquid::VecCheckThrowTolerance( CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance, bool lobbing )
-{
-	flSpeed = MAX( 1.0f, flSpeed );
-
-	Vector vecDelta = vecSpot2 - vecSpot1;
-	float flDist = vecDelta.Length();
-	if ( flDist < 1e-3f )
-		return vec3_origin;
-
-	Vector vecVelocity = vecDelta * (flSpeed / flDist);
-
-	// Trace directly to the target
-	trace_t tr;
-	UTIL_TraceLine( vecSpot1, vecSpot2, MASK_SOLID, pEdict, COLLISION_GROUP_NONE, &tr );
-	if ( tr.fraction != 1.0f )
-	{
-		bool bFail = true;
-		if ( flTolerance > 0.0f )
-		{
-			float flNearness = (tr.endpos - vecSpot2).LengthSqr();
-			if ( flNearness < Square( flTolerance ) )
-				bFail = false;
-		}
-		if ( bFail )
-			return vec3_origin;
-	}
-
-	return vecVelocity;
-}
-
 
 void CNPC_Bullsquid::Precache()
 {
@@ -1273,4 +1224,4 @@ DEFINE_SCHEDULE
 	"		COND_NEW_ENEMY"
 )
 
-AI_END_CUSTOM_NPC()// Replace the GetSpitVector and VecCheckThrowTolerance methods with Antlion-style lobbing logic
+AI_END_CUSTOM_NPC()
