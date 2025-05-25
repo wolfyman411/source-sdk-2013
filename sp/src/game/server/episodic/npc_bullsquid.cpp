@@ -174,37 +174,39 @@ bool CNPC_Bullsquid::InnateWeaponLOSCondition(const Vector& ownerPos, const Vect
 	return BaseClass::InnateWeaponLOSCondition(ownerPos, targetPos, bSetConditions);
 }
 
-bool CNPC_Bullsquid::GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut, bool lobbing = false)
+bool CNPC_Bullsquid::GetSpitVector( const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut, bool lobbing )
 {
-	float spitSpeed = 800.0f;
+	// Antlion-style: always try a direct shot first, then lob if requested or direct fails
+	const float directSpeed = 800.0f;
+	const float lobSpeed = 600.0f;
+	const float tolerance = 10.0f * 12.0f;
 
-	if (lobbing)
+	Vector vecToss = vec3_origin;
+
+	// Try direct shot first if not lobbing
+	if ( !lobbing )
 	{
-		spitSpeed = 200.0f;
+		vecToss = VecCheckThrowTolerance( this, vecStartPos, vecTarget, directSpeed, tolerance, false );
 	}
 
-	Vector vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed, (10.0f * 12.0f), lobbing);
-
-	// If this failed then try a little faster (flattens the arc)
-	if (vecToss == vec3_origin)
+	// If direct failed or lobbing requested, try lob
+	if ( vecToss == vec3_origin )
 	{
-		vecToss = VecCheckThrowTolerance(this, vecStartPos, vecTarget, spitSpeed * 1.5f, (10.0f * 12.0f), lobbing);
-		if (vecToss == vec3_origin)
-			return false;
+		vecToss = VecCheckThrowTolerance( this, vecStartPos, vecTarget, lobSpeed, tolerance, true );
 	}
 
-	// Save out the result
-	if (vecOut)
-	{
+	if ( vecToss == vec3_origin )
+		return false;
+
+	if ( vecOut )
 		*vecOut = vecToss;
-	}
 
 	return true;
 }
 
-Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance, bool lobbing)
+Vector CNPC_Bullsquid::VecCheckThrowTolerance( CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance, bool lobbing )
 {
-	flSpeed = MAX(1.0f, flSpeed);
+	flSpeed = MAX( 1.0f, flSpeed );
 
 	float flGravity = GetCurrentGravity();
 
@@ -213,56 +215,101 @@ Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector&
 	float flDeltaZ = vecDelta.z;
 
 	// Calculate the time to reach the target in 2D
-	float flSpeed2D = flSpeed;
-	float flTime = flDelta2D / flSpeed2D;
+	float flTime = flDelta2D / flSpeed;
+	if ( flTime <= 0.0f )
+		return vec3_origin;
 
 	// Calculate the required vertical speed to reach the target height
 	float flSpeedZ = (flDeltaZ + 0.5f * flGravity * flTime * flTime) / flTime;
 
-	Vector vecGrenadeVel = vecDelta;
-	vecGrenadeVel.z = 0;
-	if (flDelta2D > 0.0f)
-		vecGrenadeVel *= (flSpeed2D / flDelta2D);
-	vecGrenadeVel.z = flSpeedZ;
+	Vector vecVelocity = vecDelta;
+	vecVelocity.z = 0;
+	if ( flDelta2D > 0.0f )
+		vecVelocity *= (flSpeed / flDelta2D);
+	vecVelocity.z = flSpeedZ;
 
-	Vector vecApex = vecSpot1 + (vecSpot2 - vecSpot1) * 0.3f;
-	vecApex.z += 0.3f * flGravity * (flTime * 0.3f) * (flTime * 0.3f);
-
-	if (lobbing)
+	// For lobbing, raise the apex and adjust vertical speed
+	if ( lobbing )
 	{
-		vecApex = vecSpot1;
-		vecApex.z = max(vecSpot1.z, vecSpot2.z) + 125.0f;
-		float timeToApex = flTime * 0.3f;
-		vecGrenadeVel.z = (vecApex.z - vecSpot1.z) / timeToApex + 0.5f * flGravity;
+		float apexHeight = MAX( vecSpot1.z, vecSpot2.z ) + 125.0f;
+		float timeToApex = flTime * 0.5f;
+		vecVelocity.z = (apexHeight - vecSpot1.z) / timeToApex + 0.5f * flGravity * timeToApex;
 	}
+
+	// Trace to apex and to target, similar to antlion
+	Vector vecApex = vecSpot1 + (vecSpot2 - vecSpot1) * 0.5f;
+	vecApex.z = (lobbing ? MAX( vecSpot1.z, vecSpot2.z ) + 125.0f : vecApex.z);
 
 	trace_t tr;
-	UTIL_TraceLine(vecSpot1, vecApex, MASK_SOLID, pEdict, COLLISION_GROUP_NONE, &tr);
-	if (tr.fraction != 1.0f)
-	{
+	UTIL_TraceLine( vecSpot1, vecApex, MASK_SOLID, pEdict, COLLISION_GROUP_NONE, &tr );
+	if ( tr.fraction != 1.0f )
 		return vec3_origin;
-	}
 
-	UTIL_TraceLine(vecApex, vecSpot2, MASK_SOLID_BRUSHONLY, pEdict, COLLISION_GROUP_NONE, &tr);
-	if (tr.fraction != 1.0f)
+	UTIL_TraceLine( vecApex, vecSpot2, MASK_SOLID_BRUSHONLY, pEdict, COLLISION_GROUP_NONE, &tr );
+	if ( tr.fraction != 1.0f )
 	{
 		bool bFail = true;
-		if (flTolerance > 0.0f)
+		if ( flTolerance > 0.0f )
 		{
 			float flNearness = (tr.endpos - vecSpot2).LengthSqr();
-			if (flNearness < Square(flTolerance))
-			{
+			if ( flNearness < Square( flTolerance ) )
 				bFail = false;
-			}
 		}
-		if (bFail)
-		{
+		if ( bFail )
 			return vec3_origin;
-		}
 	}
 
-	return vecGrenadeVel;
+	return vecVelocity;
 }
+// Replace the GetSpitVector and VecCheckThrowTolerance methods to always use a straight line (no lobbing)
+
+bool CNPC_Bullsquid::GetSpitVector( const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut, bool lobbing )
+{
+	// Always use a direct shot, ignore lobbing
+	const float spitSpeed = 800.0f;
+	const float tolerance = 10.0f * 12.0f;
+
+	Vector vecToss = VecCheckThrowTolerance( this, vecStartPos, vecTarget, spitSpeed, tolerance, false );
+
+	if ( vecToss == vec3_origin )
+		return false;
+
+	if ( vecOut )
+		*vecOut = vecToss;
+
+	return true;
+}
+
+Vector CNPC_Bullsquid::VecCheckThrowTolerance( CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance, bool lobbing )
+{
+	flSpeed = MAX( 1.0f, flSpeed );
+
+	Vector vecDelta = vecSpot2 - vecSpot1;
+	float flDist = vecDelta.Length();
+	if ( flDist < 1e-3f )
+		return vec3_origin;
+
+	Vector vecVelocity = vecDelta * (flSpeed / flDist);
+
+	// Trace directly to the target
+	trace_t tr;
+	UTIL_TraceLine( vecSpot1, vecSpot2, MASK_SOLID, pEdict, COLLISION_GROUP_NONE, &tr );
+	if ( tr.fraction != 1.0f )
+	{
+		bool bFail = true;
+		if ( flTolerance > 0.0f )
+		{
+			float flNearness = (tr.endpos - vecSpot2).LengthSqr();
+			if ( flNearness < Square( flTolerance ) )
+				bFail = false;
+		}
+		if ( bFail )
+			return vec3_origin;
+	}
+
+	return vecVelocity;
+}
+
 
 void CNPC_Bullsquid::Precache()
 {
@@ -1226,4 +1273,4 @@ DEFINE_SCHEDULE
 	"		COND_NEW_ENEMY"
 )
 
-AI_END_CUSTOM_NPC()
+AI_END_CUSTOM_NPC()// Replace the GetSpitVector and VecCheckThrowTolerance methods with Antlion-style lobbing logic
