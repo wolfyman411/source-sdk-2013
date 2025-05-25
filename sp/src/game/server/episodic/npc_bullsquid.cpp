@@ -171,13 +171,15 @@ bool CNPC_Bullsquid::InnateWeaponLOSCondition(const Vector& ownerPos, const Vect
 		return GetSpitVector(vSpitPos, targetPos, &m_vecSaveSpitVelocity, true);
 	}
 
+	// test
+
 	return BaseClass::InnateWeaponLOSCondition(ownerPos, targetPos, bSetConditions);
 }
 
 bool CNPC_Bullsquid::GetSpitVector( const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut, bool lobbing )
 {
 	// Antlion-style: always try a direct shot first, then lob if requested or direct fails
-	const float directSpeed = 800.0f;
+	const float directSpeed = 900.0f;
 	const float lobSpeed = 600.0f;
 	const float tolerance = 10.0f * 12.0f;
 
