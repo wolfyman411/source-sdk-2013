@@ -208,47 +208,45 @@ Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector&
 
 	float flGravity = GetCurrentGravity();
 
-	Vector vecGrenadeVel = (vecSpot2 - vecSpot1);
+	Vector vecDelta = vecSpot2 - vecSpot1;
+	float flDelta2D = vecDelta.Length2D();
+	float flDeltaZ = vecDelta.z;
 
-	// throw at a constant time
-	float time = vecGrenadeVel.Length() / flSpeed;
-	vecGrenadeVel = vecGrenadeVel * (2.0 / time);
+	// Calculate the time to reach the target in 2D
+	float flSpeed2D = flSpeed;
+	float flTime = flDelta2D / flSpeed2D;
 
-	// adjust upward toss to compensate for gravity loss
-	vecGrenadeVel.z += flGravity * time * 0.27;
+	// Calculate the required vertical speed to reach the target height
+	float flSpeedZ = (flDeltaZ + 0.5f * flGravity * flTime * flTime) / flTime;
 
-	Vector vecApex = vecSpot1 + (vecSpot2 - vecSpot1) * 0.3;
-	vecApex.z += 0.3 * flGravity * (time * 0.3) * (time * 0.3);
+	Vector vecGrenadeVel = vecDelta;
+	vecGrenadeVel.z = 0;
+	if (flDelta2D > 0.0f)
+		vecGrenadeVel *= (flSpeed2D / flDelta2D);
+	vecGrenadeVel.z = flSpeedZ;
+
+	Vector vecApex = vecSpot1 + (vecSpot2 - vecSpot1) * 0.3f;
+	vecApex.z += 0.3f * flGravity * (flTime * 0.3f) * (flTime * 0.3f);
 
 	if (lobbing)
 	{
-		// Apex
-		Vector vecApex = vecSpot1;
-		vecApex.z = max(vecSpot1.z, vecSpot2.z) + 125.0f; // Height
-
-		// Apex Timer
-		float timeToApex = time * 0.3f;
-
-		// Upward velocity
+		vecApex = vecSpot1;
+		vecApex.z = max(vecSpot1.z, vecSpot2.z) + 125.0f;
+		float timeToApex = flTime * 0.3f;
 		vecGrenadeVel.z = (vecApex.z - vecSpot1.z) / timeToApex + 0.5f * flGravity;
 	}
 
-
 	trace_t tr;
 	UTIL_TraceLine(vecSpot1, vecApex, MASK_SOLID, pEdict, COLLISION_GROUP_NONE, &tr);
-
-	if (tr.fraction != 1.0)
+	if (tr.fraction != 1.0f)
 	{
-
 		return vec3_origin;
 	}
 
 	UTIL_TraceLine(vecApex, vecSpot2, MASK_SOLID_BRUSHONLY, pEdict, COLLISION_GROUP_NONE, &tr);
-	if (tr.fraction != 1.0)
+	if (tr.fraction != 1.0f)
 	{
 		bool bFail = true;
-
-		// Didn't make it all the way there, but check if we're within our tolerance range
 		if (flTolerance > 0.0f)
 		{
 			float flNearness = (tr.endpos - vecSpot2).LengthSqr();
@@ -257,7 +255,6 @@ Vector CNPC_Bullsquid::VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector&
 				bFail = false;
 			}
 		}
-
 		if (bFail)
 		{
 			return vec3_origin;
