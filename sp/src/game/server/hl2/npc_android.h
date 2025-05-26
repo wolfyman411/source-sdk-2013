@@ -87,7 +87,6 @@ public:
 	Class_T		Classify(void) { return CLASS_ANTLION; }
 
 	void		Event_Killed(const CTakeDamageInfo& info);
-	void		GatherEnemyConditions(CBaseEntity* pEnemy);
 
 	int			TranslateSchedule(int scheduleType);
 
@@ -173,6 +172,7 @@ private:
 		SCHED_ANDROID_BALL,
 		SCHED_ANDROID_UNBALL,
 		SCHED_ANDROID_RANGE_ATTACK,
+		SCHED_ANDROID_CHASE_ENEMY,
 	};
 
 	//==================================================

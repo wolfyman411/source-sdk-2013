@@ -72,11 +72,6 @@ CNPC_Android::CNPC_Android(void)
 
 LINK_ENTITY_TO_CLASS(npc_android, CNPC_Android);
 
-enum
-{
-	SCHED_ANDROID_RANGE_ATTACK,
-};
-
 //==================================================
 // CNPC_Antlion::m_DataDesc
 //==================================================
@@ -135,12 +130,9 @@ void CNPC_Android::Spawn(void)
 
 	SetCollisionGroup(HL2COLLISION_GROUP_ANTLION);
 
-	CapabilitiesAdd(bits_CAP_MOVE_GROUND | bits_CAP_MOVE_JUMP | bits_CAP_INNATE_RANGE_ATTACK1 | bits_CAP_INNATE_RANGE_ATTACK2);
+	CapabilitiesAdd(bits_CAP_MOVE_GROUND | bits_CAP_INNATE_MELEE_ATTACK1 | bits_CAP_INNATE_RANGE_ATTACK1 | bits_CAP_INNATE_RANGE_ATTACK2);
 
 	NPCInit();
-
-	// always pursue
-	m_flDistTooFar = FLT_MAX;
 
 	BaseClass::Spawn();
 
@@ -572,16 +564,6 @@ int CNPC_Android::SelectFailSchedule(int failedSchedule, int failedTask, AI_Task
 //-----------------------------------------------------------------------------
 int CNPC_Android::TranslateSchedule(int scheduleType)
 {
-	// FIXME: Custom schedule doesn't work?
-	/*switch (scheduleType)
-	{
-		case SCHED_RANGE_ATTACK1:
-		{
-			return SCHED_ANDROID_RANGE_ATTACK;
-		}
-
-	}*/
-
 	return BaseClass::TranslateSchedule(scheduleType);
 }
 
@@ -640,45 +622,27 @@ int CNPC_Android::SelectSchedule(void)
 		return SCHED_ANDROID_ZAP_RECOVER;
 	}
 
-	if (BehaviorSelectSchedule())
-	{
-		return BaseClass::SelectSchedule();
-	}
-
 	switch (m_NPCState)
 	{
-	case NPC_STATE_IDLE:
-	case NPC_STATE_ALERT:
-	{
-		return SCHED_IDLE_STAND;
-
-		break;
-	}
-
-	case NPC_STATE_COMBAT:
-	{
-
-		if (HasCondition(COND_CAN_RANGE_ATTACK1))
+		case NPC_STATE_COMBAT:
 		{
-			if (OccupyStrategySlotRange(SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2))
+
+			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
-				return SCHED_RANGE_ATTACK1;
+				/*if (OccupyStrategySlotRange(SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2))
+				{
+					return SCHED_RANGE_ATTACK1;
+				}
+				else
+				{
+					return SCHED_COMBAT_PATROL;
+				}*/
 			}
-			else
-			{
-				return SCHED_COMBAT_PATROL;
-			}
+
+			return SCHED_CHASE_ENEMY;
+
+			break;
 		}
-
-		if (!HasCondition(COND_SEE_ENEMY))
-		{
-			return SCHED_COMBAT_PATROL;
-		}
-
-		return SCHED_COMBAT_FACE;
-
-		break;
-	}
 	}
 
 	// no special cases here, call the base class
@@ -826,20 +790,20 @@ float CNPC_Android::MaxYawSpeed(void)
 	switch (GetActivity())
 	{
 	case ACT_IDLE:
-		return 32.0f;
+		return 90.0f;
 		break;
 
 	case ACT_WALK:
-		return 16.0f;
+		return 35.0f;
 		break;
 
 	default:
 	case ACT_RUN:
-		return 32.0f;
+		return 90.0f;
 		break;
 	}
 
-	return 32.0f;
+	return 90.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -1126,44 +1090,6 @@ bool CNPC_Android::IsLightDamage(const CTakeDamageInfo& info)
 		return true;
 
 	return false;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *pEnemy - 
-//-----------------------------------------------------------------------------
-void CNPC_Android::GatherEnemyConditions(CBaseEntity* pEnemy)
-{
-	// Do the base class
-	BaseClass::GatherEnemyConditions(pEnemy);
-
-	// If we're not already too far away, check again
-	//TODO: Check to make sure we don't already have a condition set that removes the need for this
-	if (HasCondition(COND_ENEMY_UNREACHABLE) == false)
-	{
-		Vector	predPosition;
-		UTIL_PredictedPosition(GetEnemy(), 1.0f, &predPosition);
-
-		Vector	predDir = (predPosition - GetAbsOrigin());
-		float	predLength = VectorNormalize(predDir);
-
-		// See if we'll be outside our effective target range
-		if (predLength > m_flEludeDistance)
-		{
-			Vector	predVelDir = (predPosition - GetEnemy()->GetAbsOrigin());
-			float	predSpeed = VectorNormalize(predVelDir);
-
-			// See if the enemy is moving mostly away from us
-			if ((predSpeed > 512.0f) && (DotProduct(predVelDir, predDir) > 0.0f))
-			{
-				// Mark the enemy as eluded and burrow away
-				ClearEnemyMemory();
-				SetEnemy(NULL);
-				SetIdealState(NPC_STATE_ALERT);
-				SetCondition(COND_ENEMY_UNREACHABLE);
-			}
-		}
-	}
 }
 
 //-----------------------------------------------------------------------------
