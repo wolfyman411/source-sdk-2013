@@ -96,6 +96,7 @@ private:
 	enum
 	{
 		TASK_ANDROID_LASER_ATTACK = LAST_SHARED_TASK,
+		TASK_ANDROID_CIRCLE_ENEMY,
 	};
 
 protected:

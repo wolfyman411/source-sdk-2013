@@ -290,6 +290,16 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 {
 	switch (pTask->iTask)
 	{
+		case TASK_ANDROID_CIRCLE_ENEMY:
+		{
+			if (!GetEnemy())
+			{
+				TaskFail("No enemy");
+				return;
+			}
+			break;
+		}
+
 		case TASK_ANDROID_LASER_ATTACK:
 		{
 			CBaseEntity* pTarget = GetEnemy();
@@ -321,6 +331,39 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 {
 	switch (pTask->iTask)
 	{
+		case TASK_ANDROID_CIRCLE_ENEMY:
+		{
+			if (!GetEnemy())
+			{
+				DevMsg("Lost enemy\n");
+				TaskFail("Lost enemy");
+				return;
+			}
+
+			Vector vecEnemyPos = GetEnemy()->GetAbsOrigin();
+			Vector vecDir = GetAbsOrigin() - vecEnemyPos;
+			vecDir.z = 0;
+			float flDist = vecDir.NormalizeInPlace();
+
+			QAngle angMove;
+			VectorAngles(vecDir, angMove);
+			angMove.y += RandomFloat(-100.0f, 100.0f);
+			AngleVectors(angMove, &vecDir);
+
+			// Set new position (maintain distance)
+			Vector vecTargetPos = vecEnemyPos + vecDir * flDist;
+
+			AI_NavGoal_t goal(vecTargetPos);
+			GetNavigator()->SetGoal(goal, AIN_CLEAR_TARGET);
+
+			if (GetNavigator()->CurWaypointIsGoal())
+			{
+				DevMsg("Goal Reached!");
+			}
+
+			break;
+		}
+
 		case TASK_ANDROID_LASER_ATTACK:
 		{
 			CBaseEntity* pTarget = GetEnemy();
@@ -451,6 +494,7 @@ void CNPC_Android::UpdateHead(void)
 
 AI_BEGIN_CUSTOM_NPC(npc_android, CNPC_Android)
 DECLARE_TASK(TASK_ANDROID_LASER_ATTACK);
+DECLARE_TASK(TASK_ANDROID_CIRCLE_ENEMY);
 
 //-----------------------------------------------------------------------------
 // AI Schedules Specific to this NPC
@@ -463,12 +507,14 @@ DEFINE_SCHEDULE
 	"	Tasks"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
+	"       TASK_ANDROID_CIRCLE_ENEMY       0"
 	"		TASK_ANDROID_LASER_ATTACK		0"
 	""
 	"	Interrupts"
 	"		COND_TASK_FAILED"
 	"		COND_NEW_ENEMY"
 	"		COND_ENEMY_DEAD"
+	"       COND_LOST_ENEMY"
 )
 
 AI_END_CUSTOM_NPC()
