@@ -20,6 +20,10 @@
 #include "ai_behavior_follow.h"
 #include <beam_shared.h>
 #include <Sprite.h>
+#include <smoke_trail.h>
+#include <particle_system.h>
+#include "explode.h"
+#include "props_shared.h"
 
 class CNPC_Android;
 
@@ -42,6 +46,13 @@ public:
 	void	HandleAnimEvent(animevent_t* pEvent);
 	int		GetSoundInterests(void);
 	bool	CreateBehaviors(void);
+	int		OnTakeDamage_Alive(const CTakeDamageInfo& info);
+
+	//Damage Effects
+	void	StartSmokeTrail(void);
+	void	StartFire(void);
+	void	Event_Killed(const CTakeDamageInfo& info);
+	void	Gib(void);
 
 	virtual int	RangeAttack1Conditions(float flDot, float flDist);
 
@@ -55,9 +66,16 @@ public:
 	int		SelectSchedule(void);
 	void	GatherConditions(void);
 	void	PrescheduleThink(void);
-
+	
+	//Lasers
 	CBeam* m_pBeamL;
 	CSprite* m_pLightGlowL;
+	CBeam* m_pBeamR;
+	CSprite* m_pLightGlowR;
+
+	//Effects
+	SmokeTrail* m_pSmokeTrail;
+	CParticleSystem* m_pFire;
 
 	DECLARE_DATADESC()
 

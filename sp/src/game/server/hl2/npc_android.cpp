@@ -16,6 +16,10 @@
 #define FAR_RANGE 1200.0f
 
 #define WEAPON_ATTACHMENT_LEFT	1
+#define WEAPON_ATTACHMENT_RIGHT	2
+#define PARTICLE_ATTACHMENT		"particles"
+
+ConVar sk_android_health("sk_android_health", "125");
 
 LINK_ENTITY_TO_CLASS(npc_android, CNPC_Android);
 
@@ -77,7 +81,7 @@ void CNPC_Android::Spawn()
 
 	SetBloodColor(BLOOD_COLOR_MECH);
 
-	m_iHealth = 20;
+	m_iHealth = sk_android_health.GetFloat();
 
 	m_flFieldOfView = 0.8;
 	m_NPCState = NPC_STATE_NONE;
@@ -114,6 +118,125 @@ bool CNPC_Android::CreateBehaviors()
 	AddBehavior(&m_FollowBehavior);
 
 	return BaseClass::CreateBehaviors();
+}
+
+int CNPC_Android::OnTakeDamage_Alive(const CTakeDamageInfo& info)
+{
+	DevMsg("OW! HP:%d/%d\n",GetHealth(),GetMaxHealth());
+	// Start smoking when we're nearly dead
+	if (m_iHealth < m_iMaxHealth/2)
+	{
+		StartSmokeTrail();
+	}
+	if (m_iHealth < m_iMaxHealth / 4)
+	{
+		DevMsg("Fire\n");
+		StartFire();
+	}
+
+	return (BaseClass::OnTakeDamage_Alive(info));
+}
+
+void CNPC_Android::StartSmokeTrail(void)
+{
+	if (m_pSmokeTrail != NULL)
+		return;
+
+	m_pSmokeTrail = SmokeTrail::CreateSmokeTrail();
+
+	if (m_pSmokeTrail)
+	{
+		m_pSmokeTrail->m_SpawnRate = 10;
+		m_pSmokeTrail->m_ParticleLifetime = 1;
+		m_pSmokeTrail->m_StartSize = 8;
+		m_pSmokeTrail->m_EndSize = 50;
+		m_pSmokeTrail->m_SpawnRadius = 10;
+		m_pSmokeTrail->m_MinSpeed = 25;
+		m_pSmokeTrail->m_MaxSpeed = 45;
+
+		m_pSmokeTrail->m_StartColor.Init(1.0f, 1.0f, 1.0f);
+		m_pSmokeTrail->m_EndColor.Init(0, 0, 0);
+		m_pSmokeTrail->SetLifetime(500.0f);
+
+		m_pSmokeTrail->FollowEntity(this,PARTICLE_ATTACHMENT);
+	}
+}
+
+void CNPC_Android::StartFire(void)
+{
+	m_pFire = (CParticleSystem*)CreateEntityByName("info_particle_system");
+	if (m_pFire != NULL)
+	{
+		Vector vecUp;
+		GetVectors(NULL, NULL, &vecUp);
+
+		// Setup our basic parameters
+		m_pFire->KeyValue("start_active", "1");
+		m_pFire->KeyValue("effect_name", "explosion_turret_fizzle");
+		m_pFire->SetParent(this);
+		m_pFire->FollowEntity(this, PARTICLE_ATTACHMENT);
+		m_pFire->SetAbsOrigin(WorldSpaceCenter() + (vecUp * 5.0f));
+		DispatchSpawn(m_pFire);
+		m_pFire->Activate();
+	}
+}
+
+void CNPC_Android::Event_Killed(const CTakeDamageInfo& info)
+{
+	SetCondition(COND_SCHEDULE_DONE);
+
+	Gib();
+}
+
+void CNPC_Android::Gib(void)
+{
+	if (IsMarkedForDeletion())
+		return;
+
+	// Light
+	CBroadcastRecipientFilter filter;
+	te->DynamicLight(filter, 0.0, &WorldSpaceCenter(), 255, 180, 100, 0, 100, 0.1, 0);
+
+	// Cover the gib spawn
+	ExplosionCreate(WorldSpaceCenter(), GetAbsAngles(), this, 64, 64, false);
+
+	// Turn off any smoke trail
+	if (m_pSmokeTrail)
+	{
+		m_pSmokeTrail->m_ParticleLifetime = 0;
+		UTIL_Remove(m_pSmokeTrail);
+		m_pSmokeTrail = NULL;
+	}
+
+	if (m_pFire)
+	{
+		UTIL_Remove(m_pFire);
+	}
+
+	if (m_pBeamL)
+	{
+		UTIL_Remove(m_pBeamL);
+		UTIL_Remove(m_pLightGlowL);
+	}
+
+	if (m_pBeamR)
+	{
+		UTIL_Remove(m_pBeamR);
+		UTIL_Remove(m_pLightGlowR);
+	}
+
+	Vector vecUp;
+	GetVectors(NULL, NULL, &vecUp);
+	Vector vecOrigin = WorldSpaceCenter() + (vecUp * 12.0f);
+	CPVSFilter filter2(vecOrigin);
+	for (int i = 0; i < 15; i++)
+	{
+		Vector gibVelocity = RandomVector(-100, 100);
+		int iModelIndex = modelinfo->GetModelIndex(g_PropDataSystem.GetRandomChunkModel("MetalChunks"));
+		te->BreakModel(filter2, 0.0, vecOrigin, GetAbsAngles(), Vector(40, 40, 40), gibVelocity, iModelIndex, 150, 4, 2.5, BREAK_METAL);
+	}
+
+	UTIL_Remove(this);
 }
 
 //-----------------------------------------------------------------------------
@@ -172,7 +295,14 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-				CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
+				if (!m_pBeamL)
+				{
+					CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
+				}
+				if (!m_pBeamR)
+				{
+					CreateLaser(m_pBeamR, m_pLightGlowR, WEAPON_ATTACHMENT_RIGHT);
+				}
 				break;
 			}
 			else
@@ -197,6 +327,7 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			if (pTarget)
 			{
 				UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
+				UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
 			}
 			else
 			{
@@ -227,7 +358,7 @@ void CNPC_Android::LaserPosition(CBeam* beam, int attachment)
 	AI_TraceLine(vecSrc, vecSrc + vForward * 1000.0f, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
 
 	beam->PointEntInit(tr.endpos, this);
-	beam->SetEndAttachment(WEAPON_ATTACHMENT_LEFT);
+	beam->SetEndAttachment(attachment);
 }
 
 void CNPC_Android::CreateLaser(CBeam*& beam, CSprite*& sprite, int attachment)
@@ -246,7 +377,7 @@ void CNPC_Android::CreateLaser(CBeam*& beam, CSprite*& sprite, int attachment)
 		sprite = CSprite::SpriteCreate("sprites/redglow1.vmt", GetAbsOrigin(), FALSE);
 
 		sprite->SetTransparency(kRenderGlow, 255, 200, 200, 0, kRenderFxNoDissipation);
-		sprite->SetAttachment(this, 1);
+		sprite->SetAttachment(this, attachment);
 		sprite->SetBrightness(255);
 		sprite->SetScale(0.65);
 	}
