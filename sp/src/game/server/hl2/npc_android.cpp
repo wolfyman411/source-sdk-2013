@@ -133,7 +133,6 @@ int CNPC_Android::SelectSchedule(void)
 		{
 			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
-				DevMsg("Laser Attack Sched\n");
 				return SCHED_ANDROID_LASER_ATTACK;
 			}
 			else
@@ -166,7 +165,6 @@ int CNPC_Android::RangeAttack1Conditions(float flDot, float flDist)
 
 void CNPC_Android::StartTask(const Task_t* pTask)
 {
-	DevMsg("Start: %s\n", TaskName(pTask->iTask));
 	switch (pTask->iTask)
 	{
 		case TASK_ANDROID_LASER_ATTACK:
@@ -174,34 +172,7 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-				if (!m_pBeamL)
-				{
-					Vector vAttachPos;
-					QAngle vAttachAng;
-					GetAttachment(WEAPON_ATTACHMENT_LEFT, vAttachPos, vAttachAng);
-
-					Vector vForward;
-					AngleVectors(vAttachAng, &vForward);
-
-					Vector vecSrc = vAttachPos;
-					trace_t tr;
-					AI_TraceLine(vecSrc, vecSrc + vForward * 1000.0f, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
-
-					m_pBeamL = CBeam::BeamCreate("sprites/laser.vmt", 2.0);
-					m_pBeamL->PointEntInit(tr.endpos, this);
-					m_pBeamL->SetEndAttachment(WEAPON_ATTACHMENT_LEFT);
-					m_pBeamL->SetBrightness(255);
-					m_pBeamL->SetNoise(0);
-
-
-					m_pBeamL->SetColor(255, 0, 0);
-					m_pLightGlowL = CSprite::SpriteCreate("sprites/redglow1.vmt", GetAbsOrigin(), FALSE);
-
-					m_pLightGlowL->SetTransparency(kRenderGlow, 255, 200, 200, 0, kRenderFxNoDissipation);
-					m_pLightGlowL->SetAttachment(this, 1);
-					m_pLightGlowL->SetBrightness(255);
-					m_pLightGlowL->SetScale(0.65);
-				}
+				CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
 				break;
 			}
 			else
@@ -218,12 +189,20 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 
 void CNPC_Android::RunTask(const Task_t* pTask)
 {
-	DevMsg("Run: %s\n",TaskName(pTask->iTask));
 	switch (pTask->iTask)
 	{
 		case TASK_ANDROID_LASER_ATTACK:
 		{
-			DevMsg("Run Task\n");
+			CBaseEntity* pTarget = GetEnemy();
+			if (pTarget)
+			{
+				UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
+			}
+			else
+			{
+				TaskFail(FAIL_NO_ENEMY);
+				return;
+			}
 			break;
 		}
 		default:
@@ -231,6 +210,53 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			BaseClass::RunTask(pTask);
 			break;
 		}
+	}
+}
+
+void CNPC_Android::LaserPosition(CBeam* beam, int attachment)
+{
+	Vector vAttachPos;
+	QAngle vAttachAng;
+	GetAttachment(attachment, vAttachPos, vAttachAng);
+
+	Vector vForward;
+	AngleVectors(vAttachAng, &vForward);
+
+	Vector vecSrc = vAttachPos;
+	trace_t tr;
+	AI_TraceLine(vecSrc, vecSrc + vForward * 1000.0f, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
+
+	beam->PointEntInit(tr.endpos, this);
+	beam->SetEndAttachment(WEAPON_ATTACHMENT_LEFT);
+}
+
+void CNPC_Android::CreateLaser(CBeam*& beam, CSprite*& sprite, int attachment)
+{
+	if (!beam)
+	{
+		beam = CBeam::BeamCreate("sprites/laser.vmt", 2.0);
+
+		LaserPosition(beam,attachment);
+
+		beam->SetBrightness(255);
+		beam->SetNoise(0);
+
+
+		beam->SetColor(255, 0, 0);
+		sprite = CSprite::SpriteCreate("sprites/redglow1.vmt", GetAbsOrigin(), FALSE);
+
+		sprite->SetTransparency(kRenderGlow, 255, 200, 200, 0, kRenderFxNoDissipation);
+		sprite->SetAttachment(this, 1);
+		sprite->SetBrightness(255);
+		sprite->SetScale(0.65);
+	}
+}
+
+void CNPC_Android::UpdateLaser(CBeam* beam, int attachment)
+{
+	if (beam)
+	{
+		LaserPosition(beam, attachment);
 	}
 }
 

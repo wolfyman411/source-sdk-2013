@@ -45,6 +45,10 @@ public:
 
 	virtual int	RangeAttack1Conditions(float flDot, float flDist);
 
+	void	LaserPosition(CBeam* beam, int attachment);
+	void	CreateLaser(CBeam* &beam, CSprite* &sprite, int attachment);
+	void	UpdateLaser(CBeam* beam, int attachment);
+
 	void	StartTask(const Task_t* pTask);
 	void	RunTask(const Task_t* pTask);
 

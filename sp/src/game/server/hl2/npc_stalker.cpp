@@ -505,7 +505,7 @@ void CNPC_Stalker::UpdateAttackBeam( void )
 			if ( DotProduct(targetDir,m_vLaserDir) < 0.5 )
 			{
 				TaskComplete();
-				return;
+				return; 
 			}
 
 			trace_t tr;
