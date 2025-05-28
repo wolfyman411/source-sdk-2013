@@ -18,6 +18,8 @@
 #include "ai_behavior_assault.h"
 #include "ai_behavior_standoff.h"
 #include "ai_behavior_follow.h"
+#include <beam_shared.h>
+#include <Sprite.h>
 
 class CNPC_Android;
 
@@ -40,26 +42,43 @@ public:
 	void	HandleAnimEvent(animevent_t* pEvent);
 	int		GetSoundInterests(void);
 	bool	CreateBehaviors(void);
+
+	virtual int	RangeAttack1Conditions(float flDot, float flDist);
+
+	void	StartTask(const Task_t* pTask);
+	void	RunTask(const Task_t* pTask);
+
 	int		SelectSchedule(void);
 	void	GatherConditions(void);
 	void	PrescheduleThink(void);
+
+	CBeam* m_pBeamL;
+	CSprite* m_pLightGlowL;
 
 	DECLARE_DATADESC()
 
 private:
 	CAI_FollowBehavior	m_FollowBehavior;
 	void	UpdateHead(void);
-
-protected:
+	
 	DEFINE_CUSTOM_AI;
-	int m_poseHead_Yaw, m_poseHead_Pitch;
-	virtual void PopulatePoseParameters(void);
 
 	//Schedules
 	enum
 	{
-		SCHED_ANDROID_CHASE_ENEMY,
+		SCHED_ANDROID_CHASE_ENEMY = LAST_SHARED_SCHEDULE,
+		SCHED_ANDROID_LASER_ATTACK,
 	};
+
+	//Tasks
+	enum
+	{
+		TASK_ANDROID_LASER_ATTACK = LAST_SHARED_TASK,
+	};
+
+protected:
+	int m_poseHead_Yaw, m_poseHead_Pitch;
+	virtual void PopulatePoseParameters(void);
 };
 
 #endif // HL2_EPISODIC
