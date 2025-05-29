@@ -73,8 +73,8 @@ public:
 	void	PrescheduleThink(void);
 
 	//Weapon Hands
-	Android_Weapons_e left_wpn = ANDROID_LASER;
-	Android_Weapons_e right_wpn = ANDROID_GUN;
+	Android_Weapons_e left_wpn = ANDROID_HAND;
+	Android_Weapons_e right_wpn = ANDROID_HAND;
 	
 	//Lasers
 	CBeam* m_pBeamL;
@@ -118,6 +118,7 @@ private:
 		TASK_ANDROID_LASER_ATTACK = LAST_SHARED_TASK,
 		TASK_ANDROID_GUN_ATTACK,
 		TASK_ANDROID_CIRCLE_ENEMY,
+		TASK_ANDROID_CHARGE_ENEMY,
 	};
 
 	//Conditions

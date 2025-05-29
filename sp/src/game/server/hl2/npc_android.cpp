@@ -14,7 +14,7 @@
 #include <ammodef.h>
 
 #define ANDROID_MODEL "models/aperture/android.mdl"
-#define CLOSE_RANGE 300.0f
+#define CLOSE_RANGE 150.0f
 #define FAR_RANGE 1200.0f
 #define LASER_DURATION 3.0f
 #define SHOT_DELAY 0.1f
@@ -102,9 +102,6 @@ void CNPC_Android::Spawn()
 	NPCInit();
 
 	m_flDistTooFar = FLT_MAX;
-
-	left_wpn = static_cast<Android_Weapons_e>(RandomInt(1,2));
-	right_wpn = static_cast<Android_Weapons_e>(RandomInt(1, 2));
 
 	BaseClass::Spawn();
 }
@@ -271,8 +268,34 @@ int CNPC_Android::SelectSchedule(void)
 		{
 			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
+				// Do we want to swap weapons?
+				CBaseEntity* pTarget = GetEnemy();
+				Android_Weapons_e idealWeapon = ANDROID_GUN;
+				if (pTarget)
+				{
+					float dis = (pTarget->GetAbsOrigin() - GetAbsOrigin()).Length();
+					
+					// Go with gun
+					if (dis > CLOSE_RANGE && dis < FAR_RANGE / 2.2)
+					{
+						idealWeapon = ANDROID_GUN;
+					}
+					// Middle Ground 
+					else if (dis >= FAR_RANGE / 2.2 && dis < FAR_RANGE/2)
+					{
+						idealWeapon = static_cast<Android_Weapons_e>(RandomInt(1,2));
+					}
+					// Otherwise Laser
+					else
+					{
+						idealWeapon = ANDROID_LASER;
+					}
+				}
+
+
 				if (m_nextAttackL < gpGlobals->curtime)
 				{
+					left_wpn = idealWeapon;
 					switch (left_wpn)
 					{
 						case ANDROID_LASER:
@@ -289,6 +312,7 @@ int CNPC_Android::SelectSchedule(void)
 				}
 				else if (m_nextAttackR < gpGlobals->curtime)
 				{
+					right_wpn = idealWeapon;
 					switch (right_wpn)
 					{
 						case ANDROID_LASER:
@@ -337,6 +361,16 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 	switch (pTask->iTask)
 	{
 		case TASK_ANDROID_CIRCLE_ENEMY:
+		{
+			if (!GetEnemy())
+			{
+				TaskFail("No enemy");
+				return;
+			}
+			break;
+		}
+
+		case TASK_ANDROID_CHARGE_ENEMY:
 		{
 			if (!GetEnemy())
 			{
@@ -435,6 +469,27 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			break;
 		}
 
+		case TASK_ANDROID_CHARGE_ENEMY:
+		{
+			if (!GetEnemy())
+			{
+				DevMsg("Lost enemy\n");
+				TaskFail("Lost enemy");
+				return;
+			}
+
+			Vector vecEnemyPos = GetEnemy()->GetAbsOrigin();
+			Vector vecDir = GetAbsOrigin() - vecEnemyPos;
+			vecDir.z = 0;
+
+			Vector vecTargetPos = vecEnemyPos + vecDir;
+
+			AI_NavGoal_t goal(vecTargetPos);
+			GetNavigator()->SetGoal(goal, AIN_CLEAR_TARGET);
+
+			break;
+		}
+
 		case TASK_ANDROID_GUN_ATTACK:
 		{
 			CBaseEntity* pTarget = GetEnemy();
@@ -524,14 +579,14 @@ void CNPC_Android::ShootGun(int attachment)
 	AngleVectors(vecMuzzleAngles, &vecShootDir);
 
 	FireBulletsInfo_t info;
-	info.m_vecSrc = vecMuzzleOrigin; // From attachment
-	info.m_vecDirShooting = vecShootDir; // Direction from attachment angles
-	info.m_iShots = 1; // Number of bullets
-	info.m_flDistance = 8192; // Max bullet range
-	info.m_flDamage = 10.0f; // Damage per bullet
-	info.m_pAttacker = this; // NPC is the attacker
+	info.m_vecSrc = vecMuzzleOrigin;
+	info.m_vecDirShooting = vecShootDir;
+	info.m_iShots = 1;
+	info.m_flDistance = 8192;
+	info.m_flDamage = 10.0f;
+	info.m_pAttacker = this;
 	info.m_iAmmoType = GetAmmoDef()->Index("SMG1");
-	info.m_pAdditionalIgnoreEnt = this; // Prevent self-collision
+	info.m_pAdditionalIgnoreEnt = this;
 
 	FireBullets(info);
 
@@ -693,6 +748,7 @@ AI_BEGIN_CUSTOM_NPC(npc_android, CNPC_Android)
 DECLARE_TASK(TASK_ANDROID_LASER_ATTACK);
 DECLARE_TASK(TASK_ANDROID_GUN_ATTACK);
 DECLARE_TASK(TASK_ANDROID_CIRCLE_ENEMY);
+DECLARE_TASK(TASK_ANDROID_CHARGE_ENEMY);
 
 DECLARE_CONDITION(COND_ANDROID_IS_LEFT);
 DECLARE_CONDITION(COND_ANDROID_IS_RIGHT);
@@ -725,7 +781,7 @@ DEFINE_SCHEDULE
 	"	Tasks"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
-	"       TASK_ANDROID_CIRCLE_ENEMY       0"
+	"       TASK_ANDROID_CHARGE_ENEMY       0"
 	"		TASK_ANDROID_GUN_ATTACK		0"
 	""
 	"	Interrupts"
