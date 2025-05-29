@@ -602,6 +602,22 @@ void CNPC_Android::KillLaser(CBeam* &beam, CSprite* &sprite)
 	}
 }
 
+bool CNPC_Android::OverrideMoveFacing(const AILocalMoveGoal_t& move, float flInterval)
+{
+	if (GetEnemy() && GetNavigator()->GetMovementActivity() == ACT_RUN)
+	{
+		// FIXME: this will break scripted sequences that walk when they have an enemy
+		Vector vecEnemyLKP = GetEnemyLKP();
+		if (UTIL_DistApprox(vecEnemyLKP, GetAbsOrigin()) < 512)
+		{
+			// Only start facing when we're close enough
+			AddFacingTarget(GetEnemy(), vecEnemyLKP, 1.0, 0.2);
+		}
+	}
+
+	return BaseClass::OverrideMoveFacing(move, flInterval);
+}
+
 void CNPC_Android::GatherConditions(void)
 {
 	BaseClass::GatherConditions();

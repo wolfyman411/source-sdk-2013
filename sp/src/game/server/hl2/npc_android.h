@@ -63,6 +63,8 @@ public:
 
 	void	ShootGun(int attachment);
 
+	bool	OverrideMoveFacing(const AILocalMoveGoal_t& move, float flInterval);
+
 	void	StartTask(const Task_t* pTask);
 	void	RunTask(const Task_t* pTask);
 
