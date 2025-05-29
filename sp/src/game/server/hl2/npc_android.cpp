@@ -10,10 +10,16 @@
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <particle_parse.h>
+#include <ammodef.h>
 
 #define ANDROID_MODEL "models/aperture/android.mdl"
 #define CLOSE_RANGE 300.0f
 #define FAR_RANGE 1200.0f
+#define LASER_DURATION 3.0f
+#define SHOT_DELAY 0.1f
+#define SHOT_AMOUNT 3
+#define ATTACK_DELAY 1.0f
 
 #define WEAPON_ATTACHMENT_LEFT	1
 #define WEAPON_ATTACHMENT_RIGHT	2
@@ -97,6 +103,9 @@ void CNPC_Android::Spawn()
 
 	m_flDistTooFar = FLT_MAX;
 
+	left_wpn = static_cast<Android_Weapons_e>(RandomInt(1,2));
+	right_wpn = static_cast<Android_Weapons_e>(RandomInt(1, 2));
+
 	BaseClass::Spawn();
 }
 
@@ -105,7 +114,13 @@ void CNPC_Android::Spawn()
 //-----------------------------------------------------------------------------
 void CNPC_Android::Precache()
 {
+	PrecacheParticleSystem("hunter_muzzle_flash");
+
 	PrecacheModel(ANDROID_MODEL);
+	m_attackDurL = 0.0f;
+	m_attackDurR = 0.0f;
+	m_nextAttackL = 0.0f;
+	m_nextAttackR = 0.0f;
 
 	BaseClass::Precache();
 }
@@ -256,7 +271,38 @@ int CNPC_Android::SelectSchedule(void)
 		{
 			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
-				return SCHED_ANDROID_LASER_ATTACK;
+				if (m_nextAttackL < gpGlobals->curtime)
+				{
+					switch (left_wpn)
+					{
+						case ANDROID_LASER:
+						{
+							return SCHED_ANDROID_LASER_ATTACK;
+							break;
+						}
+						case ANDROID_GUN:
+						{
+							return SCHED_ANDROID_GUN_ATTACK;
+							break;
+						}
+					}
+				}
+				else if (m_nextAttackR < gpGlobals->curtime)
+				{
+					switch (right_wpn)
+					{
+						case ANDROID_LASER:
+						{
+							return SCHED_ANDROID_LASER_ATTACK;
+							break;
+						}
+						case ANDROID_GUN:
+						{
+							return SCHED_ANDROID_GUN_ATTACK;
+							break;
+						}
+					}
+				}
 			}
 			else
 			{
@@ -300,18 +346,48 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 			break;
 		}
 
+		case TASK_ANDROID_GUN_ATTACK:
+		{
+			CBaseEntity* pTarget = GetEnemy();
+			if (pTarget)
+			{
+				if (HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_GUN)
+				{
+					m_gunShotsL = 0;
+					m_nextAttackL = gpGlobals->curtime + (SHOT_DELAY * SHOT_AMOUNT) + ATTACK_DELAY + RandomFloat(0.5f, 2.0f);
+					m_attackDurL = gpGlobals->curtime;
+				}
+				if (HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_GUN)
+				{
+					m_gunShotsR = 0;
+					m_nextAttackR = gpGlobals->curtime + (SHOT_DELAY * SHOT_AMOUNT) + ATTACK_DELAY + RandomFloat(0.5f, 2.0f);
+					m_attackDurR = gpGlobals->curtime;
+				}
+			}
+			else
+			{
+				TaskFail(FAIL_NO_ENEMY);
+				return;
+			}
+			break;
+		}
+
 		case TASK_ANDROID_LASER_ATTACK:
 		{
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-				if (!m_pBeamL)
+				if (!m_pBeamL && HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_LASER)
 				{
 					CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
+					m_attackDurL = gpGlobals->curtime + LASER_DURATION;
+					m_nextAttackL = gpGlobals->curtime + LASER_DURATION + ATTACK_DELAY + RandomFloat(0.5f,2.0f);
 				}
-				if (!m_pBeamR)
+				if (!m_pBeamR && HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_LASER)
 				{
 					CreateLaser(m_pBeamR, m_pLightGlowR, WEAPON_ATTACHMENT_RIGHT);
+					m_attackDurR = gpGlobals->curtime + LASER_DURATION;
+					m_nextAttackR = gpGlobals->curtime + LASER_DURATION + ATTACK_DELAY + RandomFloat(0.5f, 2.0f);
 				}
 				break;
 			}
@@ -356,11 +432,42 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			AI_NavGoal_t goal(vecTargetPos);
 			GetNavigator()->SetGoal(goal, AIN_CLEAR_TARGET);
 
-			if (GetNavigator()->CurWaypointIsGoal())
-			{
-				DevMsg("Goal Reached!");
-			}
+			break;
+		}
 
+		case TASK_ANDROID_GUN_ATTACK:
+		{
+			CBaseEntity* pTarget = GetEnemy();
+			if (pTarget)
+			{
+				if (HasCondition(COND_ANDROID_IS_LEFT) && m_gunShotsL < SHOT_AMOUNT && left_wpn == ANDROID_GUN)
+				{
+					if (gpGlobals->curtime >= m_attackDurL)
+					{
+						ShootGun(WEAPON_ATTACHMENT_LEFT);
+						m_gunShotsL++;
+						m_attackDurL = gpGlobals->curtime + SHOT_DELAY;
+					}
+				}
+				else if (HasCondition(COND_ANDROID_IS_RIGHT) && m_gunShotsR < SHOT_AMOUNT && right_wpn == ANDROID_GUN)
+				{
+					if (gpGlobals->curtime >= m_attackDurR)
+					{
+						ShootGun(WEAPON_ATTACHMENT_RIGHT);
+						m_gunShotsR++;
+						m_attackDurR = gpGlobals->curtime + SHOT_DELAY;
+					}
+				}
+				else
+				{
+					TaskComplete();
+				}
+			}
+			else
+			{
+				TaskFail(FAIL_NO_ENEMY);
+				return;
+			}
 			break;
 		}
 
@@ -369,8 +476,28 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-				UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
-				UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
+				if (gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER)
+				{
+					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
+				}
+				else
+				{
+					KillLaser(m_pBeamL, m_pLightGlowL);
+				}
+
+				if (gpGlobals->curtime < m_attackDurR && right_wpn == ANDROID_LASER)
+				{
+					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
+				}
+				else
+				{
+					KillLaser(m_pBeamR, m_pLightGlowR);
+				}
+
+				if (!m_pBeamR && !m_pBeamL)
+				{
+					TaskComplete();
+				}
 			}
 			else
 			{
@@ -385,6 +512,32 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			break;
 		}
 	}
+}
+
+void CNPC_Android::ShootGun(int attachment)
+{
+	Vector vecMuzzleOrigin;
+	QAngle vecMuzzleAngles;
+	GetAttachment(attachment, vecMuzzleOrigin, vecMuzzleAngles);
+
+	Vector vecShootDir;
+	AngleVectors(vecMuzzleAngles, &vecShootDir);
+
+	FireBulletsInfo_t info;
+	info.m_vecSrc = vecMuzzleOrigin; // From attachment
+	info.m_vecDirShooting = vecShootDir; // Direction from attachment angles
+	info.m_iShots = 1; // Number of bullets
+	info.m_flDistance = 8192; // Max bullet range
+	info.m_flDamage = 10.0f; // Damage per bullet
+	info.m_pAttacker = this; // NPC is the attacker
+	info.m_iAmmoType = GetAmmoDef()->Index("SMG1");
+	info.m_pAdditionalIgnoreEnt = this; // Prevent self-collision
+
+	FireBullets(info);
+
+	UTIL_Tracer(vecMuzzleOrigin, vecMuzzleOrigin + vecShootDir * info.m_flDistance, 0, TRACER_DONT_USE_ATTACHMENT, 5000.0f, false, "AR2Tracer");
+	DispatchParticleEffect("hunter_muzzle_flash", PATTACH_POINT_FOLLOW, this, attachment);
+	EmitSound("Weapon_AR2.Single");
 }
 
 void CNPC_Android::LaserPosition(CBeam* beam, int attachment)
@@ -434,9 +587,36 @@ void CNPC_Android::UpdateLaser(CBeam* beam, int attachment)
 	}
 }
 
+void CNPC_Android::KillLaser(CBeam* &beam, CSprite* &sprite)
+{
+	if (beam)
+	{
+		UTIL_Remove(beam);
+		beam = NULL;
+	}
+
+	if (sprite)
+	{
+		UTIL_Remove(sprite);
+		sprite = NULL;
+	}
+}
+
 void CNPC_Android::GatherConditions(void)
 {
 	BaseClass::GatherConditions();
+
+	if (HasCondition(COND_CAN_RANGE_ATTACK1))
+	{
+		if (m_nextAttackL < gpGlobals->curtime)
+		{
+			SetCondition(COND_ANDROID_IS_LEFT);
+		}
+		else if (m_nextAttackR < gpGlobals->curtime)
+		{
+			SetCondition(COND_ANDROID_IS_RIGHT);
+		}
+	}
 }
 
 void CNPC_Android::PrescheduleThink(void)
@@ -493,8 +673,13 @@ void CNPC_Android::UpdateHead(void)
 }
 
 AI_BEGIN_CUSTOM_NPC(npc_android, CNPC_Android)
+
 DECLARE_TASK(TASK_ANDROID_LASER_ATTACK);
+DECLARE_TASK(TASK_ANDROID_GUN_ATTACK);
 DECLARE_TASK(TASK_ANDROID_CIRCLE_ENEMY);
+
+DECLARE_CONDITION(COND_ANDROID_IS_LEFT);
+DECLARE_CONDITION(COND_ANDROID_IS_RIGHT);
 
 //-----------------------------------------------------------------------------
 // AI Schedules Specific to this NPC
@@ -509,6 +694,23 @@ DEFINE_SCHEDULE
 	"		TASK_FACE_ENEMY			0"
 	"       TASK_ANDROID_CIRCLE_ENEMY       0"
 	"		TASK_ANDROID_LASER_ATTACK		0"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
+	"		COND_NEW_ENEMY"
+	"		COND_ENEMY_DEAD"
+	"       COND_LOST_ENEMY"
+)
+
+DEFINE_SCHEDULE
+(
+	SCHED_ANDROID_GUN_ATTACK,
+
+	"	Tasks"
+	"		TASK_STOP_MOVING		0"
+	"		TASK_FACE_ENEMY			0"
+	"       TASK_ANDROID_CIRCLE_ENEMY       0"
+	"		TASK_ANDROID_GUN_ATTACK		0"
 	""
 	"	Interrupts"
 	"		COND_TASK_FAILED"

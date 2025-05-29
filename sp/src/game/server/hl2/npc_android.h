@@ -32,7 +32,7 @@ enum Android_Weapons_e
 {
 	ANDROID_HAND,
 	ANDROID_LASER,
-	ANDROID_NAIL,
+	ANDROID_GUN,
 };
 
 class CNPC_Android : public CAI_BaseActor
@@ -59,6 +59,9 @@ public:
 	void	LaserPosition(CBeam* beam, int attachment);
 	void	CreateLaser(CBeam* &beam, CSprite* &sprite, int attachment);
 	void	UpdateLaser(CBeam* beam, int attachment);
+	void	KillLaser(CBeam* &beam, CSprite* &sprite);
+
+	void	ShootGun(int attachment);
 
 	void	StartTask(const Task_t* pTask);
 	void	RunTask(const Task_t* pTask);
@@ -66,6 +69,10 @@ public:
 	int		SelectSchedule(void);
 	void	GatherConditions(void);
 	void	PrescheduleThink(void);
+
+	//Weapon Hands
+	Android_Weapons_e left_wpn = ANDROID_LASER;
+	Android_Weapons_e right_wpn = ANDROID_GUN;
 	
 	//Lasers
 	CBeam* m_pBeamL;
@@ -80,6 +87,16 @@ public:
 	DECLARE_DATADESC()
 
 private:
+	//Delays
+	float	m_attackDurL;
+	float	m_attackDurR;
+	float	m_nextAttackL;
+	float	m_nextAttackR;
+
+	//Weapon Specifics
+	int		m_gunShotsL;
+	int		m_gunShotsR;
+
 	CAI_FollowBehavior	m_FollowBehavior;
 	void	UpdateHead(void);
 	
@@ -90,13 +107,22 @@ private:
 	{
 		SCHED_ANDROID_CHASE_ENEMY = LAST_SHARED_SCHEDULE,
 		SCHED_ANDROID_LASER_ATTACK,
+		SCHED_ANDROID_GUN_ATTACK,
 	};
 
 	//Tasks
 	enum
 	{
 		TASK_ANDROID_LASER_ATTACK = LAST_SHARED_TASK,
+		TASK_ANDROID_GUN_ATTACK,
 		TASK_ANDROID_CIRCLE_ENEMY,
+	};
+
+	//Conditions
+	enum
+	{
+		COND_ANDROID_IS_LEFT = LAST_SHARED_CONDITION,
+		COND_ANDROID_IS_RIGHT,
 	};
 
 protected:
