@@ -41,7 +41,7 @@ END_DATADESC()
 //-----------------------------------------------------------------------------
 Class_T	CNPC_Android::Classify(void)
 {
-	return CLASS_MILITARY;
+	return CLASS_APERTURE;
 }
 
 
@@ -121,6 +121,16 @@ void CNPC_Android::Precache()
 	m_nextAttackL = 0.0f;
 	m_nextAttackR = 0.0f;
 
+	if (forced_left != ANDROID_NONE)
+	{
+		left_wpn = forced_left;
+	}
+
+	if (forced_right != ANDROID_NONE)
+	{
+		right_wpn = forced_right;
+	}
+
 	BaseClass::Precache();
 }
 
@@ -136,7 +146,6 @@ bool CNPC_Android::CreateBehaviors()
 
 int CNPC_Android::OnTakeDamage_Alive(const CTakeDamageInfo& info)
 {
-	DevMsg("OW! HP:%d/%d\n",GetHealth(),GetMaxHealth());
 	// Start smoking when we're nearly dead
 	if (m_iHealth < m_iMaxHealth/2)
 	{
@@ -144,7 +153,6 @@ int CNPC_Android::OnTakeDamage_Alive(const CTakeDamageInfo& info)
 	}
 	if (m_iHealth < m_iMaxHealth / 4)
 	{
-		DevMsg("Fire\n");
 		StartFire();
 	}
 
@@ -297,7 +305,7 @@ int CNPC_Android::SelectSchedule(void)
 
 				if (m_nextAttackL < gpGlobals->curtime)
 				{
-					if (left_wpn != idealWeapon)
+					if (left_wpn != idealWeapon && forced_left == ANDROID_NONE)
 					{
 						left_wpn = idealWeapon;
 						AddGesture(ACT_SWAP_LEFT_WPN);
@@ -319,7 +327,7 @@ int CNPC_Android::SelectSchedule(void)
 				}
 				else if (m_nextAttackR < gpGlobals->curtime)
 				{
-					if (right_wpn != idealWeapon)
+					if (right_wpn != idealWeapon && forced_right == ANDROID_NONE)
 					{
 						right_wpn = idealWeapon;
 						AddGesture(ACT_SWAP_RIGHT_WPN);
@@ -457,7 +465,6 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 		{
 			if (!GetEnemy())
 			{
-				DevMsg("Lost enemy\n");
 				TaskFail("Lost enemy");
 				return;
 			}
@@ -485,7 +492,6 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 		{
 			if (!GetEnemy())
 			{
-				DevMsg("Lost enemy\n");
 				TaskFail("Lost enemy");
 				return;
 			}

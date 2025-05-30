@@ -1466,6 +1466,38 @@ ConVar  alyx_darkness_force( "alyx_darkness_force", "0", FCVAR_CHEAT | FCVAR_REP
 		CBaseCombatCharacter::SetDefaultRelationship(CLASS_EARTH_FAUNA,			CLASS_HACKED_ROLLERMINE,D_NU, 0);
 
 		// ------------------------------------------------------------
+		//	> CLASS_APERTURE
+		// ------------------------------------------------------------
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_NONE, D_NU, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_PLAYER, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_ANTLION, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_BARNACLE, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_BULLSEYE, D_NU, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_BULLSQUID, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_CITIZEN_PASSIVE, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_CITIZEN_REBEL, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_COMBINE, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_COMBINE_GUNSHIP, D_NU, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_COMBINE_HUNTER, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_CONSCRIPT, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_FLARE, D_NU, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_HEADCRAB, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_HOUNDEYE, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_MANHACK, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_METROPOLICE, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_MILITARY, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_MISSILE, D_NU, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_SCANNER, D_NU, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_STALKER, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_VORTIGAUNT, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_ZOMBIE, D_HT, 1);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_PROTOSNIPER, D_NU, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_EARTH_FAUNA, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_PLAYER_ALLY, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_PLAYER_ALLY_VITAL, D_HT, 0);
+		CBaseCombatCharacter::SetDefaultRelationship(CLASS_APERTURE, CLASS_HACKED_ROLLERMINE, D_HT, 0);
+
+		// ------------------------------------------------------------
 		//	> CLASS_HACKED_ROLLERMINE
 		// ------------------------------------------------------------
 		CBaseCombatCharacter::SetDefaultRelationship(CLASS_HACKED_ROLLERMINE,			CLASS_NONE,				D_NU, 0);			
@@ -1537,6 +1569,7 @@ ConVar  alyx_darkness_force( "alyx_darkness_force", "0", FCVAR_CHEAT | FCVAR_REP
 			case CLASS_MISSILE:			return "CLASS_MISSILE";
 			case CLASS_FLARE:			return "CLASS_FLARE";
 			case CLASS_EARTH_FAUNA:		return "CLASS_EARTH_FAUNA";
+			case CLASS_APERTURE:		return "CLASS_APERTURE";
 #ifdef MAPBASE
 			case CLASS_HACKED_ROLLERMINE:	return "CLASS_HACKED_ROLLERMINE";
 #endif

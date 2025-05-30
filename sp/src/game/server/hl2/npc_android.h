@@ -33,6 +33,7 @@ enum Android_Weapons_e
 	ANDROID_HAND,
 	ANDROID_LASER,
 	ANDROID_GUN,
+	ANDROID_NONE,
 };
 
 class CNPC_Android : public CAI_BaseActor
@@ -75,6 +76,9 @@ public:
 	//Weapon Hands
 	Android_Weapons_e left_wpn = ANDROID_HAND;
 	Android_Weapons_e right_wpn = ANDROID_HAND;
+
+	Android_Weapons_e forced_left = ANDROID_GUN;
+	Android_Weapons_e forced_right = ANDROID_GUN;
 	
 	//Lasers
 	CBeam* m_pBeamL;
