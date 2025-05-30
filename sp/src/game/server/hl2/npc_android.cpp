@@ -121,16 +121,6 @@ void CNPC_Android::Precache()
 	m_nextAttackL = 0.0f;
 	m_nextAttackR = 0.0f;
 
-	if (forced_left != ANDROID_NONE)
-	{
-		left_wpn = forced_left;
-	}
-
-	if (forced_right != ANDROID_NONE)
-	{
-		right_wpn = forced_right;
-	}
-
 	BaseClass::Precache();
 }
 
@@ -305,7 +295,12 @@ int CNPC_Android::SelectSchedule(void)
 
 				if (m_nextAttackL < gpGlobals->curtime)
 				{
-					if (left_wpn != idealWeapon && forced_left == ANDROID_NONE)
+					if (forced_left != ANDROID_NONE)
+					{
+						idealWeapon = forced_left;
+					}
+
+					if (left_wpn != idealWeapon)
 					{
 						left_wpn = idealWeapon;
 						AddGesture(ACT_SWAP_LEFT_WPN);
@@ -327,7 +322,12 @@ int CNPC_Android::SelectSchedule(void)
 				}
 				else if (m_nextAttackR < gpGlobals->curtime)
 				{
-					if (right_wpn != idealWeapon && forced_right == ANDROID_NONE)
+					if (forced_right != ANDROID_NONE)
+					{
+						idealWeapon = forced_right;
+					}
+
+					if (right_wpn != idealWeapon)
 					{
 						right_wpn = idealWeapon;
 						AddGesture(ACT_SWAP_RIGHT_WPN);
