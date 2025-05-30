@@ -46,6 +46,8 @@ public:
 	Class_T Classify(void);
 	void	HandleAnimEvent(animevent_t* pEvent);
 	int		GetSoundInterests(void);
+	float	GetIdealAccel(void) const;
+	float	MaxYawSpeed(void);
 	bool	CreateBehaviors(void);
 	int		OnTakeDamage_Alive(const CTakeDamageInfo& info);
 
@@ -71,20 +73,22 @@ public:
 
 	int		SelectSchedule(void);
 	void	GatherConditions(void);
+	void	Think(void);
 	void	PrescheduleThink(void);
 
 	//Weapon Hands
 	Android_Weapons_e left_wpn = ANDROID_HAND;
 	Android_Weapons_e right_wpn = ANDROID_HAND;
 
-	Android_Weapons_e forced_left = ANDROID_LASER;
-	Android_Weapons_e forced_right = ANDROID_GUN;
+	Android_Weapons_e forced_left = ANDROID_NONE;
+	Android_Weapons_e forced_right = ANDROID_NONE;
 	
 	//Lasers
 	CBeam* m_pBeamL;
 	CSprite* m_pLightGlowL;
 	CBeam* m_pBeamR;
 	CSprite* m_pLightGlowR;
+	bool	m_bPlayingLaserSound;
 
 	//Effects
 	SmokeTrail* m_pSmokeTrail;
@@ -122,7 +126,6 @@ private:
 		TASK_ANDROID_LASER_ATTACK = LAST_SHARED_TASK,
 		TASK_ANDROID_GUN_ATTACK,
 		TASK_ANDROID_CIRCLE_ENEMY,
-		TASK_ANDROID_CHARGE_ENEMY,
 	};
 
 	//Conditions
