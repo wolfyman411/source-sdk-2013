@@ -7,15 +7,17 @@
 #include "npc_android.h"
 #include "ai_schedule.h"
 #include "util.h"
-
-// memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 #include <particle_parse.h>
 #include <ammodef.h>
 
+//Activities
+Activity ACT_SWAP_LEFT_WPN;
+Activity ACT_SWAP_RIGHT_WPN;
+
 #define ANDROID_MODEL "models/aperture/android.mdl"
 #define CLOSE_RANGE 150.0f
-#define FAR_RANGE 1200.0f
+#define FAR_RANGE 2000.0f
 #define LASER_DURATION 3.0f
 #define SHOT_DELAY 0.1f
 #define SHOT_AMOUNT 3
@@ -295,7 +297,12 @@ int CNPC_Android::SelectSchedule(void)
 
 				if (m_nextAttackL < gpGlobals->curtime)
 				{
-					left_wpn = idealWeapon;
+					if (left_wpn != idealWeapon)
+					{
+						left_wpn = idealWeapon;
+						AddGesture(ACT_SWAP_LEFT_WPN);
+						m_nextAttackL = gpGlobals->curtime + 1.0f;
+					}
 					switch (left_wpn)
 					{
 						case ANDROID_LASER:
@@ -312,7 +319,12 @@ int CNPC_Android::SelectSchedule(void)
 				}
 				else if (m_nextAttackR < gpGlobals->curtime)
 				{
-					right_wpn = idealWeapon;
+					if (right_wpn != idealWeapon)
+					{
+						right_wpn = idealWeapon;
+						AddGesture(ACT_SWAP_RIGHT_WPN);
+						m_nextAttackR = gpGlobals->curtime + 1.0f;
+					}
 					switch (right_wpn)
 					{
 						case ANDROID_LASER:
@@ -580,10 +592,10 @@ void CNPC_Android::ShootGun(int attachment)
 
 	FireBulletsInfo_t info;
 	info.m_vecSrc = vecMuzzleOrigin;
-	info.m_vecDirShooting = vecShootDir;
+	info.m_vecDirShooting = vecShootDir * RandomFloat(0.5f,0.9f);
 	info.m_iShots = 1;
 	info.m_flDistance = 8192;
-	info.m_flDamage = 10.0f;
+	info.m_flDamage = 7.0f;
 	info.m_pAttacker = this;
 	info.m_iAmmoType = GetAmmoDef()->Index("SMG1");
 	info.m_pAdditionalIgnoreEnt = this;
@@ -753,6 +765,9 @@ DECLARE_TASK(TASK_ANDROID_CHARGE_ENEMY);
 DECLARE_CONDITION(COND_ANDROID_IS_LEFT);
 DECLARE_CONDITION(COND_ANDROID_IS_RIGHT);
 
+DECLARE_ACTIVITY(ACT_SWAP_LEFT_WPN);
+DECLARE_ACTIVITY(ACT_SWAP_RIGHT_WPN);
+
 //-----------------------------------------------------------------------------
 // AI Schedules Specific to this NPC
 //-----------------------------------------------------------------------------
@@ -762,6 +777,7 @@ DEFINE_SCHEDULE
 	SCHED_ANDROID_LASER_ATTACK,
 
 	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_ESTABLISH_LINE_OF_FIRE"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
 	"       TASK_ANDROID_CIRCLE_ENEMY       0"
@@ -779,6 +795,7 @@ DEFINE_SCHEDULE
 	SCHED_ANDROID_GUN_ATTACK,
 
 	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_ESTABLISH_LINE_OF_FIRE"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
 	"       TASK_ANDROID_CHARGE_ENEMY       0"
