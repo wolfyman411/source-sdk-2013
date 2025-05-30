@@ -549,20 +549,17 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-				if (gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER)
+				if (gpGlobals->curtime < m_attackDurL || gpGlobals->curtime < m_attackDurR)
 				{
 					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
+					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
 				}
-				else
+				
+				if (gpGlobals->curtime >= m_attackDurL)
 				{
 					KillLaser(m_pBeamL, m_pLightGlowL);
 				}
-
-				if (gpGlobals->curtime < m_attackDurR && right_wpn == ANDROID_LASER)
-				{
-					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
-				}
-				else
+				if (gpGlobals->curtime >= m_attackDurR)
 				{
 					KillLaser(m_pBeamR, m_pLightGlowR);
 				}
@@ -783,7 +780,6 @@ DEFINE_SCHEDULE
 	SCHED_ANDROID_LASER_ATTACK,
 
 	"	Tasks"
-	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_ESTABLISH_LINE_OF_FIRE"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
 	"       TASK_ANDROID_CIRCLE_ENEMY       0"
@@ -801,7 +797,6 @@ DEFINE_SCHEDULE
 	SCHED_ANDROID_GUN_ATTACK,
 
 	"	Tasks"
-	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_ESTABLISH_LINE_OF_FIRE"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
 	"       TASK_ANDROID_CHARGE_ENEMY       0"

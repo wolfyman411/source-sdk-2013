@@ -78,7 +78,7 @@ public:
 	Android_Weapons_e right_wpn = ANDROID_HAND;
 
 	Android_Weapons_e forced_left = ANDROID_LASER;
-	Android_Weapons_e forced_right = ANDROID_LASER;
+	Android_Weapons_e forced_right = ANDROID_GUN;
 	
 	//Lasers
 	CBeam* m_pBeamL;
