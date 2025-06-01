@@ -82,8 +82,8 @@ public:
 	Android_Weapons_e left_wpn = ANDROID_HAND;
 	Android_Weapons_e right_wpn = ANDROID_HAND;
 
-	Android_Weapons_e forced_left = ANDROID_LASER;
-	Android_Weapons_e forced_right = ANDROID_LASER;
+	Android_Weapons_e forced_left = ANDROID_NONE;
+	Android_Weapons_e forced_right = ANDROID_NONE;
 	
 	//Lasers
 	CBeam* m_pBeamL;
@@ -110,6 +110,7 @@ private:
 	float	m_attackDurR;
 	float	m_nextAttackL;
 	float	m_nextAttackR;
+	float	m_nextSwap;
 
 	//Weapon Specifics
 	int		m_gunShotsL;

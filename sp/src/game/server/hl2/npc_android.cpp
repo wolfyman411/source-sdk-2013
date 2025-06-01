@@ -306,25 +306,29 @@ int CNPC_Android::SelectSchedule(void)
 			{
 				// Do we want to swap weapons?
 				CBaseEntity* pTarget = GetEnemy();
-				Android_Weapons_e idealWeapon = ANDROID_GUN;
+				Android_Weapons_e idealWeapon_left = ANDROID_GUN;
+				Android_Weapons_e idealWeapon_right = ANDROID_GUN;
 				if (pTarget)
 				{
 					float dis = (pTarget->GetAbsOrigin() - GetAbsOrigin()).Length();
 					
 					// Go with gun
-					if (dis > CLOSE_RANGE && dis < FAR_RANGE / 2.2)
+					if (dis > CLOSE_RANGE && dis < FAR_RANGE / 3)
 					{
-						idealWeapon = ANDROID_GUN;
+						idealWeapon_left = ANDROID_GUN;
+						idealWeapon_right = ANDROID_GUN;
 					}
 					// Middle Ground 
-					else if (dis >= FAR_RANGE / 2.2 && dis < FAR_RANGE/2)
+					else if (dis >= FAR_RANGE / 3 && dis < FAR_RANGE/2)
 					{
-						idealWeapon = static_cast<Android_Weapons_e>(RandomInt(1,2));
+						idealWeapon_left = ANDROID_GUN;
+						idealWeapon_right = ANDROID_LASER;
 					}
 					// Otherwise Laser
 					else
 					{
-						idealWeapon = ANDROID_LASER;
+						idealWeapon_left = ANDROID_LASER;
+						idealWeapon_right = ANDROID_LASER;
 					}
 				}
 
@@ -333,12 +337,12 @@ int CNPC_Android::SelectSchedule(void)
 				{
 					if (forced_left != ANDROID_NONE)
 					{
-						idealWeapon = forced_left;
+						idealWeapon_left = forced_left;
 					}
 
-					if (left_wpn != idealWeapon)
+					if (left_wpn != idealWeapon_left)
 					{
-						left_wpn = idealWeapon;
+						left_wpn = idealWeapon_left;
 						AddGesture(ACT_SWAP_LEFT_WPN);
 						m_nextAttackL = gpGlobals->curtime + 1.0f;
 					}
@@ -360,12 +364,12 @@ int CNPC_Android::SelectSchedule(void)
 				{
 					if (forced_right != ANDROID_NONE)
 					{
-						idealWeapon = forced_right;
+						idealWeapon_right = forced_right;
 					}
 
-					if (right_wpn != idealWeapon)
+					if (right_wpn != idealWeapon_right)
 					{
-						right_wpn = idealWeapon;
+						right_wpn = idealWeapon_right;
 						AddGesture(ACT_SWAP_RIGHT_WPN);
 						m_nextAttackR = gpGlobals->curtime + 1.0f;
 					}
@@ -438,16 +442,27 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-				if (HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_GUN)
+				//Check if both
+				if (HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_GUN && left_wpn == right_wpn)
 				{
 					m_gunShotsL = 0;
-					m_nextAttackL = gpGlobals->curtime + (SHOT_DELAY * SHOT_AMOUNT) + ATTACK_DELAY + RandomFloat(0.1f, 0.5f);
+					m_nextAttackL = gpGlobals->curtime + ATTACK_DELAY + RandomFloat(0.1f, 0.5f);
+					m_attackDurL = gpGlobals->curtime;
+
+					m_gunShotsR = 0;
+					m_nextAttackR = m_nextAttackL + 0.1f;;
+					m_attackDurR = m_attackDurL;
+				}
+				else if (HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_GUN)
+				{
+					m_gunShotsL = 0;
+					m_nextAttackL = gpGlobals->curtime + ATTACK_DELAY + RandomFloat(0.1f, 0.5f);
 					m_attackDurL = gpGlobals->curtime;
 				}
 				else if (HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_GUN)
 				{
 					m_gunShotsR = 0;
-					m_nextAttackR = gpGlobals->curtime + (SHOT_DELAY * SHOT_AMOUNT) + ATTACK_DELAY + RandomFloat(0.1f, 0.5f);
+					m_nextAttackR = gpGlobals->curtime + ATTACK_DELAY + RandomFloat(0.1f, 0.5f);
 					m_attackDurR = gpGlobals->curtime;
 				}
 			}
@@ -552,7 +567,18 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-				if (HasCondition(COND_ANDROID_IS_LEFT) && m_gunShotsL < SHOT_AMOUNT && left_wpn == ANDROID_GUN)
+				//Check if both
+				if (HasCondition(COND_ANDROID_IS_LEFT) && m_gunShotsL < SHOT_AMOUNT && left_wpn == ANDROID_GUN && left_wpn == right_wpn)
+				{
+					if (gpGlobals->curtime >= m_attackDurL)
+					{
+						ShootGun(WEAPON_ATTACHMENT_LEFT);
+						ShootGun(WEAPON_ATTACHMENT_RIGHT);
+						m_gunShotsL++;
+						m_attackDurL = gpGlobals->curtime + SHOT_DELAY;
+					}
+				}
+				else if (HasCondition(COND_ANDROID_IS_LEFT) && m_gunShotsL < SHOT_AMOUNT && left_wpn == ANDROID_GUN)
 				{
 					if (gpGlobals->curtime >= m_attackDurL)
 					{
@@ -654,7 +680,7 @@ Vector CNPC_Android::CalcEndPoint()
 		if ((DotProduct(vBCCFacing, targetToMe) < 0.5) &&
 			(pBCC->GetSmoothedVelocity().Length() < 50))
 		{
-			resultVec.z -= 300;
+			resultVec.z -= 150;
 		}
 	}
 
@@ -677,7 +703,8 @@ void CNPC_Android::ShootGun(int attachment)
 	QAngle vecMuzzleAngles;
 	GetAttachment(attachment, vecMuzzleOrigin, vecMuzzleAngles);
 
-	Vector vecShootDir;
+	Vector vecShootDir = GetShootEnemyDir(vecMuzzleOrigin,true);
+
 	AngleVectors(vecMuzzleAngles, &vecShootDir);
 
 	for (int i = 0; i < 3; i++)
@@ -965,8 +992,8 @@ DEFINE_SCHEDULE
 	"	Tasks"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
-	"       TASK_ANDROID_CIRCLE_ENEMY       0"
 	"		TASK_ANDROID_GUN_ATTACK		0"
+	"       TASK_ANDROID_CIRCLE_ENEMY       0"
 	""
 	"	Interrupts"
 	"		COND_TASK_FAILED"
