@@ -464,12 +464,24 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-				if (!m_pBeamL && HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_LASER)
+				//Check if both
+				if (!m_pBeamL && !m_pBeamR && HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_LASER && left_wpn == right_wpn)
 				{
 					laserAccuracy = 0.0f;
-					m_laserStartpoint = GetEnemyLKP() + pTarget->GetViewOffset();
-					m_laserStartpoint.x += 60 + 120 * random->RandomInt(-1, 1);
-					m_laserStartpoint.y += 60 + 120 * random->RandomInt(-1, 1);
+					m_laserStartpoint = CalcEndPoint();
+
+					CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
+					m_attackDurL = gpGlobals->curtime + LASER_DURATION;
+					m_nextAttackL = gpGlobals->curtime + LASER_DURATION + ATTACK_DELAY + RandomFloat(0.5f, 2.0f);
+
+					CreateLaser(m_pBeamR, m_pLightGlowR, WEAPON_ATTACHMENT_RIGHT);
+					m_attackDurR = m_attackDurL;
+					m_nextAttackR = m_nextAttackL + 0.1f;
+				}
+				else if (!m_pBeamL && HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_LASER)
+				{
+					laserAccuracy = 0.0f;
+					m_laserStartpoint = CalcEndPoint();
 
 					CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
 					m_attackDurL = gpGlobals->curtime + LASER_DURATION;
@@ -478,9 +490,7 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 				else if (!m_pBeamR && HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_LASER)
 				{
 					laserAccuracy = 0.0f;
-					m_laserStartpoint = GetEnemyLKP() + pTarget->GetViewOffset();
-					m_laserStartpoint.x += 60 + 120 * random->RandomInt(-1, 1);
-					m_laserStartpoint.y += 60 + 120 * random->RandomInt(-1, 1);
+					m_laserStartpoint = CalcEndPoint();
 
 					CreateLaser(m_pBeamR, m_pLightGlowR, WEAPON_ATTACHMENT_RIGHT);
 					m_attackDurR = gpGlobals->curtime + LASER_DURATION;
@@ -578,16 +588,23 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
-
-				if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER)
+				//Check if both
+				if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER && left_wpn == right_wpn)
 				{
-					laserAccuracy += 0.01f;
+					laserAccuracy += 0.02f;
+					LaserEndPoint();
+					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
+					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
+				}
+				else if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER)
+				{
+					laserAccuracy += 0.02f;
 					LaserEndPoint();
 					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
 				}
 				else if (HasCondition(COND_ANDROID_IS_RIGHT) && gpGlobals->curtime < m_attackDurR && right_wpn == ANDROID_LASER)
 				{
-					laserAccuracy += 0.01f;
+					laserAccuracy += 0.02f;
 					LaserEndPoint();
 					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
 				}
@@ -597,7 +614,7 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 					{
 						KillLaser(m_pBeamL, m_pLightGlowL);
 					}
-					else if (m_pBeamR)
+					if (m_pBeamR)
 					{
 						KillLaser(m_pBeamR, m_pLightGlowR);
 					}
@@ -617,6 +634,31 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			break;
 		}
 	}
+}
+
+Vector CNPC_Android::CalcEndPoint()
+{
+	CBaseEntity* pTarget = GetEnemy();
+	Vector resultVec = GetEnemyLKP() + pTarget->GetViewOffset();
+
+	//Default Function
+	resultVec.x += 60 + 120 * random->RandomInt(-1, 1);
+	resultVec.y += 60 + 120 * random->RandomInt(-1, 1);
+
+	//If facing instead shoot ground
+	CBaseCombatCharacter* pBCC = ToBaseCombatCharacter(pTarget);
+	if (pBCC)
+	{
+		Vector targetToMe = (pBCC->GetAbsOrigin() - GetAbsOrigin());
+		Vector vBCCFacing = pBCC->BodyDirection2D();
+		if ((DotProduct(vBCCFacing, targetToMe) < 0.5) &&
+			(pBCC->GetSmoothedVelocity().Length() < 50))
+		{
+			resultVec.z -= 300;
+		}
+	}
+
+	return resultVec;
 }
 
 void CNPC_Android::LaserEndPoint()

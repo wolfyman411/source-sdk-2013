@@ -63,6 +63,7 @@ public:
 	void	CreateLaser(CBeam* &beam, CSprite* &sprite, int attachment);
 	void	UpdateLaser(CBeam* beam, int attachment);
 	void	LaserEndPoint();
+	Vector	CalcEndPoint();
 	void	KillLaser(CBeam* &beam, CSprite* &sprite);
 
 	void	ShootGun(int attachment);
