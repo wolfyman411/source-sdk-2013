@@ -444,7 +444,7 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 					m_nextAttackL = gpGlobals->curtime + (SHOT_DELAY * SHOT_AMOUNT) + ATTACK_DELAY + RandomFloat(0.1f, 0.5f);
 					m_attackDurL = gpGlobals->curtime;
 				}
-				if (HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_GUN)
+				else if (HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_GUN)
 				{
 					m_gunShotsR = 0;
 					m_nextAttackR = gpGlobals->curtime + (SHOT_DELAY * SHOT_AMOUNT) + ATTACK_DELAY + RandomFloat(0.1f, 0.5f);
@@ -466,12 +466,22 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 			{
 				if (!m_pBeamL && HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_LASER)
 				{
+					laserAccuracy = 0.0f;
+					m_laserStartpoint = GetEnemyLKP() + pTarget->GetViewOffset();
+					m_laserStartpoint.x += 60 + 120 * random->RandomInt(-1, 1);
+					m_laserStartpoint.y += 60 + 120 * random->RandomInt(-1, 1);
+
 					CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
 					m_attackDurL = gpGlobals->curtime + LASER_DURATION;
 					m_nextAttackL = gpGlobals->curtime + LASER_DURATION + ATTACK_DELAY + RandomFloat(0.5f,2.0f);
 				}
-				if (!m_pBeamR && HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_LASER)
+				else if (!m_pBeamR && HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_LASER)
 				{
+					laserAccuracy = 0.0f;
+					m_laserStartpoint = GetEnemyLKP() + pTarget->GetViewOffset();
+					m_laserStartpoint.x += 60 + 120 * random->RandomInt(-1, 1);
+					m_laserStartpoint.y += 60 + 120 * random->RandomInt(-1, 1);
+
 					CreateLaser(m_pBeamR, m_pLightGlowR, WEAPON_ATTACHMENT_RIGHT);
 					m_attackDurR = gpGlobals->curtime + LASER_DURATION;
 					m_nextAttackR = gpGlobals->curtime + LASER_DURATION + ATTACK_DELAY + RandomFloat(0.5f, 2.0f);
@@ -571,10 +581,14 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 
 				if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER)
 				{
+					laserAccuracy += 0.01f;
+					LaserEndPoint();
 					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
 				}
 				else if (HasCondition(COND_ANDROID_IS_RIGHT) && gpGlobals->curtime < m_attackDurR && right_wpn == ANDROID_LASER)
 				{
+					laserAccuracy += 0.01f;
+					LaserEndPoint();
 					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
 				}
 				else
@@ -603,6 +617,16 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			break;
 		}
 	}
+}
+
+void CNPC_Android::LaserEndPoint()
+{
+	Vector vecToEnemy = GetEnemy()->GetAbsOrigin() - GetAbsOrigin();
+	vecToEnemy.NormalizeInPlace();
+	m_laserEndpoint = GetAbsOrigin() + (vecToEnemy * FAR_RANGE * 2.0f);
+
+	//Combine the start and end
+	m_laserTarget = Lerp(laserAccuracy, m_laserStartpoint, m_laserEndpoint);
 }
 
 void CNPC_Android::ShootGun(int attachment)
@@ -659,7 +683,7 @@ void CNPC_Android::LaserPosition(CBeam* beam, int attachment)
 
 	Vector vecSrc = vAttachPos;
 	trace_t tr;
-	AI_TraceLine(vecSrc, vecSrc + vForward * 1000.0f, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
+	AI_TraceLine(vecSrc, m_laserTarget, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
 
 	beam->PointEntInit(tr.endpos, this);
 	beam->SetEndAttachment(attachment);
@@ -712,6 +736,13 @@ void CNPC_Android::CreateLaser(CBeam*& beam, CSprite*& sprite, int attachment)
 		sprite->SetAttachment(this, attachment);
 		sprite->SetBrightness(255);
 		sprite->SetScale(0.65);
+
+		m_pLightGlowEnd = CSprite::SpriteCreate("sprites/redglow1.vmt", GetAbsOrigin(), FALSE);
+
+		m_pLightGlowEnd->SetTransparency(kRenderGlow, 255, 200, 200, 0, kRenderFxNoDissipation);
+		m_pLightGlowEnd->SetAttachment(beam, beam->GetEndAttachment());
+		m_pLightGlowEnd->SetBrightness(255);
+		m_pLightGlowEnd->SetScale(0.65);
 	}
 }
 
@@ -731,6 +762,7 @@ void CNPC_Android::KillLaser(CBeam* &beam, CSprite* &sprite)
 		StopSound(beam->entindex(), "NPC_Stalker.BurnWall");
 		UTIL_Remove(beam);
 		beam = NULL;
+		UTIL_Remove(m_pLightGlowEnd);
 	}
 
 	if (sprite)
@@ -793,6 +825,8 @@ void CNPC_Android::PopulatePoseParameters(void)
 {
 	m_poseHead_Pitch = LookupPoseParameter("head_pitch");
 	m_poseHead_Yaw = LookupPoseParameter("head_yaw");
+	m_poseWeaponL = LookupPoseParameter("weapon_left_yaw");
+	m_poseWeaponR = LookupPoseParameter("weapon_right_yaw");
 
 	BaseClass::PopulatePoseParameters();
 }
@@ -802,6 +836,8 @@ void CNPC_Android::UpdateHead(void)
 
 	float yaw = GetPoseParameter(m_poseHead_Yaw);
 	float pitch = GetPoseParameter(m_poseHead_Pitch);
+	float weaponL = GetPoseParameter(m_poseWeaponL);
+	float weaponR = GetPoseParameter(m_poseWeaponR);
 
 	CBaseEntity* pTarget = (GetTarget() != NULL) ? GetTarget() : GetEnemy();
 
@@ -814,6 +850,8 @@ void CNPC_Android::UpdateHead(void)
 		{
 			SetPoseParameter(m_poseHead_Yaw, UTIL_Approach(0, yaw, 10));
 			SetPoseParameter(m_poseHead_Pitch, UTIL_Approach(0, pitch, 10));
+			SetPoseParameter(m_poseWeaponL, UTIL_Approach(0, weaponL, 10));
+			SetPoseParameter(m_poseWeaponR, UTIL_Approach(0, weaponR, 10));
 
 			return;
 		}
@@ -822,17 +860,27 @@ void CNPC_Android::UpdateHead(void)
 		float yawDiff = VecToYaw(enemyDir);
 		yawDiff = UTIL_AngleDiff(yawDiff, facingYaw + yaw);
 
+		float yawLeftDiff = VecToYaw(enemyDir);
+		yawLeftDiff = UTIL_AngleDiff(yawLeftDiff, facingYaw + weaponL);
+
+		float yawRightDiff = VecToYaw(enemyDir);
+		yawRightDiff = UTIL_AngleDiff(yawRightDiff, facingYaw + weaponR);
+
 		float facingPitch = UTIL_VecToPitch(BodyDirection3D());
 		float pitchDiff = UTIL_VecToPitch(enemyDir);
 		pitchDiff = UTIL_AngleDiff(pitchDiff, facingPitch + pitch);
 
-		SetPoseParameter(m_poseHead_Yaw, UTIL_Approach(yaw + yawDiff, yaw, 50));
+		SetPoseParameter(m_poseHead_Yaw, UTIL_Approach(yaw + yawDiff, yaw, 10));
 		SetPoseParameter(m_poseHead_Pitch, UTIL_Approach(pitch + pitchDiff, pitch, 50));
+		SetPoseParameter(m_poseWeaponL, UTIL_Approach(weaponL + yawLeftDiff, weaponL, 10));
+		SetPoseParameter(m_poseWeaponR, UTIL_Approach(weaponR + yawRightDiff, weaponR, 10));
 	}
 	else
 	{
 		SetPoseParameter(m_poseHead_Yaw, UTIL_Approach(0, yaw, 10));
 		SetPoseParameter(m_poseHead_Pitch, UTIL_Approach(0, pitch, 10));
+		SetPoseParameter(m_poseWeaponL, UTIL_Approach(0, weaponL, 10));
+		SetPoseParameter(m_poseWeaponR, UTIL_Approach(0, weaponR, 10));
 	}
 }
 
@@ -859,7 +907,6 @@ DEFINE_SCHEDULE
 	"	Tasks"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
-	"       TASK_ANDROID_CIRCLE_ENEMY       0"
 	"		TASK_ANDROID_LASER_ATTACK		0"
 	""
 	"	Interrupts"

@@ -62,6 +62,7 @@ public:
 	void	LaserPosition(CBeam* beam, int attachment);
 	void	CreateLaser(CBeam* &beam, CSprite* &sprite, int attachment);
 	void	UpdateLaser(CBeam* beam, int attachment);
+	void	LaserEndPoint();
 	void	KillLaser(CBeam* &beam, CSprite* &sprite);
 
 	void	ShootGun(int attachment);
@@ -80,15 +81,21 @@ public:
 	Android_Weapons_e left_wpn = ANDROID_HAND;
 	Android_Weapons_e right_wpn = ANDROID_HAND;
 
-	Android_Weapons_e forced_left = ANDROID_NONE;
-	Android_Weapons_e forced_right = ANDROID_NONE;
+	Android_Weapons_e forced_left = ANDROID_LASER;
+	Android_Weapons_e forced_right = ANDROID_LASER;
 	
 	//Lasers
 	CBeam* m_pBeamL;
 	CSprite* m_pLightGlowL;
 	CBeam* m_pBeamR;
 	CSprite* m_pLightGlowR;
+	CSprite* m_pLightGlowEnd;
+
 	bool	m_bPlayingLaserSound;
+	Vector	m_laserEndpoint;
+	Vector m_laserStartpoint;
+	Vector m_laserTarget;
+	float laserAccuracy;
 
 	//Effects
 	SmokeTrail* m_pSmokeTrail;
@@ -136,7 +143,7 @@ private:
 	};
 
 protected:
-	int m_poseHead_Yaw, m_poseHead_Pitch;
+	int m_poseHead_Yaw, m_poseHead_Pitch, m_poseWeaponL, m_poseWeaponR;
 	virtual void PopulatePoseParameters(void);
 };
 
