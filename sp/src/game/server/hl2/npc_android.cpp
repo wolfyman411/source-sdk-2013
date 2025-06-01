@@ -399,6 +399,18 @@ int CNPC_Android::SelectSchedule(void)
 	return BaseClass::SelectSchedule();
 }
 
+int CNPC_Android::TranslateSchedule(int scheduleType)
+{
+	switch (scheduleType)
+	{
+	case SCHED_CHASE_ENEMY:
+		return SCHED_ANDROID_CHASE_ENEMY;
+		break;
+	}
+
+	return BaseClass::TranslateSchedule(scheduleType);
+}
+
 int CNPC_Android::RangeAttack1Conditions(float flDot, float flDist)
 {
 	if (GetNextAttack() > gpGlobals->curtime)
@@ -728,7 +740,7 @@ void CNPC_Android::ShootGun(int attachment)
 		info.m_vecSpread = VECTOR_CONE_20DEGREES;
 		info.m_iShots = 1;
 		info.m_flDistance = 8192;
-		info.m_flDamage = 3.0f;
+		info.m_flDamage = 2.2f;
 		info.m_pAttacker = this;
 		info.m_iAmmoType = GetAmmoDef()->Index("SMG1");
 		info.m_pAdditionalIgnoreEnt = this;
@@ -971,6 +983,27 @@ DECLARE_ACTIVITY(ACT_SWAP_RIGHT_WPN);
 
 DEFINE_SCHEDULE
 (
+	SCHED_ANDROID_CHASE_ENEMY,
+
+	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_ESTABLISH_LINE_OF_FIRE"
+	"		TASK_GET_PATH_TO_ENEMY			0"
+	"		TASK_RUN_PATH					0"
+	"		TASK_WAIT_FOR_MOVEMENT			0"
+	"	"
+	"	Interrupts"
+	"		COND_LIGHT_DAMAGE"
+	"		COND_HEAVY_DAMAGE"
+	"		COND_NEW_ENEMY"
+	"		COND_ENEMY_DEAD"
+	"		COND_CAN_RANGE_ATTACK1"
+	"		COND_CAN_MELEE_ATTACK1"
+	"		COND_CAN_MELEE_ATTACK2"
+	"		COND_TASK_FAILED"
+)
+
+DEFINE_SCHEDULE
+(
 	SCHED_ANDROID_LASER_ATTACK,
 
 	"	Tasks"
@@ -1000,6 +1033,60 @@ DEFINE_SCHEDULE
 	"		COND_NEW_ENEMY"
 	"		COND_ENEMY_DEAD"
 	"       COND_LOST_ENEMY"
+)
+
+DEFINE_SCHEDULE
+(
+	SCHED_ANDROID_FLANK_RANDOM,
+
+	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE					SCHEDULE:SCHED_ANDROID_RUN_RANDOM"
+	"		TASK_SET_TOLERANCE_DISTANCE				48"
+	"		TASK_SET_ROUTE_SEARCH_TIME				1"	// Spend 1 second trying to build a path if stuck
+	"		TASK_GET_FLANK_ARC_PATH_TO_ENEMY_LOS	30"
+	"		TASK_RUN_PATH							0"
+	"		TASK_WAIT_FOR_MOVEMENT					0"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
+	"		COND_HEAVY_DAMAGE"
+	"		COND_CAN_RANGE_ATTACK1"
+	"		COND_COND_SEE_ENEMY"
+	"		COND_CAN_MELEE_ATTACK1"
+)
+
+DEFINE_SCHEDULE
+(
+	SCHED_ANDROID_RUN_RANDOM,
+
+	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_ANDROID_COVER_FROM_ENEMY"
+	"		TASK_SET_TOLERANCE_DISTANCE		48"
+	"		TASK_SET_ROUTE_SEARCH_TIME		1"	// Spend 1 second trying to build a path if stuck
+	"		TASK_GET_PATH_TO_RANDOM_NODE	128"
+	"		TASK_RUN_PATH					0"
+	"		TASK_WAIT_FOR_MOVEMENT			0"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
+	"		COND_COND_SEE_ENEMY"
+	"		COND_CAN_RANGE_ATTACK1"
+)
+DEFINE_SCHEDULE
+(
+	SCHED_ANDROID_COVER_FROM_ENEMY,
+
+	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_FAIL_TAKE_COVER"
+	"		TASK_FIND_COVER_FROM_ENEMY		0"
+	"		TASK_RUN_PATH					0"
+	"		TASK_WAIT_FOR_MOVEMENT			0"
+	"		TASK_STOP_MOVING				0"
+	""
+	"	Interrupts"
+	"		COND_CAN_RANGE_ATTACK1"
+	"		COND_TASK_FAILED"
+	"		COND_NEW_ENEMY"
 )
 
 AI_END_CUSTOM_NPC()

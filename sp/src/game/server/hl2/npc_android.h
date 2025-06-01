@@ -74,6 +74,7 @@ public:
 	void	RunTask(const Task_t* pTask);
 
 	int		SelectSchedule(void);
+	int		TranslateSchedule(int scheduleType);
 	void	GatherConditions(void);
 	void	Think(void);
 	void	PrescheduleThink(void);
@@ -127,6 +128,9 @@ private:
 		SCHED_ANDROID_CHASE_ENEMY = LAST_SHARED_SCHEDULE,
 		SCHED_ANDROID_LASER_ATTACK,
 		SCHED_ANDROID_GUN_ATTACK,
+		SCHED_ANDROID_FLANK_RANDOM,
+		SCHED_ANDROID_RUN_RANDOM,
+		SCHED_ANDROID_COVER_FROM_ENEMY,
 	};
 
 	//Tasks
