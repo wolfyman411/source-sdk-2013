@@ -75,6 +75,7 @@ public:
 	void	RunTask(const Task_t* pTask);
 
 	int		SelectSchedule(void);
+	void	SwapWeapon(Android_Weapons_e &ref);
 	int		TranslateSchedule(int scheduleType);
 	void	GatherConditions(void);
 	void	Think(void);
@@ -112,7 +113,8 @@ private:
 	float	m_attackDurR;
 	float	m_nextAttackL;
 	float	m_nextAttackR;
-	float	m_nextSwap;
+	int	m_nextSwapL;
+	int	m_nextSwapR;
 
 	//Weapon Specifics
 	int		m_gunShotsL;
@@ -156,7 +158,7 @@ private:
 	};
 
 protected:
-	int m_poseHead_Yaw, m_poseHead_Pitch, m_poseWeaponL, m_poseWeaponR;
+	int m_poseHead_Yaw, m_poseHead_Pitch;
 	virtual void PopulatePoseParameters(void);
 };
 
