@@ -226,6 +226,9 @@ void CNPC_Android::Zap(void)
 	if (IsRunningDynamicInteraction())
 		return;
 
+	KillLaser(m_pBeamR, m_pLightGlowR);
+	KillLaser(m_pBeamL, m_pLightGlowL);
+
 	ClearSchedule("Zapped");
 	SetCondition(COND_ANDROID_ZAPPED);
 	m_zapped = true;
@@ -357,20 +360,40 @@ int CNPC_Android::SelectSchedule(void)
 			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
 				// Swap Weapons every so often
-				if (m_nextSwapL <= 0)
+				if (forced_left == ANDROID_NONE)
 				{
-					SwapWeapon(left_wpn);
-					m_nextSwapL = RandomInt(2, 4);
+					if (m_nextSwapL <= 0)
+					{
+						SwapWeapon(left_wpn);
+						m_nextSwapL = RandomInt(2, 4);
 
+						AddGesture(ACT_SWAP_LEFT_WPN);
+						m_nextAttackL = gpGlobals->curtime + 1.0f;
+					}
+				}
+				else if (left_wpn != forced_left)
+				{
+					m_nextSwapL = INFINITY;
+					left_wpn = forced_left;
 					AddGesture(ACT_SWAP_LEFT_WPN);
 					m_nextAttackL = gpGlobals->curtime + 1.0f;
 				}
-
-				if (m_nextSwapR <= 0)
+				
+				if (forced_right == ANDROID_NONE)
 				{
-					SwapWeapon(right_wpn);
-					m_nextSwapR = RandomInt(2, 4);
+					if (m_nextSwapR <= 0)
+					{
+						SwapWeapon(right_wpn);
+						m_nextSwapR = RandomInt(2, 4);
 
+						AddGesture(ACT_SWAP_RIGHT_WPN);
+						m_nextAttackR = gpGlobals->curtime + 1.0f;
+					}
+				}
+				else if (right_wpn != forced_right)
+				{
+					m_nextSwapR = INFINITY;
+					right_wpn = forced_right;
 					AddGesture(ACT_SWAP_RIGHT_WPN);
 					m_nextAttackR = gpGlobals->curtime + 1.0f;
 				}
@@ -468,23 +491,6 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 {
 	switch (pTask->iTask)
 	{
-		case TASK_ANDROID_CIRCLE_ENEMY:
-		{
-			if (!GetEnemy())
-			{
-				TaskFail("No enemy");
-				return;
-			}
-			break;
-
-			if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
-			{
-				TaskFail("Too Close");
-				return;
-			}
-			break;
-		}
-
 		case TASK_ANDROID_GUN_ATTACK:
 		{
 			CBaseEntity* pTarget = GetEnemy();
@@ -591,39 +597,6 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 {
 	switch (pTask->iTask)
 	{
-		case TASK_ANDROID_CIRCLE_ENEMY:
-		{
-			if (!GetEnemy())
-			{
-				TaskFail("Lost enemy");
-				return;
-			}
-
-			if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
-			{
-				TaskFail("Too Close");
-				return;
-			}
-
-			Vector vecEnemyPos = GetEnemy()->GetAbsOrigin();
-			Vector vecDir = GetAbsOrigin() - vecEnemyPos;
-			vecDir.z = 0;
-			float flDist = vecDir.NormalizeInPlace();
-
-			QAngle angMove;
-			VectorAngles(vecDir, angMove);
-			angMove.y += RandomFloat(-100.0f, 100.0f);
-			AngleVectors(angMove, &vecDir);
-
-			// Set new position (maintain distance)
-			Vector vecTargetPos = vecEnemyPos + vecDir * flDist;
-
-			AI_NavGoal_t goal(vecTargetPos);
-			GetNavigator()->SetGoal(goal, AIN_CLEAR_TARGET);
-
-			break;
-		}
-
 		case TASK_ANDROID_GUN_ATTACK:
 		{
 			CBaseEntity* pTarget = GetEnemy();
@@ -676,6 +649,23 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
+				//Kill laser if way off.
+				Vector vEnemyForward, vForward;
+
+				GetEnemy()->GetVectors(&vEnemyForward, NULL, NULL);
+				GetVectors(&vForward, NULL, NULL);
+
+				float flDot = DotProduct(vForward, vEnemyForward);
+
+				if (flDot > 0.0)
+				{
+					KillLaser(m_pBeamL, m_pLightGlowL);
+					KillLaser(m_pBeamR, m_pLightGlowR);
+
+					TaskFail("Laser off.");
+					return;
+				}
+
 				//Check if both
 				if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER && left_wpn == right_wpn)
 				{
@@ -823,7 +813,9 @@ void CNPC_Android::LaserPosition(CBeam* beam, int attachment)
 	{
 		CBaseEntity* pHitEntity = tr.m_pEnt;
 
-		if (pHitEntity && pHitEntity != this)
+		CBaseCombatCharacter* pVictimBCC = pHitEntity->MyCombatCharacterPointer();
+
+		if (pVictimBCC && pVictimBCC != this)
 		{
 			CTakeDamageInfo damageInfo;
 			damageInfo.SetDamage(5.0f);
@@ -831,7 +823,7 @@ void CNPC_Android::LaserPosition(CBeam* beam, int attachment)
 			damageInfo.SetInflictor(this);
 			damageInfo.SetDamageType(DMG_DISSOLVE);
 
-			pHitEntity->TakeDamage(damageInfo);
+			pVictimBCC->TakeDamage(damageInfo);
 		}
 
 		if (!m_bPlayingLaserSound)
@@ -1009,7 +1001,6 @@ AI_BEGIN_CUSTOM_NPC(npc_android, CNPC_Android)
 
 DECLARE_TASK(TASK_ANDROID_LASER_ATTACK);
 DECLARE_TASK(TASK_ANDROID_GUN_ATTACK);
-DECLARE_TASK(TASK_ANDROID_CIRCLE_ENEMY);
 
 DECLARE_CONDITION(COND_ANDROID_IS_LEFT);
 DECLARE_CONDITION(COND_ANDROID_IS_RIGHT);
@@ -1073,7 +1064,6 @@ DEFINE_SCHEDULE
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
 	"		TASK_ANDROID_GUN_ATTACK		0"
-	"       TASK_ANDROID_CIRCLE_ENEMY       0"
 	""
 	"	Interrupts"
 	"		COND_TASK_FAILED"
