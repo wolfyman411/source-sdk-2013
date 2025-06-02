@@ -15,6 +15,9 @@
 Activity ACT_SWAP_LEFT_WPN;
 Activity ACT_SWAP_RIGHT_WPN;
 
+int AE_ANDROID_SWAP_RIGHT;
+int AE_ANDROID_SWAP_LEFT;
+
 #define ANDROID_MODEL "models/aperture/android.mdl"
 #define CLOSE_RANGE 200.0f
 #define FAR_RANGE 2000.0f
@@ -52,13 +55,18 @@ Class_T	CNPC_Android::Classify(void)
 //-----------------------------------------------------------------------------
 void CNPC_Android::HandleAnimEvent(animevent_t* pEvent)
 {
-	switch (pEvent->event)
+	if (pEvent->event == AE_ANDROID_SWAP_LEFT)
 	{
-	case 1:
-	default:
-		BaseClass::HandleAnimEvent(pEvent);
-		break;
+		SetBodygroup(1, left_wpn + 1);
+		return;
 	}
+
+	if (pEvent->event == AE_ANDROID_SWAP_RIGHT)
+	{
+		SetBodygroup(2, right_wpn + 1);
+		return;
+	}
+	BaseClass::HandleAnimEvent(pEvent);
 }
 
 //-----------------------------------------------------------------------------
@@ -104,6 +112,8 @@ void CNPC_Android::Spawn()
 	NPCInit();
 
 	m_flDistTooFar = FLT_MAX;
+	SetBodygroup(1, 1);
+	SetBodygroup(2, 1);
 
 	BaseClass::Spawn();
 }
@@ -976,6 +986,9 @@ DECLARE_CONDITION(COND_ANDROID_IS_RIGHT);
 
 DECLARE_ACTIVITY(ACT_SWAP_LEFT_WPN);
 DECLARE_ACTIVITY(ACT_SWAP_RIGHT_WPN);
+
+DECLARE_ANIMEVENT(AE_ANDROID_SWAP_LEFT);
+DECLARE_ANIMEVENT(AE_ANDROID_SWAP_RIGHT);
 
 //-----------------------------------------------------------------------------
 // AI Schedules Specific to this NPC
