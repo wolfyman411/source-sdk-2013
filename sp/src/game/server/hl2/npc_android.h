@@ -52,6 +52,7 @@ public:
 	int		OnTakeDamage_Alive(const CTakeDamageInfo& info);
 
 	//Damage Effects
+	void	Zap(void);
 	void	StartSmokeTrail(void);
 	void	StartFire(void);
 	void	Event_Killed(const CTakeDamageInfo& info);
@@ -117,6 +118,10 @@ private:
 	int		m_gunShotsL;
 	int		m_gunShotsR;
 
+	//Zap
+	bool m_zapped;
+	float m_zaptime;
+
 	CAI_FollowBehavior	m_FollowBehavior;
 	void	UpdateHead(void);
 	
@@ -131,6 +136,7 @@ private:
 		SCHED_ANDROID_FLANK_RANDOM,
 		SCHED_ANDROID_RUN_RANDOM,
 		SCHED_ANDROID_COVER_FROM_ENEMY,
+		SCHED_ANDROID_ZAP,
 	};
 
 	//Tasks
@@ -146,6 +152,7 @@ private:
 	{
 		COND_ANDROID_IS_LEFT = LAST_SHARED_CONDITION,
 		COND_ANDROID_IS_RIGHT,
+		COND_ANDROID_ZAPPED,
 	};
 
 protected:

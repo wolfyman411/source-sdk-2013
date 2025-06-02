@@ -14,6 +14,7 @@
 //Activities
 Activity ACT_SWAP_LEFT_WPN;
 Activity ACT_SWAP_RIGHT_WPN;
+Activity ACT_ZAPPED;
 
 int AE_ANDROID_SWAP_RIGHT;
 int AE_ANDROID_SWAP_LEFT;
@@ -25,12 +26,13 @@ int AE_ANDROID_SWAP_LEFT;
 #define SHOT_DELAY 0.1f
 #define SHOT_AMOUNT 3
 #define ATTACK_DELAY 0.3f
+#define ZAP_STUN 5.0f
 
 #define WEAPON_ATTACHMENT_LEFT	1
 #define WEAPON_ATTACHMENT_RIGHT	2
 #define PARTICLE_ATTACHMENT		"particles"
 
-ConVar sk_android_health("sk_android_health", "200");
+ConVar sk_android_health("sk_android_health", "400");
 
 LINK_ENTITY_TO_CLASS(npc_android, CNPC_Android);
 
@@ -182,6 +184,15 @@ bool CNPC_Android::CreateBehaviors()
 
 int CNPC_Android::OnTakeDamage_Alive(const CTakeDamageInfo& info)
 {
+	CTakeDamageInfo newinfo = info;
+
+	// Zap our robot if physgun
+	if (newinfo.GetDamageType() & (DMG_PHYSGUN) && !m_zapped)
+	{
+		Zap();
+	}
+
+
 	// Start smoking when we're nearly dead
 	if (m_iHealth < m_iMaxHealth/2)
 	{
@@ -192,7 +203,33 @@ int CNPC_Android::OnTakeDamage_Alive(const CTakeDamageInfo& info)
 		StartFire();
 	}
 
-	return (BaseClass::OnTakeDamage_Alive(info));
+	// If zapped, deal insane damage
+	if (m_zapped && IsCurSchedule(SCHED_ANDROID_ZAP))
+	{
+		newinfo.SetDamage(newinfo.GetDamage() * 5.0f);
+	}
+
+	return (BaseClass::OnTakeDamage_Alive(newinfo));
+}
+
+void CNPC_Android::Zap(void)
+{
+	//Cannot be zapped already
+	if (m_zapped)
+		return;
+
+	// Must be on the ground
+	if ((GetFlags() & FL_ONGROUND) == false)
+		return;
+
+	// Can't be in a dynamic interation
+	if (IsRunningDynamicInteraction())
+		return;
+
+	ClearSchedule("Zapped");
+	SetCondition(COND_ANDROID_ZAPPED);
+	m_zapped = true;
+	m_zaptime = gpGlobals->curtime + ZAP_STUN;
 }
 
 void CNPC_Android::StartSmokeTrail(void)
@@ -302,6 +339,11 @@ void CNPC_Android::Gib(void)
 //-----------------------------------------------------------------------------
 int CNPC_Android::SelectSchedule(void)
 {
+	if (HasCondition(COND_ANDROID_ZAPPED))
+	{
+		ClearCondition(COND_ANDROID_ZAPPED);
+		return SCHED_ANDROID_ZAP;
+	}
 
 	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
 	{
@@ -886,6 +928,12 @@ void CNPC_Android::Think(void)
 		KillLaser(m_pBeamR, m_pLightGlowR);
 		KillLaser(m_pBeamL, m_pLightGlowL);
 	}
+
+	if (m_zaptime < gpGlobals->curtime)
+	{
+		m_zapped = false;
+	}
+
 	BaseClass::Think();
 }
 
@@ -983,9 +1031,11 @@ DECLARE_TASK(TASK_ANDROID_CIRCLE_ENEMY);
 
 DECLARE_CONDITION(COND_ANDROID_IS_LEFT);
 DECLARE_CONDITION(COND_ANDROID_IS_RIGHT);
+DECLARE_CONDITION(COND_ANDROID_ZAPPED);
 
 DECLARE_ACTIVITY(ACT_SWAP_LEFT_WPN);
 DECLARE_ACTIVITY(ACT_SWAP_RIGHT_WPN);
+DECLARE_ACTIVITY(ACT_ZAPPED);
 
 DECLARE_ANIMEVENT(AE_ANDROID_SWAP_LEFT);
 DECLARE_ANIMEVENT(AE_ANDROID_SWAP_RIGHT);
@@ -1013,6 +1063,7 @@ DEFINE_SCHEDULE
 	"		COND_CAN_MELEE_ATTACK1"
 	"		COND_CAN_MELEE_ATTACK2"
 	"		COND_TASK_FAILED"
+	"		COND_ANDROID_ZAPPED"
 )
 
 DEFINE_SCHEDULE
@@ -1029,6 +1080,7 @@ DEFINE_SCHEDULE
 	"		COND_NEW_ENEMY"
 	"		COND_ENEMY_DEAD"
 	"       COND_LOST_ENEMY"
+	"		COND_ANDROID_ZAPPED"
 )
 
 DEFINE_SCHEDULE
@@ -1046,6 +1098,7 @@ DEFINE_SCHEDULE
 	"		COND_NEW_ENEMY"
 	"		COND_ENEMY_DEAD"
 	"       COND_LOST_ENEMY"
+	"		COND_ANDROID_ZAPPED"
 )
 
 DEFINE_SCHEDULE
@@ -1066,6 +1119,7 @@ DEFINE_SCHEDULE
 	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_COND_SEE_ENEMY"
 	"		COND_CAN_MELEE_ATTACK1"
+	"		COND_ANDROID_ZAPPED"
 )
 
 DEFINE_SCHEDULE
@@ -1084,6 +1138,7 @@ DEFINE_SCHEDULE
 	"		COND_TASK_FAILED"
 	"		COND_COND_SEE_ENEMY"
 	"		COND_CAN_RANGE_ATTACK1"
+	"		COND_ANDROID_ZAPPED"
 )
 DEFINE_SCHEDULE
 (
@@ -1100,6 +1155,19 @@ DEFINE_SCHEDULE
 	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_TASK_FAILED"
 	"		COND_NEW_ENEMY"
+	"		COND_ANDROID_ZAPPED"
+)
+DEFINE_SCHEDULE
+(
+	SCHED_ANDROID_ZAP,
+
+	"	Tasks"
+	"		TASK_STOP_MOVING	0"
+	"		TASK_RESET_ACTIVITY		0"
+	"		TASK_PLAY_SEQUENCE		ACTIVITY:ACT_ZAPPED"
+
+	"	Interrupts"
+	"		COND_TASK_FAILED"
 )
 
 AI_END_CUSTOM_NPC()
