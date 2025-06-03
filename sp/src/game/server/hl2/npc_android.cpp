@@ -10,6 +10,7 @@
 #include "tier0/memdbgon.h"
 #include <particle_parse.h>
 #include <ammodef.h>
+#include "npc_androidball.h"
 
 //Activities
 Activity ACT_SWAP_LEFT_WPN;
@@ -21,7 +22,7 @@ int AE_ANDROID_SWAP_LEFT;
 
 #define ANDROID_MODEL "models/aperture/android.mdl"
 #define CLOSE_RANGE 200.0f
-#define FAR_RANGE 2000.0f
+#define FAR_RANGE 1000.0f
 #define LASER_DURATION 3.0f
 #define SHOT_DELAY 0.1f
 #define SHOT_AMOUNT 3
@@ -348,6 +349,12 @@ int CNPC_Android::SelectSchedule(void)
 		return SCHED_ANDROID_ZAP;
 	}
 
+	if (HasCondition(COND_TOO_FAR_TO_ATTACK))
+	{
+		DevMsg("balman\n");
+		return SCHED_ANDROID_BALL_MODE;
+	}
+
 	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
 	{
 		return SCHED_MOVE_AWAY_FROM_ENEMY;
@@ -587,6 +594,34 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 				return;
 			}
 		}
+		case TASK_ANDROID_BALL_MODE:
+		{
+			CBaseEntity* pTarget = GetEnemy();
+			if (pTarget && !ballMode)
+			{
+				//create a new android ball where the android is
+				CBaseEntity *newEnt = CreateEntityByName("npc_androidball");
+				if (newEnt)
+				{
+					ballMode = true;
+					CAI_BaseNPC* newNPC = dynamic_cast<CAI_BaseNPC*>(newEnt);
+					newNPC->SetAbsOrigin(GetAbsOrigin());
+					newNPC->SetAbsAngles(GetAbsAngles());
+					DispatchSpawn(newNPC);
+					newNPC->Activate();
+					newNPC->SetEnemy(GetEnemy());
+					newNPC->SetState(GetState());
+					UTIL_Remove(this);
+					TaskComplete();
+				}
+			}
+			else
+			{
+				TaskFail(FAIL_NO_ENEMY);
+				return;
+			}
+			break;
+		}
 		default:
 			BaseClass::StartTask(pTask);
 			break;
@@ -705,6 +740,10 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 				return;
 			}
 			break;
+		}
+		case TASK_ANDROID_BALL_MODE:
+		{
+			return;
 		}
 		default:
 		{
@@ -1001,6 +1040,7 @@ AI_BEGIN_CUSTOM_NPC(npc_android, CNPC_Android)
 
 DECLARE_TASK(TASK_ANDROID_LASER_ATTACK);
 DECLARE_TASK(TASK_ANDROID_GUN_ATTACK);
+DECLARE_TASK(TASK_ANDROID_BALL_MODE);
 
 DECLARE_CONDITION(COND_ANDROID_IS_LEFT);
 DECLARE_CONDITION(COND_ANDROID_IS_RIGHT);
@@ -1140,6 +1180,21 @@ DEFINE_SCHEDULE
 
 	"	Interrupts"
 	"		COND_TASK_FAILED"
+)
+DEFINE_SCHEDULE
+(
+	SCHED_ANDROID_BALL_MODE,
+	"	Tasks"
+	"		TASK_STOP_MOVING		0"
+	"		TASK_FACE_ENEMY			0"
+	"		TASK_ANDROID_BALL_MODE	0"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
+	"		COND_NEW_ENEMY"
+	"		COND_ENEMY_DEAD"
+	"       COND_LOST_ENEMY"
+	"		COND_ANDROID_ZAPPED"
 )
 
 AI_END_CUSTOM_NPC()

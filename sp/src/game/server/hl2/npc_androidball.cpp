@@ -37,6 +37,9 @@
 #include "mapentities.h"
 #include "RagdollBoogie.h"
 #include "physics_collisionevent.h"
+#include "npc_androidball.h"
+#include "npc_android.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -53,24 +56,6 @@ ConVar	sk_ball_stun_delay("sk_ball_stun_delay", "1");
 // Purpose: This class only implements the IMotionEvent-specific behavior
 //			It keeps track of the forces so they can be integrated
 //-----------------------------------------------------------------------------
-class CBallController : public IMotionEvent
-{
-	DECLARE_SIMPLE_DATADESC();
-
-public:
-	IMotionEvent::simresult_e Simulate(IPhysicsMotionController* pController, IPhysicsObject* pObject, float deltaTime, Vector& linear, AngularImpulse& angular);
-
-	AngularImpulse	m_vecAngular;
-	Vector			m_vecLinear;
-
-	void Off(void) { m_fIsStopped = true; }
-	void On(void) { m_fIsStopped = false; }
-
-	bool IsOn(void) { return !m_fIsStopped; }
-
-private:
-	bool	m_fIsStopped;
-};
 
 BEGIN_SIMPLE_DATADESC(CBallController)
 
@@ -102,167 +87,13 @@ IMotionEvent::simresult_e CBallController::Simulate(IPhysicsMotionController* pC
 
 #define BALL_RETURN_TO_PLAYER_DIST			(200*200)
 
-#define BALL_MIN_ATTACK_DIST	1
+#define BALL_MIN_ATTACK_DIST	200
 #define BALL_MAX_ATTACK_DIST	4096
 
 #define	BALL_FEAR_DISTANCE			(300*300)
 
 //=========================================================
-// Custom schedules
 //=========================================================
-enum
-{
-	SCHED_BALL_RANGE_ATTACK1 = LAST_SHARED_SCHEDULE,
-	SCHED_BALL_CHASE_ENEMY,
-	SCHED_BALL_FLEE,
-	SCHED_BALL_ALERT_STAND,
-	SCHED_BALL_NUDGE_TOWARDS_NODES,
-	SCHED_BALL_PATH_TO_PLAYER,
-	SCHED_BALL_ROLL_TO_PLAYER,
-};
-
-//=========================================================
-// Custom tasks
-//=========================================================
-enum
-{
-	TASK_BALL_CHARGE_ENEMY = LAST_SHARED_TASK,
-	TASK_BALL_GET_PATH_TO_FLEE,
-	TASK_BALL_NUDGE_TOWARDS_NODES,
-	TASK_BALL_RETURN_TO_PLAYER,
-};
-
-//=========================================================
-//=========================================================
-class CNPC_AndroidBall : public CNPCBaseInteractive<CAI_BaseNPC>, public CDefaultPlayerPickupVPhysics
-{
-	DECLARE_CLASS(CNPC_AndroidBall, CNPCBaseInteractive<CAI_BaseNPC>);
-
-public:
-
-	CNPC_AndroidBall(void) { m_bUniformSight = false; }
-	~CNPC_AndroidBall(void);
-
-	void	Spawn(void);
-	bool	CreateVPhysics();
-	void	RunAI();
-	void	StartTask(const Task_t* pTask);
-	void	RunTask(const Task_t* pTask);
-	float	GetAttackDamageScale(CBaseEntity* pVictim);
-	void	VPhysicsCollision(int index, gamevcollisionevent_t* pEvent);
-	void	Precache(void);
-	void	OnPhysGunPickup(CBasePlayer* pPhysGunUser, PhysGunPickup_t reason);
-	void	OnPhysGunDrop(CBasePlayer* pPhysGunUser, PhysGunDrop_t Reason);
-	void	PrescheduleThink();
-	bool	ShouldSavePhysics() { return true; }
-	void	OnRestore();
-	bool	QuerySeeEntity(CBaseEntity* pSightEnt, bool bOnlyHateOrFearIfNPC = false);
-
-	int		RangeAttack1Conditions(float flDot, float flDist);
-	int		SelectSchedule(void);
-	int		TranslateSchedule(int scheduleType);
-
-	bool	OverrideMove(float flInterval) { return true; }
-	bool	IsValidEnemy(CBaseEntity* pEnemy);
-	float	RollingSpeed();
-	float	GetStunDelay();
-	void	EmbedOnGroundImpact();
-	void	UpdateEfficiency(bool bInPVS) { SetEfficiency((GetSleepState() != AISS_AWAKE) ? AIE_DORMANT : AIE_NORMAL); SetMoveEfficiency(AIME_NORMAL); }
-	void	DrawDebugGeometryOverlays()
-	{
-		if (m_debugOverlays & OVERLAY_BBOX_BIT)
-		{
-			float dist = GetSenses()->GetDistLook();
-			Vector range(dist, dist, 64);
-			NDebugOverlay::Box(GetAbsOrigin(), -range, range, 255, 0, 0, 0, 0);
-		}
-		BaseClass::DrawDebugGeometryOverlays();
-	}
-	// UNDONE: Put this in the qc file!
-	Vector EyePosition()
-	{
-		// This takes advantage of the fact that the system knows
-		// that the abs origin is at the center of the rollermine
-		// and that the OBB is actually world-aligned despite the
-		// fact that SOLID_VPHYSICS is being used
-		Vector eye = CollisionProp()->GetCollisionOrigin();
-		eye.z += CollisionProp()->OBBMaxs().z;
-		return eye;
-	}
-
-	int		OnTakeDamage(const CTakeDamageInfo& info);
-	void	TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr, CDmgAccumulator* pAccumulator);
-
-	Class_T	Classify()
-	{
-		return CLASS_APERTURE;
-	}
-
-	virtual bool ShouldGoToIdleState()
-	{
-		return gpGlobals->curtime > m_flGoIdleTime ? true : false;
-	}
-
-	virtual	void OnStateChange(NPC_STATE OldState, NPC_STATE NewState);
-
-	NPC_STATE SelectIdealState();
-
-	// Vehicle sticking
-
-	virtual unsigned int	PhysicsSolidMaskForEntity(void) const;
-
-	COutputEvent m_OnPhysGunDrop;
-	COutputEvent m_OnPhysGunPickup;
-
-protected:
-	DEFINE_CUSTOM_AI;
-	DECLARE_DATADESC();
-
-	bool	BecomePhysical();
-
-	void	Explode(void);
-	void	PreDetonate(void);
-
-	bool	IsActive() { return m_flActiveTime > gpGlobals->curtime ? false : true; }
-
-	inline float	GetForwardSpeed() const
-	{
-#ifdef MAPBASE
-		if (m_flSpeedModifier != 1.0f)
-			return m_flForwardSpeed * m_flSpeedModifier;
-		else
-#endif
-			return m_flForwardSpeed;
-	}
-
-	// INPCInteractive Functions
-	virtual bool	CanInteractWith(CAI_BaseNPC* pUser) { return true; }
-	virtual void	NotifyInteraction(CAI_BaseNPC* pUser);
-
-	CSoundPatch* m_pRollSound;
-	CSoundPatch* m_pPingSound;
-
-	CBallController			m_RollerController;
-	IPhysicsMotionController* m_pMotionController;
-
-	float	m_flChargeTime;
-	float	m_flGoIdleTime;
-	float	m_flForwardSpeed;
-	int		m_iSoundEventFlags;
-
-	CNetworkVar(bool, m_bIsOpen);
-	CNetworkVar(float, m_flActiveTime);	//If later than the current time, this will force the mine to be active
-
-	bool	m_bHeld;		//Whether or not the player is holding the mine
-	bool	m_bEmbedOnGroundImpact;
-
-	// Constraint used to stick us to a vehicle
-	IPhysicsConstraint* m_pConstraint;
-
-	bool	m_bUniformSight;
-
-	static string_t gm_iszDropshipClassname;
-};
 
 string_t CNPC_AndroidBall::gm_iszDropshipClassname;
 
@@ -522,6 +353,9 @@ int CNPC_AndroidBall::SelectSchedule(void)
 	if ((m_bHeld) || !IsActive())
 		return SCHED_ALERT_STAND;
 
+	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
+		return SCHED_BALL_UNBALL;
+
 	// If we can see something we're afraid of, run from it
 	if (HasCondition(COND_SEE_FEAR))
 		return SCHED_BALL_FLEE;
@@ -734,7 +568,39 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 		TaskComplete();
 	}
 	break;
+	case TASK_BALL_UNBALL:
+	{
+		CBaseEntity* pTarget = GetEnemy();
+		if (pTarget && !unball)
+		{
+			//create a new android where the ball is
+			unball = true;
 
+			CBaseEntity* newEnt = CreateEntityByName("npc_android");
+			if (newEnt)
+			{
+				CAI_BaseNPC* newNPC = dynamic_cast<CAI_BaseNPC*>(newEnt);
+				newNPC->SetAbsOrigin(GetAbsOrigin());
+
+				QAngle angLookAtEnemy;
+				VectorAngles(pTarget->GetAbsOrigin(), angLookAtEnemy);
+
+				newNPC->SetAbsAngles(QAngle(0, angLookAtEnemy.y,0));
+				DispatchSpawn(newNPC);
+				newNPC->Activate();
+				newNPC->SetEnemy(GetEnemy());
+				newNPC->SetState(GetState());
+				UTIL_Remove(this);
+				TaskComplete();
+			}
+		}
+		else
+		{
+			TaskFail(FAIL_NO_ENEMY);
+			return;
+		}
+		break;
+	}
 	default:
 		BaseClass::StartTask(pTask);
 		break;
@@ -1309,6 +1175,7 @@ DECLARE_TASK(TASK_BALL_CHARGE_ENEMY)
 DECLARE_TASK(TASK_BALL_GET_PATH_TO_FLEE)
 DECLARE_TASK(TASK_BALL_NUDGE_TOWARDS_NODES)
 DECLARE_TASK(TASK_BALL_RETURN_TO_PLAYER)
+DECLARE_TASK(TASK_BALL_UNBALL)
 
 //Schedules
 
@@ -1451,6 +1318,21 @@ DEFINE_SCHEDULE
 	"		COND_HEAR_DANGER"
 	"		COND_HEAR_BULLET_IMPACT"
 	"		COND_IDLE_INTERRUPT"
+)
+DEFINE_SCHEDULE
+(
+	SCHED_BALL_UNBALL,
+	"	Tasks"
+	"		TASK_STOP_MOVING		0"
+	"		TASK_FACE_ENEMY			0"
+	"		TASK_BALL_UNBALL	0"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
+	"		COND_NEW_ENEMY"
+	"		COND_ENEMY_DEAD"
+	"       COND_LOST_ENEMY"
+	"		COND_ANDROID_ZAPPED"
 )
 
 AI_END_CUSTOM_NPC()

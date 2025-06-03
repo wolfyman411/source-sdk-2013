@@ -124,6 +124,8 @@ private:
 	bool m_zapped;
 	float m_zaptime;
 
+	bool ballMode = false;
+
 	CAI_FollowBehavior	m_FollowBehavior;
 	void	UpdateHead(void);
 	
@@ -139,6 +141,7 @@ private:
 		SCHED_ANDROID_RUN_RANDOM,
 		SCHED_ANDROID_COVER_FROM_ENEMY,
 		SCHED_ANDROID_ZAP,
+		SCHED_ANDROID_BALL_MODE,
 	};
 
 	//Tasks
@@ -146,6 +149,7 @@ private:
 	{
 		TASK_ANDROID_LASER_ATTACK = LAST_SHARED_TASK,
 		TASK_ANDROID_GUN_ATTACK,
+		TASK_ANDROID_BALL_MODE,
 	};
 
 	//Conditions
