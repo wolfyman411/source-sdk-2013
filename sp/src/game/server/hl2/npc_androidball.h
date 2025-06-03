@@ -23,6 +23,24 @@
 
 class CNPC_AndroidBall;
 
+class CAndroidBallController : public IMotionEvent
+{
+	DECLARE_SIMPLE_DATADESC();
+
+public:
+	IMotionEvent::simresult_e Simulate(IPhysicsMotionController* pController, IPhysicsObject* pObject, float deltaTime, Vector& linear, AngularImpulse& angular);
+
+	AngularImpulse	m_vecAngular;
+	Vector			m_vecLinear;
+
+	void Off(void) { m_fIsStopped = true; }
+	void On(void) { m_fIsStopped = false; }
+
+	bool IsOn(void) { return !m_fIsStopped; }
+
+private:
+	bool	m_fIsStopped;
+};
 
 class CNPC_AndroidBall : public CAI_BaseActor
 {
@@ -45,6 +63,10 @@ public:
 	void	Think(void);
 	void	PrescheduleThink(void);
 
+	bool	BecomePhysical(void);
+	void	OnRestore();
+	bool	CreateVPhysics();
+
 	DECLARE_DATADESC()
 
 private:
@@ -53,25 +75,8 @@ private:
 	DEFINE_CUSTOM_AI;
 
 protected:
-};
-
-class CAndroidBallController : public IMotionEvent
-{
-	DECLARE_SIMPLE_DATADESC();
-
-public:
-	IMotionEvent::simresult_e Simulate(IPhysicsMotionController* pController, IPhysicsObject* pObject, float deltaTime, Vector& linear, AngularImpulse& angular);
-
-	AngularImpulse	m_vecAngular;
-	Vector			m_vecLinear;
-
-	void Off(void) { m_fIsStopped = true; }
-	void On(void) { m_fIsStopped = false; }
-
-	bool IsOn(void) { return !m_fIsStopped; }
-
-private:
-	bool	m_fIsStopped;
+	CAndroidBallController		m_RollerController;
+	IPhysicsMotionController*	m_pMotionController;
 };
 
 #endif // HL2_EPISODIC
