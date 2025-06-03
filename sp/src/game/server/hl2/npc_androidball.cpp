@@ -87,7 +87,7 @@ IMotionEvent::simresult_e CBallController::Simulate(IPhysicsMotionController* pC
 
 #define BALL_RETURN_TO_PLAYER_DIST			(200*200)
 
-#define BALL_MIN_ATTACK_DIST	200
+#define BALL_MIN_ATTACK_DIST	400
 #define BALL_MAX_ATTACK_DIST	4096
 
 #define	BALL_FEAR_DISTANCE			(300*300)
@@ -573,31 +573,43 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 		CBaseEntity* pTarget = GetEnemy();
 		if (pTarget && !unball)
 		{
-			//create a new android where the ball is
-			unball = true;
-
+			// Create a new android where the ball is
 			CBaseEntity* newEnt = CreateEntityByName("npc_android");
 			if (newEnt)
 			{
-				CAI_BaseNPC* newNPC = dynamic_cast<CAI_BaseNPC*>(newEnt);
-				newNPC->SetAbsOrigin(GetAbsOrigin());
+				CNPC_Android* newNPC = dynamic_cast<CNPC_Android*>(newEnt);
+				if (newNPC)
+				{
+					newNPC->SetAbsOrigin(GetAbsOrigin());
 
-				QAngle angLookAtEnemy;
-				VectorAngles(pTarget->GetAbsOrigin(), angLookAtEnemy);
+					Vector vecToEnemy = pTarget->GetAbsOrigin() - GetAbsOrigin();
+					vecToEnemy.z = 0;
+					vecToEnemy.NormalizeInPlace();
 
-				newNPC->SetAbsAngles(QAngle(0, angLookAtEnemy.y,0));
-				DispatchSpawn(newNPC);
-				newNPC->Activate();
-				newNPC->SetEnemy(GetEnemy());
-				newNPC->SetState(GetState());
-				UTIL_Remove(this);
-				TaskComplete();
+					QAngle angLookAtEnemy;
+					VectorAngles(vecToEnemy, angLookAtEnemy);
+
+					newNPC->SetAbsAngles(QAngle(0, angLookAtEnemy.y, 0));
+					newNPC->m_startBalled = true;
+
+					DispatchSpawn(newNPC);
+					newNPC->Activate();
+
+					newNPC->SetEnemy(pTarget);
+					newNPC->SetState(GetState());
+
+					unball = true;
+					TaskComplete();
+
+					UTIL_Remove(this);
+					return;
+				}
 			}
+			TaskFail("Failed to create android NPC");
 		}
 		else
 		{
 			TaskFail(FAIL_NO_ENEMY);
-			return;
 		}
 		break;
 	}

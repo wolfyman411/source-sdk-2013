@@ -42,6 +42,7 @@ public:
 	DECLARE_CLASS(CNPC_Android, CAI_BaseActor);
 
 	void	Spawn(void);
+	void	Activate();
 	void	Precache(void);
 	Class_T Classify(void);
 	void	HandleAnimEvent(animevent_t* pEvent);
@@ -105,6 +106,8 @@ public:
 	SmokeTrail* m_pSmokeTrail;
 	CParticleSystem* m_pFire;
 
+	bool m_startBalled = false;
+
 	DECLARE_DATADESC()
 
 private:
@@ -124,7 +127,7 @@ private:
 	bool m_zapped;
 	float m_zaptime;
 
-	bool ballMode = false;
+	bool m_ballMode = false;
 
 	CAI_FollowBehavior	m_FollowBehavior;
 	void	UpdateHead(void);
@@ -142,6 +145,7 @@ private:
 		SCHED_ANDROID_COVER_FROM_ENEMY,
 		SCHED_ANDROID_ZAP,
 		SCHED_ANDROID_BALL_MODE,
+		SCHED_ANDROID_UNBALL,
 	};
 
 	//Tasks

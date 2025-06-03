@@ -16,13 +16,15 @@
 Activity ACT_SWAP_LEFT_WPN;
 Activity ACT_SWAP_RIGHT_WPN;
 Activity ACT_ZAPPED;
+Activity ACT_BALL;
+Activity ACT_UNBALL;
 
 int AE_ANDROID_SWAP_RIGHT;
 int AE_ANDROID_SWAP_LEFT;
 
 #define ANDROID_MODEL "models/aperture/android.mdl"
 #define CLOSE_RANGE 200.0f
-#define FAR_RANGE 1000.0f
+#define FAR_RANGE 700.0f
 #define LASER_DURATION 3.0f
 #define SHOT_DELAY 0.1f
 #define SHOT_AMOUNT 3
@@ -119,6 +121,20 @@ void CNPC_Android::Spawn()
 	SetBodygroup(2, 1);
 
 	BaseClass::Spawn();
+}
+
+void CNPC_Android::Activate()
+{
+	BaseClass::Activate();
+	if (m_startBalled)
+	{
+		DevMsg("unball\n");
+		m_startBalled = false;
+		SetActivity(ACT_UNBALL);
+		SetSchedule(SCHED_ANDROID_UNBALL);
+		SetActivity(ACT_UNBALL);
+		SetIdealActivity(ACT_UNBALL);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -343,6 +359,7 @@ void CNPC_Android::Gib(void)
 //-----------------------------------------------------------------------------
 int CNPC_Android::SelectSchedule(void)
 {
+
 	if (HasCondition(COND_ANDROID_ZAPPED))
 	{
 		ClearCondition(COND_ANDROID_ZAPPED);
@@ -351,7 +368,6 @@ int CNPC_Android::SelectSchedule(void)
 
 	if (HasCondition(COND_TOO_FAR_TO_ATTACK))
 	{
-		DevMsg("balman\n");
 		return SCHED_ANDROID_BALL_MODE;
 	}
 
@@ -597,15 +613,15 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 		case TASK_ANDROID_BALL_MODE:
 		{
 			CBaseEntity* pTarget = GetEnemy();
-			if (pTarget && !ballMode)
+			if (pTarget && !m_ballMode)
 			{
 				//create a new android ball where the android is
 				CBaseEntity *newEnt = CreateEntityByName("npc_androidball");
 				if (newEnt)
 				{
-					ballMode = true;
+					m_ballMode = true;
 					CAI_BaseNPC* newNPC = dynamic_cast<CAI_BaseNPC*>(newEnt);
-					newNPC->SetAbsOrigin(GetAbsOrigin());
+					newNPC->SetAbsOrigin(Vector(GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z+10.0f));
 					newNPC->SetAbsAngles(GetAbsAngles());
 					DispatchSpawn(newNPC);
 					newNPC->Activate();
@@ -613,6 +629,7 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 					newNPC->SetState(GetState());
 					UTIL_Remove(this);
 					TaskComplete();
+					return;
 				}
 			}
 			else
@@ -1049,6 +1066,8 @@ DECLARE_CONDITION(COND_ANDROID_ZAPPED);
 DECLARE_ACTIVITY(ACT_SWAP_LEFT_WPN);
 DECLARE_ACTIVITY(ACT_SWAP_RIGHT_WPN);
 DECLARE_ACTIVITY(ACT_ZAPPED);
+DECLARE_ACTIVITY(ACT_BALL);
+DECLARE_ACTIVITY(ACT_UNBALL);
 
 DECLARE_ANIMEVENT(AE_ANDROID_SWAP_LEFT);
 DECLARE_ANIMEVENT(AE_ANDROID_SWAP_RIGHT);
@@ -1187,6 +1206,7 @@ DEFINE_SCHEDULE
 	"	Tasks"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
+	"		TASK_PLAY_SEQUENCE		ACTIVITY:ACT_BALL"
 	"		TASK_ANDROID_BALL_MODE	0"
 	""
 	"	Interrupts"
@@ -1194,6 +1214,17 @@ DEFINE_SCHEDULE
 	"		COND_NEW_ENEMY"
 	"		COND_ENEMY_DEAD"
 	"       COND_LOST_ENEMY"
+	"		COND_ANDROID_ZAPPED"
+)
+
+DEFINE_SCHEDULE
+(
+	SCHED_ANDROID_UNBALL,
+	"	Tasks"
+	"		TASK_PLAY_SEQUENCE		ACTIVITY:ACT_UNBALL"
+	""
+	"	Interrupts"
+	"		COND_TASK_FAILED"
 	"		COND_ANDROID_ZAPPED"
 )
 
