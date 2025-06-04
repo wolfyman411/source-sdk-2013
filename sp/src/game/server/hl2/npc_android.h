@@ -41,6 +41,8 @@ class CNPC_Android : public CAI_BaseActor
 public:
 	DECLARE_CLASS(CNPC_Android, CAI_BaseActor);
 
+	void	SetVars(float health, Android_Weapons_e leftWeapon, Android_Weapons_e rightWeapon);
+
 	void	Spawn(void);
 	void	Activate();
 	void	Precache(void);

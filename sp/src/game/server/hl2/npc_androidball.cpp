@@ -156,6 +156,13 @@ void CNPC_AndroidBall::Precache(void)
 }
 
 
+void CNPC_AndroidBall::SetVars(float health, Android_Weapons_e leftWeapon, Android_Weapons_e rightWeapon)
+{
+	android_health = health;
+	forced_left = leftWeapon;
+	forced_right = rightWeapon;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose:
 // Input  :
@@ -591,9 +598,11 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 
 					newNPC->SetAbsAngles(QAngle(0, angLookAtEnemy.y, 0));
 					newNPC->m_startBalled = true;
+					newNPC->SetSquad(GetSquad());
 
 					DispatchSpawn(newNPC);
 					newNPC->Activate();
+					newNPC->SetVars(android_health, forced_left, forced_right);
 
 					newNPC->SetEnemy(pTarget);
 					newNPC->SetState(GetState());

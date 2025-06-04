@@ -76,6 +76,8 @@ public:
 	CNPC_AndroidBall(void) { m_bUniformSight = false; }
 	~CNPC_AndroidBall(void);
 
+	void	SetVars(float health, Android_Weapons_e leftWeapon = ANDROID_NONE, Android_Weapons_e rightWeapon = ANDROID_NONE);
+
 	void	Spawn(void);
 	bool	CreateVPhysics();
 	void	RunAI();
@@ -150,6 +152,10 @@ public:
 private:
 
 	bool unball = false;
+
+	float android_health = 0.0f;
+	Android_Weapons_e forced_left;
+	Android_Weapons_e forced_right;
 
 	enum
 	{

@@ -52,6 +52,16 @@ Class_T	CNPC_Android::Classify(void)
 	return CLASS_APERTURE;
 }
 
+void CNPC_Android::SetVars(float health, Android_Weapons_e leftWeapon, Android_Weapons_e rightWeapon)
+{
+	SetHealth(health);
+	forced_left = leftWeapon;
+	forced_right = rightWeapon;
+
+	//Update HP state
+	CTakeDamageInfo newinfo;
+	TakeDamage(newinfo);
+}
 
 
 //-----------------------------------------------------------------------------
@@ -328,17 +338,8 @@ void CNPC_Android::Gib(void)
 		UTIL_Remove(m_pFire);
 	}
 
-	if (m_pBeamL)
-	{
-		UTIL_Remove(m_pBeamL);
-		UTIL_Remove(m_pLightGlowL);
-	}
-
-	if (m_pBeamR)
-	{
-		UTIL_Remove(m_pBeamR);
-		UTIL_Remove(m_pLightGlowR);
-	}
+	KillLaser(m_pBeamL, m_pLightGlowL);
+	KillLaser(m_pBeamR, m_pLightGlowR);
 
 	Vector vecUp;
 	GetVectors(NULL, NULL, &vecUp);
@@ -619,11 +620,19 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 				CBaseEntity *newEnt = CreateEntityByName("npc_androidball");
 				if (newEnt)
 				{
+					KillLaser(m_pBeamL, m_pLightGlowL);
+					KillLaser(m_pBeamR, m_pLightGlowR);
+
 					m_ballMode = true;
-					CAI_BaseNPC* newNPC = dynamic_cast<CAI_BaseNPC*>(newEnt);
+					CNPC_AndroidBall* newNPC = dynamic_cast<CNPC_AndroidBall*>(newEnt);
 					newNPC->SetAbsOrigin(Vector(GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z+10.0f));
 					newNPC->SetAbsAngles(GetAbsAngles());
+					newNPC->SetSquad(GetSquad());
+
 					DispatchSpawn(newNPC);
+
+					newNPC->SetVars(GetHealth(), forced_left, forced_right);
+
 					newNPC->Activate();
 					newNPC->SetEnemy(GetEnemy());
 					newNPC->SetState(GetState());
