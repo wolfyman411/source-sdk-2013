@@ -71,6 +71,12 @@ DEFINE_FIELD(m_pLightGlowEnd, FIELD_CLASSPTR),
 
 DEFINE_FIELD(m_zapped, FIELD_BOOLEAN),
 
+
+
+//-----------------------------------------------------------------------------
+DEFINE_KEYFIELD(forced_left, FIELD_INTEGER,"forced_left"),
+DEFINE_KEYFIELD(forced_right, FIELD_INTEGER, "forced_right"),
+
 END_DATADESC()
 
 //-----------------------------------------------------------------------------
@@ -1091,6 +1097,7 @@ void CNPC_Android::UpdateHead(void)
 		SetPoseParameter(m_poseHead_Pitch, UTIL_Approach(0, pitch, 10));
 	}
 }
+
 
 AI_BEGIN_CUSTOM_NPC(npc_android, CNPC_Android)
 
