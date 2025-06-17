@@ -1,0 +1,13 @@
+"VertexLitGeneric"
+{
+	"$surfaceprop" "metal"
+	"$selfillum" 1
+	"$model" 1
+	"$phong" 1
+	"$phongboost" "5"
+	"$halflambert" "1"
+	"$phongalbedotint" "1"										
+	"$phongfresnelranges"	"[.1 .5 1.0]"
+	"$baseTexture" 	"models/aperture/android/android_sheet"
+	"$bumpmap"	"models/aperture/android/android_bump"
+}
