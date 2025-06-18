@@ -130,6 +130,7 @@ private:
 	float m_zaptime;
 
 	bool m_ballMode = false;
+	float m_tooClose = 0.0f;
 
 	CAI_FollowBehavior	m_FollowBehavior;
 	void	UpdateHead(void);

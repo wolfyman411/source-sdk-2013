@@ -30,6 +30,7 @@ int AE_ANDROID_SWAP_LEFT;
 #define SHOT_AMOUNT 3
 #define ATTACK_DELAY 0.3f
 #define ZAP_STUN 5.0f
+#define TOO_CLOSE_BALL 3.0f
 
 #define WEAPON_ATTACHMENT_LEFT	1
 #define WEAPON_ATTACHMENT_RIGHT	2
@@ -71,7 +72,7 @@ DEFINE_FIELD(m_pLightGlowEnd, FIELD_CLASSPTR),
 
 DEFINE_FIELD(m_zapped, FIELD_BOOLEAN),
 
-
+DEFINE_FIELD(m_tooClose, FIELD_FLOAT),
 
 //-----------------------------------------------------------------------------
 DEFINE_KEYFIELD(forced_left, FIELD_INTEGER,"forced_left"),
@@ -410,6 +411,14 @@ int CNPC_Android::SelectSchedule(void)
 
 	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
 	{
+		if (gpGlobals->curtime > m_tooClose)
+		{
+			return SCHED_ANDROID_BALL_MODE;
+		}
+		else if (gpGlobals->curtime < m_tooClose)
+		{
+			m_tooClose = gpGlobals->curtime + TOO_CLOSE_BALL;
+		}
 		return SCHED_MOVE_AWAY_FROM_ENEMY;
 	}
 
@@ -672,6 +681,7 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 					newNPC->Activate();
 					newNPC->SetEnemy(GetEnemy());
 					newNPC->SetState(GetState());
+					newNPC->SetSchedule(90); //FLEE SCHEDULE
 					UTIL_Remove(this);
 					TaskComplete();
 					return;
@@ -766,20 +776,20 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 				//Check if both
 				if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER && left_wpn == right_wpn)
 				{
-					laserAccuracy += 0.02f;
+					laserAccuracy += 0.04f;
 					LaserEndPoint();
 					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
 					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
 				}
 				else if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER)
 				{
-					laserAccuracy += 0.02f;
+					laserAccuracy += 0.04f;
 					LaserEndPoint();
 					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
 				}
 				else if (HasCondition(COND_ANDROID_IS_RIGHT) && gpGlobals->curtime < m_attackDurR && right_wpn == ANDROID_LASER)
 				{
-					laserAccuracy += 0.02f;
+					laserAccuracy += 0.04f;
 					LaserEndPoint();
 					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
 				}
@@ -1045,9 +1055,11 @@ void CNPC_Android::GatherConditions(void)
 	}
 }
 
+
 void CNPC_Android::PrescheduleThink(void)
 {
 	UpdateHead();
+
 	BaseClass::PrescheduleThink();
 }
 
@@ -1149,6 +1161,7 @@ DEFINE_SCHEDULE
 	SCHED_ANDROID_LASER_ATTACK,
 
 	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE		SCHEDULE:SCHED_ANDROID_RUN_RANDOM"
 	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
 	"		TASK_ANDROID_LASER_ATTACK		0"
@@ -1166,7 +1179,7 @@ DEFINE_SCHEDULE
 	SCHED_ANDROID_GUN_ATTACK,
 
 	"	Tasks"
-	"		TASK_STOP_MOVING		0"
+	"		TASK_SET_FAIL_SCHEDULE		SCHEDULE:SCHED_ANDROID_RUN_RANDOM"
 	"		TASK_FACE_ENEMY			0"
 	"		TASK_ANDROID_GUN_ATTACK		0"
 	""

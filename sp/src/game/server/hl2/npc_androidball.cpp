@@ -364,7 +364,7 @@ int CNPC_AndroidBall::SelectSchedule(void)
 	if ((m_bHeld) || !IsActive())
 		return SCHED_ALERT_STAND;
 
-	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
+	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK) && !IsCurSchedule(SCHED_BALL_FLEE))
 		return SCHED_BALL_UNBALL;
 
 	// If we can see something we're afraid of, run from it
@@ -1246,8 +1246,8 @@ DEFINE_SCHEDULE
 	"	Tasks"
 	"		TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_IDLE_STAND"
 	"		TASK_BALL_GET_PATH_TO_FLEE	300"
-	"		TASK_RUN_PATH						0"
-	"		TASK_STOP_MOVING					0"
+	"		TASK_RUN_PATH					0"
+	"		TASK_WAIT_FOR_MOVEMENT			0"
 	"	"
 	"	Interrupts"
 	"		COND_NEW_ENEMY"
