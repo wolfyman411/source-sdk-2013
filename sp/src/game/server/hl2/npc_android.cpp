@@ -23,7 +23,7 @@ int AE_ANDROID_SWAP_RIGHT;
 int AE_ANDROID_SWAP_LEFT;
 
 #define ANDROID_MODEL "models/aperture/android.mdl"
-#define CLOSE_RANGE 200.0f
+#define CLOSE_RANGE 100.0f
 #define FAR_RANGE 700.0f
 #define LASER_DURATION 3.0f
 #define SHOT_DELAY 0.1f
@@ -31,6 +31,8 @@ int AE_ANDROID_SWAP_LEFT;
 #define ATTACK_DELAY 0.3f
 #define ZAP_STUN 5.0f
 #define TOO_CLOSE_BALL 3.0f
+#define LASER_SPEED 3000.0f
+#define BALL_COOLDOWN 2.0f
 
 #define WEAPON_ATTACHMENT_LEFT	1
 #define WEAPON_ATTACHMENT_RIGHT	2
@@ -73,6 +75,7 @@ DEFINE_FIELD(m_pLightGlowEnd, FIELD_CLASSPTR),
 DEFINE_FIELD(m_zapped, FIELD_BOOLEAN),
 
 DEFINE_FIELD(m_tooClose, FIELD_FLOAT),
+DEFINE_FIELD(m_lastBall, FIELD_FLOAT),
 
 //-----------------------------------------------------------------------------
 DEFINE_KEYFIELD(forced_left, FIELD_INTEGER,"forced_left"),
@@ -176,6 +179,7 @@ void CNPC_Android::Activate()
 	if (m_startBalled)
 	{
 		DevMsg("unball\n");
+		m_lastBall = gpGlobals->curtime + BALL_COOLDOWN;
 		m_startBalled = false;
 		SetActivity(ACT_UNBALL);
 		SetSchedule(SCHED_ANDROID_UNBALL);
@@ -404,14 +408,14 @@ int CNPC_Android::SelectSchedule(void)
 		return SCHED_ANDROID_ZAP;
 	}
 
-	if (HasCondition(COND_TOO_FAR_TO_ATTACK))
+	if (HasCondition(COND_TOO_FAR_TO_ATTACK) && m_lastBall < gpGlobals->curtime)
 	{
 		return SCHED_ANDROID_BALL_MODE;
 	}
 
 	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
 	{
-		if (gpGlobals->curtime > m_tooClose)
+		if (gpGlobals->curtime > m_tooClose && m_lastBall < gpGlobals->curtime)
 		{
 			return SCHED_ANDROID_BALL_MODE;
 		}
@@ -674,6 +678,11 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 					newNPC->SetAbsAngles(GetAbsAngles());
 					newNPC->SetSquad(GetSquad());
 
+					if (gpGlobals->curtime > m_tooClose)
+					{
+						newNPC->m_retreating = true;
+					}
+
 					DispatchSpawn(newNPC);
 
 					newNPC->SetVars(GetHealth(), forced_left, forced_right);
@@ -681,7 +690,7 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 					newNPC->Activate();
 					newNPC->SetEnemy(GetEnemy());
 					newNPC->SetState(GetState());
-					newNPC->SetSchedule(90); //FLEE SCHEDULE
+
 					UTIL_Remove(this);
 					TaskComplete();
 					return;
@@ -856,8 +865,21 @@ void CNPC_Android::LaserEndPoint()
 	vecToEnemy.NormalizeInPlace();
 	m_laserEndpoint = GetAbsOrigin() + (vecToEnemy * FAR_RANGE * 2.0f);
 
-	//Combine the start and end
-	m_laserTarget = Lerp(laserAccuracy, m_laserStartpoint, m_laserEndpoint);
+	Vector dirToEndpoint = m_laserEndpoint - m_laserStartpoint;
+	float distanceToEndpoint = dirToEndpoint.NormalizeInPlace();
+
+	float moveStep = LASER_SPEED * gpGlobals->frametime;
+	if (moveStep >= distanceToEndpoint)
+	{
+		m_laserStartpoint = m_laserEndpoint;
+	}
+	else
+	{
+		m_laserStartpoint += dirToEndpoint * moveStep;
+	}
+
+	// Update laser target (could just use m_laserStartpoint directly)
+	m_laserTarget = m_laserStartpoint;
 }
 
 void CNPC_Android::ShootGun(int attachment)
