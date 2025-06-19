@@ -62,7 +62,6 @@ DEFINE_FIELD(m_nextAttackR, FIELD_FLOAT),
 DEFINE_FIELD(m_laserStartpoint, FIELD_VECTOR),
 DEFINE_FIELD(m_laserEndpoint, FIELD_VECTOR),
 DEFINE_FIELD(m_laserTarget, FIELD_VECTOR),
-DEFINE_FIELD(laserAccuracy, FIELD_FLOAT),
 
 DEFINE_FIELD(m_pSmokeTrail, FIELD_CLASSPTR),
 DEFINE_FIELD(m_pFire, FIELD_CLASSPTR),
@@ -415,14 +414,14 @@ int CNPC_Android::SelectSchedule(void)
 
 	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
 	{
-		if (gpGlobals->curtime > m_tooClose && m_lastBall < gpGlobals->curtime)
+		/*if (gpGlobals->curtime > m_tooClose && m_lastBall < gpGlobals->curtime)
 		{
 			return SCHED_ANDROID_BALL_MODE;
 		}
 		else if (gpGlobals->curtime < m_tooClose)
 		{
 			m_tooClose = gpGlobals->curtime + TOO_CLOSE_BALL;
-		}
+		}*/
 		return SCHED_MOVE_AWAY_FROM_ENEMY;
 	}
 
@@ -616,7 +615,6 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 				//Check if both
 				if (!m_pBeamL && !m_pBeamR && HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_LASER && left_wpn == right_wpn)
 				{
-					laserAccuracy = 0.0f;
 					m_laserStartpoint = CalcEndPoint();
 
 					CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
@@ -632,7 +630,6 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 				}
 				else if (!m_pBeamL && HasCondition(COND_ANDROID_IS_LEFT) && left_wpn == ANDROID_LASER)
 				{
-					laserAccuracy = 0.0f;
 					m_laserStartpoint = CalcEndPoint();
 
 					CreateLaser(m_pBeamL, m_pLightGlowL, WEAPON_ATTACHMENT_LEFT);
@@ -643,7 +640,6 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 				}
 				else if (!m_pBeamR && HasCondition(COND_ANDROID_IS_RIGHT) && right_wpn == ANDROID_LASER)
 				{
-					laserAccuracy = 0.0f;
 					m_laserStartpoint = CalcEndPoint();
 
 					CreateLaser(m_pBeamR, m_pLightGlowR, WEAPON_ATTACHMENT_RIGHT);
@@ -773,32 +769,29 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 
 				float flDot = DotProduct(vForward, vEnemyForward);
 
-				if (flDot > 0.0)
+				if (flDot > 0.5)
 				{
 					KillLaser(m_pBeamL, m_pLightGlowL);
 					KillLaser(m_pBeamR, m_pLightGlowR);
 
-					TaskFail("Laser off.");
+					TaskComplete();
 					return;
 				}
 
 				//Check if both
 				if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER && left_wpn == right_wpn)
 				{
-					laserAccuracy += 0.04f;
 					LaserEndPoint();
 					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
 					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
 				}
 				else if (HasCondition(COND_ANDROID_IS_LEFT) && gpGlobals->curtime < m_attackDurL && left_wpn == ANDROID_LASER)
 				{
-					laserAccuracy += 0.04f;
 					LaserEndPoint();
 					UpdateLaser(m_pBeamL, WEAPON_ATTACHMENT_LEFT);
 				}
 				else if (HasCondition(COND_ANDROID_IS_RIGHT) && gpGlobals->curtime < m_attackDurR && right_wpn == ANDROID_LASER)
 				{
-					laserAccuracy += 0.04f;
 					LaserEndPoint();
 					UpdateLaser(m_pBeamR, WEAPON_ATTACHMENT_RIGHT);
 				}

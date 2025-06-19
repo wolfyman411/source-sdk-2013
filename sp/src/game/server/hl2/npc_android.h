@@ -102,7 +102,6 @@ public:
 	Vector	m_laserEndpoint;
 	Vector m_laserStartpoint;
 	Vector m_laserTarget;
-	float laserAccuracy;
 
 	//Effects
 	SmokeTrail* m_pSmokeTrail;
