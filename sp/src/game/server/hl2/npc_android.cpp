@@ -11,6 +11,8 @@
 #include <particle_parse.h>
 #include <ammodef.h>
 #include "npc_androidball.h"
+#include "AI_Squad.h"
+#include "AI_SquadSlot.h"
 
 //Activities
 Activity ACT_SWAP_LEFT_WPN;
@@ -24,7 +26,7 @@ int AE_ANDROID_SWAP_LEFT;
 
 #define ANDROID_MODEL "models/aperture/android.mdl"
 #define CLOSE_RANGE 100.0f
-#define FAR_RANGE 700.0f
+#define FAR_RANGE 1500.0f
 #define LASER_DURATION 3.0f
 #define SHOT_DELAY 0.1f
 #define SHOT_AMOUNT 3
@@ -156,12 +158,11 @@ void CNPC_Android::Spawn()
 	m_flFieldOfView = 0.8;
 	m_NPCState = NPC_STATE_NONE;
 
+	m_MoveAndShootOverlay.SetInitialDelay(0.75);
+
 	CapabilitiesAdd(bits_CAP_MOVE_GROUND | bits_CAP_TURN_HEAD | bits_CAP_INNATE_RANGE_ATTACK1);
 
-	if (m_SquadName != NULL_STRING)
-	{
-		CapabilitiesAdd(bits_CAP_SQUAD);
-	}
+	CapabilitiesAdd(bits_CAP_SQUAD);
 
 	NPCInit();
 
@@ -244,6 +245,8 @@ float CNPC_Android::MaxYawSpeed(void)
 //=========================================================
 bool CNPC_Android::CreateBehaviors()
 {
+	AddBehavior(&m_AssaultBehavior);
+	AddBehavior(&m_StandoffBehavior);
 	AddBehavior(&m_FollowBehavior);
 
 	return BaseClass::CreateBehaviors();
@@ -431,6 +434,7 @@ int CNPC_Android::SelectSchedule(void)
 		{
 			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
+				DevMsg("Swap Left: %d, Swap Right: %d \n", m_nextSwapL, m_nextSwapR);
 				// Swap Weapons every so often
 				if (forced_left == ANDROID_NONE)
 				{
@@ -445,7 +449,7 @@ int CNPC_Android::SelectSchedule(void)
 				}
 				else if (left_wpn != forced_left)
 				{
-					m_nextSwapL = INFINITY;
+					m_nextSwapL = INFINITY; //BIG NUMBER
 					left_wpn = forced_left;
 					AddGesture(ACT_SWAP_LEFT_WPN);
 					m_nextAttackL = gpGlobals->curtime + 1.0f;
@@ -464,16 +468,18 @@ int CNPC_Android::SelectSchedule(void)
 				}
 				else if (right_wpn != forced_right)
 				{
-					m_nextSwapR = INFINITY;
+					m_nextSwapR = INFINITY; //BIG NUMBER
 					right_wpn = forced_right;
 					AddGesture(ACT_SWAP_RIGHT_WPN);
 					m_nextAttackR = gpGlobals->curtime + 1.0f;
 				}
 
-				if (m_nextAttackL < gpGlobals->curtime)
+				if (OccupyStrategySlot(0) || OccupyStrategySlot(1))
 				{
-					switch (left_wpn)
+					if (m_nextAttackL < gpGlobals->curtime)
 					{
+						switch (left_wpn)
+						{
 						case ANDROID_LASER:
 						{
 							return SCHED_ANDROID_LASER_ATTACK;
@@ -483,13 +489,13 @@ int CNPC_Android::SelectSchedule(void)
 						{
 							return SCHED_ANDROID_GUN_ATTACK;
 							break;
+						}
 						}
 					}
-				}
-				else if (m_nextAttackR < gpGlobals->curtime)
-				{
-					switch (right_wpn)
+					else if (m_nextAttackR < gpGlobals->curtime)
 					{
+						switch (right_wpn)
+						{
 						case ANDROID_LASER:
 						{
 							return SCHED_ANDROID_LASER_ATTACK;
@@ -499,16 +505,22 @@ int CNPC_Android::SelectSchedule(void)
 						{
 							return SCHED_ANDROID_GUN_ATTACK;
 							break;
+						}
 						}
 					}
 				}
 			}
 			else
 			{
-				return SCHED_CHASE_ENEMY;
+				return SCHED_ANDROID_FLANK_RANDOM;
 			}
 			break;
 		}
+	}
+	if (m_AssaultBehavior.CanSelectSchedule())
+	{
+		DeferSchedulingToBehavior(&m_AssaultBehavior);
+		return BaseClass::SelectSchedule();
 	}
 
 	return BaseClass::SelectSchedule();
@@ -545,16 +557,28 @@ int CNPC_Android::TranslateSchedule(int scheduleType)
 int CNPC_Android::RangeAttack1Conditions(float flDot, float flDist)
 {
 	if (GetNextAttack() > gpGlobals->curtime)
+	{
+		DevMsg("Can't attack\n");
 		return COND_NOT_FACING_ATTACK;
+	}
 
-	if (flDot < DOT_10DEGREE)
+	if (flDot < DOT_30DEGREE)
+	{
+		DevMsg("Not Facing\n");
 		return COND_NOT_FACING_ATTACK;
+	}
 
 	if (flDist > FAR_RANGE)
+	{
+		DevMsg("Too far\n");
 		return COND_TOO_FAR_TO_ATTACK;
+	}
 
 	if (flDist < CLOSE_RANGE)
+	{
+		DevMsg("Too close\n");
 		return COND_TOO_CLOSE_TO_ATTACK;
+	}
 
 	return COND_CAN_RANGE_ATTACK1;
 }
@@ -711,6 +735,18 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 	{
 		case TASK_ANDROID_GUN_ATTACK:
 		{
+			AutoMovement();
+
+			Vector vecEnemyLKP = GetEnemyLKP();
+			if (!FInAimCone(vecEnemyLKP))
+			{
+				GetMotor()->SetIdealYawToTargetAndUpdate(vecEnemyLKP, AI_KEEP_YAW_SPEED);
+			}
+			else
+			{
+				GetMotor()->SetIdealYawAndUpdate(GetMotor()->GetIdealYaw(), AI_KEEP_YAW_SPEED);
+			}
+
 			CBaseEntity* pTarget = GetEnemy();
 			if (pTarget)
 			{
@@ -903,10 +939,10 @@ void CNPC_Android::ShootGun(int attachment)
 		FireBulletsInfo_t info;
 		info.m_vecSrc = vecMuzzleOrigin;
 		info.m_vecDirShooting = vecShootDir;
-		info.m_vecSpread = VECTOR_CONE_20DEGREES;
+		info.m_vecSpread = VECTOR_CONE_5DEGREES;
 		info.m_iShots = 1;
 		info.m_flDistance = 8192;
-		info.m_flDamage = 2.2f;
+		info.m_flDamage = 4.4f;
 		info.m_pAttacker = this;
 		info.m_iAmmoType = GetAmmoDef()->Index("SMG1");
 		info.m_pAdditionalIgnoreEnt = this;
@@ -1160,13 +1196,11 @@ DEFINE_SCHEDULE
 	"		TASK_WAIT_FOR_MOVEMENT			0"
 	"	"
 	"	Interrupts"
+	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_LIGHT_DAMAGE"
 	"		COND_HEAVY_DAMAGE"
 	"		COND_NEW_ENEMY"
 	"		COND_ENEMY_DEAD"
-	"		COND_CAN_RANGE_ATTACK1"
-	"		COND_CAN_MELEE_ATTACK1"
-	"		COND_CAN_MELEE_ATTACK2"
 	"		COND_TASK_FAILED"
 	"		COND_ANDROID_ZAPPED"
 )
@@ -1195,6 +1229,7 @@ DEFINE_SCHEDULE
 
 	"	Tasks"
 	"		TASK_SET_FAIL_SCHEDULE		SCHEDULE:SCHED_ANDROID_RUN_RANDOM"
+	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
 	"		TASK_ANDROID_GUN_ATTACK		0"
 	""
@@ -1219,11 +1254,10 @@ DEFINE_SCHEDULE
 	"		TASK_WAIT_FOR_MOVEMENT					0"
 	""
 	"	Interrupts"
+	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_TASK_FAILED"
 	"		COND_HEAVY_DAMAGE"
-	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_COND_SEE_ENEMY"
-	"		COND_CAN_MELEE_ATTACK1"
 	"		COND_ANDROID_ZAPPED"
 )
 
@@ -1240,9 +1274,9 @@ DEFINE_SCHEDULE
 	"		TASK_WAIT_FOR_MOVEMENT			0"
 	""
 	"	Interrupts"
+	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_TASK_FAILED"
 	"		COND_COND_SEE_ENEMY"
-	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_ANDROID_ZAPPED"
 )
 DEFINE_SCHEDULE

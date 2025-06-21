@@ -117,8 +117,6 @@ DEFINE_FIELD(forced_left, FIELD_INTEGER),
 DEFINE_FIELD(forced_right, FIELD_INTEGER),
 DEFINE_FIELD(android_health, FIELD_FLOAT),
 
-DEFINE_FIELD(m_retreating, FIELD_BOOLEAN),
-
 DEFINE_FIELD(m_bEmbedOnGroundImpact, FIELD_BOOLEAN),
 
 DEFINE_PHYSPTR(m_pConstraint),
@@ -366,12 +364,7 @@ int CNPC_AndroidBall::SelectSchedule(void)
 	if ((m_bHeld) || !IsActive())
 		return SCHED_ALERT_STAND;
 
-	if (m_retreating)
-	{
-		return SCHED_BALL_RETREAT;
-	}
-
-	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK) && !m_retreating)
+	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK) && !IsCurSchedule(SCHED_BALL_FLEE))
 		return SCHED_BALL_UNBALL;
 
 	// If we can see something we're afraid of, run from it
@@ -381,11 +374,11 @@ int CNPC_AndroidBall::SelectSchedule(void)
 	switch (m_NPCState)
 	{
 	case NPC_STATE_COMBAT:
+
 		if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			return SCHED_BALL_RANGE_ATTACK1;
 
-		if (!m_retreating)
-			return SCHED_BALL_CHASE_ENEMY;
+		return SCHED_BALL_CHASE_ENEMY;
 		break;
 
 	default:
@@ -404,7 +397,7 @@ int CNPC_AndroidBall::TranslateSchedule(int scheduleType)
 {
 	switch (scheduleType)
 	{
-	break;
+		break;
 
 	case SCHED_ALERT_STAND:
 	{
@@ -500,6 +493,7 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 	}
 	break;
 
+	case TASK_BALL_CHARGE_ENEMY:
 	case TASK_BALL_RETURN_TO_PLAYER:
 	{
 		IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
@@ -551,12 +545,6 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 	}
 	break;
 
-	case TASK_BALL_CHARGE_ENEMY:
-	{
-		ChainStartTask(TASK_MOVE_AWAY_PATH, pTask->flTaskData);
-	}
-	break;
-
 	case TASK_BALL_NUDGE_TOWARDS_NODES:
 	{
 		IPhysicsObject* pPhysicsObject = VPhysicsGetObject();
@@ -593,12 +581,6 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 	break;
 	case TASK_BALL_UNBALL:
 	{
-		if (m_bHeld)
-		{
-			TaskFail("Player interrupted by grabbing");
-			break;
-		}
-
 		CBaseEntity* pTarget = GetEnemy();
 		if (pTarget && !unball)
 		{
@@ -621,7 +603,6 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 					newNPC->SetAbsAngles(QAngle(0, angLookAtEnemy.y, 0));
 					newNPC->m_startBalled = true;
 					newNPC->SetSquad(GetSquad());
-					newNPC->Precache();
 
 					DispatchSpawn(newNPC);
 					newNPC->Activate();
@@ -632,7 +613,6 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 
 					unball = true;
 					TaskComplete();
-					ClearSchedule("Ball");
 
 					UTIL_Remove(this);
 					return;
@@ -664,12 +644,6 @@ void CNPC_AndroidBall::RunTask(const Task_t* pTask)
 	{
 
 	case TASK_BALL_GET_PATH_TO_FLEE:
-	{
-		ChainRunTask(TASK_MOVE_AWAY_PATH, pTask->flTaskData);
-	}
-	break;
-
-	case TASK_BALL_GET_PATH_TO_RETREAT:
 	{
 		ChainRunTask(TASK_MOVE_AWAY_PATH, pTask->flTaskData);
 	}
@@ -1166,7 +1140,6 @@ void CNPC_AndroidBall::PrescheduleThink()
 			return;
 		}
 	}
-
 	BaseClass::PrescheduleThink();
 }
 
@@ -1225,7 +1198,6 @@ AI_BEGIN_CUSTOM_NPC(npc_androidball, CNPC_AndroidBall)
 //Tasks
 DECLARE_TASK(TASK_BALL_CHARGE_ENEMY)
 DECLARE_TASK(TASK_BALL_GET_PATH_TO_FLEE)
-DECLARE_TASK(TASK_BALL_GET_PATH_TO_RETREAT)
 DECLARE_TASK(TASK_BALL_NUDGE_TOWARDS_NODES)
 DECLARE_TASK(TASK_BALL_RETURN_TO_PLAYER)
 DECLARE_TASK(TASK_BALL_UNBALL)
@@ -1280,27 +1252,6 @@ DEFINE_SCHEDULE
 	"	Interrupts"
 	"		COND_NEW_ENEMY"
 	"		COND_TASK_FAILED"
-)
-
-DEFINE_SCHEDULE
-(
-	SCHED_BALL_RETREAT,
-
-	"	Tasks"
-	"		TASK_SET_FAIL_SCHEDULE				SCHEDULE:TASK_BALL_UNBALL"
-	"		TASK_BALL_GET_PATH_TO_FLEE	10"
-	"		TASK_RUN_PATH					0"
-	"		TASK_WAIT_FOR_MOVEMENT			0"
-	"		TASK_BALL_UNBALL	0"
-
-	"	"
-	"	Interrupts"
-	"		COND_ENEMY_DEAD"
-	"		COND_ENEMY_UNREACHABLE"
-	"		COND_ENEMY_TOO_FAR"
-	"		COND_CAN_RANGE_ATTACK1"
-	"		COND_TASK_FAILED"
-	"		COND_SEE_FEAR"
 )
 
 DEFINE_SCHEDULE

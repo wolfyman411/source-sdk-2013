@@ -131,8 +131,6 @@ private:
 	bool m_ballMode = false;
 	float m_tooClose = 0.0f;
 	float m_lastBall = 0.0f;
-
-	CAI_FollowBehavior	m_FollowBehavior;
 	void	UpdateHead(void);
 	
 	DEFINE_CUSTOM_AI;
@@ -170,6 +168,10 @@ private:
 protected:
 	int m_poseHead_Yaw, m_poseHead_Pitch;
 	virtual void PopulatePoseParameters(void);
+
+	CAI_AssaultBehavior			m_AssaultBehavior;
+	CAI_StandoffBehavior		m_StandoffBehavior;
+	CAI_FollowBehavior			m_FollowBehavior;
 };
 
 #endif // HL2_EPISODIC
