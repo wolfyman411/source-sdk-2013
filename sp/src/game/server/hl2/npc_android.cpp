@@ -32,7 +32,7 @@ int AE_ANDROID_SWAP_LEFT;
 #define SHOT_AMOUNT 3
 #define ATTACK_DELAY 0.3f
 #define ZAP_STUN 5.0f
-#define TOO_CLOSE_BALL 3.0f
+#define TOO_CLOSE_BALL 0.5f
 #define LASER_SPEED 3000.0f
 #define BALL_COOLDOWN 2.0f
 
@@ -160,6 +160,8 @@ void CNPC_Android::Spawn()
 
 	m_MoveAndShootOverlay.SetInitialDelay(0.75);
 	m_nextForwardMoveTime = 0;
+
+	m_tooClose = 0;
 
 	CapabilitiesAdd(bits_CAP_MOVE_GROUND | bits_CAP_TURN_HEAD | bits_CAP_INNATE_RANGE_ATTACK1);
 
@@ -416,17 +418,23 @@ int CNPC_Android::SelectSchedule(void)
 		return SCHED_ANDROID_BALL_MODE;
 	}
 
+	if (HasCondition(COND_ANDROID_SHOULD_BALL))
+	{
+		return SCHED_ANDROID_BALL_MODE;
+	}
+
+	if (HasCondition(COND_TOO_FAR_TO_ATTACK) && m_lastBall < gpGlobals->curtime)
+	{
+		return SCHED_ANDROID_BALL_MODE;
+	}
+
 	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK))
 	{
-		/*if (gpGlobals->curtime > m_tooClose && m_lastBall < gpGlobals->curtime)
-		{
-			return SCHED_ANDROID_BALL_MODE;
-		}
-		else if (gpGlobals->curtime < m_tooClose)
-		{
-			m_tooClose = gpGlobals->curtime + TOO_CLOSE_BALL;
-		}*/
 		return SCHED_MOVE_AWAY_FROM_ENEMY;
+	}
+	else
+	{
+		m_tooClose = 0.0f;
 	}
 
 	switch (m_NPCState)
@@ -573,7 +581,14 @@ int CNPC_Android::RangeAttack1Conditions(float flDot, float flDist)
 
 	if (flDist < CLOSE_RANGE)
 	{
+		m_tooClose += gpGlobals->frametime;
+		DevMsg("%.2f\n", m_tooClose);
+
 		return COND_TOO_CLOSE_TO_ATTACK;
+	}
+	else
+	{
+		m_tooClose = 0.0f;
 	}
 
 	return COND_CAN_RANGE_ATTACK1;
@@ -694,7 +709,8 @@ void CNPC_Android::StartTask(const Task_t* pTask)
 					newNPC->SetAbsAngles(GetAbsAngles());
 					newNPC->SetSquad(GetSquad());
 
-					if (gpGlobals->curtime > m_tooClose)
+					//Check if retreating
+					if (m_tooClose > 0.0f)
 					{
 						newNPC->m_retreating = true;
 					}
@@ -1098,6 +1114,11 @@ void CNPC_Android::GatherConditions(void)
 			SetCondition(COND_ANDROID_IS_RIGHT);
 		}
 	}
+
+	if (m_tooClose > TOO_CLOSE_BALL && m_lastBall < gpGlobals->curtime)
+	{
+		SetCondition(COND_ANDROID_SHOULD_BALL);
+	}
 }
 
 
@@ -1165,6 +1186,7 @@ DECLARE_TASK(TASK_ANDROID_BALL_MODE);
 DECLARE_CONDITION(COND_ANDROID_IS_LEFT);
 DECLARE_CONDITION(COND_ANDROID_IS_RIGHT);
 DECLARE_CONDITION(COND_ANDROID_ZAPPED);
+DECLARE_CONDITION(COND_ANDROID_SHOULD_BALL);
 
 DECLARE_ACTIVITY(ACT_SWAP_LEFT_WPN);
 DECLARE_ACTIVITY(ACT_SWAP_RIGHT_WPN);
@@ -1185,7 +1207,7 @@ DEFINE_SCHEDULE
 
 	"	Tasks"
 	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_ESTABLISH_LINE_OF_FIRE"
-	"		TASK_GET_PATH_TO_ENEMY			0"
+	"		TASK_GET_PATH_TO_ENEMY_LOS			0"
 	"		TASK_RUN_PATH					0"
 	"		TASK_WAIT_FOR_MOVEMENT			0"
 	"	"
@@ -1197,6 +1219,7 @@ DEFINE_SCHEDULE
 	"		COND_ENEMY_DEAD"
 	"		COND_TASK_FAILED"
 	"		COND_ANDROID_ZAPPED"
+	"		COND_ANDROID_SHOULD_BALL"
 )
 
 DEFINE_SCHEDULE
@@ -1215,6 +1238,7 @@ DEFINE_SCHEDULE
 	"		COND_ENEMY_DEAD"
 	"       COND_LOST_ENEMY"
 	"		COND_ANDROID_ZAPPED"
+	"		COND_ANDROID_SHOULD_BALL"
 )
 
 DEFINE_SCHEDULE
@@ -1232,6 +1256,7 @@ DEFINE_SCHEDULE
 	"		COND_ENEMY_DEAD"
 	"       COND_LOST_ENEMY"
 	"		COND_ANDROID_ZAPPED"
+	"		COND_ANDROID_SHOULD_BALL"
 )
 
 DEFINE_SCHEDULE
@@ -1252,6 +1277,7 @@ DEFINE_SCHEDULE
 	"		COND_HEAVY_DAMAGE"
 	"		COND_COND_SEE_ENEMY"
 	"		COND_ANDROID_ZAPPED"
+	"		COND_ANDROID_SHOULD_BALL"
 )
 
 DEFINE_SCHEDULE
@@ -1271,6 +1297,7 @@ DEFINE_SCHEDULE
 	"		COND_TASK_FAILED"
 	"		COND_COND_SEE_ENEMY"
 	"		COND_ANDROID_ZAPPED"
+	"		COND_ANDROID_SHOULD_BALL"
 )
 DEFINE_SCHEDULE
 (
@@ -1288,6 +1315,7 @@ DEFINE_SCHEDULE
 	"		COND_TASK_FAILED"
 	"		COND_NEW_ENEMY"
 	"		COND_ANDROID_ZAPPED"
+	"		COND_ANDROID_SHOULD_BALL"
 )
 DEFINE_SCHEDULE
 (

@@ -119,6 +119,8 @@ DEFINE_FIELD(android_health, FIELD_FLOAT),
 
 DEFINE_FIELD(m_bEmbedOnGroundImpact, FIELD_BOOLEAN),
 
+DEFINE_FIELD(m_retreating, FIELD_BOOLEAN),
+
 DEFINE_PHYSPTR(m_pConstraint),
 
 DEFINE_KEYFIELD(m_bUniformSight, FIELD_BOOLEAN, "uniformsightdist"),
@@ -364,6 +366,9 @@ int CNPC_AndroidBall::SelectSchedule(void)
 	if ((m_bHeld) || !IsActive())
 		return SCHED_ALERT_STAND;
 
+	if (HasCondition(COND_BALL_RETREAT))
+		return SCHED_BALL_RETREAT;
+
 	if (HasCondition(COND_TOO_CLOSE_TO_ATTACK) && !IsCurSchedule(SCHED_BALL_FLEE))
 		return SCHED_BALL_UNBALL;
 
@@ -484,7 +489,6 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 
 		if (pPhysicsObject == NULL)
 		{
-			assert(0);
 			TaskFail("Roller lost internal physics object?");
 			return;
 		}
@@ -500,7 +504,6 @@ void CNPC_AndroidBall::StartTask(const Task_t* pTask)
 
 		if (pPhysicsObject == NULL)
 		{
-			assert(0);
 			TaskFail("Roller lost internal physics object?");
 			return;
 		}
@@ -715,7 +718,6 @@ void CNPC_AndroidBall::RunTask(const Task_t* pTask)
 
 			if (pPhysicsObject == NULL)
 			{
-				assert(0);
 				TaskFail("Roller lost internal physics object?");
 				return;
 			}
@@ -1187,6 +1189,16 @@ void CNPC_AndroidBall::TraceAttack(const CTakeDamageInfo& info, const Vector& ve
 	BaseClass::TraceAttack(info, vecDir, ptr, pAccumulator);
 }
 
+void CNPC_AndroidBall::GatherConditions(void)
+{
+	BaseClass::GatherConditions();
+
+	if (m_retreating)
+	{
+		SetCondition(COND_BALL_RETREAT);
+	}
+}
+
 //-----------------------------------------------------------------------------
 //
 // Schedules
@@ -1201,6 +1213,9 @@ DECLARE_TASK(TASK_BALL_GET_PATH_TO_FLEE)
 DECLARE_TASK(TASK_BALL_NUDGE_TOWARDS_NODES)
 DECLARE_TASK(TASK_BALL_RETURN_TO_PLAYER)
 DECLARE_TASK(TASK_BALL_UNBALL)
+
+//Conditions
+DECLARE_CONDITION(COND_BALL_RETREAT)
 
 //Schedules
 
@@ -1237,6 +1252,24 @@ DEFINE_SCHEDULE
 	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_TASK_FAILED"
 	"		COND_SEE_FEAR"
+)
+
+DEFINE_SCHEDULE
+(
+	SCHED_BALL_RETREAT,
+
+	"	Tasks"
+	"		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_BALL_UNBALL"
+	"		TASK_MOVE_AWAY_PATH				300"
+	"		TASK_RUN_PATH					0"
+	"		TASK_WAIT_FOR_MOVEMENT			0"
+	"		TASK_STOP_MOVING				0"
+	"		TASK_FACE_ENEMY					0"
+	"		TASK_BALL_UNBALL				0"
+	"	"
+	"	Interrupts"
+	"		COND_NEW_ENEMY"
+	"		COND_TASK_FAILED"
 )
 
 DEFINE_SCHEDULE

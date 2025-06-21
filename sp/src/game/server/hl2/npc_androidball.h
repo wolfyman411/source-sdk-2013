@@ -128,6 +128,8 @@ public:
 	int		OnTakeDamage(const CTakeDamageInfo& info);
 	void	TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr, CDmgAccumulator* pAccumulator);
 
+	void GatherConditions(void);
+
 	Class_T	Classify()
 	{
 		return CLASS_APERTURE;
@@ -180,6 +182,11 @@ private:
 		TASK_BALL_NUDGE_TOWARDS_NODES,
 		TASK_BALL_RETURN_TO_PLAYER,
 		TASK_BALL_UNBALL,
+	};
+
+	enum
+	{
+		COND_BALL_RETREAT = LAST_SHARED_CONDITION,
 	};
 
 protected:
