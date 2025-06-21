@@ -159,6 +159,7 @@ void CNPC_Android::Spawn()
 	m_NPCState = NPC_STATE_NONE;
 
 	m_MoveAndShootOverlay.SetInitialDelay(0.75);
+	m_nextForwardMoveTime = 0;
 
 	CapabilitiesAdd(bits_CAP_MOVE_GROUND | bits_CAP_TURN_HEAD | bits_CAP_INNATE_RANGE_ATTACK1);
 
@@ -434,7 +435,6 @@ int CNPC_Android::SelectSchedule(void)
 		{
 			if (HasCondition(COND_CAN_RANGE_ATTACK1))
 			{
-				DevMsg("Swap Left: %d, Swap Right: %d \n", m_nextSwapL, m_nextSwapR);
 				// Swap Weapons every so often
 				if (forced_left == ANDROID_NONE)
 				{
@@ -558,25 +558,21 @@ int CNPC_Android::RangeAttack1Conditions(float flDot, float flDist)
 {
 	if (GetNextAttack() > gpGlobals->curtime)
 	{
-		DevMsg("Can't attack\n");
 		return COND_NOT_FACING_ATTACK;
 	}
 
 	if (flDot < DOT_30DEGREE)
 	{
-		DevMsg("Not Facing\n");
 		return COND_NOT_FACING_ATTACK;
 	}
 
 	if (flDist > FAR_RANGE)
 	{
-		DevMsg("Too far\n");
 		return COND_TOO_FAR_TO_ATTACK;
 	}
 
 	if (flDist < CLOSE_RANGE)
 	{
-		DevMsg("Too close\n");
 		return COND_TOO_CLOSE_TO_ATTACK;
 	}
 
@@ -736,15 +732,13 @@ void CNPC_Android::RunTask(const Task_t* pTask)
 		case TASK_ANDROID_GUN_ATTACK:
 		{
 			AutoMovement();
-
-			Vector vecEnemyLKP = GetEnemyLKP();
-			if (!FInAimCone(vecEnemyLKP))
+			// Move forward when shooting
+			if (gpGlobals->curtime >= m_nextForwardMoveTime)
 			{
-				GetMotor()->SetIdealYawToTargetAndUpdate(vecEnemyLKP, AI_KEEP_YAW_SPEED);
-			}
-			else
-			{
-				GetMotor()->SetIdealYawAndUpdate(GetMotor()->GetIdealYaw(), AI_KEEP_YAW_SPEED);
+				Vector vecForward;
+				AngleVectors(GetAbsAngles(), &vecForward);
+				GetNavigator()->SetGoal(GetAbsOrigin() + vecForward * 100.0f);
+				m_nextForwardMoveTime = gpGlobals->curtime + 0.5f;
 			}
 
 			CBaseEntity* pTarget = GetEnemy();
@@ -1229,7 +1223,6 @@ DEFINE_SCHEDULE
 
 	"	Tasks"
 	"		TASK_SET_FAIL_SCHEDULE		SCHEDULE:SCHED_ANDROID_RUN_RANDOM"
-	"		TASK_STOP_MOVING		0"
 	"		TASK_FACE_ENEMY			0"
 	"		TASK_ANDROID_GUN_ATTACK		0"
 	""

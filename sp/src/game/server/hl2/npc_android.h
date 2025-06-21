@@ -128,6 +128,8 @@ private:
 	bool m_zapped;
 	float m_zaptime;
 
+	float m_nextForwardMoveTime;
+
 	bool m_ballMode = false;
 	float m_tooClose = 0.0f;
 	float m_lastBall = 0.0f;
