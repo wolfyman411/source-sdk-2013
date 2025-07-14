@@ -1000,6 +1000,7 @@ void CNPC_Android::LaserPosition(CBeam* beam, int attachment)
 
 		if (!m_bPlayingLaserSound)
 		{
+			DevMsg("laser sound\n");
 			CPASAttenuationFilter filter(beam, "NPC_Stalker.BurnWall");
 			filter.MakeReliable();
 
@@ -1051,6 +1052,7 @@ void CNPC_Android::UpdateLaser(CBeam* beam, int attachment)
 
 void CNPC_Android::KillLaser(CBeam* &beam, CSprite* &sprite)
 {
+	m_bPlayingLaserSound = false;
 
 	if (beam)
 	{
