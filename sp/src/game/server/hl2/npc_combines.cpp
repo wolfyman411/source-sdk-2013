@@ -69,7 +69,8 @@ void CNPC_CombineS::Spawn( void )
 	else if ( IsArmorless() ) {
 		SetHealth( sk_combine_s_health.GetFloat() / 2 );
 		SetMaxHealth( sk_combine_s_health.GetFloat() / 2 );
-		SetKickDamage( sk_combine_s_kick.GetFloat() );
+		// bloodycop6385 :: Let's assume the lads are not entirely as strong as the finished product, cus they're naked.
+		SetKickDamage( sk_combine_s_kick.GetFloat() / 2 );
 
 		GetExpresser()->SetVoicePitch( random->RandomInt( 70, 85 ) );
 	}
