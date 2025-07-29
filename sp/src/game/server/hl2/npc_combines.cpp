@@ -70,6 +70,8 @@ void CNPC_CombineS::Spawn( void )
 		SetHealth( sk_combine_s_health.GetFloat() / 2 );
 		SetMaxHealth( sk_combine_s_health.GetFloat() / 2 );
 		SetKickDamage( sk_combine_s_kick.GetFloat() );
+
+		GetExpresser()->SetVoicePitch( random->RandomInt( 70, 85 ) );
 	}
 	else
 	{
