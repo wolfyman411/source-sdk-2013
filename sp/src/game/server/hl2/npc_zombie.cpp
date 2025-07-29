@@ -28,7 +28,7 @@
 // ACT_FLINCH_PHYSICS
 
 
-ConVar	sk_zombie_health( "sk_zombie_health","60");
+ConVar	sk_zombie_health( "sk_zombie_health","0");
 
 envelopePoint_t envZombieMoanVolumeFast[] =
 {
@@ -250,7 +250,7 @@ void CZombie::Precache( void )
 {
 	BaseClass::Precache();
 
-	PrecacheModel( "models/zombie/classic.mdl" );
+	PrecacheModel( DefaultOrCustomModel( "models/zombie/classic.mdl" ) );
 	PrecacheModel( "models/zombie/classic_torso.mdl" );
 	PrecacheModel( "models/zombie/classic_legs.mdl" );
 
@@ -515,7 +515,7 @@ void CZombie::SetZombieModel( void )
 	}
 	else
 	{
-		SetModel( "models/zombie/classic.mdl" );
+		SetModel( DefaultOrCustomModel( "models/zombie/classic.mdl" ) );
 		SetHullType( HULL_HUMAN );
 	}
 

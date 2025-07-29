@@ -65,7 +65,6 @@ enum propdata_interactions_t
 	PROPINTER_FIRE_IGNITE_HALFHEALTH,	// "ignite"				"halfhealth"
 
 	PROPINTER_PHYSGUN_CREATE_FLARE,		// "onpickup"		"create_flare"
-	PROPINTER_PHYSGUN_CREATE_LIGHT,		// "onpickup"		"create_light"
 
 	PROPINTER_PHYSGUN_ALLOW_OVERHEAD,	// "allow_overhead"	"yes"
 

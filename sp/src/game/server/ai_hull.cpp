@@ -47,13 +47,12 @@ ai_hull_t  Tiny_Centered_Hull	(bits_TINY_CENTERED_HULL,	"TINY_CENTERED_HULL",	Ve
 ai_hull_t  Large_Hull			(bits_LARGE_HULL,			"LARGE_HULL",			Vector(-40,-40,   0),	Vector(40, 40, 100),	Vector(-40,-40, 0),		Vector(40, 40, 100) );
 ai_hull_t  Large_Centered_Hull	(bits_LARGE_CENTERED_HULL,	"LARGE_CENTERED_HULL",	Vector(-38,-38, -38),	Vector(38, 38, 38),		Vector(-30,-30,-30),	Vector(30, 30, 30) );
 ai_hull_t  Medium_Tall_Hull		(bits_MEDIUM_TALL_HULL,		"MEDIUM_TALL_HULL",		Vector(-18,-18,   0),	Vector(18, 18, 100),	Vector(-12,-12, 0),	    Vector(12, 12, 100) );
-ai_hull_t  Small_Hull			(bits_SMALL_HULL,			"SMALL_HULL",			Vector(-16, -16, 0),	Vector(16, 16, 40),		Vector(-8, -8, 0),		Vector(8, 8, 40) );
 #endif//HL1_DLL
 
 //
 // Array of hulls. These hulls must correspond with the enumerations in AI_Hull.h!
 //
-ai_hull_t* hull[NUM_HULLS] =
+ai_hull_t*	hull[NUM_HULLS] =	
 {
 	&Human_Hull,
 	&Small_Centered_Hull,
@@ -65,7 +64,6 @@ ai_hull_t* hull[NUM_HULLS] =
 	&Large_Hull,
 	&Large_Centered_Hull,
 	&Medium_Tall_Hull,
-	&Small_Hull,
 };
 
 
