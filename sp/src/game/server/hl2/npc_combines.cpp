@@ -119,10 +119,10 @@ void CNPC_CombineS::Precache()
 	}
 
 	if ( !Q_stricmp( pModelName, "models/baresoldier/baresoldier.mdl" ) ) {
-		m_fIsArmorless = true;
+		m_fIsArmourless = true;
 	}
 	else {
-		m_fIsArmorless = false;
+		m_fIsArmourless = false;
 	}
 
 	if ( !GetModelName() )
