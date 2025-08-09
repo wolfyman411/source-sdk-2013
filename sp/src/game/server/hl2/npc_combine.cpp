@@ -379,7 +379,7 @@ bool CNPC_Combine::DynamicPropCover()
         float heightDifference = fabs( pEntity->GetAbsOrigin().z - GetAbsOrigin().z );
         if ( heightDifference > 100.0f )
         {
-            Msg( "[DEBUG] Prop too high/low (diff=%.1f): %s\n", heightDifference, modelName );
+            DevMsg( "[DEBUG] Prop too high/low (diff=%.1f): %s\n", heightDifference, modelName );
             continue;
         }
 
@@ -387,7 +387,7 @@ bool CNPC_Combine::DynamicPropCover()
         int currentUsers = CountNPCsUsingProp( pEntity );
         if ( currentUsers >= MAX_NPCS_PER_PROP )
         {
-            Msg( "[DEBUG] Prop full - %d NPCs using: %s\n", currentUsers, modelName );
+            DevMsg( "[DEBUG] Prop full - %d NPCs using: %s\n", currentUsers, modelName );
             continue;
         }
 
@@ -397,7 +397,7 @@ bool CNPC_Combine::DynamicPropCover()
             if ( FStrEq( modelName, lowCover[ i ] ) )
             {
                 availableLowCoverProps.AddToTail( pEntity );
-                Msg( "[DEBUG] Low cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
+                DevMsg( "[DEBUG] Low cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
                     heightDifference, currentUsers, modelName );
                 break;
             }
@@ -409,7 +409,7 @@ bool CNPC_Combine::DynamicPropCover()
             if ( FStrEq( modelName, highCover[ i ] ) )
             {
                 availableHighCoverProps.AddToTail( pEntity );
-                Msg( "[DEBUG] High cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
+                DevMsg( "[DEBUG] High cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
                     heightDifference, currentUsers, modelName );
                 break;
             }
@@ -420,21 +420,21 @@ bool CNPC_Combine::DynamicPropCover()
     if ( availableLowCoverProps.Count() > 0 )
     {
         m_hLowCoverProp = availableLowCoverProps[ RandomInt( 0, availableLowCoverProps.Count() - 1 ) ];
-        Msg( "[DEBUG] Selected LOW COVER with available slot\n" );
+        DevMsg( "[DEBUG] Selected LOW COVER with available slot\n" );
     }
     else
     {
-        Msg( "[DEBUG] No LOW COVER with available slots\n" );
+        DevMsg( "[DEBUG] No LOW COVER with available slots\n" );
     }
 
     if ( availableHighCoverProps.Count() > 0 )
     {
         m_hHighCoverProp = availableHighCoverProps[ RandomInt( 0, availableHighCoverProps.Count() - 1 ) ];
-        Msg( "[DEBUG] Selected HIGH COVER with available slot\n" );
+        DevMsg( "[DEBUG] Selected HIGH COVER with available slot\n" );
     }
     else
     {
-        Msg( "[DEBUG] No HIGH COVER with available slots\n" );
+        DevMsg( "[DEBUG] No HIGH COVER with available slots\n" );
     }
 
     return (m_hLowCoverProp || m_hHighCoverProp);
