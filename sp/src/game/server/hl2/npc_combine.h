@@ -215,6 +215,10 @@ public:
 
 	virtual bool	ShouldPickADeathPose( void );
 
+	// CUSTOM DYNAMIC PROP COVER FUNCTIONS
+	bool			DynamicPropCover();
+	int				CountNPCsUsingProp( CBaseEntity* pProp );
+
 protected:
 	void			SetKickDamage( int nDamage ) { m_nKickDamage = nDamage; }
 #ifndef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
@@ -260,6 +264,8 @@ private:
 		SCHED_COMBINE_MOVE_TO_FORCED_GREN_LOS,
 		SCHED_COMBINE_FACE_IDEAL_YAW,
 		SCHED_COMBINE_MOVE_TO_MELEE,
+		SCHED_COMBINE_MOVE_TO_HIGH_COVER, // [MODIFICATION]
+		SCHED_COMBINE_MOVE_TO_LOW_COVER, // [MODIFICATION]
 		NEXT_SCHEDULE,
 	};
 
@@ -277,6 +283,8 @@ private:
 		TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET,
 		TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS,
 		TASK_COMBINE_SET_STANDING,
+		TASK_COMBINE_MOVE_TO_HIGH_COVER, // [MODIFICATION]
+		TASK_COMBINE_MOVE_TO_LOW_COVER, // [MODIFICATION]
 		NEXT_TASK
 	};
 
@@ -292,6 +300,8 @@ private:
 		COND_COMBINE_DROP_GRENADE,
 		COND_COMBINE_ON_FIRE,
 		COND_COMBINE_ATTACK_SLOT_AVAILABLE,
+		COND_COMBINE_HAS_HIGH_COVER,
+		COND_COMBINE_HAS_LOW_COVER,
 		NEXT_CONDITION
 	};
 
@@ -368,6 +378,10 @@ private:
 #ifdef MAPBASE
 	CAI_PolicingBehavior		m_PolicingBehavior;
 #endif
+
+	EHANDLE m_hLowCoverProp;   // For low cover props
+	EHANDLE m_hHighCoverProp;  // For high cover props
+	float m_flNextPropSearchTime; // Timer to control search for new props
 
 public:
 #ifndef MAPBASE // CAI_GrenadeUser

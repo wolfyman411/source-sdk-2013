@@ -254,6 +254,10 @@ END_DATADESC()
 CNPC_Combine::CNPC_Combine()
 {
 	m_vecTossVelocity = vec3_origin;
+
+	m_hLowCoverProp = NULL;				// [MODIFICATION-Dynamic Cover] Handle to selected low cover prop for dynamic cover system.
+	m_hHighCoverProp = NULL;			// [MODIFICATION-Dynamic Cover] Handle to selected high cover prop for dynamic cover system.
+	m_flNextPropSearchTime = 0;		// [MODIFICATION-Dynamic Cover] Timer to control how often dynamic cover props are searched. Allows immediate search on spawn.	
 }
 
 
@@ -271,6 +275,170 @@ bool CNPC_Combine::CreateComponents()
 	return true;
 }
 
+// ============================================
+// [MODIFICATION-Dynamic Cover]  HELPER FUNCTION - Count NPCs using a prop
+// ============================================
+int CNPC_Combine::CountNPCsUsingProp( CBaseEntity* pProp )
+{
+	if (!pProp)
+		return 0;
+
+	int count = 0;
+	CBaseEntity* pEntity = NULL;
+
+	// Search all entities within a radius around the prop
+	for (CEntitySphereQuery sphere( pProp->GetAbsOrigin(), 600.0f ); (pEntity = sphere.GetCurrentEntity())!=NULL; sphere.NextEntity())
+	{
+		// Try casting to Combine NPC
+		CNPC_Combine* pCombine = dynamic_cast< CNPC_Combine* >(pEntity);
+		if (!pCombine||pCombine==this) // Skip self
+			continue;
+
+		// Check if using the same prop
+		if (pCombine->m_hLowCoverProp==pProp||pCombine->m_hHighCoverProp==pProp)
+		{
+			count++;
+		}
+	}
+
+	return count;
+}
+
+//-----------------------------------------------------------------------------
+// [MODIFICATION-Dynamic Cover] -  Dynamic Cover
+//-----------------------------------------------------------------------------
+
+bool CNPC_Combine::DynamicPropCover()
+{
+	// Cover prop lists (same as before)
+	static const char* lowCover[] = {
+	"models/container_chunk03.mdl",
+	"models/gibs/gunship_gibs_midsection.mdl",
+	"models/gibs/gunship_gibs_tailsection.mdl",
+	"models/gibs/strider_gib7.mdl",
+	"models/props_combine/combine_barricade_short01a.mdl",
+	"models/props_combine/combine_barricade_short02a.mdl",
+	"models/props_combine/combine_barricade_short03a.mdl",
+	"models/props_junk/trashdumpster01a.mdl",
+	"models/props_junk/wood_crate001a.mdl",
+	"models/props_junk/wood_crate001a_damaged.mdl",
+	"models/props_junk/wood_crate001a_damagedmax.mdl",
+	"models/props_junk/wood_crate002a.mdl",
+	"models/props_vehicles/car001a_hatchback.mdl",
+	"models/props_vehicles/car001b_hatchback.mdl",
+	"models/props_wasteland/controlroom_desk001a.mdl",
+	"models/props_wasteland/controlroom_desk001b.mdl",
+	"models/props_wasteland/kitchen_counter001d.mdl",
+	"models/props_wasteland/laundry_cart001.mdl"
+	};
+
+	static const char* highCover[] = {
+	"models/combine_strider.mdl",
+	"models/gibs/helicopter_brokenpiece_04_cockpit.mdl",
+	"models/gibs/helicopter_brokenpiece_06_body.mdl",
+	"models/gibs/gunship_gibs_engine.mdl",
+	"models/gibs/gunship_gibs_headsection.mdl",
+	"models/props_junk/trashdumpster02.mdl",
+	"models/props_vehicles/car002a.mdl",
+	"models/props_vehicles/car002b.mdl",
+	"models/props_vehicles/car003a.mdl",
+	"models/props_vehicles/car003b.mdl",
+	"models/props_vehicles/car004a.mdl",
+	"models/props_vehicles/car004b.mdl",
+	"models/props_vehicles/car005a.mdl",
+	"models/props_vehicles/car005b.mdl",
+	"models/props_vehicles/generatortrailer01.mdl",
+	"models/props_vehicles/trailer002a.mdl",
+	"models/props_vehicles/truck001a.mdl",
+	"models/props_vehicles/truck002a_cab.mdl",
+	"models/props_vehicles/truck003a.mdl",
+	"models/props_vehicles/van001a.mdl",
+	"models/props_vehicles/wagon001a.mdl",
+	};
+
+	// Reset handles
+	m_hLowCoverProp = m_hHighCoverProp = NULL;
+
+	CUtlVector<CBaseEntity*> availableLowCoverProps;
+	CUtlVector<CBaseEntity*> availableHighCoverProps;
+	const int MAX_NPCS_PER_PROP = 2;
+
+	// Search for all props in radius
+	for (CBaseEntity* pEntity = gEntList.FindEntityInSphere( NULL, GetAbsOrigin(), 512.0f );
+		pEntity;
+		pEntity = gEntList.FindEntityInSphere( pEntity, GetAbsOrigin(), 512.0f ))
+	{
+		if (!FClassnameIs( pEntity, "prop_physics" )&&!FClassnameIs( pEntity, "prop_ragdoll" ))
+			continue;
+
+		const char* modelName = STRING( pEntity->GetModelName() );
+		if (!modelName)
+			continue;
+
+		// Check if prop is at same level (on ground)
+		float heightDifference = fabs( pEntity->GetAbsOrigin().z-GetAbsOrigin().z );
+		if (heightDifference>100.0f)
+		{
+			Msg( "[DEBUG] Prop too high/low (diff=%.1f): %s\n", heightDifference, modelName );
+			continue;
+		}
+
+		// Check if prop has available slots
+		int currentUsers = CountNPCsUsingProp( pEntity );
+		if (currentUsers>=MAX_NPCS_PER_PROP)
+		{
+			Msg( "[DEBUG] Prop full - %d NPCs using: %s\n", currentUsers, modelName );
+			continue;
+		}
+
+		// Check if it's low cover
+		for (int i = 0; i<ARRAYSIZE( lowCover ); i++)
+		{
+			if (FStrEq( modelName, lowCover[ i ] ))
+			{
+				availableLowCoverProps.AddToTail( pEntity );
+				Msg( "[DEBUG] Low cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
+					heightDifference, currentUsers, modelName );
+				break;
+			}
+		}
+
+		// Check if it's high cover
+		for (int i = 0; i<ARRAYSIZE( highCover ); i++)
+		{
+			if (FStrEq( modelName, highCover[ i ] ))
+			{
+				availableHighCoverProps.AddToTail( pEntity );
+				Msg( "[DEBUG] High cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
+					heightDifference, currentUsers, modelName );
+				break;
+			}
+		}
+	}
+
+	// Select random props from available arrays
+	if (availableLowCoverProps.Count()>0)
+	{
+		m_hLowCoverProp = availableLowCoverProps[ RandomInt( 0, availableLowCoverProps.Count()-1 ) ];
+		Msg( "[DEBUG] Selected LOW COVER with available slot\n" );
+	}
+	else
+	{
+		Msg( "[DEBUG] No LOW COVER with available slots\n" );
+	}
+
+	if (availableHighCoverProps.Count()>0)
+	{
+		m_hHighCoverProp = availableHighCoverProps[ RandomInt( 0, availableHighCoverProps.Count()-1 ) ];
+		Msg( "[DEBUG] Selected HIGH COVER with available slot\n" );
+	}
+	else
+	{
+		Msg( "[DEBUG] No HIGH COVER with available slots\n" );
+	}
+
+	return (m_hLowCoverProp||m_hHighCoverProp);
+}
 
 //------------------------------------------------------------------------------
 // Purpose: Don't look, only get info from squad.
@@ -548,6 +716,80 @@ void CNPC_Combine::GatherConditions()
 
 	if( GetState() == NPC_STATE_COMBAT )
 	{
+		// [MODIFICATION-Dynamic Cover] - Start
+		if (GetEnemy()!=NULL) {
+			if (gpGlobals->curtime>=m_flNextPropSearchTime)
+			{
+				// Clear conditions and search for new props
+				ClearCondition( COND_COMBINE_HAS_LOW_COVER );
+				ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
+				DynamicPropCover();
+
+				// Set next search time (8-12 seconds)
+				float randomInterval = RandomFloat( 8.0f, 12.0f );
+				m_flNextPropSearchTime = gpGlobals->curtime+randomInterval;
+				Msg( "[DEBUG] GatherConditions: NEW SEARCH executed - next in %.1fs\n", randomInterval );
+			}
+			else
+			{
+				// Use already selected props
+				Msg( "[DEBUG] GatherConditions: Keeping current props - next search in %.1fs\n",
+					m_flNextPropSearchTime-gpGlobals->curtime );
+			}
+
+			// Check if enemy is too close to current props
+			Vector enemyPos = GetEnemy()->GetAbsOrigin();
+			const float MIN_COVER_DISTANCE = 150.0f;
+			bool enemyTooClose = (m_hLowCoverProp&&enemyPos.DistTo( m_hLowCoverProp->GetAbsOrigin() )<MIN_COVER_DISTANCE)||
+				(m_hHighCoverProp&&enemyPos.DistTo( m_hHighCoverProp->WorldSpaceCenter() )<MIN_COVER_DISTANCE);
+
+			if (enemyTooClose)
+			{
+				Msg( "[DEBUG] GatherConditions: Enemy too close to current props\n" );
+			}
+			else
+			{
+				// Validate LOW COVER
+				if (m_hLowCoverProp)
+				{
+					Vector enemyToProp = m_hLowCoverProp->GetAbsOrigin()-enemyPos;
+					VectorNormalize( enemyToProp );
+					enemyToProp.z = 0;
+					Vector testPos = m_hLowCoverProp->GetAbsOrigin()+(enemyToProp*80.0f);
+
+					if (GetNavigator()->CanFitAtPosition( testPos, MASK_NPCSOLID ))
+					{
+						SetCondition( COND_COMBINE_HAS_LOW_COVER );
+						Msg( "[DEBUG] GatherConditions: LOW COVER valid and navigable\n" );
+					}
+					else
+					{
+						m_hLowCoverProp = NULL;
+						Msg( "[DEBUG] GatherConditions: LOW COVER discarded - not navigable\n" );
+					}
+				}
+
+				// Validate HIGH COVER
+				if (m_hHighCoverProp)
+				{
+					Vector enemyToProp = m_hHighCoverProp->WorldSpaceCenter()-enemyPos;
+					VectorNormalize( enemyToProp );
+					enemyToProp.z = 0;
+					Vector testPos = m_hHighCoverProp->WorldSpaceCenter()+(enemyToProp*80.0f);
+
+					if (GetNavigator()->CanFitAtPosition( testPos, MASK_NPCSOLID ))
+					{
+						SetCondition( COND_COMBINE_HAS_HIGH_COVER );
+						Msg( "[DEBUG] GatherConditions: HIGH COVER valid and navigable\n" );
+					}
+					else
+					{
+						m_hHighCoverProp = NULL;
+						Msg( "[DEBUG] GatherConditions: HIGH COVER discarded - not navigable\n" );
+					}
+				}
+			} // [MODIFICATION-Dynamic Cover] - End
+		}
 #ifdef MAPBASE
 		// Don't override the standoff
 		if( IsCurSchedule( SCHED_COMBINE_WAIT_IN_COVER, false ) && !m_StandoffBehavior.IsActive() )
@@ -913,6 +1155,110 @@ void CNPC_Combine::StartTask( const Task_t *pTask )
 
 	switch ( pTask->iTask )
 	{
+		case TASK_COMBINE_MOVE_TO_HIGH_COVER:  // [MODIFICATION-Dynamic Cover]
+		{
+			if (!m_hHighCoverProp||!GetEnemy())
+			{
+				TaskFail( "No prop or enemy for high cover" );
+				return;
+			}
+
+			// Check if prop is at same level (not too high/low)
+			float heightDifference = fabs( m_hHighCoverProp->GetAbsOrigin().z-GetAbsOrigin().z );
+			if (heightDifference>100.0f)
+			{
+				Msg( "[DEBUG] HIGH_COVER: Prop too high/low (diff=%.1f), failing task\n", heightDifference );
+				ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
+				TaskFail( "Prop not at ground level" );
+				return;
+			}
+
+			// Calculate positions based on prop geometry
+			Vector propCenter = m_hHighCoverProp->WorldSpaceCenter();
+			Vector enemyPos = GetEnemy()->GetAbsOrigin();
+			Vector enemyToProp = propCenter-enemyPos;
+			VectorNormalize( enemyToProp );
+			enemyToProp.z = 0;
+			Vector vMins, vMaxs;
+			m_hHighCoverProp->GetCollideable()->WorldSpaceSurroundingBounds( &vMins, &vMaxs );
+			const float BASE_OFFSET = 80.0f;
+			Vector positions[ 3 ] = {
+			 Vector( vMins.x, propCenter.y, vMins.z )+(enemyToProp*BASE_OFFSET),  // ESQUERDA
+			 propCenter+(enemyToProp*BASE_OFFSET),                              // CENTRO  
+			 Vector( vMaxs.x, propCenter.y, vMins.z )+(enemyToProp*BASE_OFFSET)   // DIREITA
+			};
+			// Choose zone closest to enemy
+			int chosenIndex = 1; // Default: center
+			float distances[ 3 ] = {
+			 enemyPos.DistTo( positions[ 0 ] ),
+			 enemyPos.DistTo( positions[ 1 ] ),
+			 enemyPos.DistTo( positions[ 2 ] )
+			};
+			if (distances[ 0 ]<distances[ 1 ]&&distances[ 0 ]<distances[ 2 ]) chosenIndex = 0;
+			else if (distances[ 2 ]<distances[ 1 ]&&distances[ 2 ]<distances[ 0 ]) chosenIndex = 2;
+			Vector targetPosition = positions[ chosenIndex ];
+			float distToTarget = GetAbsOrigin().DistTo( targetPosition );
+			Msg( "[DEBUG] HIGH_COVER: Zone %s, dist=%.1f\n",
+				(chosenIndex==0) ? "LEFT" : (chosenIndex==2) ? "RIGHT" : "CENTER", distToTarget );
+			// Check if already arrived
+			if (distToTarget<=50.0f)
+			{
+				ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
+				TaskComplete();
+				return;
+			}
+			// Set navigation (GatherConditions already validated navigability)
+			AI_NavGoal_t goal( targetPosition, ACT_RUN, AIN_DEF_TOLERANCE );
+			if (GetNavigator()->SetGoal( goal ))
+			{
+				TaskComplete();
+			}
+			else
+			{
+				TaskFail( "Could not set navigation goal" );
+			}
+		}
+		break;
+
+
+
+		case TASK_COMBINE_MOVE_TO_LOW_COVER: // [MODIFICATION-Dynamic Cover]
+		{
+			if (!m_hLowCoverProp||!GetEnemy())
+			{
+				TaskFail( "No prop or enemy for low cover" );
+				return;
+			}
+
+			// Calculate cover position
+			Vector enemyToProp = m_hLowCoverProp->GetAbsOrigin()-GetEnemy()->GetAbsOrigin();
+			VectorNormalize( enemyToProp );
+			enemyToProp.z = 0;
+			Vector targetPosition = m_hLowCoverProp->GetAbsOrigin()+(enemyToProp*80.0f);
+
+			float distToTarget = GetAbsOrigin().DistTo( targetPosition );
+			Msg( "[DEBUG] LOW_COVER: dist=%.1f\n", distToTarget );
+
+			// Check if already arrived
+			if (distToTarget<=50.0f)
+			{
+				ClearCondition( COND_COMBINE_HAS_LOW_COVER );
+				TaskComplete();
+				return;
+			}
+
+			// Set navigation (GatherConditions already validated navigability)
+			AI_NavGoal_t goal( targetPosition, ACT_RUN, AIN_DEF_TOLERANCE );
+			if (GetNavigator()->SetGoal( goal ))
+			{
+				TaskComplete();
+			}
+			else
+			{
+				TaskFail( "Could not set navigation goal" );
+			}
+		}
+		break;
 	case TASK_COMBINE_SET_STANDING:
 		{
 			if ( pTask->flTaskData == 1.0f)
@@ -2218,6 +2564,71 @@ int CNPC_Combine::SelectSchedule( void )
 
 	case NPC_STATE_COMBAT:
 		{
+			if (HasCondition( COND_SEE_ENEMY )&&HasCondition( COND_CAN_RANGE_ATTACK1 )) // [MODIFICATION-Dynamic Cover] - Start
+			{
+				bool hasLow = HasCondition( COND_COMBINE_HAS_LOW_COVER );
+				bool hasHigh = HasCondition( COND_COMBINE_HAS_HIGH_COVER );
+				const float MAX_PROP_DISTANCE = 520.0f; // Maximum acceptable distance
+
+				if (hasLow&&hasHigh)
+				{
+					// Validate both props before choosing
+					bool lowValid = !m_hLowCoverProp||GetAbsOrigin().DistTo( m_hLowCoverProp->GetAbsOrigin() )<=MAX_PROP_DISTANCE;
+					bool highValid = !m_hHighCoverProp||GetAbsOrigin().DistTo( m_hHighCoverProp->WorldSpaceCenter() )<=MAX_PROP_DISTANCE;
+
+					if (lowValid&&highValid)
+					{
+						bool useLowCover = RandomInt( 0, 1 )==0;
+						Msg( "[DEBUG] SelectSchedule: BOTH COVERS valid - choosing %s\n",
+							useLowCover ? "LOW" : "HIGH" );
+						return useLowCover ? SCHED_COMBINE_MOVE_TO_LOW_COVER : SCHED_COMBINE_MOVE_TO_HIGH_COVER;
+					}
+					else if (lowValid)
+					{
+						Msg( "[DEBUG] SelectSchedule: Only LOW COVER in valid range\n" );
+						return SCHED_COMBINE_MOVE_TO_LOW_COVER;
+					}
+					else if (highValid)
+					{
+						Msg( "[DEBUG] SelectSchedule: Only HIGH COVER in valid range\n" );
+						return SCHED_COMBINE_MOVE_TO_HIGH_COVER;
+					}
+					else
+					{
+						Msg( "[DEBUG] SelectSchedule: Both covers too distant - default AI\n" );
+					}
+				}
+				else if (hasLow)
+				{
+					// Validate LOW COVER
+					if (!m_hLowCoverProp||GetAbsOrigin().DistTo( m_hLowCoverProp->GetAbsOrigin() )>MAX_PROP_DISTANCE)
+					{
+						Msg( "[DEBUG] SelectSchedule: LOW COVER too distant - rejecting\n" );
+					}
+					else
+					{
+						Msg( "[DEBUG] SelectSchedule: LOW COVER valid\n" );
+						return SCHED_COMBINE_MOVE_TO_LOW_COVER;
+					}
+				}
+				else if (hasHigh)
+				{
+					// Validate HIGH COVER
+					if (!m_hHighCoverProp||GetAbsOrigin().DistTo( m_hHighCoverProp->WorldSpaceCenter() )>MAX_PROP_DISTANCE)
+					{
+						Msg( "[DEBUG] SelectSchedule: HIGH COVER too distant - rejecting\n" );
+					}
+					else
+					{
+						Msg( "[DEBUG] SelectSchedule: HIGH COVER valid\n" );
+						return SCHED_COMBINE_MOVE_TO_HIGH_COVER;
+					}
+				}
+
+				// If reached here, no valid covers available
+				Msg( "[DEBUG] SelectSchedule: No valid cover available - using default AI\n" );
+			} // [MODIFICATION-Dynamic Cover] - End
+
 			int nSched = SelectCombatSchedule();
 			if ( nSched != SCHED_NONE )
 				return nSched;
@@ -3991,6 +4402,8 @@ DECLARE_TASK( TASK_COMBINE_DIE_INSTANTLY )
 DECLARE_TASK( TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET )
 DECLARE_TASK( TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS )
 DECLARE_TASK( TASK_COMBINE_SET_STANDING )
+DECLARE_TASK( TASK_COMBINE_MOVE_TO_LOW_COVER ) // [MODIFICATION-Dynamic Cover]
+DECLARE_TASK( TASK_COMBINE_MOVE_TO_HIGH_COVER ) // [MODIFICATION-Dynamic Cover]
 
 //Activities
 #if !SHARED_COMBINE_ACTIVITIES
@@ -4022,6 +4435,8 @@ DECLARE_CONDITION( COND_COMBINE_HIT_BY_BUGBAIT )
 DECLARE_CONDITION( COND_COMBINE_DROP_GRENADE )
 DECLARE_CONDITION( COND_COMBINE_ON_FIRE )
 DECLARE_CONDITION( COND_COMBINE_ATTACK_SLOT_AVAILABLE )
+DECLARE_CONDITION( COND_COMBINE_HAS_HIGH_COVER ) // [MODIFICATION-Dynamic Cover]
+DECLARE_CONDITION( COND_COMBINE_HAS_LOW_COVER ) // [MODIFICATION-Dynamic Cover]
 
 DECLARE_INTERACTION( g_interactionCombineBash );
 
@@ -4743,5 +5158,43 @@ DEFINE_SCHEDULE
  "		COND_ENEMY_DEAD"
  "		COND_CAN_MELEE_ATTACK1"
  )
+
+ // SCHED_COMBINE_MOVE_TO_HIGH_COVER
+//=========================================================
+DEFINE_SCHEDULE
+(
+SCHED_COMBINE_MOVE_TO_HIGH_COVER, // [MODIFICATION-Dynamic Cover]
+
+"	Tasks"
+"		TASK_STOP_MOVING						0"
+"		TASK_COMBINE_MOVE_TO_HIGH_COVER			0"
+"		TASK_RUN_PATH_TIMED						4"
+"		TASK_WAIT_FOR_MOVEMENT					0"
+"		TASK_FACE_ENEMY							0"
+"		TASK_RANGE_ATTACK1						0"
+"	"
+"	Interrupts"
+
+)
+
+//=========================================================
+// SCHED_COMBINE_MOVE_TO_LOW_COVER
+//=========================================================
+
+DEFINE_SCHEDULE
+(
+SCHED_COMBINE_MOVE_TO_LOW_COVER, // [MODIFICATION-Dynamic Cover]
+
+"   Tasks"
+"		TASK_STOP_MOVING					    0"
+"		TASK_COMBINE_MOVE_TO_LOW_COVER			0"
+"		TASK_RUN_PATH_TIMED						8"
+"		TASK_WAIT_FOR_MOVEMENT					0"
+"		TASK_FACE_ENEMY							0"
+"		TASK_RANGE_ATTACK1						0"
+""
+"   Interrupts"
+
+)
 
  AI_END_CUSTOM_NPC()
