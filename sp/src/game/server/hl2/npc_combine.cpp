@@ -89,7 +89,7 @@ string_t	s_iszShotgunClassname;
 //-----------------------------------------------------------------------------
 // Interactions
 //-----------------------------------------------------------------------------
-int	g_interactionCombineBash		= 0; // melee bash attack
+int	g_interactionCombineBash = 0; // melee bash attack
 
 //=========================================================
 // Combines's Anim Events Go Here
@@ -139,26 +139,26 @@ Activity ACT_TURRET_CARRY_RUN;
 //	> Squad slots
 // -----------------------------------------------
 enum SquadSlot_T
-{	
-	SQUAD_SLOT_GRENADE1 = LAST_SHARED_SQUADSLOT,
-	SQUAD_SLOT_GRENADE2,
-	SQUAD_SLOT_ATTACK_OCCLUDER,
-	SQUAD_SLOT_OVERWATCH,
+{
+    SQUAD_SLOT_GRENADE1 = LAST_SHARED_SQUADSLOT,
+    SQUAD_SLOT_GRENADE2,
+    SQUAD_SLOT_ATTACK_OCCLUDER,
+    SQUAD_SLOT_OVERWATCH,
 };
 
 enum TacticalVariant_T
 {
-	TACTICAL_VARIANT_DEFAULT = 0,
-	TACTICAL_VARIANT_PRESSURE_ENEMY,				// Always try to close in on the player.
-	TACTICAL_VARIANT_PRESSURE_ENEMY_UNTIL_CLOSE,	// Act like VARIANT_PRESSURE_ENEMY, but go to VARIANT_DEFAULT once within 30 feet
+    TACTICAL_VARIANT_DEFAULT = 0,
+    TACTICAL_VARIANT_PRESSURE_ENEMY,				// Always try to close in on the player.
+    TACTICAL_VARIANT_PRESSURE_ENEMY_UNTIL_CLOSE,	// Act like VARIANT_PRESSURE_ENEMY, but go to VARIANT_DEFAULT once within 30 feet
 #ifdef MAPBASE
-	TACTICAL_VARIANT_GRENADE_HAPPY,					// Throw grenades as if you're fighting a turret
+    TACTICAL_VARIANT_GRENADE_HAPPY,					// Throw grenades as if you're fighting a turret
 #endif
 };
 
 enum PathfindingVariant_T
 {
-	PATHFINDING_VARIANT_DEFAULT = 0,
+    PATHFINDING_VARIANT_DEFAULT = 0,
 };
 
 
@@ -210,24 +210,24 @@ DEFINE_EMBEDDED( m_Sentences ),
 //							m_RappelBehavior (auto saved by AI)
 //							m_ActBusyBehavior (auto saved by AI)
 
-DEFINE_INPUTFUNC( FIELD_VOID,	"LookOff",	InputLookOff ),
-DEFINE_INPUTFUNC( FIELD_VOID,	"LookOn",	InputLookOn ),
+DEFINE_INPUTFUNC( FIELD_VOID, "LookOff", InputLookOff ),
+DEFINE_INPUTFUNC( FIELD_VOID, "LookOn", InputLookOn ),
 
-DEFINE_INPUTFUNC( FIELD_VOID,	"StartPatrolling",	InputStartPatrolling ),
-DEFINE_INPUTFUNC( FIELD_VOID,	"StopPatrolling",	InputStopPatrolling ),
+DEFINE_INPUTFUNC( FIELD_VOID, "StartPatrolling", InputStartPatrolling ),
+DEFINE_INPUTFUNC( FIELD_VOID, "StopPatrolling", InputStopPatrolling ),
 
-DEFINE_INPUTFUNC( FIELD_STRING,	"Assault", InputAssault ),
+DEFINE_INPUTFUNC( FIELD_STRING, "Assault", InputAssault ),
 
-DEFINE_INPUTFUNC( FIELD_VOID,	"HitByBugbait",		InputHitByBugbait ),
+DEFINE_INPUTFUNC( FIELD_VOID, "HitByBugbait", InputHitByBugbait ),
 
 #ifndef MAPBASE
-DEFINE_INPUTFUNC( FIELD_STRING,	"ThrowGrenadeAtTarget",	InputThrowGrenadeAtTarget ),
+DEFINE_INPUTFUNC( FIELD_STRING, "ThrowGrenadeAtTarget", InputThrowGrenadeAtTarget ),
 #else
-DEFINE_INPUTFUNC( FIELD_BOOLEAN,	"SetElite",	InputSetElite ),
+DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetElite", InputSetElite ),
 
-DEFINE_INPUTFUNC( FIELD_VOID,	"DropGrenade",	InputDropGrenade ),
+DEFINE_INPUTFUNC( FIELD_VOID, "DropGrenade", InputDropGrenade ),
 
-DEFINE_INPUTFUNC( FIELD_INTEGER,	"SetTacticalVariant",	InputSetTacticalVariant ),
+DEFINE_INPUTFUNC( FIELD_INTEGER, "SetTacticalVariant", InputSetTacticalVariant ),
 
 DEFINE_INPUTFUNC( FIELD_STRING, "SetPoliceGoal", InputSetPoliceGoal ),
 
@@ -253,11 +253,11 @@ END_DATADESC()
 //------------------------------------------------------------------------------
 CNPC_Combine::CNPC_Combine()
 {
-	m_vecTossVelocity = vec3_origin;
+    m_vecTossVelocity = vec3_origin;
 
-	m_hLowCoverProp = NULL;				// [MODIFICATION-Dynamic Cover] Handle to selected low cover prop for dynamic cover system.
-	m_hHighCoverProp = NULL;			// [MODIFICATION-Dynamic Cover] Handle to selected high cover prop for dynamic cover system.
-	m_flNextPropSearchTime = 0;		// [MODIFICATION-Dynamic Cover] Timer to control how often dynamic cover props are searched. Allows immediate search on spawn.	
+    m_hLowCoverProp = NULL;				// [MODIFICATION-Dynamic Cover] Handle to selected low cover prop for dynamic cover system.
+    m_hHighCoverProp = NULL;			// [MODIFICATION-Dynamic Cover] Handle to selected high cover prop for dynamic cover system.
+    m_flNextPropSearchTime = 0;		// [MODIFICATION-Dynamic Cover] Timer to control how often dynamic cover props are searched. Allows immediate search on spawn.	
 }
 
 
@@ -266,13 +266,13 @@ CNPC_Combine::CNPC_Combine()
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::CreateComponents()
 {
-	if ( !BaseClass::CreateComponents() )
-		return false;
+    if ( !BaseClass::CreateComponents() )
+        return false;
 
 #ifndef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-	m_Sentences.Init( this, "NPC_Combine.SentenceParameters" );
+    m_Sentences.Init( this, "NPC_Combine.SentenceParameters" );
 #endif
-	return true;
+    return true;
 }
 
 // ============================================
@@ -280,28 +280,28 @@ bool CNPC_Combine::CreateComponents()
 // ============================================
 int CNPC_Combine::CountNPCsUsingProp( CBaseEntity* pProp )
 {
-	if (!pProp)
-		return 0;
+    if ( !pProp )
+        return 0;
 
-	int count = 0;
-	CBaseEntity* pEntity = NULL;
+    int count = 0;
+    CBaseEntity* pEntity = NULL;
 
-	// Search all entities within a radius around the prop
-	for (CEntitySphereQuery sphere( pProp->GetAbsOrigin(), 600.0f ); (pEntity = sphere.GetCurrentEntity())!=NULL; sphere.NextEntity())
-	{
-		// Try casting to Combine NPC
-		CNPC_Combine* pCombine = dynamic_cast< CNPC_Combine* >(pEntity);
-		if (!pCombine||pCombine==this) // Skip self
-			continue;
+    // Search all entities within a radius around the prop
+    for ( CEntitySphereQuery sphere( pProp->GetAbsOrigin(), 600.0f ); (pEntity = sphere.GetCurrentEntity()) != NULL; sphere.NextEntity() )
+    {
+        // Try casting to Combine NPC
+        CNPC_Combine* pCombine = dynamic_cast< CNPC_Combine* >(pEntity);
+        if ( !pCombine || pCombine == this ) // Skip self
+            continue;
 
-		// Check if using the same prop
-		if (pCombine->m_hLowCoverProp==pProp||pCombine->m_hHighCoverProp==pProp)
-		{
-			count++;
-		}
-	}
+        // Check if using the same prop
+        if ( pCombine->m_hLowCoverProp == pProp || pCombine->m_hHighCoverProp == pProp )
+        {
+            count++;
+        }
+    }
 
-	return count;
+    return count;
 }
 
 //-----------------------------------------------------------------------------
@@ -310,182 +310,182 @@ int CNPC_Combine::CountNPCsUsingProp( CBaseEntity* pProp )
 
 bool CNPC_Combine::DynamicPropCover()
 {
-	// Cover prop lists (same as before)
-	static const char* lowCover[] = {
-	"models/container_chunk03.mdl",
-	"models/gibs/gunship_gibs_midsection.mdl",
-	"models/gibs/gunship_gibs_tailsection.mdl",
-	"models/gibs/strider_gib7.mdl",
-	"models/props_combine/combine_barricade_short01a.mdl",
-	"models/props_combine/combine_barricade_short02a.mdl",
-	"models/props_combine/combine_barricade_short03a.mdl",
-	"models/props_junk/trashdumpster01a.mdl",
-	"models/props_junk/wood_crate001a.mdl",
-	"models/props_junk/wood_crate001a_damaged.mdl",
-	"models/props_junk/wood_crate001a_damagedmax.mdl",
-	"models/props_junk/wood_crate002a.mdl",
-	"models/props_vehicles/car001a_hatchback.mdl",
-	"models/props_vehicles/car001b_hatchback.mdl",
-	"models/props_wasteland/controlroom_desk001a.mdl",
-	"models/props_wasteland/controlroom_desk001b.mdl",
-	"models/props_wasteland/kitchen_counter001d.mdl",
-	"models/props_wasteland/laundry_cart001.mdl"
-	};
+    // Cover prop lists (same as before)
+    static const char* lowCover[] = {
+    "models/container_chunk03.mdl",
+    "models/gibs/gunship_gibs_midsection.mdl",
+    "models/gibs/gunship_gibs_tailsection.mdl",
+    "models/gibs/strider_gib7.mdl",
+    "models/props_combine/combine_barricade_short01a.mdl",
+    "models/props_combine/combine_barricade_short02a.mdl",
+    "models/props_combine/combine_barricade_short03a.mdl",
+    "models/props_junk/trashdumpster01a.mdl",
+    "models/props_junk/wood_crate001a.mdl",
+    "models/props_junk/wood_crate001a_damaged.mdl",
+    "models/props_junk/wood_crate001a_damagedmax.mdl",
+    "models/props_junk/wood_crate002a.mdl",
+    "models/props_vehicles/car001a_hatchback.mdl",
+    "models/props_vehicles/car001b_hatchback.mdl",
+    "models/props_wasteland/controlroom_desk001a.mdl",
+    "models/props_wasteland/controlroom_desk001b.mdl",
+    "models/props_wasteland/kitchen_counter001d.mdl",
+    "models/props_wasteland/laundry_cart001.mdl"
+    };
 
-	static const char* highCover[] = {
-	"models/combine_strider.mdl",
-	"models/gibs/helicopter_brokenpiece_04_cockpit.mdl",
-	"models/gibs/helicopter_brokenpiece_06_body.mdl",
-	"models/gibs/gunship_gibs_engine.mdl",
-	"models/gibs/gunship_gibs_headsection.mdl",
-	"models/props_junk/trashdumpster02.mdl",
-	"models/props_vehicles/car002a.mdl",
-	"models/props_vehicles/car002b.mdl",
-	"models/props_vehicles/car003a.mdl",
-	"models/props_vehicles/car003b.mdl",
-	"models/props_vehicles/car004a.mdl",
-	"models/props_vehicles/car004b.mdl",
-	"models/props_vehicles/car005a.mdl",
-	"models/props_vehicles/car005b.mdl",
-	"models/props_vehicles/generatortrailer01.mdl",
-	"models/props_vehicles/trailer002a.mdl",
-	"models/props_vehicles/truck001a.mdl",
-	"models/props_vehicles/truck002a_cab.mdl",
-	"models/props_vehicles/truck003a.mdl",
-	"models/props_vehicles/van001a.mdl",
-	"models/props_vehicles/wagon001a.mdl",
-	};
+    static const char* highCover[] = {
+    "models/combine_strider.mdl",
+    "models/gibs/helicopter_brokenpiece_04_cockpit.mdl",
+    "models/gibs/helicopter_brokenpiece_06_body.mdl",
+    "models/gibs/gunship_gibs_engine.mdl",
+    "models/gibs/gunship_gibs_headsection.mdl",
+    "models/props_junk/trashdumpster02.mdl",
+    "models/props_vehicles/car002a.mdl",
+    "models/props_vehicles/car002b.mdl",
+    "models/props_vehicles/car003a.mdl",
+    "models/props_vehicles/car003b.mdl",
+    "models/props_vehicles/car004a.mdl",
+    "models/props_vehicles/car004b.mdl",
+    "models/props_vehicles/car005a.mdl",
+    "models/props_vehicles/car005b.mdl",
+    "models/props_vehicles/generatortrailer01.mdl",
+    "models/props_vehicles/trailer002a.mdl",
+    "models/props_vehicles/truck001a.mdl",
+    "models/props_vehicles/truck002a_cab.mdl",
+    "models/props_vehicles/truck003a.mdl",
+    "models/props_vehicles/van001a.mdl",
+    "models/props_vehicles/wagon001a.mdl",
+    };
 
-	// Reset handles
-	m_hLowCoverProp = m_hHighCoverProp = NULL;
+    // Reset handles
+    m_hLowCoverProp = m_hHighCoverProp = NULL;
 
-	CUtlVector<CBaseEntity*> availableLowCoverProps;
-	CUtlVector<CBaseEntity*> availableHighCoverProps;
-	const int MAX_NPCS_PER_PROP = 2;
+    CUtlVector<CBaseEntity*> availableLowCoverProps;
+    CUtlVector<CBaseEntity*> availableHighCoverProps;
+    const int MAX_NPCS_PER_PROP = 2;
 
-	// Search for all props in radius
-	for (CBaseEntity* pEntity = gEntList.FindEntityInSphere( NULL, GetAbsOrigin(), 512.0f );
-		pEntity;
-		pEntity = gEntList.FindEntityInSphere( pEntity, GetAbsOrigin(), 512.0f ))
-	{
-		if (!FClassnameIs( pEntity, "prop_physics" )&&!FClassnameIs( pEntity, "prop_ragdoll" ))
-			continue;
+    // Search for all props in radius
+    for ( CBaseEntity* pEntity = gEntList.FindEntityInSphere( NULL, GetAbsOrigin(), 512.0f );
+        pEntity;
+        pEntity = gEntList.FindEntityInSphere( pEntity, GetAbsOrigin(), 512.0f ) )
+    {
+        if ( !FClassnameIs( pEntity, "prop_physics" ) && !FClassnameIs( pEntity, "prop_ragdoll" ) )
+            continue;
 
-		const char* modelName = STRING( pEntity->GetModelName() );
-		if (!modelName)
-			continue;
+        const char* modelName = STRING( pEntity->GetModelName() );
+        if ( !modelName )
+            continue;
 
-		// Check if prop is at same level (on ground)
-		float heightDifference = fabs( pEntity->GetAbsOrigin().z-GetAbsOrigin().z );
-		if (heightDifference>100.0f)
-		{
-			Msg( "[DEBUG] Prop too high/low (diff=%.1f): %s\n", heightDifference, modelName );
-			continue;
-		}
+        // Check if prop is at same level (on ground)
+        float heightDifference = fabs( pEntity->GetAbsOrigin().z - GetAbsOrigin().z );
+        if ( heightDifference > 100.0f )
+        {
+            Msg( "[DEBUG] Prop too high/low (diff=%.1f): %s\n", heightDifference, modelName );
+            continue;
+        }
 
-		// Check if prop has available slots
-		int currentUsers = CountNPCsUsingProp( pEntity );
-		if (currentUsers>=MAX_NPCS_PER_PROP)
-		{
-			Msg( "[DEBUG] Prop full - %d NPCs using: %s\n", currentUsers, modelName );
-			continue;
-		}
+        // Check if prop has available slots
+        int currentUsers = CountNPCsUsingProp( pEntity );
+        if ( currentUsers >= MAX_NPCS_PER_PROP )
+        {
+            Msg( "[DEBUG] Prop full - %d NPCs using: %s\n", currentUsers, modelName );
+            continue;
+        }
 
-		// Check if it's low cover
-		for (int i = 0; i<ARRAYSIZE( lowCover ); i++)
-		{
-			if (FStrEq( modelName, lowCover[ i ] ))
-			{
-				availableLowCoverProps.AddToTail( pEntity );
-				Msg( "[DEBUG] Low cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
-					heightDifference, currentUsers, modelName );
-				break;
-			}
-		}
+        // Check if it's low cover
+        for ( int i = 0; i < ARRAYSIZE( lowCover ); i++ )
+        {
+            if ( FStrEq( modelName, lowCover[ i ] ) )
+            {
+                availableLowCoverProps.AddToTail( pEntity );
+                Msg( "[DEBUG] Low cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
+                    heightDifference, currentUsers, modelName );
+                break;
+            }
+        }
 
-		// Check if it's high cover
-		for (int i = 0; i<ARRAYSIZE( highCover ); i++)
-		{
-			if (FStrEq( modelName, highCover[ i ] ))
-			{
-				availableHighCoverProps.AddToTail( pEntity );
-				Msg( "[DEBUG] High cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
-					heightDifference, currentUsers, modelName );
-				break;
-			}
-		}
-	}
+        // Check if it's high cover
+        for ( int i = 0; i < ARRAYSIZE( highCover ); i++ )
+        {
+            if ( FStrEq( modelName, highCover[ i ] ) )
+            {
+                availableHighCoverProps.AddToTail( pEntity );
+                Msg( "[DEBUG] High cover at valid level (diff=%.1f, %d/2 occupied): %s\n",
+                    heightDifference, currentUsers, modelName );
+                break;
+            }
+        }
+    }
 
-	// Select random props from available arrays
-	if (availableLowCoverProps.Count()>0)
-	{
-		m_hLowCoverProp = availableLowCoverProps[ RandomInt( 0, availableLowCoverProps.Count()-1 ) ];
-		Msg( "[DEBUG] Selected LOW COVER with available slot\n" );
-	}
-	else
-	{
-		Msg( "[DEBUG] No LOW COVER with available slots\n" );
-	}
+    // Select random props from available arrays
+    if ( availableLowCoverProps.Count() > 0 )
+    {
+        m_hLowCoverProp = availableLowCoverProps[ RandomInt( 0, availableLowCoverProps.Count() - 1 ) ];
+        Msg( "[DEBUG] Selected LOW COVER with available slot\n" );
+    }
+    else
+    {
+        Msg( "[DEBUG] No LOW COVER with available slots\n" );
+    }
 
-	if (availableHighCoverProps.Count()>0)
-	{
-		m_hHighCoverProp = availableHighCoverProps[ RandomInt( 0, availableHighCoverProps.Count()-1 ) ];
-		Msg( "[DEBUG] Selected HIGH COVER with available slot\n" );
-	}
-	else
-	{
-		Msg( "[DEBUG] No HIGH COVER with available slots\n" );
-	}
+    if ( availableHighCoverProps.Count() > 0 )
+    {
+        m_hHighCoverProp = availableHighCoverProps[ RandomInt( 0, availableHighCoverProps.Count() - 1 ) ];
+        Msg( "[DEBUG] Selected HIGH COVER with available slot\n" );
+    }
+    else
+    {
+        Msg( "[DEBUG] No HIGH COVER with available slots\n" );
+    }
 
-	return (m_hLowCoverProp||m_hHighCoverProp);
+    return (m_hLowCoverProp || m_hHighCoverProp);
 }
 
 //------------------------------------------------------------------------------
 // Purpose: Don't look, only get info from squad.
 //------------------------------------------------------------------------------
-void CNPC_Combine::InputLookOff( inputdata_t &inputdata )
+void CNPC_Combine::InputLookOff( inputdata_t& inputdata )
 {
-	m_spawnflags |= SF_COMBINE_NO_LOOK;
+    m_spawnflags |= SF_COMBINE_NO_LOOK;
 }
 
 //------------------------------------------------------------------------------
 // Purpose: Enable looking.
 //------------------------------------------------------------------------------
-void CNPC_Combine::InputLookOn( inputdata_t &inputdata )
+void CNPC_Combine::InputLookOn( inputdata_t& inputdata )
 {
-	m_spawnflags &= ~SF_COMBINE_NO_LOOK;
+    m_spawnflags &= ~SF_COMBINE_NO_LOOK;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputStartPatrolling( inputdata_t &inputdata )
+void CNPC_Combine::InputStartPatrolling( inputdata_t& inputdata )
 {
-	m_bShouldPatrol = true;
+    m_bShouldPatrol = true;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputStopPatrolling( inputdata_t &inputdata )
+void CNPC_Combine::InputStopPatrolling( inputdata_t& inputdata )
 {
-	m_bShouldPatrol = false;
+    m_bShouldPatrol = false;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputAssault( inputdata_t &inputdata )
+void CNPC_Combine::InputAssault( inputdata_t& inputdata )
 {
-	m_AssaultBehavior.SetParameters( AllocPooledString(inputdata.value.String()), CUE_DONT_WAIT, RALLY_POINT_SELECT_DEFAULT );
+    m_AssaultBehavior.SetParameters( AllocPooledString( inputdata.value.String() ), CUE_DONT_WAIT, RALLY_POINT_SELECT_DEFAULT );
 }
 
 //-----------------------------------------------------------------------------
 // We were hit by bugbait
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputHitByBugbait( inputdata_t &inputdata )
+void CNPC_Combine::InputHitByBugbait( inputdata_t& inputdata )
 {
-	SetCondition( COND_COMBINE_HIT_BY_BUGBAIT );
+    SetCondition( COND_COMBINE_HIT_BY_BUGBAIT );
 }
 
 #ifndef MAPBASE
@@ -494,27 +494,27 @@ void CNPC_Combine::InputHitByBugbait( inputdata_t &inputdata )
 //			If I'm a combine elite, fire my combine ball at the target instead.
 // Input  : &inputdata - 
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputThrowGrenadeAtTarget( inputdata_t &inputdata )
+void CNPC_Combine::InputThrowGrenadeAtTarget( inputdata_t& inputdata )
 {
-	// Ignore if we're inside a scripted sequence
-	if ( m_NPCState == NPC_STATE_SCRIPT && m_hCine )
-		return;
+    // Ignore if we're inside a scripted sequence
+    if ( m_NPCState == NPC_STATE_SCRIPT && m_hCine )
+        return;
 
 #ifdef MAPBASE
-	CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, inputdata.value.String(), this, inputdata.pActivator, inputdata.pCaller );
+    CBaseEntity* pEntity = gEntList.FindEntityByName( NULL, inputdata.value.String(), this, inputdata.pActivator, inputdata.pCaller );
 #else
-	CBaseEntity *pEntity = gEntList.FindEntityByName( NULL, inputdata.value.String(), NULL, inputdata.pActivator, inputdata.pCaller );
+    CBaseEntity* pEntity = gEntList.FindEntityByName( NULL, inputdata.value.String(), NULL, inputdata.pActivator, inputdata.pCaller );
 #endif
-	if ( !pEntity )
-	{
-		DevMsg("%s (%s) received ThrowGrenadeAtTarget input, but couldn't find target entity '%s'\n", GetClassname(), GetDebugName(), inputdata.value.String() );
-		return;
-	}
+    if ( !pEntity )
+    {
+        DevMsg( "%s (%s) received ThrowGrenadeAtTarget input, but couldn't find target entity '%s'\n", GetClassname(), GetDebugName(), inputdata.value.String() );
+        return;
+    }
 
-	m_hForcedGrenadeTarget = pEntity;
-	m_flNextGrenadeCheck = 0;
+    m_hForcedGrenadeTarget = pEntity;
+    m_flNextGrenadeCheck = 0;
 
-	ClearSchedule( "Told to throw grenade via input" );
+    ClearSchedule( "Told to throw grenade via input" );
 }
 #endif
 
@@ -522,58 +522,58 @@ void CNPC_Combine::InputThrowGrenadeAtTarget( inputdata_t &inputdata )
 //-----------------------------------------------------------------------------
 // Instant transformation of arsenal from grenades to energy balls, or vice versa
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputSetElite( inputdata_t &inputdata )
+void CNPC_Combine::InputSetElite( inputdata_t& inputdata )
 {
-	m_fIsElite = inputdata.value.Bool();
+    m_fIsElite = inputdata.value.Bool();
 }
 
 //-----------------------------------------------------------------------------
 // We were told to drop a grenade
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputDropGrenade( inputdata_t &inputdata )
+void CNPC_Combine::InputDropGrenade( inputdata_t& inputdata )
 {
-	SetCondition( COND_COMBINE_DROP_GRENADE );
+    SetCondition( COND_COMBINE_DROP_GRENADE );
 
-	ClearSchedule( "Told to drop grenade via input" );
+    ClearSchedule( "Told to drop grenade via input" );
 }
 
 //-----------------------------------------------------------------------------
 // Changes our tactical variant easily
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputSetTacticalVariant( inputdata_t &inputdata )
+void CNPC_Combine::InputSetTacticalVariant( inputdata_t& inputdata )
 {
-	m_iTacticalVariant = inputdata.value.Int();
+    m_iTacticalVariant = inputdata.value.Int();
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : &inputdata - 
 //-----------------------------------------------------------------------------
-void CNPC_Combine::InputSetPoliceGoal( inputdata_t &inputdata )
+void CNPC_Combine::InputSetPoliceGoal( inputdata_t& inputdata )
 {
-	if (/*!inputdata.value.String() ||*/ inputdata.value.String()[0] == 0)
-	{
-		m_PolicingBehavior.Disable();
-		return;
-	}
+    if (/*!inputdata.value.String() ||*/ inputdata.value.String()[ 0 ] == 0 )
+    {
+        m_PolicingBehavior.Disable();
+        return;
+    }
 
-	CBaseEntity *pGoal = gEntList.FindEntityByName( NULL, inputdata.value.String() );
+    CBaseEntity* pGoal = gEntList.FindEntityByName( NULL, inputdata.value.String() );
 
-	if ( pGoal == NULL )
-	{
-		DevMsg( "SetPoliceGoal: %s (%s) unable to find ai_goal_police: %s\n", GetClassname(), GetDebugName(), inputdata.value.String() );
-		return;
-	}
+    if ( pGoal == NULL )
+    {
+        DevMsg( "SetPoliceGoal: %s (%s) unable to find ai_goal_police: %s\n", GetClassname(), GetDebugName(), inputdata.value.String() );
+        return;
+    }
 
-	CAI_PoliceGoal *pPoliceGoal = dynamic_cast<CAI_PoliceGoal *>(pGoal);
+    CAI_PoliceGoal* pPoliceGoal = dynamic_cast< CAI_PoliceGoal* >(pGoal);
 
-	if ( pPoliceGoal == NULL )
-	{
-		DevMsg( "SetPoliceGoal: %s (%s)'s target %s is not an ai_goal_police entity!\n", GetClassname(), GetDebugName(), inputdata.value.String() );
-		return;
-	}
+    if ( pPoliceGoal == NULL )
+    {
+        DevMsg( "SetPoliceGoal: %s (%s)'s target %s is not an ai_goal_police entity!\n", GetClassname(), GetDebugName(), inputdata.value.String() );
+        return;
+    }
 
-	m_PolicingBehavior.Enable( pPoliceGoal );
+    m_PolicingBehavior.Enable( pPoliceGoal );
 }
 #endif
 
@@ -582,16 +582,16 @@ void CNPC_Combine::InputSetPoliceGoal( inputdata_t &inputdata )
 //-----------------------------------------------------------------------------
 void CNPC_Combine::Precache()
 {
-	PrecacheModel("models/Weapons/w_grenade.mdl");
-	UTIL_PrecacheOther( "npc_handgrenade" );
+    PrecacheModel( "models/Weapons/w_grenade.mdl" );
+    UTIL_PrecacheOther( "npc_handgrenade" );
 
-	PrecacheScriptSound( "NPC_Combine.GrenadeLaunch" );
-	PrecacheScriptSound( "NPC_Combine.WeaponBash" );
+    PrecacheScriptSound( "NPC_Combine.GrenadeLaunch" );
+    PrecacheScriptSound( "NPC_Combine.WeaponBash" );
 #ifndef MAPBASE // Now that we use WeaponSound(SPECIAL1), this isn't necessary
-	PrecacheScriptSound( "Weapon_CombineGuard.Special1" );
+    PrecacheScriptSound( "Weapon_CombineGuard.Special1" );
 #endif
 
-	BaseClass::Precache();
+    BaseClass::Precache();
 }
 
 //-----------------------------------------------------------------------------
@@ -599,9 +599,9 @@ void CNPC_Combine::Precache()
 void CNPC_Combine::Activate()
 {
 #ifndef MAPBASE
-	s_iszShotgunClassname = FindPooledString( "weapon_shotgun" );
+    s_iszShotgunClassname = FindPooledString( "weapon_shotgun" );
 #endif
-	BaseClass::Activate();
+    BaseClass::Activate();
 }
 
 //-----------------------------------------------------------------------------
@@ -611,60 +611,60 @@ void CNPC_Combine::Activate()
 //-----------------------------------------------------------------------------
 void CNPC_Combine::Spawn( void )
 {
-	SetHullType(HULL_HUMAN);
-	SetHullSizeNormal();
+    SetHullType( HULL_HUMAN );
+    SetHullSizeNormal();
 
-	SetSolid( SOLID_BBOX );
-	AddSolidFlags( FSOLID_NOT_STANDABLE );
-	SetMoveType( MOVETYPE_STEP );
-	SetBloodColor( BLOOD_COLOR_RED );
-	m_flFieldOfView			= -0.2;// indicates the width of this NPC's forward view cone ( as a dotproduct result )
-	m_NPCState				= NPC_STATE_NONE;
-	m_flNextGrenadeCheck	= gpGlobals->curtime + 1;
-	m_flNextPainSoundTime	= 0;
-	m_flNextAlertSoundTime	= 0;
-	m_bShouldPatrol			= false;
+    SetSolid( SOLID_BBOX );
+    AddSolidFlags( FSOLID_NOT_STANDABLE );
+    SetMoveType( MOVETYPE_STEP );
+    SetBloodColor( BLOOD_COLOR_RED );
+    m_flFieldOfView = -0.2;// indicates the width of this NPC's forward view cone ( as a dotproduct result )
+    m_NPCState = NPC_STATE_NONE;
+    m_flNextGrenadeCheck = gpGlobals->curtime + 1;
+    m_flNextPainSoundTime = 0;
+    m_flNextAlertSoundTime = 0;
+    m_bShouldPatrol = false;
 
-	//	CapabilitiesAdd( bits_CAP_TURN_HEAD | bits_CAP_MOVE_GROUND | bits_CAP_MOVE_JUMP | bits_CAP_MOVE_CLIMB);
-	// JAY: Disabled jump for now - hard to compare to HL1
-	CapabilitiesAdd( bits_CAP_TURN_HEAD | bits_CAP_MOVE_GROUND );
+    //	CapabilitiesAdd( bits_CAP_TURN_HEAD | bits_CAP_MOVE_GROUND | bits_CAP_MOVE_JUMP | bits_CAP_MOVE_CLIMB);
+    // JAY: Disabled jump for now - hard to compare to HL1
+    CapabilitiesAdd( bits_CAP_TURN_HEAD | bits_CAP_MOVE_GROUND );
 
-	CapabilitiesAdd( bits_CAP_AIM_GUN );
+    CapabilitiesAdd( bits_CAP_AIM_GUN );
 
-	// Innate range attack for grenade
-	// CapabilitiesAdd(bits_CAP_INNATE_RANGE_ATTACK2 );
+    // Innate range attack for grenade
+    // CapabilitiesAdd(bits_CAP_INNATE_RANGE_ATTACK2 );
 
-	// Innate range attack for kicking
-	CapabilitiesAdd(bits_CAP_INNATE_MELEE_ATTACK1 );
+    // Innate range attack for kicking
+    CapabilitiesAdd( bits_CAP_INNATE_MELEE_ATTACK1 );
 
-	// Can be in a squad
-	CapabilitiesAdd( bits_CAP_SQUAD);
-	CapabilitiesAdd( bits_CAP_USE_WEAPONS );
+    // Can be in a squad
+    CapabilitiesAdd( bits_CAP_SQUAD );
+    CapabilitiesAdd( bits_CAP_USE_WEAPONS );
 
-	CapabilitiesAdd( bits_CAP_DUCK );				// In reloading and cover
+    CapabilitiesAdd( bits_CAP_DUCK );				// In reloading and cover
 
-	CapabilitiesAdd( bits_CAP_NO_HIT_SQUADMATES );
+    CapabilitiesAdd( bits_CAP_NO_HIT_SQUADMATES );
 
-	m_bFirstEncounter	= true;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
+    m_bFirstEncounter = true;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
-	m_HackedGunPos = Vector ( 0, 0, 55 );
+    m_HackedGunPos = Vector( 0, 0, 55 );
 
-	m_flStopMoveShootTime = FLT_MAX; // Move and shoot defaults on.
-	m_MoveAndShootOverlay.SetInitialDelay( 0.75 ); // But with a bit of a delay.
+    m_flStopMoveShootTime = FLT_MAX; // Move and shoot defaults on.
+    m_MoveAndShootOverlay.SetInitialDelay( 0.75 ); // But with a bit of a delay.
 
-	m_flNextLostSoundTime		= 0;
-	m_flAlertPatrolTime			= 0;
+    m_flNextLostSoundTime = 0;
+    m_flAlertPatrolTime = 0;
 
-	m_flNextAltFireTime = gpGlobals->curtime;
+    m_flNextAltFireTime = gpGlobals->curtime;
 
-	NPCInit();
+    NPCInit();
 
 #ifdef MAPBASE
-	// This was moved from CalcWeaponProficiency() so soldiers don't change skin unnaturally and uncontrollably
-	if ( GetActiveWeapon() && EntIsClass(GetActiveWeapon(), gm_isz_class_Shotgun) && m_nSkin != COMBINE_SKIN_SHOTGUNNER )
-	{
-		m_nSkin = COMBINE_SKIN_SHOTGUNNER;
-	}
+    // This was moved from CalcWeaponProficiency() so soldiers don't change skin unnaturally and uncontrollably
+    if ( GetActiveWeapon() && EntIsClass( GetActiveWeapon(), gm_isz_class_Shotgun ) && m_nSkin != COMBINE_SKIN_SHOTGUNNER )
+    {
+        m_nSkin = COMBINE_SKIN_SHOTGUNNER;
+    }
 #endif
 }
 
@@ -674,17 +674,17 @@ void CNPC_Combine::Spawn( void )
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::CreateBehaviors()
 {
-	AddBehavior( &m_RappelBehavior );
-	AddBehavior( &m_ActBusyBehavior );
-	AddBehavior( &m_AssaultBehavior );
-	AddBehavior( &m_StandoffBehavior );
-	AddBehavior( &m_FollowBehavior );
-	AddBehavior( &m_FuncTankBehavior );
+    AddBehavior( &m_RappelBehavior );
+    AddBehavior( &m_ActBusyBehavior );
+    AddBehavior( &m_AssaultBehavior );
+    AddBehavior( &m_StandoffBehavior );
+    AddBehavior( &m_FollowBehavior );
+    AddBehavior( &m_FuncTankBehavior );
 #ifdef MAPBASE
-	AddBehavior( &m_PolicingBehavior );
+    AddBehavior( &m_PolicingBehavior );
 #endif
 
-	return BaseClass::CreateBehaviors();
+    return BaseClass::CreateBehaviors();
 }
 
 //-----------------------------------------------------------------------------
@@ -692,132 +692,132 @@ bool CNPC_Combine::CreateBehaviors()
 void CNPC_Combine::PostNPCInit()
 {
 #ifndef MAPBASE
-	if( IsElite() )
-	{
-		// Give a warning if a Combine Soldier is equipped with anything other than
-		// an AR2. 
-		if( !GetActiveWeapon() || !FClassnameIs( GetActiveWeapon(), "weapon_ar2" ) )
-		{
-			DevWarning("**Combine Elite Soldier MUST be equipped with AR2\n");
-		}
-	}
+    if ( IsElite() )
+    {
+        // Give a warning if a Combine Soldier is equipped with anything other than
+        // an AR2. 
+        if ( !GetActiveWeapon() || !FClassnameIs( GetActiveWeapon(), "weapon_ar2" ) )
+        {
+            DevWarning( "**Combine Elite Soldier MUST be equipped with AR2\n" );
+        }
+    }
 #endif
 
-	BaseClass::PostNPCInit();
+    BaseClass::PostNPCInit();
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void CNPC_Combine::GatherConditions()
 {
-	BaseClass::GatherConditions();
+    BaseClass::GatherConditions();
 
-	ClearCondition( COND_COMBINE_ATTACK_SLOT_AVAILABLE );
+    ClearCondition( COND_COMBINE_ATTACK_SLOT_AVAILABLE );
 
-	if( GetState() == NPC_STATE_COMBAT )
-	{
-		// [MODIFICATION-Dynamic Cover] - Start
-		if (GetEnemy()!=NULL) {
-			if (gpGlobals->curtime>=m_flNextPropSearchTime)
-			{
-				// Clear conditions and search for new props
-				ClearCondition( COND_COMBINE_HAS_LOW_COVER );
-				ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
-				DynamicPropCover();
+    if ( GetState() == NPC_STATE_COMBAT )
+    {
+        // [MODIFICATION-Dynamic Cover] - Start
+        if ( GetEnemy() != NULL ) {
+            if ( gpGlobals->curtime >= m_flNextPropSearchTime )
+            {
+                // Clear conditions and search for new props
+                ClearCondition( COND_COMBINE_HAS_LOW_COVER );
+                ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
+                DynamicPropCover();
 
-				// Set next search time (8-12 seconds)
-				float randomInterval = RandomFloat( 8.0f, 12.0f );
-				m_flNextPropSearchTime = gpGlobals->curtime+randomInterval;
-				Msg( "[DEBUG] GatherConditions: NEW SEARCH executed - next in %.1fs\n", randomInterval );
-			}
-			else
-			{
-				// Use already selected props
-				Msg( "[DEBUG] GatherConditions: Keeping current props - next search in %.1fs\n",
-					m_flNextPropSearchTime-gpGlobals->curtime );
-			}
+                // Set next search time (8-12 seconds)
+                float randomInterval = RandomFloat( 8.0f, 12.0f );
+                m_flNextPropSearchTime = gpGlobals->curtime + randomInterval;
+                Msg( "[DEBUG] GatherConditions: NEW SEARCH executed - next in %.1fs\n", randomInterval );
+            }
+            else
+            {
+                // Use already selected props
+                Msg( "[DEBUG] GatherConditions: Keeping current props - next search in %.1fs\n",
+                    m_flNextPropSearchTime - gpGlobals->curtime );
+            }
 
-			// Check if enemy is too close to current props
-			Vector enemyPos = GetEnemy()->GetAbsOrigin();
-			const float MIN_COVER_DISTANCE = 150.0f;
-			bool enemyTooClose = (m_hLowCoverProp&&enemyPos.DistTo( m_hLowCoverProp->GetAbsOrigin() )<MIN_COVER_DISTANCE)||
-				(m_hHighCoverProp&&enemyPos.DistTo( m_hHighCoverProp->WorldSpaceCenter() )<MIN_COVER_DISTANCE);
+            // Check if enemy is too close to current props
+            Vector enemyPos = GetEnemy()->GetAbsOrigin();
+            const float MIN_COVER_DISTANCE = 150.0f;
+            bool enemyTooClose = (m_hLowCoverProp && enemyPos.DistTo( m_hLowCoverProp->GetAbsOrigin() ) < MIN_COVER_DISTANCE) ||
+                (m_hHighCoverProp && enemyPos.DistTo( m_hHighCoverProp->WorldSpaceCenter() ) < MIN_COVER_DISTANCE);
 
-			if (enemyTooClose)
-			{
-				Msg( "[DEBUG] GatherConditions: Enemy too close to current props\n" );
-			}
-			else
-			{
-				// Validate LOW COVER
-				if (m_hLowCoverProp)
-				{
-					Vector enemyToProp = m_hLowCoverProp->GetAbsOrigin()-enemyPos;
-					VectorNormalize( enemyToProp );
-					enemyToProp.z = 0;
-					Vector testPos = m_hLowCoverProp->GetAbsOrigin()+(enemyToProp*80.0f);
+            if ( enemyTooClose )
+            {
+                Msg( "[DEBUG] GatherConditions: Enemy too close to current props\n" );
+            }
+            else
+            {
+                // Validate LOW COVER
+                if ( m_hLowCoverProp )
+                {
+                    Vector enemyToProp = m_hLowCoverProp->GetAbsOrigin() - enemyPos;
+                    VectorNormalize( enemyToProp );
+                    enemyToProp.z = 0;
+                    Vector testPos = m_hLowCoverProp->GetAbsOrigin() + (enemyToProp * 80.0f);
 
-					if (GetNavigator()->CanFitAtPosition( testPos, MASK_NPCSOLID ))
-					{
-						SetCondition( COND_COMBINE_HAS_LOW_COVER );
-						Msg( "[DEBUG] GatherConditions: LOW COVER valid and navigable\n" );
-					}
-					else
-					{
-						m_hLowCoverProp = NULL;
-						Msg( "[DEBUG] GatherConditions: LOW COVER discarded - not navigable\n" );
-					}
-				}
+                    if ( GetNavigator()->CanFitAtPosition( testPos, MASK_NPCSOLID ) )
+                    {
+                        SetCondition( COND_COMBINE_HAS_LOW_COVER );
+                        Msg( "[DEBUG] GatherConditions: LOW COVER valid and navigable\n" );
+                    }
+                    else
+                    {
+                        m_hLowCoverProp = NULL;
+                        Msg( "[DEBUG] GatherConditions: LOW COVER discarded - not navigable\n" );
+                    }
+                }
 
-				// Validate HIGH COVER
-				if (m_hHighCoverProp)
-				{
-					Vector enemyToProp = m_hHighCoverProp->WorldSpaceCenter()-enemyPos;
-					VectorNormalize( enemyToProp );
-					enemyToProp.z = 0;
-					Vector testPos = m_hHighCoverProp->WorldSpaceCenter()+(enemyToProp*80.0f);
+                // Validate HIGH COVER
+                if ( m_hHighCoverProp )
+                {
+                    Vector enemyToProp = m_hHighCoverProp->WorldSpaceCenter() - enemyPos;
+                    VectorNormalize( enemyToProp );
+                    enemyToProp.z = 0;
+                    Vector testPos = m_hHighCoverProp->WorldSpaceCenter() + (enemyToProp * 80.0f);
 
-					if (GetNavigator()->CanFitAtPosition( testPos, MASK_NPCSOLID ))
-					{
-						SetCondition( COND_COMBINE_HAS_HIGH_COVER );
-						Msg( "[DEBUG] GatherConditions: HIGH COVER valid and navigable\n" );
-					}
-					else
-					{
-						m_hHighCoverProp = NULL;
-						Msg( "[DEBUG] GatherConditions: HIGH COVER discarded - not navigable\n" );
-					}
-				}
-			} // [MODIFICATION-Dynamic Cover] - End
-		}
+                    if ( GetNavigator()->CanFitAtPosition( testPos, MASK_NPCSOLID ) )
+                    {
+                        SetCondition( COND_COMBINE_HAS_HIGH_COVER );
+                        Msg( "[DEBUG] GatherConditions: HIGH COVER valid and navigable\n" );
+                    }
+                    else
+                    {
+                        m_hHighCoverProp = NULL;
+                        Msg( "[DEBUG] GatherConditions: HIGH COVER discarded - not navigable\n" );
+                    }
+                }
+            } // [MODIFICATION-Dynamic Cover] - End
+        }
 #ifdef MAPBASE
-		// Don't override the standoff
-		if( IsCurSchedule( SCHED_COMBINE_WAIT_IN_COVER, false ) && !m_StandoffBehavior.IsActive() )
+        // Don't override the standoff
+        if ( IsCurSchedule( SCHED_COMBINE_WAIT_IN_COVER, false ) && !m_StandoffBehavior.IsActive() )
 #else
-		if( IsCurSchedule( SCHED_COMBINE_WAIT_IN_COVER, false ) )
+        if ( IsCurSchedule( SCHED_COMBINE_WAIT_IN_COVER, false ) )
 #endif
-		{
-			// Soldiers that are standing around doing nothing poll for attack slots so
-			// that they can respond quickly when one comes available. If they can 
-			// occupy a vacant attack slot, they do so. This holds the slot until their
-			// schedule breaks and schedule selection runs again, essentially reserving this
-			// slot. If they do not select an attack schedule, then they'll release the slot.
-			if( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-			{
-				SetCondition( COND_COMBINE_ATTACK_SLOT_AVAILABLE );
-			}
-		}
+        {
+            // Soldiers that are standing around doing nothing poll for attack slots so
+            // that they can respond quickly when one comes available. If they can 
+            // occupy a vacant attack slot, they do so. This holds the slot until their
+            // schedule breaks and schedule selection runs again, essentially reserving this
+            // slot. If they do not select an attack schedule, then they'll release the slot.
+            if ( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+            {
+                SetCondition( COND_COMBINE_ATTACK_SLOT_AVAILABLE );
+            }
+        }
 
-		if( IsUsingTacticalVariant(TACTICAL_VARIANT_PRESSURE_ENEMY_UNTIL_CLOSE) )
-		{
-			if( GetEnemy() != NULL && !HasCondition(COND_ENEMY_OCCLUDED) )
-			{
-				// Now we're close to our enemy, stop using the tactical variant.
-				if( GetAbsOrigin().DistToSqr(GetEnemy()->GetAbsOrigin()) < Square(30.0f * 12.0f) )
-					m_iTacticalVariant = TACTICAL_VARIANT_DEFAULT;
-			}
-		}
-	}
+        if ( IsUsingTacticalVariant( TACTICAL_VARIANT_PRESSURE_ENEMY_UNTIL_CLOSE ) )
+        {
+            if ( GetEnemy() != NULL && !HasCondition( COND_ENEMY_OCCLUDED ) )
+            {
+                // Now we're close to our enemy, stop using the tactical variant.
+                if ( GetAbsOrigin().DistToSqr( GetEnemy()->GetAbsOrigin() ) < Square( 30.0f * 12.0f ) )
+                    m_iTacticalVariant = TACTICAL_VARIANT_DEFAULT;
+            }
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -825,48 +825,48 @@ void CNPC_Combine::GatherConditions()
 //-----------------------------------------------------------------------------
 void CNPC_Combine::PrescheduleThink()
 {
-	BaseClass::PrescheduleThink();
+    BaseClass::PrescheduleThink();
 
-	// Speak any queued sentences
+    // Speak any queued sentences
 #ifndef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-	m_Sentences.UpdateSentenceQueue();
+    m_Sentences.UpdateSentenceQueue();
 #endif
 
-	if ( IsOnFire() )
-	{
-		SetCondition( COND_COMBINE_ON_FIRE );
-	}
-	else
-	{
-		ClearCondition( COND_COMBINE_ON_FIRE );
-	}
+    if ( IsOnFire() )
+    {
+        SetCondition( COND_COMBINE_ON_FIRE );
+    }
+    else
+    {
+        ClearCondition( COND_COMBINE_ON_FIRE );
+    }
 
-	extern ConVar ai_debug_shoot_positions;
-	if ( ai_debug_shoot_positions.GetBool() )
-		NDebugOverlay::Cross3D( EyePosition(), 16, 0, 255, 0, false, 0.1 );
+    extern ConVar ai_debug_shoot_positions;
+    if ( ai_debug_shoot_positions.GetBool() )
+        NDebugOverlay::Cross3D( EyePosition(), 16, 0, 255, 0, false, 0.1 );
 
-	if( gpGlobals->curtime >= m_flStopMoveShootTime )
-	{
-		// Time to stop move and shoot and start facing the way I'm running.
-		// This makes the combine look attentive when disengaging, but prevents
-		// them from always running around facing you.
-		//
-		// Only do this if it won't be immediately shut off again.
-		if( GetNavigator()->GetPathTimeToGoal() > 1.0f )
-		{
-			m_MoveAndShootOverlay.SuspendMoveAndShoot( 5.0f );
-			m_flStopMoveShootTime = FLT_MAX;
-		}
-	}
+    if ( gpGlobals->curtime >= m_flStopMoveShootTime )
+    {
+        // Time to stop move and shoot and start facing the way I'm running.
+        // This makes the combine look attentive when disengaging, but prevents
+        // them from always running around facing you.
+        //
+        // Only do this if it won't be immediately shut off again.
+        if ( GetNavigator()->GetPathTimeToGoal() > 1.0f )
+        {
+            m_MoveAndShootOverlay.SuspendMoveAndShoot( 5.0f );
+            m_flStopMoveShootTime = FLT_MAX;
+        }
+    }
 
-	if( m_flGroundSpeed > 0 && GetState() == NPC_STATE_COMBAT && m_MoveAndShootOverlay.IsSuspended() )
-	{
-		// Return to move and shoot when near my goal so that I 'tuck into' the location facing my enemy.
-		if( GetNavigator()->GetPathTimeToGoal() <= 1.0f )
-		{
-			m_MoveAndShootOverlay.SuspendMoveAndShoot( 0 );
-		}
-	}
+    if ( m_flGroundSpeed > 0 && GetState() == NPC_STATE_COMBAT && m_MoveAndShootOverlay.IsSuspended() )
+    {
+        // Return to move and shoot when near my goal so that I 'tuck into' the location facing my enemy.
+        if ( GetNavigator()->GetPathTimeToGoal() <= 1.0f )
+        {
+            m_MoveAndShootOverlay.SuspendMoveAndShoot( 0 );
+        }
+    }
 }
 
 #ifndef MAPBASE
@@ -874,39 +874,39 @@ void CNPC_Combine::PrescheduleThink()
 //-----------------------------------------------------------------------------
 void CNPC_Combine::DelayAltFireAttack( float flDelay )
 {
-	float flNextAltFire = gpGlobals->curtime + flDelay;
+    float flNextAltFire = gpGlobals->curtime + flDelay;
 
-	if( flNextAltFire > m_flNextAltFireTime )
-	{
-		// Don't let this delay order preempt a previous request to wait longer.
-		m_flNextAltFireTime = flNextAltFire;
-	}
+    if ( flNextAltFire > m_flNextAltFireTime )
+    {
+        // Don't let this delay order preempt a previous request to wait longer.
+        m_flNextAltFireTime = flNextAltFire;
+    }
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void CNPC_Combine::DelaySquadAltFireAttack( float flDelay )
 {
-	// Make sure to delay my own alt-fire attack.
-	DelayAltFireAttack( flDelay );
+    // Make sure to delay my own alt-fire attack.
+    DelayAltFireAttack( flDelay );
 
-	AISquadIter_t iter;
-	CAI_BaseNPC *pSquadmate = m_pSquad ? m_pSquad->GetFirstMember( &iter ) : NULL;
-	while ( pSquadmate )
-	{
-		CNPC_Combine *pCombine = dynamic_cast<CNPC_Combine*>(pSquadmate);
+    AISquadIter_t iter;
+    CAI_BaseNPC* pSquadmate = m_pSquad ? m_pSquad->GetFirstMember( &iter ) : NULL;
+    while ( pSquadmate )
+    {
+        CNPC_Combine* pCombine = dynamic_cast< CNPC_Combine* >(pSquadmate);
 
 #ifdef MAPBASE
-		if( pCombine && pCombine->IsAltFireCapable() )
+        if ( pCombine && pCombine->IsAltFireCapable() )
 #else
-		if( pCombine && pCombine->IsElite() )
+        if ( pCombine && pCombine->IsElite() )
 #endif
-		{
-			pCombine->DelayAltFireAttack( flDelay );
-		}
+        {
+            pCombine->DelayAltFireAttack( flDelay );
+        }
 
-		pSquadmate = m_pSquad->GetNextMember( &iter );
-	}
+        pSquadmate = m_pSquad->GetNextMember( &iter );
+    }
 }
 #endif
 
@@ -915,29 +915,29 @@ void CNPC_Combine::DelaySquadAltFireAttack( float flDelay )
 //-----------------------------------------------------------------------------
 float CNPC_Combine::MaxYawSpeed( void )
 {
-	switch( GetActivity() )
-	{
-	case ACT_TURN_LEFT:
-	case ACT_TURN_RIGHT:
-		return 45;
-		break;
-	case ACT_RUN:
-	case ACT_RUN_HURT:
-		return 15;
-		break;
-	case ACT_WALK:
-	case ACT_WALK_CROUCH:
-		return 25;
-		break;
-	case ACT_RANGE_ATTACK1:
-	case ACT_RANGE_ATTACK2:
-	case ACT_MELEE_ATTACK1:
-	case ACT_MELEE_ATTACK2:
-		return 35;
-	default:
-		return 35;
-		break;
-	}
+    switch ( GetActivity() )
+    {
+        case ACT_TURN_LEFT:
+        case ACT_TURN_RIGHT:
+            return 45;
+            break;
+        case ACT_RUN:
+        case ACT_RUN_HURT:
+            return 15;
+            break;
+        case ACT_WALK:
+        case ACT_WALK_CROUCH:
+            return 25;
+            break;
+        case ACT_RANGE_ATTACK1:
+        case ACT_RANGE_ATTACK2:
+        case ACT_MELEE_ATTACK1:
+        case ACT_MELEE_ATTACK2:
+            return 35;
+        default:
+            return 35;
+            break;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -945,42 +945,42 @@ float CNPC_Combine::MaxYawSpeed( void )
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::ShouldMoveAndShoot()
 {
-	// Set this timer so that gpGlobals->curtime can't catch up to it. 
-	// Essentially, we're saying that we're not going to interfere with 
-	// what the AI wants to do with move and shoot. 
-	//
-	// If any code below changes this timer, the code is saying 
-	// "It's OK to move and shoot until gpGlobals->curtime == m_flStopMoveShootTime"
-	m_flStopMoveShootTime = FLT_MAX;
+    // Set this timer so that gpGlobals->curtime can't catch up to it. 
+    // Essentially, we're saying that we're not going to interfere with 
+    // what the AI wants to do with move and shoot. 
+    //
+    // If any code below changes this timer, the code is saying 
+    // "It's OK to move and shoot until gpGlobals->curtime == m_flStopMoveShootTime"
+    m_flStopMoveShootTime = FLT_MAX;
 
-	if( IsCurSchedule( SCHED_COMBINE_HIDE_AND_RELOAD, false ) )
-		m_flStopMoveShootTime = gpGlobals->curtime + random->RandomFloat( 0.4f, 0.6f );
+    if ( IsCurSchedule( SCHED_COMBINE_HIDE_AND_RELOAD, false ) )
+        m_flStopMoveShootTime = gpGlobals->curtime + random->RandomFloat( 0.4f, 0.6f );
 
-	if( IsCurSchedule( SCHED_TAKE_COVER_FROM_BEST_SOUND, false ) )
-		return false;
+    if ( IsCurSchedule( SCHED_TAKE_COVER_FROM_BEST_SOUND, false ) )
+        return false;
 
-	if( IsCurSchedule( SCHED_COMBINE_TAKE_COVER_FROM_BEST_SOUND, false ) )
-		return false;
+    if ( IsCurSchedule( SCHED_COMBINE_TAKE_COVER_FROM_BEST_SOUND, false ) )
+        return false;
 
-	if( IsCurSchedule( SCHED_COMBINE_RUN_AWAY_FROM_BEST_SOUND, false ) )
-		return false;
+    if ( IsCurSchedule( SCHED_COMBINE_RUN_AWAY_FROM_BEST_SOUND, false ) )
+        return false;
 
-	if( HasCondition( COND_NO_PRIMARY_AMMO, false ) )
-		m_flStopMoveShootTime = gpGlobals->curtime + random->RandomFloat( 0.4f, 0.6f );
+    if ( HasCondition( COND_NO_PRIMARY_AMMO, false ) )
+        m_flStopMoveShootTime = gpGlobals->curtime + random->RandomFloat( 0.4f, 0.6f );
 
-	if( m_pSquad && IsCurSchedule( SCHED_COMBINE_TAKE_COVER1, false ) )
-		m_flStopMoveShootTime = gpGlobals->curtime + random->RandomFloat( 0.4f, 0.6f );
+    if ( m_pSquad && IsCurSchedule( SCHED_COMBINE_TAKE_COVER1, false ) )
+        m_flStopMoveShootTime = gpGlobals->curtime + random->RandomFloat( 0.4f, 0.6f );
 
-	return BaseClass::ShouldMoveAndShoot();
+    return BaseClass::ShouldMoveAndShoot();
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: turn in the direction of movement
 // Output :
 //-----------------------------------------------------------------------------
-bool CNPC_Combine::OverrideMoveFacing( const AILocalMoveGoal_t &move, float flInterval )
+bool CNPC_Combine::OverrideMoveFacing( const AILocalMoveGoal_t& move, float flInterval )
 {
-	return BaseClass::OverrideMoveFacing( move, flInterval );
+    return BaseClass::OverrideMoveFacing( move, flInterval );
 }
 
 //-----------------------------------------------------------------------------
@@ -988,9 +988,9 @@ bool CNPC_Combine::OverrideMoveFacing( const AILocalMoveGoal_t &move, float flIn
 //
 //
 //-----------------------------------------------------------------------------
-Class_T	CNPC_Combine::Classify ( void )
+Class_T	CNPC_Combine::Classify( void )
 {
-	return CLASS_COMBINE;
+    return CLASS_COMBINE;
 }
 
 #ifdef MAPBASE
@@ -999,8 +999,8 @@ Class_T	CNPC_Combine::Classify ( void )
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::IsAltFireCapable( void )
 {
-	// The base class tells us if we're carrying an alt-fire-able weapon.
-	return (IsElite() || m_bAlternateCapable) && BaseClass::IsAltFireCapable();
+    // The base class tells us if we're carrying an alt-fire-able weapon.
+    return (IsElite() || m_bAlternateCapable) && BaseClass::IsAltFireCapable();
 }
 
 //-----------------------------------------------------------------------------
@@ -1008,7 +1008,7 @@ bool CNPC_Combine::IsAltFireCapable( void )
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::IsGrenadeCapable( void )
 {
-	return !IsElite() || m_bAlternateCapable;
+    return !IsElite() || m_bAlternateCapable;
 }
 #endif
 
@@ -1018,734 +1018,734 @@ bool CNPC_Combine::IsGrenadeCapable( void )
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::IsCurTaskContinuousMove()
 {
-	const Task_t* pTask = GetTask();
-	if ( pTask && (pTask->iTask == TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY) )
-		return true;
+    const Task_t* pTask = GetTask();
+    if ( pTask && (pTask->iTask == TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY) )
+        return true;
 
-	return BaseClass::IsCurTaskContinuousMove();
+    return BaseClass::IsCurTaskContinuousMove();
 }
 
 
 //-----------------------------------------------------------------------------
 // Chase the enemy, updating the target position as the player moves
 //-----------------------------------------------------------------------------
-void CNPC_Combine::StartTaskChaseEnemyContinuously( const Task_t *pTask )
+void CNPC_Combine::StartTaskChaseEnemyContinuously( const Task_t* pTask )
 {
-	CBaseEntity *pEnemy = GetEnemy();
-	if ( !pEnemy )
-	{
-		TaskFail( FAIL_NO_ENEMY );
-		return;
-	}
+    CBaseEntity* pEnemy = GetEnemy();
+    if ( !pEnemy )
+    {
+        TaskFail( FAIL_NO_ENEMY );
+        return;
+    }
 
-	// We're done once we get close enough
-	if ( WorldSpaceCenter().DistToSqr( pEnemy->WorldSpaceCenter() ) <= pTask->flTaskData * pTask->flTaskData )
-	{
-		TaskComplete();
-		return;
-	}
+    // We're done once we get close enough
+    if ( WorldSpaceCenter().DistToSqr( pEnemy->WorldSpaceCenter() ) <= pTask->flTaskData * pTask->flTaskData )
+    {
+        TaskComplete();
+        return;
+    }
 
-	// TASK_GET_PATH_TO_ENEMY
-	if ( IsUnreachable( pEnemy ) )
-	{
-		TaskFail(FAIL_NO_ROUTE);
-		return;
-	}
+    // TASK_GET_PATH_TO_ENEMY
+    if ( IsUnreachable( pEnemy ) )
+    {
+        TaskFail( FAIL_NO_ROUTE );
+        return;
+    }
 
-	if ( !GetNavigator()->SetGoal( GOALTYPE_ENEMY, AIN_NO_PATH_TASK_FAIL ) )
-	{
-		// no way to get there =( 
-		DevWarning( 2, "GetPathToEnemy failed!!\n" );
-		RememberUnreachable( pEnemy );
-		TaskFail(FAIL_NO_ROUTE);
-		return;
-	}
+    if ( !GetNavigator()->SetGoal( GOALTYPE_ENEMY, AIN_NO_PATH_TASK_FAIL ) )
+    {
+        // no way to get there =( 
+        DevWarning( 2, "GetPathToEnemy failed!!\n" );
+        RememberUnreachable( pEnemy );
+        TaskFail( FAIL_NO_ROUTE );
+        return;
+    }
 
-	// NOTE: This is TaskRunPath here.
-	if ( TranslateActivity( ACT_RUN ) != ACT_INVALID )
-	{
-		GetNavigator()->SetMovementActivity( ACT_RUN );
-	}
-	else
-	{
-		GetNavigator()->SetMovementActivity(ACT_WALK);
-	}
+    // NOTE: This is TaskRunPath here.
+    if ( TranslateActivity( ACT_RUN ) != ACT_INVALID )
+    {
+        GetNavigator()->SetMovementActivity( ACT_RUN );
+    }
+    else
+    {
+        GetNavigator()->SetMovementActivity( ACT_WALK );
+    }
 
-	// Cover is void once I move
-	Forget( bits_MEMORY_INCOVER );
+    // Cover is void once I move
+    Forget( bits_MEMORY_INCOVER );
 
-	if (GetNavigator()->GetGoalType() == GOALTYPE_NONE)
-	{
-		TaskComplete();
-		GetNavigator()->ClearGoal();		// Clear residual state
-		return;
-	}
+    if ( GetNavigator()->GetGoalType() == GOALTYPE_NONE )
+    {
+        TaskComplete();
+        GetNavigator()->ClearGoal();		// Clear residual state
+        return;
+    }
 
-	// No shooting delay when in this mode
-	m_MoveAndShootOverlay.SetInitialDelay( 0.0 );
+    // No shooting delay when in this mode
+    m_MoveAndShootOverlay.SetInitialDelay( 0.0 );
 
-	if (!GetNavigator()->IsGoalActive())
-	{
-		SetIdealActivity( GetStoppedActivity() );
-	}
-	else
-	{
-		// Check validity of goal type
-		ValidateNavGoal();
-	}
+    if ( !GetNavigator()->IsGoalActive() )
+    {
+        SetIdealActivity( GetStoppedActivity() );
+    }
+    else
+    {
+        // Check validity of goal type
+        ValidateNavGoal();
+    }
 
-	// set that we're probably going to stop before the goal
-	GetNavigator()->SetArrivalDistance( pTask->flTaskData );
-	m_vSavePosition = GetEnemy()->WorldSpaceCenter();
+    // set that we're probably going to stop before the goal
+    GetNavigator()->SetArrivalDistance( pTask->flTaskData );
+    m_vSavePosition = GetEnemy()->WorldSpaceCenter();
 }
 
-void CNPC_Combine::RunTaskChaseEnemyContinuously( const Task_t *pTask )
+void CNPC_Combine::RunTaskChaseEnemyContinuously( const Task_t* pTask )
 {
-	if (!GetNavigator()->IsGoalActive())
-	{
-		SetIdealActivity( GetStoppedActivity() );
-	}
-	else
-	{
-		// Check validity of goal type
-		ValidateNavGoal();
-	}
+    if ( !GetNavigator()->IsGoalActive() )
+    {
+        SetIdealActivity( GetStoppedActivity() );
+    }
+    else
+    {
+        // Check validity of goal type
+        ValidateNavGoal();
+    }
 
-	CBaseEntity *pEnemy = GetEnemy();
-	if ( !pEnemy )
-	{
-		TaskFail( FAIL_NO_ENEMY );
-		return;
-	}
+    CBaseEntity* pEnemy = GetEnemy();
+    if ( !pEnemy )
+    {
+        TaskFail( FAIL_NO_ENEMY );
+        return;
+    }
 
-	// We're done once we get close enough
-	if ( WorldSpaceCenter().DistToSqr( pEnemy->WorldSpaceCenter() ) <= pTask->flTaskData * pTask->flTaskData )
-	{
-		GetNavigator()->StopMoving();
-		TaskComplete();
-		return;
-	}
+    // We're done once we get close enough
+    if ( WorldSpaceCenter().DistToSqr( pEnemy->WorldSpaceCenter() ) <= pTask->flTaskData * pTask->flTaskData )
+    {
+        GetNavigator()->StopMoving();
+        TaskComplete();
+        return;
+    }
 
-	// Recompute path if the enemy has moved too much
-	if ( m_vSavePosition.DistToSqr( pEnemy->WorldSpaceCenter() ) < (pTask->flTaskData * pTask->flTaskData) )
-		return;
+    // Recompute path if the enemy has moved too much
+    if ( m_vSavePosition.DistToSqr( pEnemy->WorldSpaceCenter() ) < (pTask->flTaskData * pTask->flTaskData) )
+        return;
 
-	if ( IsUnreachable( pEnemy ) )
-	{
-		TaskFail(FAIL_NO_ROUTE);
-		return;
-	}
+    if ( IsUnreachable( pEnemy ) )
+    {
+        TaskFail( FAIL_NO_ROUTE );
+        return;
+    }
 
-	if ( !GetNavigator()->RefindPathToGoal() )
-	{
-		TaskFail(FAIL_NO_ROUTE);
-		return;
-	}
+    if ( !GetNavigator()->RefindPathToGoal() )
+    {
+        TaskFail( FAIL_NO_ROUTE );
+        return;
+    }
 
-	m_vSavePosition = pEnemy->WorldSpaceCenter();
+    m_vSavePosition = pEnemy->WorldSpaceCenter();
 }
 
 //=========================================================
 // start task
 //=========================================================
-void CNPC_Combine::StartTask( const Task_t *pTask )
+void CNPC_Combine::StartTask( const Task_t* pTask )
 {
-	// NOTE: This reset is required because we change it in TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY
-	m_MoveAndShootOverlay.SetInitialDelay( 0.75 );
+    // NOTE: This reset is required because we change it in TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY
+    m_MoveAndShootOverlay.SetInitialDelay( 0.75 );
 
-	switch ( pTask->iTask )
-	{
-		case TASK_COMBINE_MOVE_TO_HIGH_COVER:  // [MODIFICATION-Dynamic Cover]
-		{
-			if (!m_hHighCoverProp||!GetEnemy())
-			{
-				TaskFail( "No prop or enemy for high cover" );
-				return;
-			}
+    switch ( pTask->iTask )
+    {
+        case TASK_COMBINE_MOVE_TO_HIGH_COVER:  // [MODIFICATION-Dynamic Cover]
+        {
+            if ( !m_hHighCoverProp || !GetEnemy() )
+            {
+                TaskFail( "No prop or enemy for high cover" );
+                return;
+            }
 
-			// Check if prop is at same level (not too high/low)
-			float heightDifference = fabs( m_hHighCoverProp->GetAbsOrigin().z-GetAbsOrigin().z );
-			if (heightDifference>100.0f)
-			{
-				Msg( "[DEBUG] HIGH_COVER: Prop too high/low (diff=%.1f), failing task\n", heightDifference );
-				ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
-				TaskFail( "Prop not at ground level" );
-				return;
-			}
+            // Check if prop is at same level (not too high/low)
+            float heightDifference = fabs( m_hHighCoverProp->GetAbsOrigin().z - GetAbsOrigin().z );
+            if ( heightDifference > 100.0f )
+            {
+                Msg( "[DEBUG] HIGH_COVER: Prop too high/low (diff=%.1f), failing task\n", heightDifference );
+                ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
+                TaskFail( "Prop not at ground level" );
+                return;
+            }
 
-			// Calculate positions based on prop geometry
-			Vector propCenter = m_hHighCoverProp->WorldSpaceCenter();
-			Vector enemyPos = GetEnemy()->GetAbsOrigin();
-			Vector enemyToProp = propCenter-enemyPos;
-			VectorNormalize( enemyToProp );
-			enemyToProp.z = 0;
-			Vector vMins, vMaxs;
-			m_hHighCoverProp->GetCollideable()->WorldSpaceSurroundingBounds( &vMins, &vMaxs );
-			const float BASE_OFFSET = 80.0f;
-			Vector positions[ 3 ] = {
-			 Vector( vMins.x, propCenter.y, vMins.z )+(enemyToProp*BASE_OFFSET),  // ESQUERDA
-			 propCenter+(enemyToProp*BASE_OFFSET),                              // CENTRO  
-			 Vector( vMaxs.x, propCenter.y, vMins.z )+(enemyToProp*BASE_OFFSET)   // DIREITA
-			};
-			// Choose zone closest to enemy
-			int chosenIndex = 1; // Default: center
-			float distances[ 3 ] = {
-			 enemyPos.DistTo( positions[ 0 ] ),
-			 enemyPos.DistTo( positions[ 1 ] ),
-			 enemyPos.DistTo( positions[ 2 ] )
-			};
-			if (distances[ 0 ]<distances[ 1 ]&&distances[ 0 ]<distances[ 2 ]) chosenIndex = 0;
-			else if (distances[ 2 ]<distances[ 1 ]&&distances[ 2 ]<distances[ 0 ]) chosenIndex = 2;
-			Vector targetPosition = positions[ chosenIndex ];
-			float distToTarget = GetAbsOrigin().DistTo( targetPosition );
-			Msg( "[DEBUG] HIGH_COVER: Zone %s, dist=%.1f\n",
-				(chosenIndex==0) ? "LEFT" : (chosenIndex==2) ? "RIGHT" : "CENTER", distToTarget );
-			// Check if already arrived
-			if (distToTarget<=50.0f)
-			{
-				ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
-				TaskComplete();
-				return;
-			}
-			// Set navigation (GatherConditions already validated navigability)
-			AI_NavGoal_t goal( targetPosition, ACT_RUN, AIN_DEF_TOLERANCE );
-			if (GetNavigator()->SetGoal( goal ))
-			{
-				TaskComplete();
-			}
-			else
-			{
-				TaskFail( "Could not set navigation goal" );
-			}
-		}
-		break;
+            // Calculate positions based on prop geometry
+            Vector propCenter = m_hHighCoverProp->WorldSpaceCenter();
+            Vector enemyPos = GetEnemy()->GetAbsOrigin();
+            Vector enemyToProp = propCenter - enemyPos;
+            VectorNormalize( enemyToProp );
+            enemyToProp.z = 0;
+            Vector vMins, vMaxs;
+            m_hHighCoverProp->GetCollideable()->WorldSpaceSurroundingBounds( &vMins, &vMaxs );
+            const float BASE_OFFSET = 80.0f;
+            Vector positions[ 3 ] = {
+             Vector( vMins.x, propCenter.y, vMins.z ) + (enemyToProp * BASE_OFFSET),  // ESQUERDA
+             propCenter + (enemyToProp * BASE_OFFSET),                              // CENTRO  
+             Vector( vMaxs.x, propCenter.y, vMins.z ) + (enemyToProp * BASE_OFFSET)   // DIREITA
+            };
+            // Choose zone closest to enemy
+            int chosenIndex = 1; // Default: center
+            float distances[ 3 ] = {
+             enemyPos.DistTo( positions[ 0 ] ),
+             enemyPos.DistTo( positions[ 1 ] ),
+             enemyPos.DistTo( positions[ 2 ] )
+            };
+            if ( distances[ 0 ] < distances[ 1 ] && distances[ 0 ] < distances[ 2 ] ) chosenIndex = 0;
+            else if ( distances[ 2 ] < distances[ 1 ] && distances[ 2 ] < distances[ 0 ] ) chosenIndex = 2;
+            Vector targetPosition = positions[ chosenIndex ];
+            float distToTarget = GetAbsOrigin().DistTo( targetPosition );
+            Msg( "[DEBUG] HIGH_COVER: Zone %s, dist=%.1f\n",
+                (chosenIndex == 0) ? "LEFT" : (chosenIndex == 2) ? "RIGHT" : "CENTER", distToTarget );
+            // Check if already arrived
+            if ( distToTarget <= 50.0f )
+            {
+                ClearCondition( COND_COMBINE_HAS_HIGH_COVER );
+                TaskComplete();
+                return;
+            }
+            // Set navigation (GatherConditions already validated navigability)
+            AI_NavGoal_t goal( targetPosition, ACT_RUN, AIN_DEF_TOLERANCE );
+            if ( GetNavigator()->SetGoal( goal ) )
+            {
+                TaskComplete();
+            }
+            else
+            {
+                TaskFail( "Could not set navigation goal" );
+            }
+        }
+        break;
 
 
 
-		case TASK_COMBINE_MOVE_TO_LOW_COVER: // [MODIFICATION-Dynamic Cover]
-		{
-			if (!m_hLowCoverProp||!GetEnemy())
-			{
-				TaskFail( "No prop or enemy for low cover" );
-				return;
-			}
+        case TASK_COMBINE_MOVE_TO_LOW_COVER: // [MODIFICATION-Dynamic Cover]
+        {
+            if ( !m_hLowCoverProp || !GetEnemy() )
+            {
+                TaskFail( "No prop or enemy for low cover" );
+                return;
+            }
 
-			// Calculate cover position
-			Vector enemyToProp = m_hLowCoverProp->GetAbsOrigin()-GetEnemy()->GetAbsOrigin();
-			VectorNormalize( enemyToProp );
-			enemyToProp.z = 0;
-			Vector targetPosition = m_hLowCoverProp->GetAbsOrigin()+(enemyToProp*80.0f);
+            // Calculate cover position
+            Vector enemyToProp = m_hLowCoverProp->GetAbsOrigin() - GetEnemy()->GetAbsOrigin();
+            VectorNormalize( enemyToProp );
+            enemyToProp.z = 0;
+            Vector targetPosition = m_hLowCoverProp->GetAbsOrigin() + (enemyToProp * 80.0f);
 
-			float distToTarget = GetAbsOrigin().DistTo( targetPosition );
-			Msg( "[DEBUG] LOW_COVER: dist=%.1f\n", distToTarget );
+            float distToTarget = GetAbsOrigin().DistTo( targetPosition );
+            Msg( "[DEBUG] LOW_COVER: dist=%.1f\n", distToTarget );
 
-			// Check if already arrived
-			if (distToTarget<=50.0f)
-			{
-				ClearCondition( COND_COMBINE_HAS_LOW_COVER );
-				TaskComplete();
-				return;
-			}
+            // Check if already arrived
+            if ( distToTarget <= 50.0f )
+            {
+                ClearCondition( COND_COMBINE_HAS_LOW_COVER );
+                TaskComplete();
+                return;
+            }
 
-			// Set navigation (GatherConditions already validated navigability)
-			AI_NavGoal_t goal( targetPosition, ACT_RUN, AIN_DEF_TOLERANCE );
-			if (GetNavigator()->SetGoal( goal ))
-			{
-				TaskComplete();
-			}
-			else
-			{
-				TaskFail( "Could not set navigation goal" );
-			}
-		}
-		break;
-	case TASK_COMBINE_SET_STANDING:
-		{
-			if ( pTask->flTaskData == 1.0f)
-			{
-				Stand();
-			}
-			else
-			{
-				Crouch();
-			}
-			TaskComplete();
-		}
-		break;
+            // Set navigation (GatherConditions already validated navigability)
+            AI_NavGoal_t goal( targetPosition, ACT_RUN, AIN_DEF_TOLERANCE );
+            if ( GetNavigator()->SetGoal( goal ) )
+            {
+                TaskComplete();
+            }
+            else
+            {
+                TaskFail( "Could not set navigation goal" );
+            }
+        }
+        break;
+        case TASK_COMBINE_SET_STANDING:
+        {
+            if ( pTask->flTaskData == 1.0f )
+            {
+                Stand();
+            }
+            else
+            {
+                Crouch();
+            }
+            TaskComplete();
+        }
+        break;
 
-	case TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY:
-		StartTaskChaseEnemyContinuously( pTask );
-		break;
+        case TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY:
+            StartTaskChaseEnemyContinuously( pTask );
+            break;
 
-	case TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET:
-		SetIdealActivity( (Activity)(int)pTask->flTaskData );
-		GetMotor()->SetIdealYawToTargetAndUpdate( m_vecAltFireTarget, AI_KEEP_YAW_SPEED );
-		break;
+        case TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET:
+            SetIdealActivity( ( Activity ) ( int ) pTask->flTaskData );
+            GetMotor()->SetIdealYawToTargetAndUpdate( m_vecAltFireTarget, AI_KEEP_YAW_SPEED );
+            break;
 
-	case TASK_COMBINE_SIGNAL_BEST_SOUND:
-		if( IsInSquad() && GetSquad()->NumMembers() > 1 )
-		{
-			CBasePlayer *pPlayer = AI_GetSinglePlayer();
+        case TASK_COMBINE_SIGNAL_BEST_SOUND:
+            if ( IsInSquad() && GetSquad()->NumMembers() > 1 )
+            {
+                CBasePlayer* pPlayer = AI_GetSinglePlayer();
 
-			if( pPlayer && OccupyStrategySlot( SQUAD_SLOT_EXCLUSIVE_HANDSIGN ) && pPlayer->FInViewCone( this ) )
-			{
-				CSound *pSound;
-				pSound = GetBestSound();
+                if ( pPlayer && OccupyStrategySlot( SQUAD_SLOT_EXCLUSIVE_HANDSIGN ) && pPlayer->FInViewCone( this ) )
+                {
+                    CSound* pSound;
+                    pSound = GetBestSound();
 
-				Assert( pSound != NULL );
+                    Assert( pSound != NULL );
 
-				if ( pSound )
-				{
-					Vector right, tosound;
+                    if ( pSound )
+                    {
+                        Vector right, tosound;
 
-					GetVectors( NULL, &right, NULL );
+                        GetVectors( NULL, &right, NULL );
 
-					tosound = pSound->GetSoundReactOrigin() - GetAbsOrigin();
-					VectorNormalize( tosound);
+                        tosound = pSound->GetSoundReactOrigin() - GetAbsOrigin();
+                        VectorNormalize( tosound );
 
-					tosound.z = 0;
-					right.z = 0;
+                        tosound.z = 0;
+                        right.z = 0;
 
-					if( DotProduct( right, tosound ) > 0 )
-					{
-						// Right
-						SetIdealActivity( ACT_SIGNAL_RIGHT );
-					}
-					else
-					{
-						// Left
-						SetIdealActivity( ACT_SIGNAL_LEFT );
-					}
+                        if ( DotProduct( right, tosound ) > 0 )
+                        {
+                            // Right
+                            SetIdealActivity( ACT_SIGNAL_RIGHT );
+                        }
+                        else
+                        {
+                            // Left
+                            SetIdealActivity( ACT_SIGNAL_LEFT );
+                        }
 
-					break;
-				}
-			}
-		}
+                        break;
+                    }
+                }
+            }
 
-		// Otherwise, just skip it.
-		TaskComplete();
-		break;
+            // Otherwise, just skip it.
+            TaskComplete();
+            break;
 
-	case TASK_ANNOUNCE_ATTACK:
-		{
-			// If Primary Attack
-			if ((int)pTask->flTaskData == 1)
-			{
-				// -----------------------------------------------------------
-				// If enemy isn't facing me and I haven't attacked in a while
-				// annouce my attack before I start wailing away
-				// -----------------------------------------------------------
-				CBaseCombatCharacter *pBCC = GetEnemyCombatCharacterPointer();
+        case TASK_ANNOUNCE_ATTACK:
+        {
+            // If Primary Attack
+            if ( ( int ) pTask->flTaskData == 1 )
+            {
+                // -----------------------------------------------------------
+                // If enemy isn't facing me and I haven't attacked in a while
+                // annouce my attack before I start wailing away
+                // -----------------------------------------------------------
+                CBaseCombatCharacter* pBCC = GetEnemyCombatCharacterPointer();
 
-				if	(pBCC && pBCC->IsPlayer() && (!pBCC->FInViewCone ( this )) &&
-					(gpGlobals->curtime - m_flLastAttackTime > 3.0) )
-				{
-					m_flLastAttackTime = gpGlobals->curtime;
-
-#ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-					SpeakIfAllowed( TLK_CMB_ANNOUNCE, SENTENCE_PRIORITY_HIGH );
-#else
-					m_Sentences.Speak( "COMBINE_ANNOUNCE", SENTENCE_PRIORITY_HIGH );
-#endif
-
-					// Wait two seconds
-					SetWait( 2.0 );
-
-					if ( !IsCrouching() )
-					{
-						SetActivity(ACT_IDLE);
-					}
-					else
-					{
-						SetActivity(ACT_COWER); // This is really crouch idle
-					}
-				}
-				// -------------------------------------------------------------
-				//  Otherwise move on
-				// -------------------------------------------------------------
-				else
-				{
-					TaskComplete();
-				}
-			}
-			else
-			{
-#ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-				SpeakIfAllowed( TLK_CMB_THROWGRENADE, SENTENCE_PRIORITY_MEDIUM );
-#else
-				m_Sentences.Speak( "COMBINE_THROW_GRENADE", SENTENCE_PRIORITY_MEDIUM );
-#endif
-				SetActivity(ACT_IDLE);
-
-				// Wait two seconds
-				SetWait( 2.0 );
-			}
-			break;
-		}	
-
-	case TASK_WALK_PATH:
-	case TASK_RUN_PATH:
-		// grunt no longer assumes he is covered if he moves
-		Forget( bits_MEMORY_INCOVER );
-		BaseClass::StartTask( pTask );
-		break;
-
-	case TASK_COMBINE_FACE_TOSS_DIR:
-		break;
-
-	case TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS:
-#ifdef MAPBASE
-		StartTask_GetPathToForced(pTask);
-#else
-		{
-			if ( !m_hForcedGrenadeTarget )
-			{
-				TaskFail(FAIL_NO_ENEMY);
-				return;
-			}
-
-			float flMaxRange = 2000;
-			float flMinRange = 0;
-
-			Vector vecEnemy = m_hForcedGrenadeTarget->GetAbsOrigin();
-			Vector vecEnemyEye = vecEnemy + m_hForcedGrenadeTarget->GetViewOffset();
-
-			Vector posLos;
-			bool found = false;
-
-			if ( GetTacticalServices()->FindLateralLos( vecEnemyEye, &posLos ) )
-			{
-				float dist = ( posLos - vecEnemyEye ).Length();
-				if ( dist < flMaxRange && dist > flMinRange )
-					found = true;
-			}
-
-			if ( !found && GetTacticalServices()->FindLos( vecEnemy, vecEnemyEye, flMinRange, flMaxRange, 1.0, &posLos ) )
-			{
-				found = true;
-			}
-
-			if ( !found )
-			{
-				TaskFail( FAIL_NO_SHOOT );
-			}
-			else
-			{
-				// else drop into run task to offer an interrupt
-				m_vInterruptSavePosition = posLos;
-			}
-		}
-#endif
-		break;
-
-	case TASK_COMBINE_IGNORE_ATTACKS:
-		// must be in a squad
-		if (m_pSquad && m_pSquad->NumMembers() > 2)
-		{
-			// the enemy must be far enough away
-			if (GetEnemy() && (GetEnemy()->WorldSpaceCenter() - WorldSpaceCenter()).Length() > 512.0 )
-			{
-				m_flNextAttack	= gpGlobals->curtime + pTask->flTaskData;
-			}
-		}
-		TaskComplete( );
-		break;
-
-	case TASK_COMBINE_DEFER_SQUAD_GRENADES:
-		{
-#ifdef MAPBASE
-			StartTask_DeferSquad(pTask);
-#else
-			if ( m_pSquad )
-			{
-				// iterate my squad and stop everyone from throwing grenades for a little while.
-				AISquadIter_t iter;
-
-				CAI_BaseNPC *pSquadmate = m_pSquad ? m_pSquad->GetFirstMember( &iter ) : NULL;
-				while ( pSquadmate )
-				{
-#ifdef MAPBASE
-					pSquadmate->DelayGrenadeCheck(5);
-#else
-					CNPC_Combine *pCombine = dynamic_cast<CNPC_Combine*>(pSquadmate);
-
-					if( pCombine )
-					{
-						pCombine->m_flNextGrenadeCheck = gpGlobals->curtime + 5;
-					}
-#endif
-
-					pSquadmate = m_pSquad->GetNextMember( &iter );
-				}
-			}
-
-			TaskComplete();
-#endif
-			break;
-		}
-
-	case TASK_FACE_IDEAL:
-	case TASK_FACE_ENEMY:
-		{
-			if( pTask->iTask == TASK_FACE_ENEMY && HasCondition( COND_CAN_RANGE_ATTACK1 ) )
-			{
-				TaskComplete();
-				return;
-			}
-
-			BaseClass::StartTask( pTask );
-			bool bIsFlying = (GetMoveType() == MOVETYPE_FLY) || (GetMoveType() == MOVETYPE_FLYGRAVITY);
-			if (bIsFlying)
-			{
-				SetIdealActivity( ACT_GLIDE );
-			}
-
-		}
-		break;
-
-	case TASK_FIND_COVER_FROM_ENEMY:
-		{
-			if (GetHintGroup() == NULL_STRING)
-			{
-				CBaseEntity *pEntity = GetEnemy();
-
-				// FIXME: this should be generalized by the schedules that are selected, or in the definition of 
-				// what "cover" means (i.e., trace attack vulnerability vs. physical attack vulnerability
-				if ( pEntity )
-				{
-					// NOTE: This is a good time to check to see if the player is hurt.
-					// Have the combine notice this and call out
-					if ( !HasMemory(bits_MEMORY_PLAYER_HURT) && pEntity->IsPlayer() && pEntity->GetHealth() <= 20 )
-					{
-						if ( m_pSquad )
-						{
-							m_pSquad->SquadRemember(bits_MEMORY_PLAYER_HURT);
-						}
+                if ( pBCC && pBCC->IsPlayer() && (!pBCC->FInViewCone( this )) &&
+                    (gpGlobals->curtime - m_flLastAttackTime > 3.0) )
+                {
+                    m_flLastAttackTime = gpGlobals->curtime;
 
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-						SpeakIfAllowed( TLK_CMB_PLAYERHIT, SENTENCE_PRIORITY_INVALID );
+                    SpeakIfAllowed( TLK_CMB_ANNOUNCE, SENTENCE_PRIORITY_HIGH );
 #else
-						m_Sentences.Speak( "COMBINE_PLAYERHIT", SENTENCE_PRIORITY_INVALID );
+                    m_Sentences.Speak( "COMBINE_ANNOUNCE", SENTENCE_PRIORITY_HIGH );
 #endif
-						JustMadeSound( SENTENCE_PRIORITY_HIGH );
-					}
-					if ( pEntity->MyNPCPointer() )
-					{
-						if ( !(pEntity->MyNPCPointer()->CapabilitiesGet( ) & bits_CAP_WEAPON_RANGE_ATTACK1) && 
-							!(pEntity->MyNPCPointer()->CapabilitiesGet( ) & bits_CAP_INNATE_RANGE_ATTACK1) )
-						{
-							TaskComplete();
-							return;
-						}
-					}
-				}
-			}
-			BaseClass::StartTask( pTask );
-		}
-		break;
-	case TASK_RANGE_ATTACK1:
-		{
+
+                    // Wait two seconds
+                    SetWait( 2.0 );
+
+                    if ( !IsCrouching() )
+                    {
+                        SetActivity( ACT_IDLE );
+                    }
+                    else
+                    {
+                        SetActivity( ACT_COWER ); // This is really crouch idle
+                    }
+                }
+                // -------------------------------------------------------------
+                //  Otherwise move on
+                // -------------------------------------------------------------
+                else
+                {
+                    TaskComplete();
+                }
+            }
+            else
+            {
+#ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
+                SpeakIfAllowed( TLK_CMB_THROWGRENADE, SENTENCE_PRIORITY_MEDIUM );
+#else
+                m_Sentences.Speak( "COMBINE_THROW_GRENADE", SENTENCE_PRIORITY_MEDIUM );
+#endif
+                SetActivity( ACT_IDLE );
+
+                // Wait two seconds
+                SetWait( 2.0 );
+            }
+            break;
+        }
+
+        case TASK_WALK_PATH:
+        case TASK_RUN_PATH:
+            // grunt no longer assumes he is covered if he moves
+            Forget( bits_MEMORY_INCOVER );
+            BaseClass::StartTask( pTask );
+            break;
+
+        case TASK_COMBINE_FACE_TOSS_DIR:
+            break;
+
+        case TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS:
 #ifdef MAPBASE
-			// The game can crash if a soldier's weapon is removed while they're shooting
-			if (!GetActiveWeapon())
-			{
-				TaskFail( "No weapon" );
-				break;
-			}
+            StartTask_GetPathToForced( pTask );
+#else
+            {
+                if ( !m_hForcedGrenadeTarget )
+                {
+                    TaskFail( FAIL_NO_ENEMY );
+                    return;
+                }
+
+                float flMaxRange = 2000;
+                float flMinRange = 0;
+
+                Vector vecEnemy = m_hForcedGrenadeTarget->GetAbsOrigin();
+                Vector vecEnemyEye = vecEnemy + m_hForcedGrenadeTarget->GetViewOffset();
+
+                Vector posLos;
+                bool found = false;
+
+                if ( GetTacticalServices()->FindLateralLos( vecEnemyEye, &posLos ) )
+                {
+                    float dist = (posLos - vecEnemyEye).Length();
+                    if ( dist < flMaxRange && dist > flMinRange )
+                        found = true;
+                }
+
+                if ( !found && GetTacticalServices()->FindLos( vecEnemy, vecEnemyEye, flMinRange, flMaxRange, 1.0, &posLos ) )
+                {
+                    found = true;
+                }
+
+                if ( !found )
+                {
+                    TaskFail( FAIL_NO_SHOOT );
+                }
+                else
+                {
+                    // else drop into run task to offer an interrupt
+                    m_vInterruptSavePosition = posLos;
+                }
+            }
+#endif
+            break;
+
+        case TASK_COMBINE_IGNORE_ATTACKS:
+            // must be in a squad
+            if ( m_pSquad && m_pSquad->NumMembers() > 2 )
+            {
+                // the enemy must be far enough away
+                if ( GetEnemy() && (GetEnemy()->WorldSpaceCenter() - WorldSpaceCenter()).Length() > 512.0 )
+                {
+                    m_flNextAttack = gpGlobals->curtime + pTask->flTaskData;
+                }
+            }
+            TaskComplete();
+            break;
+
+        case TASK_COMBINE_DEFER_SQUAD_GRENADES:
+        {
+#ifdef MAPBASE
+            StartTask_DeferSquad( pTask );
+#else
+            if ( m_pSquad )
+            {
+                // iterate my squad and stop everyone from throwing grenades for a little while.
+                AISquadIter_t iter;
+
+                CAI_BaseNPC* pSquadmate = m_pSquad ? m_pSquad->GetFirstMember( &iter ) : NULL;
+                while ( pSquadmate )
+                {
+#ifdef MAPBASE
+                    pSquadmate->DelayGrenadeCheck( 5 );
+#else
+                    CNPC_Combine* pCombine = dynamic_cast< CNPC_Combine* >(pSquadmate);
+
+                    if ( pCombine )
+                    {
+                        pCombine->m_flNextGrenadeCheck = gpGlobals->curtime + 5;
+                    }
 #endif
 
-			m_nShots = GetActiveWeapon()->GetRandomBurst();
-			m_flShotDelay = GetActiveWeapon()->GetFireRate();
+                    pSquadmate = m_pSquad->GetNextMember( &iter );
+                }
+            }
 
-			m_flNextAttack = gpGlobals->curtime + m_flShotDelay - 0.1;
-			ResetIdealActivity( ACT_RANGE_ATTACK1 );
-			m_flLastAttackTime = gpGlobals->curtime;
-		}
-		break;
+            TaskComplete();
+#endif
+            break;
+        }
 
-	case TASK_COMBINE_DIE_INSTANTLY:
-		{
-			CTakeDamageInfo info;
+        case TASK_FACE_IDEAL:
+        case TASK_FACE_ENEMY:
+        {
+            if ( pTask->iTask == TASK_FACE_ENEMY && HasCondition( COND_CAN_RANGE_ATTACK1 ) )
+            {
+                TaskComplete();
+                return;
+            }
 
-			info.SetAttacker( this );
-			info.SetInflictor( this );
-			info.SetDamage( m_iHealth );
-			info.SetDamageType( pTask->flTaskData );
-			info.SetDamageForce( Vector( 0.1, 0.1, 0.1 ) );
+            BaseClass::StartTask( pTask );
+            bool bIsFlying = (GetMoveType() == MOVETYPE_FLY) || (GetMoveType() == MOVETYPE_FLYGRAVITY);
+            if ( bIsFlying )
+            {
+                SetIdealActivity( ACT_GLIDE );
+            }
 
-			TakeDamage( info );
+        }
+        break;
 
-			TaskComplete();
-		}
-		break;
+        case TASK_FIND_COVER_FROM_ENEMY:
+        {
+            if ( GetHintGroup() == NULL_STRING )
+            {
+                CBaseEntity* pEntity = GetEnemy();
 
-	default: 
-		BaseClass:: StartTask( pTask );
-		break;
-	}
+                // FIXME: this should be generalized by the schedules that are selected, or in the definition of 
+                // what "cover" means (i.e., trace attack vulnerability vs. physical attack vulnerability
+                if ( pEntity )
+                {
+                    // NOTE: This is a good time to check to see if the player is hurt.
+                    // Have the combine notice this and call out
+                    if ( !HasMemory( bits_MEMORY_PLAYER_HURT ) && pEntity->IsPlayer() && pEntity->GetHealth() <= 20 )
+                    {
+                        if ( m_pSquad )
+                        {
+                            m_pSquad->SquadRemember( bits_MEMORY_PLAYER_HURT );
+                        }
+
+#ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
+                        SpeakIfAllowed( TLK_CMB_PLAYERHIT, SENTENCE_PRIORITY_INVALID );
+#else
+                        m_Sentences.Speak( "COMBINE_PLAYERHIT", SENTENCE_PRIORITY_INVALID );
+#endif
+                        JustMadeSound( SENTENCE_PRIORITY_HIGH );
+                    }
+                    if ( pEntity->MyNPCPointer() )
+                    {
+                        if ( !(pEntity->MyNPCPointer()->CapabilitiesGet() & bits_CAP_WEAPON_RANGE_ATTACK1) &&
+                            !(pEntity->MyNPCPointer()->CapabilitiesGet() & bits_CAP_INNATE_RANGE_ATTACK1) )
+                        {
+                            TaskComplete();
+                            return;
+                        }
+                    }
+                }
+            }
+            BaseClass::StartTask( pTask );
+        }
+        break;
+        case TASK_RANGE_ATTACK1:
+        {
+#ifdef MAPBASE
+            // The game can crash if a soldier's weapon is removed while they're shooting
+            if ( !GetActiveWeapon() )
+            {
+                TaskFail( "No weapon" );
+                break;
+            }
+#endif
+
+            m_nShots = GetActiveWeapon()->GetRandomBurst();
+            m_flShotDelay = GetActiveWeapon()->GetFireRate();
+
+            m_flNextAttack = gpGlobals->curtime + m_flShotDelay - 0.1;
+            ResetIdealActivity( ACT_RANGE_ATTACK1 );
+            m_flLastAttackTime = gpGlobals->curtime;
+        }
+        break;
+
+        case TASK_COMBINE_DIE_INSTANTLY:
+        {
+            CTakeDamageInfo info;
+
+            info.SetAttacker( this );
+            info.SetInflictor( this );
+            info.SetDamage( m_iHealth );
+            info.SetDamageType( pTask->flTaskData );
+            info.SetDamageForce( Vector( 0.1, 0.1, 0.1 ) );
+
+            TakeDamage( info );
+
+            TaskComplete();
+        }
+        break;
+
+        default:
+            BaseClass::StartTask( pTask );
+            break;
+    }
 }
 
 //=========================================================
 // RunTask
 //=========================================================
-void CNPC_Combine::RunTask( const Task_t *pTask )
+void CNPC_Combine::RunTask( const Task_t* pTask )
 {
-	/*
-	{
-	CBaseEntity *pEnemy = GetEnemy();
-	if (pEnemy)
-	{
-	NDebugOverlay::Line(Center(), pEnemy->Center(), 0,255,255, false, 0.1);
-	}
+    /*
+    {
+    CBaseEntity *pEnemy = GetEnemy();
+    if (pEnemy)
+    {
+    NDebugOverlay::Line(Center(), pEnemy->Center(), 0,255,255, false, 0.1);
+    }
 
-	}
-	*/
+    }
+    */
 
-	/*
-	if (m_iMySquadSlot != SQUAD_SLOT_NONE)
-	{
-	char text[64];
-	Q_snprintf( text, strlen( text ), "%d", m_iMySquadSlot );
+    /*
+    if (m_iMySquadSlot != SQUAD_SLOT_NONE)
+    {
+    char text[64];
+    Q_snprintf( text, strlen( text ), "%d", m_iMySquadSlot );
 
-	NDebugOverlay::Text( Center() + Vector( 0, 0, 72 ), text, false, 0.1 );
-	}
-	*/
+    NDebugOverlay::Text( Center() + Vector( 0, 0, 72 ), text, false, 0.1 );
+    }
+    */
 
-	switch ( pTask->iTask )
-	{
-	case TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY:
-		RunTaskChaseEnemyContinuously( pTask );
-		break;
+    switch ( pTask->iTask )
+    {
+        case TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY:
+            RunTaskChaseEnemyContinuously( pTask );
+            break;
 
-	case TASK_COMBINE_SIGNAL_BEST_SOUND:
-		AutoMovement( );
-		if ( IsActivityFinished() )
-		{
-			TaskComplete();
-		}
-		break;
+        case TASK_COMBINE_SIGNAL_BEST_SOUND:
+            AutoMovement();
+            if ( IsActivityFinished() )
+            {
+                TaskComplete();
+            }
+            break;
 
-	case TASK_ANNOUNCE_ATTACK:
-		{
-			// Stop waiting if enemy facing me or lost enemy
-			CBaseCombatCharacter* pBCC = GetEnemyCombatCharacterPointer();
-			if	(!pBCC || pBCC->FInViewCone( this ))
-			{
-				TaskComplete();
-			}
+        case TASK_ANNOUNCE_ATTACK:
+        {
+            // Stop waiting if enemy facing me or lost enemy
+            CBaseCombatCharacter* pBCC = GetEnemyCombatCharacterPointer();
+            if ( !pBCC || pBCC->FInViewCone( this ) )
+            {
+                TaskComplete();
+            }
 
-			if ( IsWaitFinished() )
-			{
-				TaskComplete();
-			}
-		}
-		break;
+            if ( IsWaitFinished() )
+            {
+                TaskComplete();
+            }
+        }
+        break;
 
 #ifdef MAPBASE
-	case TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET:
-		RunTask_FaceAltFireTarget(pTask);
-		break;
+        case TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET:
+            RunTask_FaceAltFireTarget( pTask );
+            break;
 
-	case TASK_COMBINE_FACE_TOSS_DIR:
-		RunTask_FaceTossDir(pTask);
-		break;
+        case TASK_COMBINE_FACE_TOSS_DIR:
+            RunTask_FaceTossDir( pTask );
+            break;
 
-	case TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS:
-		RunTask_GetPathToForced(pTask);
-		break;
+        case TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS:
+            RunTask_GetPathToForced( pTask );
+            break;
 #else
-	case TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET:
-		GetMotor()->SetIdealYawToTargetAndUpdate( m_vecAltFireTarget, AI_KEEP_YAW_SPEED );
+        case TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET:
+            GetMotor()->SetIdealYawToTargetAndUpdate( m_vecAltFireTarget, AI_KEEP_YAW_SPEED );
 
-		if ( IsActivityFinished() )
-		{
-			TaskComplete();
-		}
-		break;
+            if ( IsActivityFinished() )
+            {
+                TaskComplete();
+            }
+            break;
 
-	case TASK_COMBINE_FACE_TOSS_DIR:
-		{
-			// project a point along the toss vector and turn to face that point.
-			GetMotor()->SetIdealYawToTargetAndUpdate( GetLocalOrigin() + m_vecTossVelocity * 64, AI_KEEP_YAW_SPEED );
+        case TASK_COMBINE_FACE_TOSS_DIR:
+        {
+            // project a point along the toss vector and turn to face that point.
+            GetMotor()->SetIdealYawToTargetAndUpdate( GetLocalOrigin() + m_vecTossVelocity * 64, AI_KEEP_YAW_SPEED );
 
-			if ( FacingIdeal() )
-			{
-				TaskComplete( true );
-			}
-			break;
-		}
+            if ( FacingIdeal() )
+            {
+                TaskComplete( true );
+            }
+            break;
+        }
 
-	case TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS:
-		{
-			if ( !m_hForcedGrenadeTarget )
-			{
-				TaskFail(FAIL_NO_ENEMY);
-				return;
-			}
+        case TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS:
+        {
+            if ( !m_hForcedGrenadeTarget )
+            {
+                TaskFail( FAIL_NO_ENEMY );
+                return;
+            }
 
-			if ( GetTaskInterrupt() > 0 )
-			{
-				ClearTaskInterrupt();
+            if ( GetTaskInterrupt() > 0 )
+            {
+                ClearTaskInterrupt();
 
-				Vector vecEnemy = m_hForcedGrenadeTarget->GetAbsOrigin();
-				AI_NavGoal_t goal( m_vInterruptSavePosition, ACT_RUN, AIN_HULL_TOLERANCE );
+                Vector vecEnemy = m_hForcedGrenadeTarget->GetAbsOrigin();
+                AI_NavGoal_t goal( m_vInterruptSavePosition, ACT_RUN, AIN_HULL_TOLERANCE );
 
-				GetNavigator()->SetGoal( goal, AIN_CLEAR_TARGET );
-				GetNavigator()->SetArrivalDirection( vecEnemy - goal.dest );
-			}
-			else
-			{
-				TaskInterrupt();
-			}
-		}
-		break;
+                GetNavigator()->SetGoal( goal, AIN_CLEAR_TARGET );
+                GetNavigator()->SetArrivalDirection( vecEnemy - goal.dest );
+            }
+            else
+            {
+                TaskInterrupt();
+            }
+        }
+        break;
 #endif
 
-	case TASK_RANGE_ATTACK1:
-		{
-			AutoMovement( );
+        case TASK_RANGE_ATTACK1:
+        {
+            AutoMovement();
 
-			Vector vecEnemyLKP = GetEnemyLKP();
-			if (!FInAimCone( vecEnemyLKP ))
-			{
-				GetMotor()->SetIdealYawToTargetAndUpdate( vecEnemyLKP, AI_KEEP_YAW_SPEED );
-			}
-			else
-			{
-				GetMotor()->SetIdealYawAndUpdate( GetMotor()->GetIdealYaw(), AI_KEEP_YAW_SPEED );
-			}
+            Vector vecEnemyLKP = GetEnemyLKP();
+            if ( !FInAimCone( vecEnemyLKP ) )
+            {
+                GetMotor()->SetIdealYawToTargetAndUpdate( vecEnemyLKP, AI_KEEP_YAW_SPEED );
+            }
+            else
+            {
+                GetMotor()->SetIdealYawAndUpdate( GetMotor()->GetIdealYaw(), AI_KEEP_YAW_SPEED );
+            }
 
-			if ( gpGlobals->curtime >= m_flNextAttack )
-			{
-				if ( IsActivityFinished() )
-				{
-					if (--m_nShots > 0)
-					{
-						// DevMsg("ACT_RANGE_ATTACK1\n");
-						ResetIdealActivity( ACT_RANGE_ATTACK1 );
-						m_flLastAttackTime = gpGlobals->curtime;
-						m_flNextAttack = gpGlobals->curtime + m_flShotDelay - 0.1;
-					}
-					else
-					{
-						// DevMsg("TASK_RANGE_ATTACK1 complete\n");
-						TaskComplete();
-					}
-				}
-			}
-			else
-			{
-				// DevMsg("Wait\n");
-			}
-		}
-		break;
+            if ( gpGlobals->curtime >= m_flNextAttack )
+            {
+                if ( IsActivityFinished() )
+                {
+                    if ( --m_nShots > 0 )
+                    {
+                        // DevMsg("ACT_RANGE_ATTACK1\n");
+                        ResetIdealActivity( ACT_RANGE_ATTACK1 );
+                        m_flLastAttackTime = gpGlobals->curtime;
+                        m_flNextAttack = gpGlobals->curtime + m_flShotDelay - 0.1;
+                    }
+                    else
+                    {
+                        // DevMsg("TASK_RANGE_ATTACK1 complete\n");
+                        TaskComplete();
+                    }
+                }
+            }
+            else
+            {
+                // DevMsg("Wait\n");
+            }
+        }
+        break;
 
-	default:
-		{
-			BaseClass::RunTask( pTask );
-			break;
-		}
-	}
+        default:
+        {
+            BaseClass::RunTask( pTask );
+            break;
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -1753,83 +1753,83 @@ void CNPC_Combine::RunTask( const Task_t *pTask )
 // Input   :
 // Output  :
 //------------------------------------------------------------------------------
-Vector CNPC_Combine::BodyTarget( const Vector &posSrc, bool bNoisy ) 
+Vector CNPC_Combine::BodyTarget( const Vector& posSrc, bool bNoisy )
 {
-	Vector result = BaseClass::BodyTarget( posSrc, bNoisy );
+    Vector result = BaseClass::BodyTarget( posSrc, bNoisy );
 
-	// @TODO (toml 02-02-04): this seems wrong. Isn't this already be accounted for 
-	// with the eye position used in the base BodyTarget()
-	if ( GetFlags() & FL_DUCKING )
-		result -= Vector(0,0,24);
+    // @TODO (toml 02-02-04): this seems wrong. Isn't this already be accounted for 
+    // with the eye position used in the base BodyTarget()
+    if ( GetFlags() & FL_DUCKING )
+        result -= Vector( 0, 0, 24 );
 
-	return result;
+    return result;
 }
 
 //------------------------------------------------------------------------------
 // Purpose:
 //------------------------------------------------------------------------------
-bool CNPC_Combine::FVisible( CBaseEntity *pEntity, int traceMask, CBaseEntity **ppBlocker )
+bool CNPC_Combine::FVisible( CBaseEntity* pEntity, int traceMask, CBaseEntity** ppBlocker )
 {
-	if( m_spawnflags & SF_COMBINE_NO_LOOK )
-	{
-		// When no look is set, if enemy has eluded the squad, 
-		// he's always invisble to me
-		if (GetEnemies()->HasEludedMe(pEntity))
-		{
-			return false;
-		}
-	}
-	return BaseClass::FVisible(pEntity, traceMask, ppBlocker);
+    if ( m_spawnflags & SF_COMBINE_NO_LOOK )
+    {
+        // When no look is set, if enemy has eluded the squad, 
+        // he's always invisble to me
+        if ( GetEnemies()->HasEludedMe( pEntity ) )
+        {
+            return false;
+        }
+    }
+    return BaseClass::FVisible( pEntity, traceMask, ppBlocker );
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void CNPC_Combine::Event_Killed( const CTakeDamageInfo &info )
+void CNPC_Combine::Event_Killed( const CTakeDamageInfo& info )
 {
-	// if I was killed before I could finish throwing my grenade, drop
-	// a grenade item that the player can retrieve.
-	if( GetActivity() == ACT_RANGE_ATTACK2 )
-	{
-		if( m_iLastAnimEventHandled != COMBINE_AE_GREN_TOSS )
-		{
-			// Drop the grenade as an item.
-			Vector vecStart;
-			GetAttachment( "lefthand", vecStart );
+    // if I was killed before I could finish throwing my grenade, drop
+    // a grenade item that the player can retrieve.
+    if ( GetActivity() == ACT_RANGE_ATTACK2 )
+    {
+        if ( m_iLastAnimEventHandled != COMBINE_AE_GREN_TOSS )
+        {
+            // Drop the grenade as an item.
+            Vector vecStart;
+            GetAttachment( "lefthand", vecStart );
 
-			CBaseEntity *pItem = DropItem( "weapon_frag", vecStart, RandomAngle(0,360) );
+            CBaseEntity* pItem = DropItem( "weapon_frag", vecStart, RandomAngle( 0, 360 ) );
 
-			if ( pItem )
-			{
-				IPhysicsObject *pObj = pItem->VPhysicsGetObject();
+            if ( pItem )
+            {
+                IPhysicsObject* pObj = pItem->VPhysicsGetObject();
 
-				if ( pObj )
-				{
-					Vector			vel;
-					vel.x = random->RandomFloat( -100.0f, 100.0f );
-					vel.y = random->RandomFloat( -100.0f, 100.0f );
-					vel.z = random->RandomFloat( 800.0f, 1200.0f );
-					AngularImpulse	angImp	= RandomAngularImpulse( -300.0f, 300.0f );
+                if ( pObj )
+                {
+                    Vector			vel;
+                    vel.x = random->RandomFloat( -100.0f, 100.0f );
+                    vel.y = random->RandomFloat( -100.0f, 100.0f );
+                    vel.z = random->RandomFloat( 800.0f, 1200.0f );
+                    AngularImpulse	angImp = RandomAngularImpulse( -300.0f, 300.0f );
 
-					vel[2] = 0.0f;
-					pObj->AddVelocity( &vel, &angImp );
-				}
+                    vel[ 2 ] = 0.0f;
+                    pObj->AddVelocity( &vel, &angImp );
+                }
 
-				// In the Citadel we need to dissolve this
+                // In the Citadel we need to dissolve this
 #ifdef MAPBASE
-				if ( PlayerHasMegaPhysCannon() && GlobalEntity_GetCounter("super_phys_gun") != 1 )
+                if ( PlayerHasMegaPhysCannon() && GlobalEntity_GetCounter( "super_phys_gun" ) != 1 )
 #else
-				if ( PlayerHasMegaPhysCannon() )
+                if ( PlayerHasMegaPhysCannon() )
 #endif
-				{
-					CBaseCombatWeapon *pWeapon = static_cast<CBaseCombatWeapon *>(pItem);
+                {
+                    CBaseCombatWeapon* pWeapon = static_cast< CBaseCombatWeapon* >(pItem);
 
-					pWeapon->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
-				}
-			}
-		}
-	}
+                    pWeapon->Dissolve( NULL, gpGlobals->curtime, false, ENTITY_DISSOLVE_NORMAL );
+                }
+            }
+        }
+    }
 
-	BaseClass::Event_Killed( info );
+    BaseClass::Event_Killed( info );
 }
 
 //-----------------------------------------------------------------------------
@@ -1837,14 +1837,14 @@ void CNPC_Combine::Event_Killed( const CTakeDamageInfo &info )
 // Input  :
 // Output : Returns true is new enemy, false is known enemy
 //-----------------------------------------------------------------------------
-bool CNPC_Combine::UpdateEnemyMemory( CBaseEntity *pEnemy, const Vector &position, CBaseEntity *pInformer )
+bool CNPC_Combine::UpdateEnemyMemory( CBaseEntity* pEnemy, const Vector& position, CBaseEntity* pInformer )
 {
-	if( m_spawnflags & SF_COMBINE_NO_LOOK )
-	{
-		return false;
-	}
+    if ( m_spawnflags & SF_COMBINE_NO_LOOK )
+    {
+        return false;
+    }
 
-	return BaseClass::UpdateEnemyMemory( pEnemy, position, pInformer );
+    return BaseClass::UpdateEnemyMemory( pEnemy, position, pInformer );
 }
 
 
@@ -1854,36 +1854,36 @@ bool CNPC_Combine::UpdateEnemyMemory( CBaseEntity *pEnemy, const Vector &positio
 //-----------------------------------------------------------------------------
 void CNPC_Combine::BuildScheduleTestBits( void )
 {
-	BaseClass::BuildScheduleTestBits();
+    BaseClass::BuildScheduleTestBits();
 
-	if (gpGlobals->curtime < m_flNextAttack)
-	{
-		ClearCustomInterruptCondition( COND_CAN_RANGE_ATTACK1 );
-		ClearCustomInterruptCondition( COND_CAN_RANGE_ATTACK2 );
-	}
+    if ( gpGlobals->curtime < m_flNextAttack )
+    {
+        ClearCustomInterruptCondition( COND_CAN_RANGE_ATTACK1 );
+        ClearCustomInterruptCondition( COND_CAN_RANGE_ATTACK2 );
+    }
 
-	SetCustomInterruptCondition( COND_COMBINE_HIT_BY_BUGBAIT );
+    SetCustomInterruptCondition( COND_COMBINE_HIT_BY_BUGBAIT );
 
-	if ( !IsCurSchedule( SCHED_COMBINE_BURNING_STAND ) )
-	{
-		SetCustomInterruptCondition( COND_COMBINE_ON_FIRE );
-	}
+    if ( !IsCurSchedule( SCHED_COMBINE_BURNING_STAND ) )
+    {
+        SetCustomInterruptCondition( COND_COMBINE_ON_FIRE );
+    }
 
 #ifdef MAPBASE
-	if (npc_combine_new_cover_behavior.GetBool())
-	{
-		if ( IsCurSchedule( SCHED_COMBINE_COMBAT_FAIL ) )
-		{
-			SetCustomInterruptCondition( COND_NEW_ENEMY );
-			SetCustomInterruptCondition( COND_LIGHT_DAMAGE );
-			SetCustomInterruptCondition( COND_HEAVY_DAMAGE );
-		}
-		else if ( IsCurSchedule( SCHED_COMBINE_MOVE_TO_MELEE ) )
-		{
-			SetCustomInterruptCondition( COND_HEAR_DANGER );
-			SetCustomInterruptCondition( COND_HEAR_MOVE_AWAY );
-		}
-	}
+    if ( npc_combine_new_cover_behavior.GetBool() )
+    {
+        if ( IsCurSchedule( SCHED_COMBINE_COMBAT_FAIL ) )
+        {
+            SetCustomInterruptCondition( COND_NEW_ENEMY );
+            SetCustomInterruptCondition( COND_LIGHT_DAMAGE );
+            SetCustomInterruptCondition( COND_HEAVY_DAMAGE );
+        }
+        else if ( IsCurSchedule( SCHED_COMBINE_MOVE_TO_MELEE ) )
+        {
+            SetCustomInterruptCondition( COND_HEAR_DANGER );
+            SetCustomInterruptCondition( COND_HEAR_MOVE_AWAY );
+        }
+    }
 #endif
 }
 
@@ -1894,9 +1894,9 @@ void CNPC_Combine::BuildScheduleTestBits( void )
 // Input  : eNewActivity - 
 // Output : Activity
 //-----------------------------------------------------------------------------
-Activity CNPC_Combine::Weapon_TranslateActivity( Activity eNewActivity, bool *pRequired )
+Activity CNPC_Combine::Weapon_TranslateActivity( Activity eNewActivity, bool* pRequired )
 {
-	return BaseClass::Weapon_TranslateActivity(eNewActivity, pRequired);
+    return BaseClass::Weapon_TranslateActivity( eNewActivity, pRequired );
 }
 
 //-----------------------------------------------------------------------------
@@ -1904,14 +1904,14 @@ Activity CNPC_Combine::Weapon_TranslateActivity( Activity eNewActivity, bool *pR
 //-----------------------------------------------------------------------------
 Activity CNPC_Combine::NPC_BackupActivity( Activity eNewActivity )
 {
-	// Some models might not contain ACT_COMBINE_BUGBAIT, which the soldier model uses instead of ACT_IDLE_ON_FIRE.
-	// Contrariwise, soldiers may be called to use ACT_IDLE_ON_FIRE in other parts of the AI and need to translate to ACT_COMBINE_BUGBAIT.
-	if (eNewActivity == ACT_COMBINE_BUGBAIT)
-		return ACT_IDLE_ON_FIRE;
-	else if (eNewActivity == ACT_IDLE_ON_FIRE)
-		return ACT_COMBINE_BUGBAIT;
+    // Some models might not contain ACT_COMBINE_BUGBAIT, which the soldier model uses instead of ACT_IDLE_ON_FIRE.
+    // Contrariwise, soldiers may be called to use ACT_IDLE_ON_FIRE in other parts of the AI and need to translate to ACT_COMBINE_BUGBAIT.
+    if ( eNewActivity == ACT_COMBINE_BUGBAIT )
+        return ACT_IDLE_ON_FIRE;
+    else if ( eNewActivity == ACT_IDLE_ON_FIRE )
+        return ACT_COMBINE_BUGBAIT;
 
-	return BaseClass::NPC_BackupActivity( eNewActivity );
+    return BaseClass::NPC_BackupActivity( eNewActivity );
 }
 #endif
 
@@ -1920,91 +1920,91 @@ Activity CNPC_Combine::NPC_BackupActivity( Activity eNewActivity )
 //-----------------------------------------------------------------------------
 Activity CNPC_Combine::NPC_TranslateActivity( Activity eNewActivity )
 {
-	//Slaming this back to ACT_COMBINE_BUGBAIT since we don't want ANYTHING to change our activity while we burn.
-	if ( HasCondition( COND_COMBINE_ON_FIRE ) )
-		return BaseClass::NPC_TranslateActivity( ACT_COMBINE_BUGBAIT );
+    //Slaming this back to ACT_COMBINE_BUGBAIT since we don't want ANYTHING to change our activity while we burn.
+    if ( HasCondition( COND_COMBINE_ON_FIRE ) )
+        return BaseClass::NPC_TranslateActivity( ACT_COMBINE_BUGBAIT );
 
-	if (eNewActivity == ACT_RANGE_ATTACK2)
-	{
+    if ( eNewActivity == ACT_RANGE_ATTACK2 )
+    {
 #ifndef MAPBASE
-		// grunt is going to a secondary long range attack. This may be a thrown 
-		// grenade or fired grenade, we must determine which and pick proper sequence
-		if (Weapon_OwnsThisType( "weapon_grenadelauncher" ) )
-		{
-			return ( Activity )ACT_COMBINE_LAUNCH_GRENADE;
-		}
-		else
+        // grunt is going to a secondary long range attack. This may be a thrown 
+        // grenade or fired grenade, we must determine which and pick proper sequence
+        if ( Weapon_OwnsThisType( "weapon_grenadelauncher" ) )
+        {
+            return ( Activity ) ACT_COMBINE_LAUNCH_GRENADE;
+        }
+        else
 #else
-		if (m_bUnderthrow)
-		{
-			return ACT_SPECIAL_ATTACK1;
-		}
-		else
+        if ( m_bUnderthrow )
+        {
+            return ACT_SPECIAL_ATTACK1;
+        }
+        else
 #endif
-		{
+        {
 #if SHARED_COMBINE_ACTIVITIES
-			return ACT_COMBINE_THROW_GRENADE;
+            return ACT_COMBINE_THROW_GRENADE;
 #else
-			return ( Activity )ACT_COMBINE_THROW_GRENADE;
+            return ( Activity ) ACT_COMBINE_THROW_GRENADE;
 #endif
-		}
-	}
-	else if (eNewActivity == ACT_IDLE)
-	{
-		if ( !IsCrouching() && ( m_NPCState == NPC_STATE_COMBAT || m_NPCState == NPC_STATE_ALERT ) )
-		{
-			eNewActivity = ACT_IDLE_ANGRY;
-		}
-	}
+        }
+    }
+    else if ( eNewActivity == ACT_IDLE )
+    {
+        if ( !IsCrouching() && (m_NPCState == NPC_STATE_COMBAT || m_NPCState == NPC_STATE_ALERT) )
+        {
+            eNewActivity = ACT_IDLE_ANGRY;
+        }
+    }
 
-	if ( m_AssaultBehavior.IsRunning() )
-	{
-		switch ( eNewActivity )
-		{
-		case ACT_IDLE:
-			eNewActivity = ACT_IDLE_ANGRY;
-			break;
+    if ( m_AssaultBehavior.IsRunning() )
+    {
+        switch ( eNewActivity )
+        {
+            case ACT_IDLE:
+                eNewActivity = ACT_IDLE_ANGRY;
+                break;
 
-		case ACT_WALK:
-			eNewActivity = ACT_WALK_AIM;
-			break;
+            case ACT_WALK:
+                eNewActivity = ACT_WALK_AIM;
+                break;
 
-		case ACT_RUN:
-			eNewActivity = ACT_RUN_AIM;
-			break;
-		}
-	}
+            case ACT_RUN:
+                eNewActivity = ACT_RUN_AIM;
+                break;
+        }
+    }
 #ifdef MAPBASE
-	else if (!GetActiveWeapon() && !npc_combine_unarmed_anims.GetBool())
-	{
-		if (eNewActivity == ACT_IDLE || eNewActivity == ACT_IDLE_ANGRY)
-			eNewActivity = ACT_IDLE_SMG1;
-		else if (eNewActivity == ACT_WALK)
-			eNewActivity = ACT_WALK_RIFLE;
-		else if (eNewActivity == ACT_RUN)
-			eNewActivity = ACT_RUN_RIFLE;
-	}
-	else if (m_NPCState == NPC_STATE_IDLE && eNewActivity == ACT_WALK)
-	{
-		if (npc_combine_idle_walk_easy.GetBool())
-		{
-			// ACT_WALK_EASY has been replaced with ACT_WALK_RELAXED for weapon translation purposes
-			eNewActivity = ACT_WALK_RELAXED;
-		}
-		else if (GetActiveWeapon())
-		{
-			eNewActivity = ACT_WALK_RIFLE;
-		}
-	}
+    else if ( !GetActiveWeapon() && !npc_combine_unarmed_anims.GetBool() )
+    {
+        if ( eNewActivity == ACT_IDLE || eNewActivity == ACT_IDLE_ANGRY )
+            eNewActivity = ACT_IDLE_SMG1;
+        else if ( eNewActivity == ACT_WALK )
+            eNewActivity = ACT_WALK_RIFLE;
+        else if ( eNewActivity == ACT_RUN )
+            eNewActivity = ACT_RUN_RIFLE;
+    }
+    else if ( m_NPCState == NPC_STATE_IDLE && eNewActivity == ACT_WALK )
+    {
+        if ( npc_combine_idle_walk_easy.GetBool() )
+        {
+            // ACT_WALK_EASY has been replaced with ACT_WALK_RELAXED for weapon translation purposes
+            eNewActivity = ACT_WALK_RELAXED;
+        }
+        else if ( GetActiveWeapon() )
+        {
+            eNewActivity = ACT_WALK_RIFLE;
+        }
+    }
 
-	if ( eNewActivity == ACT_RUN && ( IsCurSchedule( SCHED_TAKE_COVER_FROM_BEST_SOUND ) || IsCurSchedule( SCHED_FLEE_FROM_BEST_SOUND ) ) )
-	{
-		if ( random->RandomInt( 0, 1 ) && npc_combine_protected_run.GetBool() && HaveSequenceForActivity( ACT_RUN_PROTECTED ) )
-			eNewActivity = ACT_RUN_PROTECTED;
-	}
+    if ( eNewActivity == ACT_RUN && (IsCurSchedule( SCHED_TAKE_COVER_FROM_BEST_SOUND ) || IsCurSchedule( SCHED_FLEE_FROM_BEST_SOUND )) )
+    {
+        if ( random->RandomInt( 0, 1 ) && npc_combine_protected_run.GetBool() && HaveSequenceForActivity( ACT_RUN_PROTECTED ) )
+            eNewActivity = ACT_RUN_PROTECTED;
+    }
 #endif
 
-	return BaseClass::NPC_TranslateActivity( eNewActivity );
+    return BaseClass::NPC_TranslateActivity( eNewActivity );
 }
 
 
@@ -2015,21 +2015,21 @@ Activity CNPC_Combine::NPC_TranslateActivity( Activity eNewActivity )
 //-----------------------------------------------------------------------------
 int CNPC_Combine::GetSoundInterests( void )
 {
-	return	SOUND_WORLD | SOUND_COMBAT | SOUND_PLAYER | SOUND_DANGER | SOUND_PHYSICS_DANGER | SOUND_BULLET_IMPACT | SOUND_MOVE_AWAY;
+    return	SOUND_WORLD | SOUND_COMBAT | SOUND_PLAYER | SOUND_DANGER | SOUND_PHYSICS_DANGER | SOUND_BULLET_IMPACT | SOUND_MOVE_AWAY;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: Return true if this NPC can hear the specified sound
 //-----------------------------------------------------------------------------
-bool CNPC_Combine::QueryHearSound( CSound *pSound )
+bool CNPC_Combine::QueryHearSound( CSound* pSound )
 {
-	if ( pSound->SoundContext() & SOUND_CONTEXT_COMBINE_ONLY )
-		return true;
+    if ( pSound->SoundContext() & SOUND_CONTEXT_COMBINE_ONLY )
+        return true;
 
-	if ( pSound->SoundContext() & SOUND_CONTEXT_EXCLUDE_COMBINE )
-		return false;
+    if ( pSound->SoundContext() & SOUND_CONTEXT_EXCLUDE_COMBINE )
+        return false;
 
-	return BaseClass::QueryHearSound( pSound );
+    return BaseClass::QueryHearSound( pSound );
 }
 
 
@@ -2039,120 +2039,120 @@ bool CNPC_Combine::QueryHearSound( CSound *pSound )
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-void CNPC_Combine::AnnounceAssault(void)
+void CNPC_Combine::AnnounceAssault( void )
 {
-	if (random->RandomInt(0,5) > 1)
-		return;
+    if ( random->RandomInt( 0, 5 ) > 1 )
+        return;
 
-	// If enemy can see me make assualt sound
-	CBaseCombatCharacter* pBCC = GetEnemyCombatCharacterPointer();
+    // If enemy can see me make assualt sound
+    CBaseCombatCharacter* pBCC = GetEnemyCombatCharacterPointer();
 
-	if (!pBCC)
-		return;
+    if ( !pBCC )
+        return;
 
-	if (!FOkToMakeSound())
-		return;
+    if ( !FOkToMakeSound() )
+        return;
 
-	// Make sure we are pretty close
-	if ( WorldSpaceCenter().DistToSqr( pBCC->WorldSpaceCenter() ) > (2000 * 2000))
-		return;
+    // Make sure we are pretty close
+    if ( WorldSpaceCenter().DistToSqr( pBCC->WorldSpaceCenter() ) > (2000 * 2000) )
+        return;
 
-	// Make sure we are in view cone of player
-	if (!pBCC->FInViewCone ( this ))
-		return;
+    // Make sure we are in view cone of player
+    if ( !pBCC->FInViewCone( this ) )
+        return;
 
-	// Make sure player can see me
-	if ( FVisible( pBCC ) )
-	{
+    // Make sure player can see me
+    if ( FVisible( pBCC ) )
+    {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-		SpeakIfAllowed( TLK_CMB_ASSAULT );
+        SpeakIfAllowed( TLK_CMB_ASSAULT );
 #else
-		m_Sentences.Speak( "COMBINE_ASSAULT" );
+        m_Sentences.Speak( "COMBINE_ASSAULT" );
 #endif
-	}
+    }
 }
 
 
-void CNPC_Combine::AnnounceEnemyType( CBaseEntity *pEnemy )
+void CNPC_Combine::AnnounceEnemyType( CBaseEntity* pEnemy )
 {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-	SpeakIfAllowed( TLK_CMB_ENEMY, SENTENCE_PRIORITY_HIGH );
+    SpeakIfAllowed( TLK_CMB_ENEMY, SENTENCE_PRIORITY_HIGH );
 #else
-	const char *pSentenceName = "COMBINE_MONST";
-	switch ( pEnemy->Classify() )
-	{
-	case CLASS_PLAYER:
-		pSentenceName = "COMBINE_ALERT";
-		break;
+    const char* pSentenceName = "COMBINE_MONST";
+    switch ( pEnemy->Classify() )
+    {
+        case CLASS_PLAYER:
+            pSentenceName = "COMBINE_ALERT";
+            break;
 
-	case CLASS_PLAYER_ALLY:
-	case CLASS_CITIZEN_REBEL:
-	case CLASS_CITIZEN_PASSIVE:
-	case CLASS_VORTIGAUNT:
-		pSentenceName = "COMBINE_MONST_CITIZENS";
-		break;
+        case CLASS_PLAYER_ALLY:
+        case CLASS_CITIZEN_REBEL:
+        case CLASS_CITIZEN_PASSIVE:
+        case CLASS_VORTIGAUNT:
+            pSentenceName = "COMBINE_MONST_CITIZENS";
+            break;
 
-	case CLASS_PLAYER_ALLY_VITAL:
-		pSentenceName = "COMBINE_MONST_CHARACTER";
-		break;
+        case CLASS_PLAYER_ALLY_VITAL:
+            pSentenceName = "COMBINE_MONST_CHARACTER";
+            break;
 
-	case CLASS_ANTLION:
-		pSentenceName = "COMBINE_MONST_BUGS";
-		break;
+        case CLASS_ANTLION:
+            pSentenceName = "COMBINE_MONST_BUGS";
+            break;
 
-	case CLASS_ZOMBIE:
-		pSentenceName = "COMBINE_MONST_ZOMBIES";
-		break;
+        case CLASS_ZOMBIE:
+            pSentenceName = "COMBINE_MONST_ZOMBIES";
+            break;
 
-	case CLASS_HEADCRAB:
-	case CLASS_BARNACLE:
-		pSentenceName = "COMBINE_MONST_PARASITES";
-		break;
-	}
+        case CLASS_HEADCRAB:
+        case CLASS_BARNACLE:
+            pSentenceName = "COMBINE_MONST_PARASITES";
+            break;
+    }
 
-	m_Sentences.Speak( pSentenceName, SENTENCE_PRIORITY_HIGH );
+    m_Sentences.Speak( pSentenceName, SENTENCE_PRIORITY_HIGH );
 #endif
 }
 
-void CNPC_Combine::AnnounceEnemyKill( CBaseEntity *pEnemy )
+void CNPC_Combine::AnnounceEnemyKill( CBaseEntity* pEnemy )
 {
-	if (!pEnemy )
-		return;
+    if ( !pEnemy )
+        return;
 
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-	AI_CriteriaSet set;
-	ModifyOrAppendEnemyCriteria(set, pEnemy);
-	SpeakIfAllowed( TLK_CMB_KILLENEMY, set, SENTENCE_PRIORITY_HIGH );
+    AI_CriteriaSet set;
+    ModifyOrAppendEnemyCriteria( set, pEnemy );
+    SpeakIfAllowed( TLK_CMB_KILLENEMY, set, SENTENCE_PRIORITY_HIGH );
 #else
-	const char *pSentenceName = "COMBINE_KILL_MONST";
-	switch ( pEnemy->Classify() )
-	{
-	case CLASS_PLAYER:
-		pSentenceName = "COMBINE_PLAYER_DEAD";
-		break;
+    const char* pSentenceName = "COMBINE_KILL_MONST";
+    switch ( pEnemy->Classify() )
+    {
+        case CLASS_PLAYER:
+            pSentenceName = "COMBINE_PLAYER_DEAD";
+            break;
 
-		// no sentences for these guys yet
-	case CLASS_PLAYER_ALLY:
-	case CLASS_CITIZEN_REBEL:
-	case CLASS_CITIZEN_PASSIVE:
-	case CLASS_VORTIGAUNT:
-		break;
+            // no sentences for these guys yet
+        case CLASS_PLAYER_ALLY:
+        case CLASS_CITIZEN_REBEL:
+        case CLASS_CITIZEN_PASSIVE:
+        case CLASS_VORTIGAUNT:
+            break;
 
-	case CLASS_PLAYER_ALLY_VITAL:
-		break;
+        case CLASS_PLAYER_ALLY_VITAL:
+            break;
 
-	case CLASS_ANTLION:
-		break;
+        case CLASS_ANTLION:
+            break;
 
-	case CLASS_ZOMBIE:
-		break;
+        case CLASS_ZOMBIE:
+            break;
 
-	case CLASS_HEADCRAB:
-	case CLASS_BARNACLE:
-		break;
-	}
+        case CLASS_HEADCRAB:
+        case CLASS_BARNACLE:
+            break;
+    }
 
-	m_Sentences.Speak( pSentenceName, SENTENCE_PRIORITY_HIGH );
+    m_Sentences.Speak( pSentenceName, SENTENCE_PRIORITY_HIGH );
 #endif
 }
 
@@ -2161,201 +2161,201 @@ void CNPC_Combine::AnnounceEnemyKill( CBaseEntity *pEnemy )
 //-----------------------------------------------------------------------------
 int CNPC_Combine::SelectCombatSchedule()
 {
-	// -----------
-	// dead enemy
-	// -----------
-	if ( HasCondition( COND_ENEMY_DEAD ) )
-	{
-		// call base class, all code to handle dead enemies is centralized there.
-		return SCHED_NONE;
-	}
+    // -----------
+    // dead enemy
+    // -----------
+    if ( HasCondition( COND_ENEMY_DEAD ) )
+    {
+        // call base class, all code to handle dead enemies is centralized there.
+        return SCHED_NONE;
+    }
 
-	// -----------
-	// new enemy
-	// -----------
-	if ( HasCondition( COND_NEW_ENEMY ) )
-	{
-		CBaseEntity *pEnemy = GetEnemy();
-		bool bFirstContact = false;
-		float flTimeSinceFirstSeen = gpGlobals->curtime - GetEnemies()->FirstTimeSeen( pEnemy );
+    // -----------
+    // new enemy
+    // -----------
+    if ( HasCondition( COND_NEW_ENEMY ) )
+    {
+        CBaseEntity* pEnemy = GetEnemy();
+        bool bFirstContact = false;
+        float flTimeSinceFirstSeen = gpGlobals->curtime - GetEnemies()->FirstTimeSeen( pEnemy );
 
-		if( flTimeSinceFirstSeen < 3.0f )
-			bFirstContact = true;
+        if ( flTimeSinceFirstSeen < 3.0f )
+            bFirstContact = true;
 
-		if ( m_pSquad && pEnemy )
-		{
-			if ( HasCondition( COND_SEE_ENEMY ) )
-			{
-				AnnounceEnemyType( pEnemy );
-			}
+        if ( m_pSquad && pEnemy )
+        {
+            if ( HasCondition( COND_SEE_ENEMY ) )
+            {
+                AnnounceEnemyType( pEnemy );
+            }
 
-			if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) && OccupyStrategySlot( SQUAD_SLOT_ATTACK1 ) )
-			{
-				// Start suppressing if someone isn't firing already (SLOT_ATTACK1). This means
-				// I'm the guy who spotted the enemy, I should react immediately.
-				return SCHED_COMBINE_SUPPRESS;
-			}
+            if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) && OccupyStrategySlot( SQUAD_SLOT_ATTACK1 ) )
+            {
+                // Start suppressing if someone isn't firing already (SLOT_ATTACK1). This means
+                // I'm the guy who spotted the enemy, I should react immediately.
+                return SCHED_COMBINE_SUPPRESS;
+            }
 
-			if ( m_pSquad->IsLeader( this ) || ( m_pSquad->GetLeader() && m_pSquad->GetLeader()->GetEnemy() != pEnemy ) )
-			{
-				// I'm the leader, but I didn't get the job suppressing the enemy. We know this because
-				// This code only runs if the code above didn't assign me SCHED_COMBINE_SUPPRESS.
-				if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-				{
-					return SCHED_RANGE_ATTACK1;
-				}
+            if ( m_pSquad->IsLeader( this ) || (m_pSquad->GetLeader() && m_pSquad->GetLeader()->GetEnemy() != pEnemy) )
+            {
+                // I'm the leader, but I didn't get the job suppressing the enemy. We know this because
+                // This code only runs if the code above didn't assign me SCHED_COMBINE_SUPPRESS.
+                if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+                {
+                    return SCHED_RANGE_ATTACK1;
+                }
 
-				if( HasCondition(COND_WEAPON_HAS_LOS) && IsStrategySlotRangeOccupied( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-				{
-					// If everyone else is attacking and I have line of fire, wait for a chance to cover someone.
-					if( OccupyStrategySlot( SQUAD_SLOT_OVERWATCH ) )
-					{
-						return SCHED_COMBINE_ENTER_OVERWATCH;
-					}
-				}
-			}
-			else
-			{
-				if ( m_pSquad->GetLeader() && FOkToMakeSound( SENTENCE_PRIORITY_MEDIUM ) )
-				{
-					JustMadeSound( SENTENCE_PRIORITY_MEDIUM );	// squelch anything that isn't high priority so the leader can speak
-				}
+                if ( HasCondition( COND_WEAPON_HAS_LOS ) && IsStrategySlotRangeOccupied( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+                {
+                    // If everyone else is attacking and I have line of fire, wait for a chance to cover someone.
+                    if ( OccupyStrategySlot( SQUAD_SLOT_OVERWATCH ) )
+                    {
+                        return SCHED_COMBINE_ENTER_OVERWATCH;
+                    }
+                }
+            }
+            else
+            {
+                if ( m_pSquad->GetLeader() && FOkToMakeSound( SENTENCE_PRIORITY_MEDIUM ) )
+                {
+                    JustMadeSound( SENTENCE_PRIORITY_MEDIUM );	// squelch anything that isn't high priority so the leader can speak
+                }
 
-				// First contact, and I'm solo, or not the squad leader.
-				if( HasCondition( COND_SEE_ENEMY ) && CanGrenadeEnemy() )
-				{
-					if( OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
-					{
-						return SCHED_RANGE_ATTACK2;
-					}
-				}
+                // First contact, and I'm solo, or not the squad leader.
+                if ( HasCondition( COND_SEE_ENEMY ) && CanGrenadeEnemy() )
+                {
+                    if ( OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
+                    {
+                        return SCHED_RANGE_ATTACK2;
+                    }
+                }
 
-				if( !bFirstContact && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-				{
-					if( random->RandomInt(0, 100) < 60 )
-					{
-						return SCHED_ESTABLISH_LINE_OF_FIRE;
-					}
-					else
-					{
-						return SCHED_COMBINE_PRESS_ATTACK;
-					}
-				}
+                if ( !bFirstContact && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+                {
+                    if ( random->RandomInt( 0, 100 ) < 60 )
+                    {
+                        return SCHED_ESTABLISH_LINE_OF_FIRE;
+                    }
+                    else
+                    {
+                        return SCHED_COMBINE_PRESS_ATTACK;
+                    }
+                }
 
-				return SCHED_TAKE_COVER_FROM_ENEMY;
-			}
-		}
-	}
+                return SCHED_TAKE_COVER_FROM_ENEMY;
+            }
+        }
+    }
 
-	// ---------------------
-	// no ammo
-	// ---------------------
-	if ( ( HasCondition ( COND_NO_PRIMARY_AMMO ) || HasCondition ( COND_LOW_PRIMARY_AMMO ) ) && !HasCondition( COND_CAN_MELEE_ATTACK1) )
-	{
-		return SCHED_HIDE_AND_RELOAD;
-	}
+    // ---------------------
+    // no ammo
+    // ---------------------
+    if ( (HasCondition( COND_NO_PRIMARY_AMMO ) || HasCondition( COND_LOW_PRIMARY_AMMO )) && !HasCondition( COND_CAN_MELEE_ATTACK1 ) )
+    {
+        return SCHED_HIDE_AND_RELOAD;
+    }
 
-	// ----------------------
-	// LIGHT DAMAGE
-	// ----------------------
-	if ( HasCondition( COND_LIGHT_DAMAGE ) )
-	{
-		if ( GetEnemy() != NULL )
-		{
-			// only try to take cover if we actually have an enemy!
+    // ----------------------
+    // LIGHT DAMAGE
+    // ----------------------
+    if ( HasCondition( COND_LIGHT_DAMAGE ) )
+    {
+        if ( GetEnemy() != NULL )
+        {
+            // only try to take cover if we actually have an enemy!
 
-			// FIXME: need to take cover for enemy dealing the damage
+            // FIXME: need to take cover for enemy dealing the damage
 
-			// A standing guy will either crouch or run.
-			// A crouching guy tries to stay stuck in.
-			if( !IsCrouching() )
-			{
-				if( GetEnemy() && random->RandomFloat( 0, 100 ) < 50 && CouldShootIfCrouching( GetEnemy() ) )
-				{
-					Crouch();
-				}
-				else
-				{
-					//!!!KELLY - this grunt was hit and is going to run to cover.
-					// m_Sentences.Speak( "COMBINE_COVER" );
-					return SCHED_TAKE_COVER_FROM_ENEMY;
-				}
-			}
-		}
-		else
-		{
-			// How am I wounded in combat with no enemy?
-			Assert( GetEnemy() != NULL );
-		}
-	}
+            // A standing guy will either crouch or run.
+            // A crouching guy tries to stay stuck in.
+            if ( !IsCrouching() )
+            {
+                if ( GetEnemy() && random->RandomFloat( 0, 100 ) < 50 && CouldShootIfCrouching( GetEnemy() ) )
+                {
+                    Crouch();
+                }
+                else
+                {
+                    //!!!KELLY - this grunt was hit and is going to run to cover.
+                    // m_Sentences.Speak( "COMBINE_COVER" );
+                    return SCHED_TAKE_COVER_FROM_ENEMY;
+                }
+            }
+        }
+        else
+        {
+            // How am I wounded in combat with no enemy?
+            Assert( GetEnemy() != NULL );
+        }
+    }
 
-	// If I'm scared of this enemy run away
-	if ( IRelationType( GetEnemy() ) == D_FR )
-	{
-		if (HasCondition( COND_SEE_ENEMY )	|| 
-			HasCondition( COND_SEE_FEAR )	|| 
-			HasCondition( COND_LIGHT_DAMAGE ) || 
-			HasCondition( COND_HEAVY_DAMAGE ))
-		{
-			FearSound();
-			//ClearCommandGoal();
-			return SCHED_RUN_FROM_ENEMY;
-		}
+    // If I'm scared of this enemy run away
+    if ( IRelationType( GetEnemy() ) == D_FR )
+    {
+        if ( HasCondition( COND_SEE_ENEMY ) ||
+            HasCondition( COND_SEE_FEAR ) ||
+            HasCondition( COND_LIGHT_DAMAGE ) ||
+            HasCondition( COND_HEAVY_DAMAGE ) )
+        {
+            FearSound();
+            //ClearCommandGoal();
+            return SCHED_RUN_FROM_ENEMY;
+        }
 
-		// If I've seen the enemy recently, cower. Ignore the time for unforgettable enemies.
-		AI_EnemyInfo_t *pMemory = GetEnemies()->Find( GetEnemy() );
-		if ( (pMemory && pMemory->bUnforgettable) || (GetEnemyLastTimeSeen() > (gpGlobals->curtime - 5.0)) )
-		{
-			// If we're facing him, just look ready. Otherwise, face him.
-			if ( FInAimCone( GetEnemy()->EyePosition() ) )
-				return SCHED_COMBAT_STAND;
+        // If I've seen the enemy recently, cower. Ignore the time for unforgettable enemies.
+        AI_EnemyInfo_t* pMemory = GetEnemies()->Find( GetEnemy() );
+        if ( (pMemory && pMemory->bUnforgettable) || (GetEnemyLastTimeSeen() > (gpGlobals->curtime - 5.0)) )
+        {
+            // If we're facing him, just look ready. Otherwise, face him.
+            if ( FInAimCone( GetEnemy()->EyePosition() ) )
+                return SCHED_COMBAT_STAND;
 
-			return SCHED_FEAR_FACE;
-		}
-	}
+            return SCHED_FEAR_FACE;
+        }
+    }
 
-	int attackSchedule = SelectScheduleAttack();
-	if ( attackSchedule != SCHED_NONE )
-		return attackSchedule;
+    int attackSchedule = SelectScheduleAttack();
+    if ( attackSchedule != SCHED_NONE )
+        return attackSchedule;
 
-	if (HasCondition(COND_ENEMY_OCCLUDED))
-	{
-		// stand up, just in case
-		Stand();
-		DesireStand();
+    if ( HasCondition( COND_ENEMY_OCCLUDED ) )
+    {
+        // stand up, just in case
+        Stand();
+        DesireStand();
 
-		if( GetEnemy() && !(GetEnemy()->GetFlags() & FL_NOTARGET) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-		{
-			// Charge in and break the enemy's cover!
-			return SCHED_ESTABLISH_LINE_OF_FIRE;
-		}
+        if ( GetEnemy() && !(GetEnemy()->GetFlags() & FL_NOTARGET) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+        {
+            // Charge in and break the enemy's cover!
+            return SCHED_ESTABLISH_LINE_OF_FIRE;
+        }
 
-		// If I'm a long, long way away, establish a LOF anyway. Once I get there I'll
-		// start respecting the squad slots again.
-		float flDistSq = GetEnemy()->WorldSpaceCenter().DistToSqr( WorldSpaceCenter() );
-		if ( flDistSq > Square(3000) )
-			return SCHED_ESTABLISH_LINE_OF_FIRE;
+        // If I'm a long, long way away, establish a LOF anyway. Once I get there I'll
+        // start respecting the squad slots again.
+        float flDistSq = GetEnemy()->WorldSpaceCenter().DistToSqr( WorldSpaceCenter() );
+        if ( flDistSq > Square( 3000 ) )
+            return SCHED_ESTABLISH_LINE_OF_FIRE;
 
-		// Otherwise tuck in.
-		Remember( bits_MEMORY_INCOVER );
-		return SCHED_COMBINE_WAIT_IN_COVER;
-	}
+        // Otherwise tuck in.
+        Remember( bits_MEMORY_INCOVER );
+        return SCHED_COMBINE_WAIT_IN_COVER;
+    }
 
-	// --------------------------------------------------------------
-	// Enemy not occluded but isn't open to attack
-	// --------------------------------------------------------------
-	if ( HasCondition( COND_SEE_ENEMY ) && !HasCondition( COND_CAN_RANGE_ATTACK1 ) )
-	{
-		if ( (HasCondition( COND_TOO_FAR_TO_ATTACK ) || IsUsingTacticalVariant(TACTICAL_VARIANT_PRESSURE_ENEMY) ) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ))
-		{
-			return SCHED_COMBINE_PRESS_ATTACK;
-		}
+    // --------------------------------------------------------------
+    // Enemy not occluded but isn't open to attack
+    // --------------------------------------------------------------
+    if ( HasCondition( COND_SEE_ENEMY ) && !HasCondition( COND_CAN_RANGE_ATTACK1 ) )
+    {
+        if ( (HasCondition( COND_TOO_FAR_TO_ATTACK ) || IsUsingTacticalVariant( TACTICAL_VARIANT_PRESSURE_ENEMY )) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+        {
+            return SCHED_COMBINE_PRESS_ATTACK;
+        }
 
-		AnnounceAssault(); 
-		return SCHED_COMBINE_ASSAULT;
-	}
+        AnnounceAssault();
+        return SCHED_COMBINE_ASSAULT;
+    }
 
-	return SCHED_NONE;
+    return SCHED_NONE;
 }
 
 
@@ -2366,303 +2366,303 @@ int CNPC_Combine::SelectCombatSchedule()
 //-----------------------------------------------------------------------------
 int CNPC_Combine::SelectSchedule( void )
 {
-	if ( IsWaitingToRappel() && BehaviorSelectSchedule() )
-	{
-		return BaseClass::SelectSchedule();
-	}
+    if ( IsWaitingToRappel() && BehaviorSelectSchedule() )
+    {
+        return BaseClass::SelectSchedule();
+    }
 
-	if ( HasCondition(COND_COMBINE_ON_FIRE) )
-		return SCHED_COMBINE_BURNING_STAND;
+    if ( HasCondition( COND_COMBINE_ON_FIRE ) )
+        return SCHED_COMBINE_BURNING_STAND;
 
-	int nSched = SelectFlinchSchedule();
-	if ( nSched != SCHED_NONE )
-		return nSched;
+    int nSched = SelectFlinchSchedule();
+    if ( nSched != SCHED_NONE )
+        return nSched;
 
-	if ( m_hForcedGrenadeTarget )
-	{
-		if ( m_flNextGrenadeCheck < gpGlobals->curtime )
-		{
-			Vector vecTarget = m_hForcedGrenadeTarget->WorldSpaceCenter();
-
-#ifdef MAPBASE
-			// This was switched to IsAltFireCapable() before, but m_bAlternateCapable makes it necessary to use IsElite() again.
-#endif
-			if ( IsElite() )
-			{
-				if ( FVisible( m_hForcedGrenadeTarget ) )
-				{
-					m_vecAltFireTarget = vecTarget;
-					m_hForcedGrenadeTarget = NULL;
-					return SCHED_COMBINE_AR2_ALTFIRE;
-				}
-			}
-			else
-			{
-				// If we can, throw a grenade at the target. 
-				// Ignore grenade count / distance / etc
-				if ( CheckCanThrowGrenade( vecTarget ) )
-				{
-					m_hForcedGrenadeTarget = NULL;
-					return SCHED_COMBINE_FORCED_GRENADE_THROW;
-				}
-			}
-		}
-
-		// Can't throw at the target, so lets try moving to somewhere where I can see it
-		if ( !FVisible( m_hForcedGrenadeTarget ) )
-		{
-			return SCHED_COMBINE_MOVE_TO_FORCED_GREN_LOS;
-		}
-	}
+    if ( m_hForcedGrenadeTarget )
+    {
+        if ( m_flNextGrenadeCheck < gpGlobals->curtime )
+        {
+            Vector vecTarget = m_hForcedGrenadeTarget->WorldSpaceCenter();
 
 #ifdef MAPBASE
-	// Drop a grenade?
-	if ( HasCondition( COND_COMBINE_DROP_GRENADE ) )
-		return SCHED_COMBINE_DROP_GRENADE;
+            // This was switched to IsAltFireCapable() before, but m_bAlternateCapable makes it necessary to use IsElite() again.
+#endif
+            if ( IsElite() )
+            {
+                if ( FVisible( m_hForcedGrenadeTarget ) )
+                {
+                    m_vecAltFireTarget = vecTarget;
+                    m_hForcedGrenadeTarget = NULL;
+                    return SCHED_COMBINE_AR2_ALTFIRE;
+                }
+            }
+            else
+            {
+                // If we can, throw a grenade at the target. 
+                // Ignore grenade count / distance / etc
+                if ( CheckCanThrowGrenade( vecTarget ) )
+                {
+                    m_hForcedGrenadeTarget = NULL;
+                    return SCHED_COMBINE_FORCED_GRENADE_THROW;
+                }
+            }
+        }
+
+        // Can't throw at the target, so lets try moving to somewhere where I can see it
+        if ( !FVisible( m_hForcedGrenadeTarget ) )
+        {
+            return SCHED_COMBINE_MOVE_TO_FORCED_GREN_LOS;
+        }
+    }
+
+#ifdef MAPBASE
+    // Drop a grenade?
+    if ( HasCondition( COND_COMBINE_DROP_GRENADE ) )
+        return SCHED_COMBINE_DROP_GRENADE;
 #endif
 
-	if ( m_NPCState != NPC_STATE_SCRIPT)
-	{
-		// If we're hit by bugbait, thrash around
-		if ( HasCondition( COND_COMBINE_HIT_BY_BUGBAIT ) )
-		{
-			// Don't do this if we're mounting a func_tank
-			if ( m_FuncTankBehavior.IsMounted() == true )
-			{
-				m_FuncTankBehavior.Dismount();
-			}
+    if ( m_NPCState != NPC_STATE_SCRIPT )
+    {
+        // If we're hit by bugbait, thrash around
+        if ( HasCondition( COND_COMBINE_HIT_BY_BUGBAIT ) )
+        {
+            // Don't do this if we're mounting a func_tank
+            if ( m_FuncTankBehavior.IsMounted() == true )
+            {
+                m_FuncTankBehavior.Dismount();
+            }
 
-			ClearCondition( COND_COMBINE_HIT_BY_BUGBAIT );
-			return SCHED_COMBINE_BUGBAIT_DISTRACTION;
-		}
+            ClearCondition( COND_COMBINE_HIT_BY_BUGBAIT );
+            return SCHED_COMBINE_BUGBAIT_DISTRACTION;
+        }
 
-		// We've been told to move away from a target to make room for a grenade to be thrown at it
-		if ( HasCondition( COND_HEAR_MOVE_AWAY ) )
-		{
-			return SCHED_MOVE_AWAY;
-		}
+        // We've been told to move away from a target to make room for a grenade to be thrown at it
+        if ( HasCondition( COND_HEAR_MOVE_AWAY ) )
+        {
+            return SCHED_MOVE_AWAY;
+        }
 
-		// These things are done in any state but dead and prone
-		if (m_NPCState != NPC_STATE_DEAD && m_NPCState != NPC_STATE_PRONE )
-		{
-			// Cower when physics objects are thrown at me
-			if ( HasCondition( COND_HEAR_PHYSICS_DANGER ) )
-			{
-				return SCHED_FLINCH_PHYSICS;
-			}
+        // These things are done in any state but dead and prone
+        if ( m_NPCState != NPC_STATE_DEAD && m_NPCState != NPC_STATE_PRONE )
+        {
+            // Cower when physics objects are thrown at me
+            if ( HasCondition( COND_HEAR_PHYSICS_DANGER ) )
+            {
+                return SCHED_FLINCH_PHYSICS;
+            }
 
-			// grunts place HIGH priority on running away from danger sounds.
-			if ( HasCondition(COND_HEAR_DANGER) )
-			{
-				CSound *pSound;
-				pSound = GetBestSound();
+            // grunts place HIGH priority on running away from danger sounds.
+            if ( HasCondition( COND_HEAR_DANGER ) )
+            {
+                CSound* pSound;
+                pSound = GetBestSound();
 
-				Assert( pSound != NULL );
-				if ( pSound)
-				{
-					if (pSound->m_iType & SOUND_DANGER)
-					{
-						// I hear something dangerous, probably need to take cover.
-						// dangerous sound nearby!, call it out
+                Assert( pSound != NULL );
+                if ( pSound )
+                {
+                    if ( pSound->m_iType & SOUND_DANGER )
+                    {
+                        // I hear something dangerous, probably need to take cover.
+                        // dangerous sound nearby!, call it out
 #ifndef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-						const char *pSentenceName = "COMBINE_DANGER";
+                        const char* pSentenceName = "COMBINE_DANGER";
 #else
-						bool bGrenade = false;
+                        bool bGrenade = false;
 #endif
 
-						CBaseEntity *pSoundOwner = pSound->m_hOwner;
-						if ( pSoundOwner )
-						{
-							CBaseGrenade *pGrenade = dynamic_cast<CBaseGrenade *>(pSoundOwner);
-							if ( pGrenade && pGrenade->GetThrower() )
-							{
-								if ( IRelationType( pGrenade->GetThrower() ) != D_LI )
-								{
-									// special case call out for enemy grenades
+                        CBaseEntity* pSoundOwner = pSound->m_hOwner;
+                        if ( pSoundOwner )
+                        {
+                            CBaseGrenade* pGrenade = dynamic_cast< CBaseGrenade* >(pSoundOwner);
+                            if ( pGrenade && pGrenade->GetThrower() )
+                            {
+                                if ( IRelationType( pGrenade->GetThrower() ) != D_LI )
+                                {
+                                    // special case call out for enemy grenades
 #ifndef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-									pSentenceName = "COMBINE_GREN";
+                                    pSentenceName = "COMBINE_GREN";
 #else
-									bGrenade = true;
+                                    bGrenade = true;
 #endif
-								}
-							}
-						}
+                                }
+                            }
+                        }
 
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-						SpeakIfAllowed( TLK_CMB_DANGER, UTIL_VarArgs( "grenade:%d", bGrenade ) );
+                        SpeakIfAllowed( TLK_CMB_DANGER, UTIL_VarArgs( "grenade:%d", bGrenade ) );
 #else
-						m_Sentences.Speak( pSentenceName, SENTENCE_PRIORITY_NORMAL, SENTENCE_CRITERIA_NORMAL );
+                        m_Sentences.Speak( pSentenceName, SENTENCE_PRIORITY_NORMAL, SENTENCE_CRITERIA_NORMAL );
 #endif
 
-						// If the sound is approaching danger, I have no enemy, and I don't see it, turn to face.
-						if( !GetEnemy() && pSound->IsSoundType(SOUND_CONTEXT_DANGER_APPROACH) && pSound->m_hOwner && !FInViewCone(pSound->GetSoundReactOrigin()) )
-						{
-							GetMotor()->SetIdealYawToTarget( pSound->GetSoundReactOrigin() );
-							return SCHED_COMBINE_FACE_IDEAL_YAW;
-						}
+                        // If the sound is approaching danger, I have no enemy, and I don't see it, turn to face.
+                        if ( !GetEnemy() && pSound->IsSoundType( SOUND_CONTEXT_DANGER_APPROACH ) && pSound->m_hOwner && !FInViewCone( pSound->GetSoundReactOrigin() ) )
+                        {
+                            GetMotor()->SetIdealYawToTarget( pSound->GetSoundReactOrigin() );
+                            return SCHED_COMBINE_FACE_IDEAL_YAW;
+                        }
 
-						return SCHED_TAKE_COVER_FROM_BEST_SOUND;
-					}
+                        return SCHED_TAKE_COVER_FROM_BEST_SOUND;
+                    }
 
-					// JAY: This was disabled in HL1.  Test?
-					if (!HasCondition( COND_SEE_ENEMY ) && ( pSound->m_iType & (SOUND_PLAYER | SOUND_COMBAT) ))
-					{
-						GetMotor()->SetIdealYawToTarget( pSound->GetSoundReactOrigin() );
-					}
-				}
-			}
-		}
+                    // JAY: This was disabled in HL1.  Test?
+                    if ( !HasCondition( COND_SEE_ENEMY ) && (pSound->m_iType & (SOUND_PLAYER | SOUND_COMBAT)) )
+                    {
+                        GetMotor()->SetIdealYawToTarget( pSound->GetSoundReactOrigin() );
+                    }
+                }
+            }
+        }
 
-		if( BehaviorSelectSchedule() )
-		{
-			return BaseClass::SelectSchedule();
-		}
-	}
+        if ( BehaviorSelectSchedule() )
+        {
+            return BaseClass::SelectSchedule();
+        }
+    }
 
-	switch	( m_NPCState )
-	{
-	case NPC_STATE_IDLE:
-		{
-			if ( m_bShouldPatrol )
-				return SCHED_COMBINE_PATROL;
-		}
-		// NOTE: Fall through!
+    switch ( m_NPCState )
+    {
+        case NPC_STATE_IDLE:
+        {
+            if ( m_bShouldPatrol )
+                return SCHED_COMBINE_PATROL;
+        }
+        // NOTE: Fall through!
 
-	case NPC_STATE_ALERT:
-		{
-			if( HasCondition(COND_LIGHT_DAMAGE) || HasCondition(COND_HEAVY_DAMAGE) )
-			{
-				AI_EnemyInfo_t *pDanger = GetEnemies()->GetDangerMemory();
-				if( pDanger && FInViewCone(pDanger->vLastKnownLocation) && !BaseClass::FVisible(pDanger->vLastKnownLocation) )
-				{
-					// I've been hurt, I'm facing the danger, but I don't see it, so move from this position.
-					return SCHED_TAKE_COVER_FROM_ORIGIN;
-				}
-			}
+        case NPC_STATE_ALERT:
+        {
+            if ( HasCondition( COND_LIGHT_DAMAGE ) || HasCondition( COND_HEAVY_DAMAGE ) )
+            {
+                AI_EnemyInfo_t* pDanger = GetEnemies()->GetDangerMemory();
+                if ( pDanger && FInViewCone( pDanger->vLastKnownLocation ) && !BaseClass::FVisible( pDanger->vLastKnownLocation ) )
+                {
+                    // I've been hurt, I'm facing the danger, but I don't see it, so move from this position.
+                    return SCHED_TAKE_COVER_FROM_ORIGIN;
+                }
+            }
 
-			if( HasCondition( COND_HEAR_COMBAT ) )
-			{
-				CSound *pSound = GetBestSound();
+            if ( HasCondition( COND_HEAR_COMBAT ) )
+            {
+                CSound* pSound = GetBestSound();
 
-				if( pSound && pSound->IsSoundType( SOUND_COMBAT ) )
-				{
-					if( m_pSquad && m_pSquad->GetSquadMemberNearestTo( pSound->GetSoundReactOrigin() ) == this && OccupyStrategySlot( SQUAD_SLOT_INVESTIGATE_SOUND ) )
-					{
-						return SCHED_INVESTIGATE_SOUND;
-					}
-				}
-			}
+                if ( pSound && pSound->IsSoundType( SOUND_COMBAT ) )
+                {
+                    if ( m_pSquad && m_pSquad->GetSquadMemberNearestTo( pSound->GetSoundReactOrigin() ) == this && OccupyStrategySlot( SQUAD_SLOT_INVESTIGATE_SOUND ) )
+                    {
+                        return SCHED_INVESTIGATE_SOUND;
+                    }
+                }
+            }
 
-			// Don't patrol if I'm in the middle of an assault, because I'll never return to the assault. 
-			if ( !m_AssaultBehavior.HasAssaultCue() )
-			{
-				if( m_bShouldPatrol || HasCondition( COND_COMBINE_SHOULD_PATROL ) )
-					return SCHED_COMBINE_PATROL;
-			}
-		}
-		break;
+            // Don't patrol if I'm in the middle of an assault, because I'll never return to the assault. 
+            if ( !m_AssaultBehavior.HasAssaultCue() )
+            {
+                if ( m_bShouldPatrol || HasCondition( COND_COMBINE_SHOULD_PATROL ) )
+                    return SCHED_COMBINE_PATROL;
+            }
+        }
+        break;
 
-	case NPC_STATE_COMBAT:
-		{
-			if (HasCondition( COND_SEE_ENEMY )&&HasCondition( COND_CAN_RANGE_ATTACK1 )) // [MODIFICATION-Dynamic Cover] - Start
-			{
-				bool hasLow = HasCondition( COND_COMBINE_HAS_LOW_COVER );
-				bool hasHigh = HasCondition( COND_COMBINE_HAS_HIGH_COVER );
-				const float MAX_PROP_DISTANCE = 520.0f; // Maximum acceptable distance
+        case NPC_STATE_COMBAT:
+        {
+            if ( HasCondition( COND_SEE_ENEMY ) && HasCondition( COND_CAN_RANGE_ATTACK1 ) ) // [MODIFICATION-Dynamic Cover] - Start
+            {
+                bool hasLow = HasCondition( COND_COMBINE_HAS_LOW_COVER );
+                bool hasHigh = HasCondition( COND_COMBINE_HAS_HIGH_COVER );
+                const float MAX_PROP_DISTANCE = 520.0f; // Maximum acceptable distance
 
-				if (hasLow&&hasHigh)
-				{
-					// Validate both props before choosing
-					bool lowValid = !m_hLowCoverProp||GetAbsOrigin().DistTo( m_hLowCoverProp->GetAbsOrigin() )<=MAX_PROP_DISTANCE;
-					bool highValid = !m_hHighCoverProp||GetAbsOrigin().DistTo( m_hHighCoverProp->WorldSpaceCenter() )<=MAX_PROP_DISTANCE;
+                if ( hasLow && hasHigh )
+                {
+                    // Validate both props before choosing
+                    bool lowValid = !m_hLowCoverProp || GetAbsOrigin().DistTo( m_hLowCoverProp->GetAbsOrigin() ) <= MAX_PROP_DISTANCE;
+                    bool highValid = !m_hHighCoverProp || GetAbsOrigin().DistTo( m_hHighCoverProp->WorldSpaceCenter() ) <= MAX_PROP_DISTANCE;
 
-					if (lowValid&&highValid)
-					{
-						bool useLowCover = RandomInt( 0, 1 )==0;
-						Msg( "[DEBUG] SelectSchedule: BOTH COVERS valid - choosing %s\n",
-							useLowCover ? "LOW" : "HIGH" );
-						return useLowCover ? SCHED_COMBINE_MOVE_TO_LOW_COVER : SCHED_COMBINE_MOVE_TO_HIGH_COVER;
-					}
-					else if (lowValid)
-					{
-						Msg( "[DEBUG] SelectSchedule: Only LOW COVER in valid range\n" );
-						return SCHED_COMBINE_MOVE_TO_LOW_COVER;
-					}
-					else if (highValid)
-					{
-						Msg( "[DEBUG] SelectSchedule: Only HIGH COVER in valid range\n" );
-						return SCHED_COMBINE_MOVE_TO_HIGH_COVER;
-					}
-					else
-					{
-						Msg( "[DEBUG] SelectSchedule: Both covers too distant - default AI\n" );
-					}
-				}
-				else if (hasLow)
-				{
-					// Validate LOW COVER
-					if (!m_hLowCoverProp||GetAbsOrigin().DistTo( m_hLowCoverProp->GetAbsOrigin() )>MAX_PROP_DISTANCE)
-					{
-						Msg( "[DEBUG] SelectSchedule: LOW COVER too distant - rejecting\n" );
-					}
-					else
-					{
-						Msg( "[DEBUG] SelectSchedule: LOW COVER valid\n" );
-						return SCHED_COMBINE_MOVE_TO_LOW_COVER;
-					}
-				}
-				else if (hasHigh)
-				{
-					// Validate HIGH COVER
-					if (!m_hHighCoverProp||GetAbsOrigin().DistTo( m_hHighCoverProp->WorldSpaceCenter() )>MAX_PROP_DISTANCE)
-					{
-						Msg( "[DEBUG] SelectSchedule: HIGH COVER too distant - rejecting\n" );
-					}
-					else
-					{
-						Msg( "[DEBUG] SelectSchedule: HIGH COVER valid\n" );
-						return SCHED_COMBINE_MOVE_TO_HIGH_COVER;
-					}
-				}
+                    if ( lowValid && highValid )
+                    {
+                        bool useLowCover = RandomInt( 0, 1 ) == 0;
+                        Msg( "[DEBUG] SelectSchedule: BOTH COVERS valid - choosing %s\n",
+                            useLowCover ? "LOW" : "HIGH" );
+                        return useLowCover ? SCHED_COMBINE_MOVE_TO_LOW_COVER : SCHED_COMBINE_MOVE_TO_HIGH_COVER;
+                    }
+                    else if ( lowValid )
+                    {
+                        Msg( "[DEBUG] SelectSchedule: Only LOW COVER in valid range\n" );
+                        return SCHED_COMBINE_MOVE_TO_LOW_COVER;
+                    }
+                    else if ( highValid )
+                    {
+                        Msg( "[DEBUG] SelectSchedule: Only HIGH COVER in valid range\n" );
+                        return SCHED_COMBINE_MOVE_TO_HIGH_COVER;
+                    }
+                    else
+                    {
+                        Msg( "[DEBUG] SelectSchedule: Both covers too distant - default AI\n" );
+                    }
+                }
+                else if ( hasLow )
+                {
+                    // Validate LOW COVER
+                    if ( !m_hLowCoverProp || GetAbsOrigin().DistTo( m_hLowCoverProp->GetAbsOrigin() ) > MAX_PROP_DISTANCE )
+                    {
+                        Msg( "[DEBUG] SelectSchedule: LOW COVER too distant - rejecting\n" );
+                    }
+                    else
+                    {
+                        Msg( "[DEBUG] SelectSchedule: LOW COVER valid\n" );
+                        return SCHED_COMBINE_MOVE_TO_LOW_COVER;
+                    }
+                }
+                else if ( hasHigh )
+                {
+                    // Validate HIGH COVER
+                    if ( !m_hHighCoverProp || GetAbsOrigin().DistTo( m_hHighCoverProp->WorldSpaceCenter() ) > MAX_PROP_DISTANCE )
+                    {
+                        Msg( "[DEBUG] SelectSchedule: HIGH COVER too distant - rejecting\n" );
+                    }
+                    else
+                    {
+                        Msg( "[DEBUG] SelectSchedule: HIGH COVER valid\n" );
+                        return SCHED_COMBINE_MOVE_TO_HIGH_COVER;
+                    }
+                }
 
-				// If reached here, no valid covers available
-				Msg( "[DEBUG] SelectSchedule: No valid cover available - using default AI\n" );
-			} // [MODIFICATION-Dynamic Cover] - End
+                // If reached here, no valid covers available
+                Msg( "[DEBUG] SelectSchedule: No valid cover available - using default AI\n" );
+            } // [MODIFICATION-Dynamic Cover] - End
 
-			int nSched = SelectCombatSchedule();
-			if ( nSched != SCHED_NONE )
-				return nSched;
-		}
-		break;
-	}
+            int nSched = SelectCombatSchedule();
+            if ( nSched != SCHED_NONE )
+                return nSched;
+        }
+        break;
+    }
 
-	// no special cases here, call the base class
-	return BaseClass::SelectSchedule();
+    // no special cases here, call the base class
+    return BaseClass::SelectSchedule();
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int CNPC_Combine::SelectFailSchedule( int failedSchedule, int failedTask, AI_TaskFailureCode_t taskFailCode )
 {
-	if( failedSchedule == SCHED_COMBINE_TAKE_COVER1 )
-	{
+    if ( failedSchedule == SCHED_COMBINE_TAKE_COVER1 )
+    {
 #ifdef MAPBASE
-		if( IsInSquad() && IsStrategySlotRangeOccupied(SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2) && HasCondition(COND_SEE_ENEMY)
-			&& ( !npc_combine_new_cover_behavior.GetBool() || (taskFailCode == FAIL_NO_COVER) ) )
+        if ( IsInSquad() && IsStrategySlotRangeOccupied( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) && HasCondition( COND_SEE_ENEMY )
+            && (!npc_combine_new_cover_behavior.GetBool() || (taskFailCode == FAIL_NO_COVER)) )
 #else
-		if( IsInSquad() && IsStrategySlotRangeOccupied(SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2) && HasCondition(COND_SEE_ENEMY) )
+        if ( IsInSquad() && IsStrategySlotRangeOccupied( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) && HasCondition( COND_SEE_ENEMY ) )
 #endif
-		{
-			// This eases the effects of an unfortunate bug that usually plagues shotgunners. Since their rate of fire is low,
-			// they spend relatively long periods of time without an attack squad slot. If you corner a shotgunner, usually 
-			// the other memebers of the squad will hog all of the attack slots and pick schedules to move to establish line of
-			// fire. During this time, the shotgunner is prevented from attacking. If he also cannot find cover (the fallback case)
-			// he will stand around like an idiot, right in front of you. Instead of this, we have him run up to you for a melee attack.
-			return SCHED_COMBINE_MOVE_TO_MELEE;
-		}
-	}
+        {
+            // This eases the effects of an unfortunate bug that usually plagues shotgunners. Since their rate of fire is low,
+            // they spend relatively long periods of time without an attack squad slot. If you corner a shotgunner, usually 
+            // the other memebers of the squad will hog all of the attack slots and pick schedules to move to establish line of
+            // fire. During this time, the shotgunner is prevented from attacking. If he also cannot find cover (the fallback case)
+            // he will stand around like an idiot, right in front of you. Instead of this, we have him run up to you for a melee attack.
+            return SCHED_COMBINE_MOVE_TO_MELEE;
+        }
+    }
 
-	return BaseClass::SelectFailSchedule( failedSchedule, failedTask, taskFailCode );
+    return BaseClass::SelectFailSchedule( failedSchedule, failedTask, taskFailCode );
 }
 
 //-----------------------------------------------------------------------------
@@ -2670,7 +2670,7 @@ int CNPC_Combine::SelectFailSchedule( int failedSchedule, int failedTask, AI_Tas
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::ShouldChargePlayer()
 {
-	return GetEnemy() && GetEnemy()->IsPlayer() && PlayerHasMegaPhysCannon() && !IsLimitingHintGroups();
+    return GetEnemy() && GetEnemy()->IsPlayer() && PlayerHasMegaPhysCannon() && !IsLimitingHintGroups();
 }
 
 
@@ -2683,142 +2683,142 @@ bool CNPC_Combine::ShouldChargePlayer()
 int CNPC_Combine::SelectScheduleAttack()
 {
 #ifndef MAPBASE // Moved to SelectSchedule()
-	// Drop a grenade?
-	if ( HasCondition( COND_COMBINE_DROP_GRENADE ) )
-		return SCHED_COMBINE_DROP_GRENADE;
+    // Drop a grenade?
+    if ( HasCondition( COND_COMBINE_DROP_GRENADE ) )
+        return SCHED_COMBINE_DROP_GRENADE;
 #endif
 
-	// Kick attack?
-	if ( HasCondition( COND_CAN_MELEE_ATTACK1 ) )
-	{
-		return SCHED_MELEE_ATTACK1;
-	}
+    // Kick attack?
+    if ( HasCondition( COND_CAN_MELEE_ATTACK1 ) )
+    {
+        return SCHED_MELEE_ATTACK1;
+    }
 
-	// If I'm fighting a combine turret (it's been hacked to attack me), I can't really
-	// hurt it with bullets, so become grenade happy.
+    // If I'm fighting a combine turret (it's been hacked to attack me), I can't really
+    // hurt it with bullets, so become grenade happy.
 #ifdef MAPBASE
-	if ( GetEnemy() && ( (IsUsingTacticalVariant(TACTICAL_VARIANT_GRENADE_HAPPY)) || GetEnemy()->ClassMatches(gm_isz_class_FloorTurret) ) )
+    if ( GetEnemy() && ((IsUsingTacticalVariant( TACTICAL_VARIANT_GRENADE_HAPPY )) || GetEnemy()->ClassMatches( gm_isz_class_FloorTurret )) )
 #else
-	if ( GetEnemy() && GetEnemy()->Classify() == CLASS_COMBINE && FClassnameIs(GetEnemy(), "npc_turret_floor") )
+    if ( GetEnemy() && GetEnemy()->Classify() == CLASS_COMBINE && FClassnameIs( GetEnemy(), "npc_turret_floor" ) )
 #endif
-	{
-		// Don't do this until I've been fighting the turret for a few seconds
-		float flTimeAtFirstHand = GetEnemies()->TimeAtFirstHand(GetEnemy());
-		if ( flTimeAtFirstHand != AI_INVALID_TIME )
-		{
-			float flTimeEnemySeen = gpGlobals->curtime - flTimeAtFirstHand;
-			if ( flTimeEnemySeen > 4.0 )
-			{
-				if ( CanGrenadeEnemy() && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
-					return SCHED_RANGE_ATTACK2;
-			}
-		}
+    {
+        // Don't do this until I've been fighting the turret for a few seconds
+        float flTimeAtFirstHand = GetEnemies()->TimeAtFirstHand( GetEnemy() );
+        if ( flTimeAtFirstHand != AI_INVALID_TIME )
+        {
+            float flTimeEnemySeen = gpGlobals->curtime - flTimeAtFirstHand;
+            if ( flTimeEnemySeen > 4.0 )
+            {
+                if ( CanGrenadeEnemy() && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
+                    return SCHED_RANGE_ATTACK2;
+            }
+        }
 
-		// If we're not in the viewcone of the turret, run up and hit it. Do this a bit later to
-		// give other squadmembers a chance to throw a grenade before I run in.
+        // If we're not in the viewcone of the turret, run up and hit it. Do this a bit later to
+        // give other squadmembers a chance to throw a grenade before I run in.
 #ifdef MAPBASE
-		// Don't do turret charging of we're just grenade happy.
-		if ( !IsUsingTacticalVariant(TACTICAL_VARIANT_GRENADE_HAPPY) && !GetEnemy()->MyNPCPointer()->FInViewCone( this ) && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
+        // Don't do turret charging of we're just grenade happy.
+        if ( !IsUsingTacticalVariant( TACTICAL_VARIANT_GRENADE_HAPPY ) && !GetEnemy()->MyNPCPointer()->FInViewCone( this ) && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
 #else
-		if ( !GetEnemy()->MyNPCPointer()->FInViewCone( this ) && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
+        if ( !GetEnemy()->MyNPCPointer()->FInViewCone( this ) && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
 #endif
-			return SCHED_COMBINE_CHARGE_TURRET;
-	}
+            return SCHED_COMBINE_CHARGE_TURRET;
+    }
 
-	// When fighting against the player who's wielding a mega-physcannon, 
-	// always close the distance if possible
-	// But don't do it if you're in a nav-limited hint group
-	if ( ShouldChargePlayer() )
-	{
-		float flDistSq = GetEnemy()->WorldSpaceCenter().DistToSqr( WorldSpaceCenter() );
-		if ( flDistSq <= COMBINE_MEGA_PHYSCANNON_ATTACK_DISTANCE_SQ )
-		{
-			if( HasCondition(COND_SEE_ENEMY) )
-			{
-				if ( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-					return SCHED_RANGE_ATTACK1;
-			}
-			else
-			{
-				if ( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-					return SCHED_COMBINE_PRESS_ATTACK;
-			}
-		}
+    // When fighting against the player who's wielding a mega-physcannon, 
+    // always close the distance if possible
+    // But don't do it if you're in a nav-limited hint group
+    if ( ShouldChargePlayer() )
+    {
+        float flDistSq = GetEnemy()->WorldSpaceCenter().DistToSqr( WorldSpaceCenter() );
+        if ( flDistSq <= COMBINE_MEGA_PHYSCANNON_ATTACK_DISTANCE_SQ )
+        {
+            if ( HasCondition( COND_SEE_ENEMY ) )
+            {
+                if ( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+                    return SCHED_RANGE_ATTACK1;
+            }
+            else
+            {
+                if ( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+                    return SCHED_COMBINE_PRESS_ATTACK;
+            }
+        }
 
-		if ( HasCondition(COND_SEE_ENEMY) && !IsUnreachable( GetEnemy() ) )
-		{
-			return SCHED_COMBINE_CHARGE_PLAYER;
-		}
-	}
+        if ( HasCondition( COND_SEE_ENEMY ) && !IsUnreachable( GetEnemy() ) )
+        {
+            return SCHED_COMBINE_CHARGE_PLAYER;
+        }
+    }
 
-	// Can I shoot?
-	if ( HasCondition(COND_CAN_RANGE_ATTACK1) )
-	{
+    // Can I shoot?
+    if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) )
+    {
 
-		// JAY: HL1 behavior missing?
+        // JAY: HL1 behavior missing?
 #if 0
-		if ( m_pSquad )
-		{
-			// if the enemy has eluded the squad and a squad member has just located the enemy
-			// and the enemy does not see the squad member, issue a call to the squad to waste a 
-			// little time and give the player a chance to turn.
-			if ( MySquadLeader()->m_fEnemyEluded && !HasConditions ( bits_COND_ENEMY_FACING_ME ) )
-			{
-				MySquadLeader()->m_fEnemyEluded = FALSE;
-				return SCHED_GRUNT_FOUND_ENEMY;
-			}
-		}
+        if ( m_pSquad )
+        {
+            // if the enemy has eluded the squad and a squad member has just located the enemy
+            // and the enemy does not see the squad member, issue a call to the squad to waste a 
+            // little time and give the player a chance to turn.
+            if ( MySquadLeader()->m_fEnemyEluded && !HasConditions( bits_COND_ENEMY_FACING_ME ) )
+            {
+                MySquadLeader()->m_fEnemyEluded = FALSE;
+                return SCHED_GRUNT_FOUND_ENEMY;
+            }
+        }
 #endif
 
-		// Engage if allowed
-		if ( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-		{
-			return SCHED_RANGE_ATTACK1;
-		}
+        // Engage if allowed
+        if ( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+        {
+            return SCHED_RANGE_ATTACK1;
+        }
 
-		// Throw a grenade if not allowed to engage with weapon.
-		if ( CanGrenadeEnemy() )
-		{
-			if ( OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
-			{
-				return SCHED_RANGE_ATTACK2;
-			}
-		}
+        // Throw a grenade if not allowed to engage with weapon.
+        if ( CanGrenadeEnemy() )
+        {
+            if ( OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
+            {
+                return SCHED_RANGE_ATTACK2;
+            }
+        }
 
-		DesireCrouch();
-		return SCHED_TAKE_COVER_FROM_ENEMY;
-	}
+        DesireCrouch();
+        return SCHED_TAKE_COVER_FROM_ENEMY;
+    }
 
-	if ( GetEnemy() && !HasCondition(COND_SEE_ENEMY) )
-	{
-		// We don't see our enemy. If it hasn't been long since I last saw him,
-		// and he's pretty close to the last place I saw him, throw a grenade in 
-		// to flush him out. A wee bit of cheating here...
+    if ( GetEnemy() && !HasCondition( COND_SEE_ENEMY ) )
+    {
+        // We don't see our enemy. If it hasn't been long since I last saw him,
+        // and he's pretty close to the last place I saw him, throw a grenade in 
+        // to flush him out. A wee bit of cheating here...
 
-		float flTime;
-		float flDist;
+        float flTime;
+        float flDist;
 
-		flTime = gpGlobals->curtime - GetEnemies()->LastTimeSeen( GetEnemy() );
-		flDist = ( GetEnemy()->GetAbsOrigin() - GetEnemies()->LastSeenPosition( GetEnemy() ) ).Length();
+        flTime = gpGlobals->curtime - GetEnemies()->LastTimeSeen( GetEnemy() );
+        flDist = (GetEnemy()->GetAbsOrigin() - GetEnemies()->LastSeenPosition( GetEnemy() )).Length();
 
-		//Msg("Time: %f   Dist: %f\n", flTime, flDist );
-		if ( flTime <= COMBINE_GRENADE_FLUSH_TIME && flDist <= COMBINE_GRENADE_FLUSH_DIST && CanGrenadeEnemy( false ) && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
-		{
-			return SCHED_RANGE_ATTACK2;
-		}
-	}
+        //Msg("Time: %f   Dist: %f\n", flTime, flDist );
+        if ( flTime <= COMBINE_GRENADE_FLUSH_TIME && flDist <= COMBINE_GRENADE_FLUSH_DIST && CanGrenadeEnemy( false ) && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
+        {
+            return SCHED_RANGE_ATTACK2;
+        }
+    }
 
-	if (HasCondition(COND_WEAPON_SIGHT_OCCLUDED))
-	{
-		// If they are hiding behind something that we can destroy, start shooting at it.
-		CBaseEntity *pBlocker = GetEnemyOccluder();
-		if ( pBlocker && pBlocker->GetHealth() > 0 && OccupyStrategySlot( SQUAD_SLOT_ATTACK_OCCLUDER ) )
-		{
-			return SCHED_SHOOT_ENEMY_COVER;
-		}
-	}
+    if ( HasCondition( COND_WEAPON_SIGHT_OCCLUDED ) )
+    {
+        // If they are hiding behind something that we can destroy, start shooting at it.
+        CBaseEntity* pBlocker = GetEnemyOccluder();
+        if ( pBlocker && pBlocker->GetHealth() > 0 && OccupyStrategySlot( SQUAD_SLOT_ATTACK_OCCLUDER ) )
+        {
+            return SCHED_SHOOT_ENEMY_COVER;
+        }
+    }
 
-	return SCHED_NONE;
+    return SCHED_NONE;
 }
 
 //-----------------------------------------------------------------------------
@@ -2826,281 +2826,281 @@ int CNPC_Combine::SelectScheduleAttack()
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-int CNPC_Combine::TranslateSchedule( int scheduleType ) 
+int CNPC_Combine::TranslateSchedule( int scheduleType )
 {
-	switch( scheduleType )
-	{
-	case SCHED_TAKE_COVER_FROM_ENEMY:
-		{
-			if ( m_pSquad )
-			{
-				// Have to explicitly check innate range attack condition as may have weapon with range attack 2
-				if (	g_pGameRules->IsSkillLevel( SKILL_HARD )	&& 
-					HasCondition(COND_CAN_RANGE_ATTACK2)		&&
-					OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
-				{
+    switch ( scheduleType )
+    {
+        case SCHED_TAKE_COVER_FROM_ENEMY:
+        {
+            if ( m_pSquad )
+            {
+                // Have to explicitly check innate range attack condition as may have weapon with range attack 2
+                if ( g_pGameRules->IsSkillLevel( SKILL_HARD ) &&
+                    HasCondition( COND_CAN_RANGE_ATTACK2 ) &&
+                    OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
+                {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-					SpeakIfAllowed( TLK_CMB_THROWGRENADE );
+                    SpeakIfAllowed( TLK_CMB_THROWGRENADE );
 #else
-					m_Sentences.Speak( "COMBINE_THROW_GRENADE" );
+                    m_Sentences.Speak( "COMBINE_THROW_GRENADE" );
 #endif
-					return SCHED_COMBINE_TOSS_GRENADE_COVER1;
-				}
-				else
-				{
-					if ( ShouldChargePlayer() && !IsUnreachable( GetEnemy() ) )
-						return SCHED_COMBINE_CHARGE_PLAYER;
+                    return SCHED_COMBINE_TOSS_GRENADE_COVER1;
+                }
+                else
+                {
+                    if ( ShouldChargePlayer() && !IsUnreachable( GetEnemy() ) )
+                        return SCHED_COMBINE_CHARGE_PLAYER;
 
-					return SCHED_COMBINE_TAKE_COVER1;
-				}
-			}
-			else
-			{
-				// Have to explicitly check innate range attack condition as may have weapon with range attack 2
-				if ( random->RandomInt(0,1) && HasCondition(COND_CAN_RANGE_ATTACK2) )
-				{
-					return SCHED_COMBINE_GRENADE_COVER1;
-				}
-				else
-				{
-					if ( ShouldChargePlayer() && !IsUnreachable( GetEnemy() ) )
-						return SCHED_COMBINE_CHARGE_PLAYER;
+                    return SCHED_COMBINE_TAKE_COVER1;
+                }
+            }
+            else
+            {
+                // Have to explicitly check innate range attack condition as may have weapon with range attack 2
+                if ( random->RandomInt( 0, 1 ) && HasCondition( COND_CAN_RANGE_ATTACK2 ) )
+                {
+                    return SCHED_COMBINE_GRENADE_COVER1;
+                }
+                else
+                {
+                    if ( ShouldChargePlayer() && !IsUnreachable( GetEnemy() ) )
+                        return SCHED_COMBINE_CHARGE_PLAYER;
 
-					return SCHED_COMBINE_TAKE_COVER1;
-				}
-			}
-		}
-	case SCHED_TAKE_COVER_FROM_BEST_SOUND:
-		{
-			return SCHED_COMBINE_TAKE_COVER_FROM_BEST_SOUND;
-		}
-		break;
-	case SCHED_COMBINE_TAKECOVER_FAILED:
-		{
-			if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-			{
-				return TranslateSchedule( SCHED_RANGE_ATTACK1 );
-			}
+                    return SCHED_COMBINE_TAKE_COVER1;
+                }
+            }
+        }
+        case SCHED_TAKE_COVER_FROM_BEST_SOUND:
+        {
+            return SCHED_COMBINE_TAKE_COVER_FROM_BEST_SOUND;
+        }
+        break;
+        case SCHED_COMBINE_TAKECOVER_FAILED:
+        {
+            if ( HasCondition( COND_CAN_RANGE_ATTACK1 ) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+            {
+                return TranslateSchedule( SCHED_RANGE_ATTACK1 );
+            }
 
 #ifdef MAPBASE
-			if ( npc_combine_new_cover_behavior.GetBool() && HasCondition( COND_CAN_RANGE_ATTACK2 ) && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
-			{
-				return TranslateSchedule( SCHED_RANGE_ATTACK2 );
-			}
+            if ( npc_combine_new_cover_behavior.GetBool() && HasCondition( COND_CAN_RANGE_ATTACK2 ) && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) )
+            {
+                return TranslateSchedule( SCHED_RANGE_ATTACK2 );
+            }
 #endif
 
-			// Run somewhere randomly
-			return TranslateSchedule( SCHED_FAIL ); 
-			break;
-		}
-		break;
-	case SCHED_FAIL_ESTABLISH_LINE_OF_FIRE:
-		{
-			if( !IsCrouching() )
-			{
-				if( GetEnemy() && CouldShootIfCrouching( GetEnemy() ) )
-				{
-					Crouch();
-					return SCHED_COMBAT_FACE;
-				}
-			}
+            // Run somewhere randomly
+            return TranslateSchedule( SCHED_FAIL );
+            break;
+        }
+        break;
+        case SCHED_FAIL_ESTABLISH_LINE_OF_FIRE:
+        {
+            if ( !IsCrouching() )
+            {
+                if ( GetEnemy() && CouldShootIfCrouching( GetEnemy() ) )
+                {
+                    Crouch();
+                    return SCHED_COMBAT_FACE;
+                }
+            }
 
-			if( HasCondition( COND_SEE_ENEMY ) )
-			{
-				return TranslateSchedule( SCHED_TAKE_COVER_FROM_ENEMY );
-			}
-			else if ( !m_AssaultBehavior.HasAssaultCue() )
-			{
-				// Don't patrol if I'm in the middle of an assault, because 
-				// I'll never return to the assault. 
-				if ( GetEnemy() )
-				{
-					RememberUnreachable( GetEnemy() );
-				}
+            if ( HasCondition( COND_SEE_ENEMY ) )
+            {
+                return TranslateSchedule( SCHED_TAKE_COVER_FROM_ENEMY );
+            }
+            else if ( !m_AssaultBehavior.HasAssaultCue() )
+            {
+                // Don't patrol if I'm in the middle of an assault, because 
+                // I'll never return to the assault. 
+                if ( GetEnemy() )
+                {
+                    RememberUnreachable( GetEnemy() );
+                }
 
-				return TranslateSchedule( SCHED_COMBINE_PATROL );
-			}
-		}
-		break;
-	case SCHED_COMBINE_ASSAULT:
-		{
-			CBaseEntity *pEntity = GetEnemy();
+                return TranslateSchedule( SCHED_COMBINE_PATROL );
+            }
+        }
+        break;
+        case SCHED_COMBINE_ASSAULT:
+        {
+            CBaseEntity* pEntity = GetEnemy();
 
-			// FIXME: this should be generalized by the schedules that are selected, or in the definition of 
-			// what "cover" means (i.e., trace attack vulnerability vs. physical attack vulnerability
-			if (pEntity && pEntity->MyNPCPointer())
-			{
-				if ( !(pEntity->MyNPCPointer()->CapabilitiesGet( ) & bits_CAP_WEAPON_RANGE_ATTACK1))
-				{
-					return TranslateSchedule( SCHED_ESTABLISH_LINE_OF_FIRE );
-				}
-			}
-			// don't charge forward if there's a hint group
-			if (GetHintGroup() != NULL_STRING)
-			{
-				return TranslateSchedule( SCHED_ESTABLISH_LINE_OF_FIRE );
-			}
-			return SCHED_COMBINE_ASSAULT;
-		}
-	case SCHED_ESTABLISH_LINE_OF_FIRE:
-		{
-			// always assume standing
-			// Stand();
+            // FIXME: this should be generalized by the schedules that are selected, or in the definition of 
+            // what "cover" means (i.e., trace attack vulnerability vs. physical attack vulnerability
+            if ( pEntity && pEntity->MyNPCPointer() )
+            {
+                if ( !(pEntity->MyNPCPointer()->CapabilitiesGet() & bits_CAP_WEAPON_RANGE_ATTACK1) )
+                {
+                    return TranslateSchedule( SCHED_ESTABLISH_LINE_OF_FIRE );
+                }
+            }
+            // don't charge forward if there's a hint group
+            if ( GetHintGroup() != NULL_STRING )
+            {
+                return TranslateSchedule( SCHED_ESTABLISH_LINE_OF_FIRE );
+            }
+            return SCHED_COMBINE_ASSAULT;
+        }
+        case SCHED_ESTABLISH_LINE_OF_FIRE:
+        {
+            // always assume standing
+            // Stand();
 
-			if( CanAltFireEnemy(true) && OccupyStrategySlot(SQUAD_SLOT_SPECIAL_ATTACK) )
-			{
-				// If an elite in the squad could fire a combine ball at the player's last known position,
-				// do so!
-				return SCHED_COMBINE_AR2_ALTFIRE;
-			}
+            if ( CanAltFireEnemy( true ) && OccupyStrategySlot( SQUAD_SLOT_SPECIAL_ATTACK ) )
+            {
+                // If an elite in the squad could fire a combine ball at the player's last known position,
+                // do so!
+                return SCHED_COMBINE_AR2_ALTFIRE;
+            }
 
-			if( IsUsingTacticalVariant( TACTICAL_VARIANT_PRESSURE_ENEMY ) && !IsRunningBehavior() )
-			{
-				if( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-				{
-					return SCHED_COMBINE_PRESS_ATTACK;
-				}
-			}
+            if ( IsUsingTacticalVariant( TACTICAL_VARIANT_PRESSURE_ENEMY ) && !IsRunningBehavior() )
+            {
+                if ( OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+                {
+                    return SCHED_COMBINE_PRESS_ATTACK;
+                }
+            }
 
-			return SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE;
-		}
-		break;
-	case SCHED_HIDE_AND_RELOAD:
-		{
-			// stand up, just in case
-			// Stand();
-			// DesireStand();
-			if( CanGrenadeEnemy() && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) && random->RandomInt( 0, 100 ) < 20 )
-			{
-				// If I COULD throw a grenade and I need to reload, 20% chance I'll throw a grenade before I hide to reload.
-				return SCHED_COMBINE_GRENADE_AND_RELOAD;
-			}
+            return SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE;
+        }
+        break;
+        case SCHED_HIDE_AND_RELOAD:
+        {
+            // stand up, just in case
+            // Stand();
+            // DesireStand();
+            if ( CanGrenadeEnemy() && OccupyStrategySlot( SQUAD_SLOT_GRENADE1 ) && random->RandomInt( 0, 100 ) < 20 )
+            {
+                // If I COULD throw a grenade and I need to reload, 20% chance I'll throw a grenade before I hide to reload.
+                return SCHED_COMBINE_GRENADE_AND_RELOAD;
+            }
 
-			// No running away in the citadel!
-			if ( ShouldChargePlayer() )
-				return SCHED_RELOAD;
+            // No running away in the citadel!
+            if ( ShouldChargePlayer() )
+                return SCHED_RELOAD;
 
-			return SCHED_COMBINE_HIDE_AND_RELOAD;
-		}
-		break;
-	case SCHED_RANGE_ATTACK1:
-		{
-			if ( HasCondition( COND_NO_PRIMARY_AMMO ) || HasCondition( COND_LOW_PRIMARY_AMMO ) )
-			{
-				// Ditch the strategy slot for attacking (which we just reserved!)
-				VacateStrategySlot();
-				return TranslateSchedule( SCHED_HIDE_AND_RELOAD );
-			}
+            return SCHED_COMBINE_HIDE_AND_RELOAD;
+        }
+        break;
+        case SCHED_RANGE_ATTACK1:
+        {
+            if ( HasCondition( COND_NO_PRIMARY_AMMO ) || HasCondition( COND_LOW_PRIMARY_AMMO ) )
+            {
+                // Ditch the strategy slot for attacking (which we just reserved!)
+                VacateStrategySlot();
+                return TranslateSchedule( SCHED_HIDE_AND_RELOAD );
+            }
 
-			if( CanAltFireEnemy(true) && OccupyStrategySlot(SQUAD_SLOT_SPECIAL_ATTACK) )
-			{
-				// Since I'm holding this squadslot, no one else can try right now. If I die before the shot 
-				// goes off, I won't have affected anyone else's ability to use this attack at their nearest
-				// convenience.
-				return SCHED_COMBINE_AR2_ALTFIRE;
-			}
+            if ( CanAltFireEnemy( true ) && OccupyStrategySlot( SQUAD_SLOT_SPECIAL_ATTACK ) )
+            {
+                // Since I'm holding this squadslot, no one else can try right now. If I die before the shot 
+                // goes off, I won't have affected anyone else's ability to use this attack at their nearest
+                // convenience.
+                return SCHED_COMBINE_AR2_ALTFIRE;
+            }
 
-			if ( IsCrouching() || ( CrouchIsDesired() && !HasCondition( COND_HEAVY_DAMAGE ) ) )
-			{
-				// See if we can crouch and shoot
-				if (GetEnemy() != NULL)
-				{
-					float dist = (GetLocalOrigin() - GetEnemy()->GetLocalOrigin()).Length();
+            if ( IsCrouching() || (CrouchIsDesired() && !HasCondition( COND_HEAVY_DAMAGE )) )
+            {
+                // See if we can crouch and shoot
+                if ( GetEnemy() != NULL )
+                {
+                    float dist = (GetLocalOrigin() - GetEnemy()->GetLocalOrigin()).Length();
 
-					// only crouch if they are relatively far away
-					if (dist > COMBINE_MIN_CROUCH_DISTANCE)
-					{
-						// try crouching
-						Crouch();
+                    // only crouch if they are relatively far away
+                    if ( dist > COMBINE_MIN_CROUCH_DISTANCE )
+                    {
+                        // try crouching
+                        Crouch();
 
-						Vector targetPos = GetEnemy()->BodyTarget(GetActiveWeapon()->GetLocalOrigin());
+                        Vector targetPos = GetEnemy()->BodyTarget( GetActiveWeapon()->GetLocalOrigin() );
 
-						// if we can't see it crouched, stand up
-						if (!WeaponLOSCondition(GetLocalOrigin(),targetPos,false))
-						{
-							Stand();
-						}
-					}
-				}
-			}
-			else
-			{
-				// always assume standing
-				Stand();
-			}
+                        // if we can't see it crouched, stand up
+                        if ( !WeaponLOSCondition( GetLocalOrigin(), targetPos, false ) )
+                        {
+                            Stand();
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // always assume standing
+                Stand();
+            }
 
 #ifdef MAPBASE
-			// SCHED_COMBINE_WAIT_IN_COVER uses INCOVER, but only gets out of it when the soldier moves.
-			// That seems to mess up shooting, so this Forget() attempts to fix that.
-			Forget( bits_MEMORY_INCOVER );
+            // SCHED_COMBINE_WAIT_IN_COVER uses INCOVER, but only gets out of it when the soldier moves.
+            // That seems to mess up shooting, so this Forget() attempts to fix that.
+            Forget( bits_MEMORY_INCOVER );
 #endif
 
-			return SCHED_COMBINE_RANGE_ATTACK1;
-		}
-	case SCHED_RANGE_ATTACK2:
-		{
-			// If my weapon can range attack 2 use the weapon
-			if (GetActiveWeapon() && GetActiveWeapon()->CapabilitiesGet() & bits_CAP_WEAPON_RANGE_ATTACK2)
-			{
-				return SCHED_RANGE_ATTACK2;
-			}
-			// Otherwise use innate attack
-			else
-			{
-				return SCHED_COMBINE_RANGE_ATTACK2;
-			}
-		}
-		// SCHED_COMBAT_FACE:
-		// SCHED_COMBINE_WAIT_FACE_ENEMY:
-		// SCHED_COMBINE_SWEEP:
-		// SCHED_COMBINE_COVER_AND_RELOAD:
-		// SCHED_COMBINE_FOUND_ENEMY:
+            return SCHED_COMBINE_RANGE_ATTACK1;
+        }
+        case SCHED_RANGE_ATTACK2:
+        {
+            // If my weapon can range attack 2 use the weapon
+            if ( GetActiveWeapon() && GetActiveWeapon()->CapabilitiesGet() & bits_CAP_WEAPON_RANGE_ATTACK2 )
+            {
+                return SCHED_RANGE_ATTACK2;
+            }
+            // Otherwise use innate attack
+            else
+            {
+                return SCHED_COMBINE_RANGE_ATTACK2;
+            }
+        }
+        // SCHED_COMBAT_FACE:
+        // SCHED_COMBINE_WAIT_FACE_ENEMY:
+        // SCHED_COMBINE_SWEEP:
+        // SCHED_COMBINE_COVER_AND_RELOAD:
+        // SCHED_COMBINE_FOUND_ENEMY:
 
-	case SCHED_VICTORY_DANCE:
-		{
-			return SCHED_COMBINE_VICTORY_DANCE;
-		}
-	case SCHED_COMBINE_SUPPRESS:
-		{
+        case SCHED_VICTORY_DANCE:
+        {
+            return SCHED_COMBINE_VICTORY_DANCE;
+        }
+        case SCHED_COMBINE_SUPPRESS:
+        {
 #define MIN_SIGNAL_DIST	256
-			if ( GetEnemy() != NULL && GetEnemy()->IsPlayer() && m_bFirstEncounter )
-			{
-				float flDistToEnemy = ( GetEnemy()->GetAbsOrigin() - GetAbsOrigin() ).Length();
+            if ( GetEnemy() != NULL && GetEnemy()->IsPlayer() && m_bFirstEncounter )
+            {
+                float flDistToEnemy = (GetEnemy()->GetAbsOrigin() - GetAbsOrigin()).Length();
 
-				if( flDistToEnemy >= MIN_SIGNAL_DIST )
-				{
-					m_bFirstEncounter = false;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
-					return SCHED_COMBINE_SIGNAL_SUPPRESS;
-				}
-			}
+                if ( flDistToEnemy >= MIN_SIGNAL_DIST )
+                {
+                    m_bFirstEncounter = false;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
+                    return SCHED_COMBINE_SIGNAL_SUPPRESS;
+                }
+            }
 
-			return SCHED_COMBINE_SUPPRESS;
-		}
-	case SCHED_FAIL:
-		{
-			if ( GetEnemy() != NULL )
-			{
-				return SCHED_COMBINE_COMBAT_FAIL;
-			}
-			return SCHED_FAIL;
-		}
+            return SCHED_COMBINE_SUPPRESS;
+        }
+        case SCHED_FAIL:
+        {
+            if ( GetEnemy() != NULL )
+            {
+                return SCHED_COMBINE_COMBAT_FAIL;
+            }
+            return SCHED_FAIL;
+        }
 
-	case SCHED_COMBINE_PATROL:
-		{
-			// If I have an enemy, don't go off into random patrol mode.
-			if ( GetEnemy() && GetEnemy()->IsAlive() )
-				return SCHED_COMBINE_PATROL_ENEMY;
+        case SCHED_COMBINE_PATROL:
+        {
+            // If I have an enemy, don't go off into random patrol mode.
+            if ( GetEnemy() && GetEnemy()->IsAlive() )
+                return SCHED_COMBINE_PATROL_ENEMY;
 
-			return SCHED_COMBINE_PATROL;
-		}
-	}
+            return SCHED_COMBINE_PATROL;
+        }
+    }
 
-	return BaseClass::TranslateSchedule( scheduleType );
+    return BaseClass::TranslateSchedule( scheduleType );
 }
 
 //=========================================================
 //=========================================================
-void CNPC_Combine::OnStartSchedule( int scheduleType ) 
+void CNPC_Combine::OnStartSchedule( int scheduleType )
 {
 }
 
@@ -3108,246 +3108,246 @@ void CNPC_Combine::OnStartSchedule( int scheduleType )
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
-void CNPC_Combine::HandleAnimEvent( animevent_t *pEvent )
+void CNPC_Combine::HandleAnimEvent( animevent_t* pEvent )
 {
-	Vector vecShootDir;
-	Vector vecShootOrigin;
-	bool handledEvent = false;
+    Vector vecShootDir;
+    Vector vecShootOrigin;
+    bool handledEvent = false;
 
-	if (pEvent->type & AE_TYPE_NEWEVENTSYSTEM)
-	{
-		if ( pEvent->event == COMBINE_AE_BEGIN_ALTFIRE )
-		{
+    if ( pEvent->type & AE_TYPE_NEWEVENTSYSTEM )
+    {
+        if ( pEvent->event == COMBINE_AE_BEGIN_ALTFIRE )
+        {
 #ifdef MAPBASE
-			if (GetActiveWeapon())
-				GetActiveWeapon()->WeaponSound(SPECIAL1);
+            if ( GetActiveWeapon() )
+                GetActiveWeapon()->WeaponSound( SPECIAL1 );
 #else
-			EmitSound( "Weapon_CombineGuard.Special1" );
+            EmitSound( "Weapon_CombineGuard.Special1" );
 #endif
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-			SpeakIfAllowed( TLK_CMB_THROWGRENADE, "altfire:1", SENTENCE_PRIORITY_MEDIUM );
+            SpeakIfAllowed( TLK_CMB_THROWGRENADE, "altfire:1", SENTENCE_PRIORITY_MEDIUM );
 #endif
-			handledEvent = true;
-		}
-		else if ( pEvent->event == COMBINE_AE_ALTFIRE )
-		{
+            handledEvent = true;
+        }
+        else if ( pEvent->event == COMBINE_AE_ALTFIRE )
+        {
 #ifdef MAPBASE
-			if ( IsAltFireCapable() && GetActiveWeapon() )
+            if ( IsAltFireCapable() && GetActiveWeapon() )
 #else
-			if ( IsElite() )
+            if ( IsElite() )
 #endif
-			{
-				animevent_t fakeEvent;
+            {
+                animevent_t fakeEvent;
 
-				fakeEvent.pSource = this;
-				fakeEvent.event = EVENT_WEAPON_AR2_ALTFIRE;
-				GetActiveWeapon()->Operator_HandleAnimEvent( &fakeEvent, this );
+                fakeEvent.pSource = this;
+                fakeEvent.event = EVENT_WEAPON_AR2_ALTFIRE;
+                GetActiveWeapon()->Operator_HandleAnimEvent( &fakeEvent, this );
 
-				// Stop other squad members from combine balling for a while.
-				DelaySquadAltFireAttack( 10.0f );
+                // Stop other squad members from combine balling for a while.
+                DelaySquadAltFireAttack( 10.0f );
 
-				// I'm disabling this decrementor. At the time of this change, the elites
-				// don't bother to check if they have grenades anyway. This means that all
-				// elites have infinite combine balls, even if the designer marks the elite
-				// as having 0 grenades. By disabling this decrementor, yet enabling the code
-				// that makes sure the elite has grenades in order to fire a combine ball, we
-				// preserve the legacy behavior while making it possible for a designer to prevent
-				// elites from shooting combine balls by setting grenades to '0' in hammer. (sjb) EP2_OUTLAND_10
+                // I'm disabling this decrementor. At the time of this change, the elites
+                // don't bother to check if they have grenades anyway. This means that all
+                // elites have infinite combine balls, even if the designer marks the elite
+                // as having 0 grenades. By disabling this decrementor, yet enabling the code
+                // that makes sure the elite has grenades in order to fire a combine ball, we
+                // preserve the legacy behavior while making it possible for a designer to prevent
+                // elites from shooting combine balls by setting grenades to '0' in hammer. (sjb) EP2_OUTLAND_10
 #ifdef MAPBASE
-				// 
-				// Here's a tip: In Mapbase, "OnThrowGrenade" is fired during alt-fire as well, fired by the weapon so it could pass its alt-fire projectile.
-				// So if you want elites to decrement on each grenade again, you could fire "!self > AddGrenades -1" every time an elite fires OnThrowGrenade.
-				// 
-				// AddGrenades(-1);
+                // 
+                // Here's a tip: In Mapbase, "OnThrowGrenade" is fired during alt-fire as well, fired by the weapon so it could pass its alt-fire projectile.
+                // So if you want elites to decrement on each grenade again, you could fire "!self > AddGrenades -1" every time an elite fires OnThrowGrenade.
+                // 
+                // AddGrenades(-1);
 #else
-				// m_iNumGrenades--;
+                // m_iNumGrenades--;
 #endif
-			}
+            }
 
-			handledEvent = true;
-		}
-		else
-		{
-			BaseClass::HandleAnimEvent( pEvent );
-		}
-	}
-	else
-	{
-		switch( pEvent->event )
-		{
-		case COMBINE_AE_AIM:	
-			{
-				handledEvent = true;
-				break;
-			}
-		case COMBINE_AE_RELOAD:
+            handledEvent = true;
+        }
+        else
+        {
+            BaseClass::HandleAnimEvent( pEvent );
+        }
+    }
+    else
+    {
+        switch ( pEvent->event )
+        {
+            case COMBINE_AE_AIM:
+            {
+                handledEvent = true;
+                break;
+            }
+            case COMBINE_AE_RELOAD:
 
-			// We never actually run out of ammo, just need to refill the clip
-			if (GetActiveWeapon())
-			{
+                // We never actually run out of ammo, just need to refill the clip
+                if ( GetActiveWeapon() )
+                {
 #ifdef MAPBASE
-				GetActiveWeapon()->Reload_NPC();
+                    GetActiveWeapon()->Reload_NPC();
 #else
-				GetActiveWeapon()->WeaponSound( RELOAD_NPC );
-				GetActiveWeapon()->m_iClip1 = GetActiveWeapon()->GetMaxClip1(); 
+                    GetActiveWeapon()->WeaponSound( RELOAD_NPC );
+                    GetActiveWeapon()->m_iClip1 = GetActiveWeapon()->GetMaxClip1();
 #endif
-				GetActiveWeapon()->m_iClip2 = GetActiveWeapon()->GetMaxClip2();  
-			}
-			ClearCondition(COND_LOW_PRIMARY_AMMO);
-			ClearCondition(COND_NO_PRIMARY_AMMO);
-			ClearCondition(COND_NO_SECONDARY_AMMO);
-			handledEvent = true;
-			break;
+                    GetActiveWeapon()->m_iClip2 = GetActiveWeapon()->GetMaxClip2();
+                }
+                ClearCondition( COND_LOW_PRIMARY_AMMO );
+                ClearCondition( COND_NO_PRIMARY_AMMO );
+                ClearCondition( COND_NO_SECONDARY_AMMO );
+                handledEvent = true;
+                break;
 
-		case COMBINE_AE_GREN_TOSS:
-			{
-				Vector vecSpin;
-				vecSpin.x = random->RandomFloat( -1000.0, 1000.0 );
-				vecSpin.y = random->RandomFloat( -1000.0, 1000.0 );
-				vecSpin.z = random->RandomFloat( -1000.0, 1000.0 );
+            case COMBINE_AE_GREN_TOSS:
+            {
+                Vector vecSpin;
+                vecSpin.x = random->RandomFloat( -1000.0, 1000.0 );
+                vecSpin.y = random->RandomFloat( -1000.0, 1000.0 );
+                vecSpin.z = random->RandomFloat( -1000.0, 1000.0 );
 
-				Vector vecStart;
-				GetAttachment( "lefthand", vecStart );
+                Vector vecStart;
+                GetAttachment( "lefthand", vecStart );
 
-				if( m_NPCState == NPC_STATE_SCRIPT )
-				{
-					// Use a fixed velocity for grenades thrown in scripted state.
-					// Grenades thrown from a script do not count against grenades remaining for the AI to use.
-					Vector forward, up, vecThrow;
+                if ( m_NPCState == NPC_STATE_SCRIPT )
+                {
+                    // Use a fixed velocity for grenades thrown in scripted state.
+                    // Grenades thrown from a script do not count against grenades remaining for the AI to use.
+                    Vector forward, up, vecThrow;
 
-					GetVectors( &forward, NULL, &up );
-					vecThrow = forward * 750 + up * 175;
+                    GetVectors( &forward, NULL, &up );
+                    vecThrow = forward * 750 + up * 175;
 #ifdef MAPBASE
-					CBaseEntity *pGrenade = Fraggrenade_Create( vecStart, vec3_angle, vecThrow, vecSpin, this, COMBINE_GRENADE_TIMER, true );
-					m_OnThrowGrenade.Set(pGrenade, pGrenade, this);
+                    CBaseEntity* pGrenade = Fraggrenade_Create( vecStart, vec3_angle, vecThrow, vecSpin, this, COMBINE_GRENADE_TIMER, true );
+                    m_OnThrowGrenade.Set( pGrenade, pGrenade, this );
 #else
-					Fraggrenade_Create( vecStart, vec3_angle, vecThrow, vecSpin, this, COMBINE_GRENADE_TIMER, true );
+                    Fraggrenade_Create( vecStart, vec3_angle, vecThrow, vecSpin, this, COMBINE_GRENADE_TIMER, true );
 #endif
-				}
-				else
-				{
-					// Use the Velocity that AI gave us.
+                }
+                else
+                {
+                    // Use the Velocity that AI gave us.
 #ifdef MAPBASE
-					CBaseEntity *pGrenade = Fraggrenade_Create( vecStart, vec3_angle, m_vecTossVelocity, vecSpin, this, COMBINE_GRENADE_TIMER, true );
-					m_OnThrowGrenade.Set(pGrenade, pGrenade, this);
-					AddGrenades(-1, pGrenade);
+                    CBaseEntity* pGrenade = Fraggrenade_Create( vecStart, vec3_angle, m_vecTossVelocity, vecSpin, this, COMBINE_GRENADE_TIMER, true );
+                    m_OnThrowGrenade.Set( pGrenade, pGrenade, this );
+                    AddGrenades( -1, pGrenade );
 #else
-					Fraggrenade_Create( vecStart, vec3_angle, m_vecTossVelocity, vecSpin, this, COMBINE_GRENADE_TIMER, true );
-					m_iNumGrenades--;
+                    Fraggrenade_Create( vecStart, vec3_angle, m_vecTossVelocity, vecSpin, this, COMBINE_GRENADE_TIMER, true );
+                    m_iNumGrenades--;
 #endif
-				}
+                }
 
-				// wait six seconds before even looking again to see if a grenade can be thrown.
-				m_flNextGrenadeCheck = gpGlobals->curtime + 6;
-			}
-			handledEvent = true;
-			break;
+                // wait six seconds before even looking again to see if a grenade can be thrown.
+                m_flNextGrenadeCheck = gpGlobals->curtime + 6;
+            }
+            handledEvent = true;
+            break;
 
-		case COMBINE_AE_GREN_LAUNCH:
-			{
-				EmitSound( "NPC_Combine.GrenadeLaunch" );
+            case COMBINE_AE_GREN_LAUNCH:
+            {
+                EmitSound( "NPC_Combine.GrenadeLaunch" );
 
-				CBaseEntity *pGrenade = CreateNoSpawn( "npc_contactgrenade", Weapon_ShootPosition(), vec3_angle, this );
-				pGrenade->KeyValue( "velocity", m_vecTossVelocity );
-				pGrenade->Spawn( );
+                CBaseEntity* pGrenade = CreateNoSpawn( "npc_contactgrenade", Weapon_ShootPosition(), vec3_angle, this );
+                pGrenade->KeyValue( "velocity", m_vecTossVelocity );
+                pGrenade->Spawn();
 
-				if ( g_pGameRules->IsSkillLevel(SKILL_HARD) )
-					m_flNextGrenadeCheck = gpGlobals->curtime + random->RandomFloat( 2, 5 );// wait a random amount of time before shooting again
-				else
-					m_flNextGrenadeCheck = gpGlobals->curtime + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
-			}
-			handledEvent = true;
-			break;
+                if ( g_pGameRules->IsSkillLevel( SKILL_HARD ) )
+                    m_flNextGrenadeCheck = gpGlobals->curtime + random->RandomFloat( 2, 5 );// wait a random amount of time before shooting again
+                else
+                    m_flNextGrenadeCheck = gpGlobals->curtime + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
+            }
+            handledEvent = true;
+            break;
 
-		case COMBINE_AE_GREN_DROP:
-			{
-				Vector vecStart;
+            case COMBINE_AE_GREN_DROP:
+            {
+                Vector vecStart;
 #ifdef MAPBASE
-				QAngle angStart;
-				m_vecTossVelocity.x = 15;
-				m_vecTossVelocity.y = 0;
-				m_vecTossVelocity.z = 0;
+                QAngle angStart;
+                m_vecTossVelocity.x = 15;
+                m_vecTossVelocity.y = 0;
+                m_vecTossVelocity.z = 0;
 
-				GetAttachment( "lefthand", vecStart, angStart );
+                GetAttachment( "lefthand", vecStart, angStart );
 
-				CBaseEntity *pGrenade = NULL;
-				if (m_NPCState == NPC_STATE_SCRIPT)
-				{
-					// While scripting, have the grenade face upwards like it was originally and also don't decrement grenade count.
-					pGrenade = Fraggrenade_Create( vecStart, vec3_angle, m_vecTossVelocity, vec3_origin, this, COMBINE_GRENADE_TIMER, true );
-				}
-				else
-				{
-					pGrenade = Fraggrenade_Create( vecStart, angStart, m_vecTossVelocity, vec3_origin, this, COMBINE_GRENADE_TIMER, true );
-					AddGrenades(-1);
-				}
+                CBaseEntity* pGrenade = NULL;
+                if ( m_NPCState == NPC_STATE_SCRIPT )
+                {
+                    // While scripting, have the grenade face upwards like it was originally and also don't decrement grenade count.
+                    pGrenade = Fraggrenade_Create( vecStart, vec3_angle, m_vecTossVelocity, vec3_origin, this, COMBINE_GRENADE_TIMER, true );
+                }
+                else
+                {
+                    pGrenade = Fraggrenade_Create( vecStart, angStart, m_vecTossVelocity, vec3_origin, this, COMBINE_GRENADE_TIMER, true );
+                    AddGrenades( -1 );
+                }
 
-				// Well, technically we're not throwing, but...still.
-				m_OnThrowGrenade.Set(pGrenade, pGrenade, this);
+                // Well, technically we're not throwing, but...still.
+                m_OnThrowGrenade.Set( pGrenade, pGrenade, this );
 #else
-				GetAttachment( "lefthand", vecStart );
+                GetAttachment( "lefthand", vecStart );
 
-				Fraggrenade_Create( vecStart, vec3_angle, m_vecTossVelocity, vec3_origin, this, COMBINE_GRENADE_TIMER, true );
-				m_iNumGrenades--;
+                Fraggrenade_Create( vecStart, vec3_angle, m_vecTossVelocity, vec3_origin, this, COMBINE_GRENADE_TIMER, true );
+                m_iNumGrenades--;
 #endif
-			}
-			handledEvent = true;
-			break;
+            }
+            handledEvent = true;
+            break;
 
-		case COMBINE_AE_KICK:
-			{
-				// Does no damage, because damage is applied based upon whether the target can handle the interaction
-				CBaseEntity *pHurt = CheckTraceHullAttack( 70, -Vector(16,16,18), Vector(16,16,18), 0, DMG_CLUB );
-				CBaseCombatCharacter* pBCC = ToBaseCombatCharacter( pHurt );
-				if (pBCC)
-				{
-					Vector forward, up;
-					AngleVectors( GetLocalAngles(), &forward, NULL, &up );
+            case COMBINE_AE_KICK:
+            {
+                // Does no damage, because damage is applied based upon whether the target can handle the interaction
+                CBaseEntity* pHurt = CheckTraceHullAttack( 70, -Vector( 16, 16, 18 ), Vector( 16, 16, 18 ), 0, DMG_CLUB );
+                CBaseCombatCharacter* pBCC = ToBaseCombatCharacter( pHurt );
+                if ( pBCC )
+                {
+                    Vector forward, up;
+                    AngleVectors( GetLocalAngles(), &forward, NULL, &up );
 
-					if ( !pBCC->DispatchInteraction( g_interactionCombineBash, NULL, this ) )
-					{
-						if ( pBCC->IsPlayer() )
-						{
-							pBCC->ViewPunch( QAngle(-12,-7,0) );
-							pHurt->ApplyAbsVelocityImpulse( forward * 100 + up * 50 );
-						}
+                    if ( !pBCC->DispatchInteraction( g_interactionCombineBash, NULL, this ) )
+                    {
+                        if ( pBCC->IsPlayer() )
+                        {
+                            pBCC->ViewPunch( QAngle( -12, -7, 0 ) );
+                            pHurt->ApplyAbsVelocityImpulse( forward * 100 + up * 50 );
+                        }
 
-						CTakeDamageInfo info( this, this, m_nKickDamage, DMG_CLUB );
-						CalculateMeleeDamageForce( &info, forward, pBCC->GetAbsOrigin() );
-						pBCC->TakeDamage( info );
+                        CTakeDamageInfo info( this, this, m_nKickDamage, DMG_CLUB );
+                        CalculateMeleeDamageForce( &info, forward, pBCC->GetAbsOrigin() );
+                        pBCC->TakeDamage( info );
 
-						EmitSound( "NPC_Combine.WeaponBash" );
-					}
-				}			
+                        EmitSound( "NPC_Combine.WeaponBash" );
+                    }
+                }
 
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-				SpeakIfAllowed( TLK_CMB_KICK );
+                SpeakIfAllowed( TLK_CMB_KICK );
 #else
-				m_Sentences.Speak( "COMBINE_KICK" );
+                m_Sentences.Speak( "COMBINE_KICK" );
 #endif
-				handledEvent = true;
-				break;
-			}
+                handledEvent = true;
+                break;
+            }
 
-		case COMBINE_AE_CAUGHT_ENEMY:
+            case COMBINE_AE_CAUGHT_ENEMY:
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-			SpeakIfAllowed( TLK_CMB_ENEMY ); //SpeakIfAllowed( "TLK_CMB_ALERT" );
+                SpeakIfAllowed( TLK_CMB_ENEMY ); //SpeakIfAllowed( "TLK_CMB_ALERT" );
 #else
-			m_Sentences.Speak( "COMBINE_ALERT" );
+                m_Sentences.Speak( "COMBINE_ALERT" );
 #endif
-			handledEvent = true;
-			break;
+                handledEvent = true;
+                break;
 
-		default:
-			BaseClass::HandleAnimEvent( pEvent );
-			break;
-		}
-	}
+            default:
+                BaseClass::HandleAnimEvent( pEvent );
+                break;
+        }
+    }
 
-	if( handledEvent )
-	{
-		m_iLastAnimEventHandled = pEvent->event;
-	}
+    if ( handledEvent )
+    {
+        m_iLastAnimEventHandled = pEvent->event;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -3355,67 +3355,67 @@ void CNPC_Combine::HandleAnimEvent( animevent_t *pEvent )
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-Vector CNPC_Combine::Weapon_ShootPosition( )
+Vector CNPC_Combine::Weapon_ShootPosition()
 {
-	bool bStanding = !IsCrouching();
-	Vector right;
-	GetVectors( NULL, &right, NULL );
+    bool bStanding = !IsCrouching();
+    Vector right;
+    GetVectors( NULL, &right, NULL );
 
-	if ((CapabilitiesGet() & bits_CAP_DUCK) )
-	{
-		if ( IsCrouchedActivity( GetActivity() ) )
-		{
-			bStanding = false;
-		}
-	}
+    if ( (CapabilitiesGet() & bits_CAP_DUCK) )
+    {
+        if ( IsCrouchedActivity( GetActivity() ) )
+        {
+            bStanding = false;
+        }
+    }
 
-	// FIXME: rename this "estimated" since it's not based on animation
-	// FIXME: the orientation won't be correct when testing from arbitary positions for arbitary angles
+    // FIXME: rename this "estimated" since it's not based on animation
+    // FIXME: the orientation won't be correct when testing from arbitary positions for arbitary angles
 
 #ifdef MAPBASE
-	// HACKHACK: This weapon shoot position code does not work properly when in close range, causing the aim
-	// to drift to the left as the enemy gets closer to it.
-	// This problem is usually bearable for regular combat, but it causes dynamic interaction yaw to be offset
-	// as well, preventing most from ever being triggered.
-	// Ideally, this should be fixed from the root cause, but due to the sensitivity of such a change, this is
-	// currently being tied to a cvar which is off by default.
-	// 
-	// If the cvar is disabled but the soldier has valid interactions on its current enemy, then a separate hack
-	// will still attempt to correct the drift as the enemy gets closer.
-	if ( npc_combine_fixed_shootpos.GetBool() )
-	{
-		right *= 0.0f;
-	}
-	else if ( HasValidInteractionsOnCurrentEnemy() )
-	{
-		float flDistSqr = GetEnemy()->WorldSpaceCenter().DistToSqr( WorldSpaceCenter() );
-		if (flDistSqr < Square( 128.0f ))
-			right *= (flDistSqr / Square( 128.0f ));
-	}
+    // HACKHACK: This weapon shoot position code does not work properly when in close range, causing the aim
+    // to drift to the left as the enemy gets closer to it.
+    // This problem is usually bearable for regular combat, but it causes dynamic interaction yaw to be offset
+    // as well, preventing most from ever being triggered.
+    // Ideally, this should be fixed from the root cause, but due to the sensitivity of such a change, this is
+    // currently being tied to a cvar which is off by default.
+    // 
+    // If the cvar is disabled but the soldier has valid interactions on its current enemy, then a separate hack
+    // will still attempt to correct the drift as the enemy gets closer.
+    if ( npc_combine_fixed_shootpos.GetBool() )
+    {
+        right *= 0.0f;
+    }
+    else if ( HasValidInteractionsOnCurrentEnemy() )
+    {
+        float flDistSqr = GetEnemy()->WorldSpaceCenter().DistToSqr( WorldSpaceCenter() );
+        if ( flDistSqr < Square( 128.0f ) )
+            right *= (flDistSqr / Square( 128.0f ));
+    }
 #endif
 
-	if  ( bStanding )
-	{
-		if( HasShotgun() )
-		{
-			return GetAbsOrigin() + COMBINE_SHOTGUN_STANDING_POSITION + right * 8;
-		}
-		else
-		{
-			return GetAbsOrigin() + COMBINE_GUN_STANDING_POSITION + right * 8;
-		}
-	}
-	else
-	{
-		if( HasShotgun() )
-		{
-			return GetAbsOrigin() + COMBINE_SHOTGUN_CROUCHING_POSITION + right * 8;
-		}
-		else
-		{
-			return GetAbsOrigin() + COMBINE_GUN_CROUCHING_POSITION + right * 8;
-		}
-	}
+    if ( bStanding )
+    {
+        if ( HasShotgun() )
+        {
+            return GetAbsOrigin() + COMBINE_SHOTGUN_STANDING_POSITION + right * 8;
+        }
+        else
+        {
+            return GetAbsOrigin() + COMBINE_GUN_STANDING_POSITION + right * 8;
+        }
+    }
+    else
+    {
+        if ( HasShotgun() )
+        {
+            return GetAbsOrigin() + COMBINE_SHOTGUN_CROUCHING_POSITION + right * 8;
+        }
+        else
+        {
+            return GetAbsOrigin() + COMBINE_GUN_CROUCHING_POSITION + right * 8;
+        }
+    }
 }
 
 
@@ -3433,81 +3433,81 @@ Vector CNPC_Combine::Weapon_ShootPosition( )
 //=========================================================
 void CNPC_Combine::SpeakSentence( int sentenceType )
 {
-	switch( sentenceType )
-	{
-	case 0: // assault
-		AnnounceAssault();
-		break;
+    switch ( sentenceType )
+    {
+        case 0: // assault
+            AnnounceAssault();
+            break;
 
-	case 1: // Flanking the player
-		// If I'm moving more than 20ft, I need to talk about it
-		if ( GetNavigator()->GetPath()->GetPathLength() > 20 * 12.0f )
-		{
+        case 1: // Flanking the player
+            // If I'm moving more than 20ft, I need to talk about it
+            if ( GetNavigator()->GetPath()->GetPathLength() > 20 * 12.0f )
+            {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-			SpeakIfAllowed( TLK_CMB_FLANK );
+                SpeakIfAllowed( TLK_CMB_FLANK );
 #else
-			m_Sentences.Speak( "COMBINE_FLANK" );
+                m_Sentences.Speak( "COMBINE_FLANK" );
 #endif
-		}
-		break;
-	}
+            }
+            break;
+    }
 }
 
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
 //=========================================================
-bool CNPC_Combine::SpeakIfAllowed( const char *concept, const char *modifiers, SentencePriority_t sentencepriority, SentenceCriteria_t sentencecriteria )
+bool CNPC_Combine::SpeakIfAllowed( const char* concept, const char* modifiers, SentencePriority_t sentencepriority, SentenceCriteria_t sentencecriteria )
 {
-	AI_CriteriaSet set;
-	if (modifiers)
-	{
+    AI_CriteriaSet set;
+    if ( modifiers )
+    {
 #ifdef NEW_RESPONSE_SYSTEM
-		GatherCriteria( &set, concept, modifiers );
+        GatherCriteria( &set, concept, modifiers );
 #else
-		GetExpresser()->MergeModifiers(set, modifiers);
+        GetExpresser()->MergeModifiers( set, modifiers );
 #endif
-	}
-	return SpeakIfAllowed( concept, set, sentencepriority, sentencecriteria );
+    }
+    return SpeakIfAllowed( concept, set, sentencepriority, sentencecriteria );
 }
 
 //=========================================================
 //=========================================================
-bool CNPC_Combine::SpeakIfAllowed( const char *concept, AI_CriteriaSet& modifiers, SentencePriority_t sentencepriority, SentenceCriteria_t sentencecriteria )
+bool CNPC_Combine::SpeakIfAllowed( const char* concept, AI_CriteriaSet& modifiers, SentencePriority_t sentencepriority, SentenceCriteria_t sentencecriteria )
 {
-	if ( sentencepriority != SENTENCE_PRIORITY_INVALID && !FOkToMakeSound( sentencepriority ) )
-		return false;
+    if ( sentencepriority != SENTENCE_PRIORITY_INVALID && !FOkToMakeSound( sentencepriority ) )
+        return false;
 
-	if ( !GetExpresser()->CanSpeakConcept( concept ) )
-		return false;
+    if ( !GetExpresser()->CanSpeakConcept( concept ) )
+        return false;
 
-	// Don't interrupt scripted VCD dialogue
-	if ( IsRunningScriptedSceneWithSpeechAndNotPaused( this, true ) )
-		return false;
+    // Don't interrupt scripted VCD dialogue
+    if ( IsRunningScriptedSceneWithSpeechAndNotPaused( this, true ) )
+        return false;
 
-	if ( Speak( concept, modifiers ) )
-	{
-		JustMadeSound( sentencepriority, 2.0f /*GetTimeSpeechComplete()*/ );
-		return true;
-	}
+    if ( Speak( concept, modifiers ) )
+    {
+        JustMadeSound( sentencepriority, 2.0f /*GetTimeSpeechComplete()*/ );
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void CNPC_Combine::ModifyOrAppendCriteria( AI_CriteriaSet& set )
 {
-	BaseClass::ModifyOrAppendCriteria( set );
+    BaseClass::ModifyOrAppendCriteria( set );
 
-	set.AppendCriteria( "numgrenades", UTIL_VarArgs("%d", m_iNumGrenades) );
-	
-	if (IsElite())
-	{
-		set.AppendCriteria( "elite", "1" );
-	}
-	else
-	{
-		set.AppendCriteria( "elite", "0" );
-	}
+    set.AppendCriteria( "numgrenades", UTIL_VarArgs( "%d", m_iNumGrenades ) );
+
+    if ( IsElite() )
+    {
+        set.AppendCriteria( "elite", "1" );
+    }
+    else
+    {
+        set.AppendCriteria( "elite", "0" );
+    }
 }
 #endif
 
@@ -3515,39 +3515,39 @@ void CNPC_Combine::ModifyOrAppendCriteria( AI_CriteriaSet& set )
 // PainSound
 //=========================================================
 #ifdef MAPBASE
-void CNPC_Combine::PainSound ( const CTakeDamageInfo &info )
+void CNPC_Combine::PainSound( const CTakeDamageInfo& info )
 #else
-void CNPC_Combine::PainSound ( void )
+void CNPC_Combine::PainSound( void )
 #endif
 {
-	// NOTE: The response system deals with this at the moment
-	if ( GetFlags() & FL_DISSOLVING )
-		return;
+    // NOTE: The response system deals with this at the moment
+    if ( GetFlags() & FL_DISSOLVING )
+        return;
 
-	if ( gpGlobals->curtime > m_flNextPainSoundTime )
-	{
+    if ( gpGlobals->curtime > m_flNextPainSoundTime )
+    {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-		AI_CriteriaSet set;
-		ModifyOrAppendDamageCriteria(set, info);
-		SpeakIfAllowed( TLK_CMB_PAIN, set, SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
+        AI_CriteriaSet set;
+        ModifyOrAppendDamageCriteria( set, info );
+        SpeakIfAllowed( TLK_CMB_PAIN, set, SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
 #else
-		const char *pSentenceName = "COMBINE_PAIN";
-		float healthRatio = (float)GetHealth() / (float)GetMaxHealth();
-		if ( !HasMemory(bits_MEMORY_PAIN_LIGHT_SOUND) && healthRatio > 0.9 )
-		{
-			Remember( bits_MEMORY_PAIN_LIGHT_SOUND );
-			pSentenceName = "COMBINE_TAUNT";
-		}
-		else if ( !HasMemory(bits_MEMORY_PAIN_HEAVY_SOUND) && healthRatio < 0.25 )
-		{
-			Remember( bits_MEMORY_PAIN_HEAVY_SOUND );
-			pSentenceName = "COMBINE_COVER";
-		}
+        const char* pSentenceName = "COMBINE_PAIN";
+        float healthRatio = ( float ) GetHealth() / ( float ) GetMaxHealth();
+        if ( !HasMemory( bits_MEMORY_PAIN_LIGHT_SOUND ) && healthRatio > 0.9 )
+        {
+            Remember( bits_MEMORY_PAIN_LIGHT_SOUND );
+            pSentenceName = "COMBINE_TAUNT";
+        }
+        else if ( !HasMemory( bits_MEMORY_PAIN_HEAVY_SOUND ) && healthRatio < 0.25 )
+        {
+            Remember( bits_MEMORY_PAIN_HEAVY_SOUND );
+            pSentenceName = "COMBINE_COVER";
+        }
 
-		m_Sentences.Speak( pSentenceName, SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
+        m_Sentences.Speak( pSentenceName, SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
 #endif
-		m_flNextPainSoundTime = gpGlobals->curtime + 1;
-	}
+        m_flNextPainSoundTime = gpGlobals->curtime + 1;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -3557,39 +3557,39 @@ void CNPC_Combine::PainSound ( void )
 // Output :
 //-----------------------------------------------------------------------------
 #ifdef MAPBASE
-void CNPC_Combine::LostEnemySound( CBaseEntity *pEnemy )
+void CNPC_Combine::LostEnemySound( CBaseEntity* pEnemy )
 #else
-void CNPC_Combine::LostEnemySound( void)
+void CNPC_Combine::LostEnemySound( void )
 #endif
 {
-	if ( gpGlobals->curtime <= m_flNextLostSoundTime )
-		return;
+    if ( gpGlobals->curtime <= m_flNextLostSoundTime )
+        return;
 
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-	AI_CriteriaSet modifiers;
-	ModifyOrAppendEnemyCriteria( modifiers, pEnemy );
+    AI_CriteriaSet modifiers;
+    ModifyOrAppendEnemyCriteria( modifiers, pEnemy );
 
-	modifiers.AppendCriteria( "lastseenenemy", gpGlobals->curtime - GetEnemies()->LastTimeSeen( pEnemy ) );
+    modifiers.AppendCriteria( "lastseenenemy", gpGlobals->curtime - GetEnemies()->LastTimeSeen( pEnemy ) );
 
-	if (SpeakIfAllowed( TLK_CMB_LOSTENEMY, modifiers ))
-	{
-		m_flNextLostSoundTime = gpGlobals->curtime + random->RandomFloat(5.0,15.0);
-	}
+    if ( SpeakIfAllowed( TLK_CMB_LOSTENEMY, modifiers ) )
+    {
+        m_flNextLostSoundTime = gpGlobals->curtime + random->RandomFloat( 5.0, 15.0 );
+    }
 #else
-	const char *pSentence;
-	if (!(CBaseEntity*)GetEnemy() || gpGlobals->curtime - GetEnemyLastTimeSeen() > 10)
-	{
-		pSentence = "COMBINE_LOST_LONG"; 
-	}
-	else
-	{
-		pSentence = "COMBINE_LOST_SHORT";
-	}
+    const char* pSentence;
+    if ( !( CBaseEntity* ) GetEnemy() || gpGlobals->curtime - GetEnemyLastTimeSeen() > 10 )
+    {
+        pSentence = "COMBINE_LOST_LONG";
+    }
+    else
+    {
+        pSentence = "COMBINE_LOST_SHORT";
+    }
 
-	if ( m_Sentences.Speak( pSentence ) >= 0 )
-	{
-		m_flNextLostSoundTime = gpGlobals->curtime + random->RandomFloat(5.0,15.0);
-	}
+    if ( m_Sentences.Speak( pSentence ) >= 0 )
+    {
+        m_flNextLostSoundTime = gpGlobals->curtime + random->RandomFloat( 5.0, 15.0 );
+    }
 #endif
 }
 
@@ -3600,18 +3600,18 @@ void CNPC_Combine::LostEnemySound( void)
 // Output :
 //-----------------------------------------------------------------------------
 #ifdef MAPBASE
-void CNPC_Combine::FoundEnemySound( CBaseEntity *pEnemy )
+void CNPC_Combine::FoundEnemySound( CBaseEntity* pEnemy )
 #else
-void CNPC_Combine::FoundEnemySound( void)
+void CNPC_Combine::FoundEnemySound( void )
 #endif
 {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-	AI_CriteriaSet modifiers;
-	ModifyOrAppendEnemyCriteria( modifiers, pEnemy );
+    AI_CriteriaSet modifiers;
+    ModifyOrAppendEnemyCriteria( modifiers, pEnemy );
 
-	SpeakIfAllowed( TLK_CMB_REFINDENEMY, modifiers, SENTENCE_PRIORITY_HIGH );
+    SpeakIfAllowed( TLK_CMB_REFINDENEMY, modifiers, SENTENCE_PRIORITY_HIGH );
 #else
-	m_Sentences.Speak( "COMBINE_REFIND_ENEMY", SENTENCE_PRIORITY_HIGH );
+    m_Sentences.Speak( "COMBINE_REFIND_ENEMY", SENTENCE_PRIORITY_HIGH );
 #endif
 }
 
@@ -3623,63 +3623,63 @@ void CNPC_Combine::FoundEnemySound( void)
 //-----------------------------------------------------------------------------
 
 // BUGBUG: It looks like this is never played because combine don't do SCHED_WAKE_ANGRY or anything else that does a TASK_SOUND_WAKE
-void CNPC_Combine::AlertSound( void)
+void CNPC_Combine::AlertSound( void )
 {
-	if ( gpGlobals->curtime > m_flNextAlertSoundTime )
-	{
+    if ( gpGlobals->curtime > m_flNextAlertSoundTime )
+    {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-		SpeakIfAllowed( TLK_CMB_GOALERT, SENTENCE_PRIORITY_HIGH );
+        SpeakIfAllowed( TLK_CMB_GOALERT, SENTENCE_PRIORITY_HIGH );
 #else
-		m_Sentences.Speak( "COMBINE_GO_ALERT", SENTENCE_PRIORITY_HIGH );
+        m_Sentences.Speak( "COMBINE_GO_ALERT", SENTENCE_PRIORITY_HIGH );
 #endif
-		m_flNextAlertSoundTime = gpGlobals->curtime + 10.0f;
-	}
+        m_flNextAlertSoundTime = gpGlobals->curtime + 10.0f;
+    }
 }
 
 //=========================================================
 // NotifyDeadFriend
 //=========================================================
-void CNPC_Combine::NotifyDeadFriend ( CBaseEntity* pFriend )
+void CNPC_Combine::NotifyDeadFriend( CBaseEntity* pFriend )
 {
 #ifndef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-	if ( GetSquad()->NumMembers() < 2 )
-	{
-		m_Sentences.Speak( "COMBINE_LAST_OF_SQUAD", SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_NORMAL );
-		JustMadeSound();
-		return;
-	}
+    if ( GetSquad()->NumMembers() < 2 )
+    {
+        m_Sentences.Speak( "COMBINE_LAST_OF_SQUAD", SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_NORMAL );
+        JustMadeSound();
+        return;
+    }
 #endif
-	// relaxed visibility test so that guys say this more often
-	//if( FInViewCone( pFriend ) && FVisible( pFriend ) )
-	{
+    // relaxed visibility test so that guys say this more often
+    //if( FInViewCone( pFriend ) && FVisible( pFriend ) )
+    {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-		SpeakIfAllowed( TLK_CMB_MANDOWN );
+        SpeakIfAllowed( TLK_CMB_MANDOWN );
 #else
-		m_Sentences.Speak( "COMBINE_MAN_DOWN" );
+        m_Sentences.Speak( "COMBINE_MAN_DOWN" );
 #endif
-	}
-	BaseClass::NotifyDeadFriend(pFriend);
+    }
+    BaseClass::NotifyDeadFriend( pFriend );
 }
 
 //=========================================================
 // DeathSound 
 //=========================================================
 #ifdef MAPBASE
-void CNPC_Combine::DeathSound ( const CTakeDamageInfo &info )
+void CNPC_Combine::DeathSound( const CTakeDamageInfo& info )
 #else
-void CNPC_Combine::DeathSound ( void )
+void CNPC_Combine::DeathSound( void )
 #endif
 {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-	AI_CriteriaSet set;
-	ModifyOrAppendDamageCriteria(set, info);
-	SpeakIfAllowed(TLK_CMB_DIE, set, SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS);
+    AI_CriteriaSet set;
+    ModifyOrAppendDamageCriteria( set, info );
+    SpeakIfAllowed( TLK_CMB_DIE, set, SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
 #else
-	// NOTE: The response system deals with this at the moment
-	if ( GetFlags() & FL_DISSOLVING )
-		return;
+    // NOTE: The response system deals with this at the moment
+    if ( GetFlags() & FL_DISSOLVING )
+        return;
 
-	m_Sentences.Speak( "COMBINE_DIE", SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
+    m_Sentences.Speak( "COMBINE_DIE", SENTENCE_PRIORITY_INVALID, SENTENCE_CRITERIA_ALWAYS );
 #endif
 }
 
@@ -3688,62 +3688,62 @@ void CNPC_Combine::DeathSound ( void )
 //=========================================================
 void CNPC_Combine::IdleSound( void )
 {
-	if (g_fCombineQuestion || random->RandomInt(0,1))
-	{
-		if (!g_fCombineQuestion)
-		{
+    if ( g_fCombineQuestion || random->RandomInt( 0, 1 ) )
+    {
+        if ( !g_fCombineQuestion )
+        {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-			int iRandom = random->RandomInt(0, 2);
-			SpeakIfAllowed( TLK_CMB_QUESTION, UTIL_VarArgs("combinequestion:%d", iRandom) );
-			g_fCombineQuestion = iRandom + 1;
+            int iRandom = random->RandomInt( 0, 2 );
+            SpeakIfAllowed( TLK_CMB_QUESTION, UTIL_VarArgs( "combinequestion:%d", iRandom ) );
+            g_fCombineQuestion = iRandom + 1;
 #else
-			// ask question or make statement
-			switch (random->RandomInt(0,2))
-			{
-			case 0: // check in
-				if ( m_Sentences.Speak( "COMBINE_CHECK" ) >= 0 )
-				{
-					g_fCombineQuestion = 1;
-				}
-				break;
+            // ask question or make statement
+            switch ( random->RandomInt( 0, 2 ) )
+            {
+                case 0: // check in
+                    if ( m_Sentences.Speak( "COMBINE_CHECK" ) >= 0 )
+                    {
+                        g_fCombineQuestion = 1;
+                    }
+                    break;
 
-			case 1: // question
-				if ( m_Sentences.Speak( "COMBINE_QUEST" ) >= 0 )
-				{
-					g_fCombineQuestion = 2;
-				}
-				break;
+                case 1: // question
+                    if ( m_Sentences.Speak( "COMBINE_QUEST" ) >= 0 )
+                    {
+                        g_fCombineQuestion = 2;
+                    }
+                    break;
 
-			case 2: // statement
-				m_Sentences.Speak( "COMBINE_IDLE" );
-				break;
-			}
+                case 2: // statement
+                    m_Sentences.Speak( "COMBINE_IDLE" );
+                    break;
+            }
 #endif
-		}
-		else
-		{
+        }
+        else
+        {
 #ifdef COMBINE_SOLDIER_USES_RESPONSE_SYSTEM
-			SpeakIfAllowed( TLK_CMB_ANSWER, UTIL_VarArgs("combinequestion:%d", g_fCombineQuestion) );
-			g_fCombineQuestion = 0;
+            SpeakIfAllowed( TLK_CMB_ANSWER, UTIL_VarArgs( "combinequestion:%d", g_fCombineQuestion ) );
+            g_fCombineQuestion = 0;
 #else
-			switch (g_fCombineQuestion)
-			{
-			case 1: // check in
-				if ( m_Sentences.Speak( "COMBINE_CLEAR" ) >= 0 )
-				{
-					g_fCombineQuestion = 0;
-				}
-				break;
-			case 2: // question 
-				if ( m_Sentences.Speak( "COMBINE_ANSWER" ) >= 0 )
-				{
-					g_fCombineQuestion = 0;
-				}
-				break;
-			}
+            switch ( g_fCombineQuestion )
+            {
+                case 1: // check in
+                    if ( m_Sentences.Speak( "COMBINE_CLEAR" ) >= 0 )
+                    {
+                        g_fCombineQuestion = 0;
+                    }
+                    break;
+                case 2: // question 
+                    if ( m_Sentences.Speak( "COMBINE_ANSWER" ) >= 0 )
+                    {
+                        g_fCombineQuestion = 0;
+                    }
+                    break;
+            }
 #endif
-		}
-	}
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -3756,9 +3756,9 @@ void CNPC_Combine::IdleSound( void )
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-int	CNPC_Combine::RangeAttack2Conditions( float flDot, float flDist ) 
+int	CNPC_Combine::RangeAttack2Conditions( float flDot, float flDist )
 {
-	return COND_NONE;
+    return COND_NONE;
 }
 
 #ifndef MAPBASE
@@ -3768,64 +3768,64 @@ int	CNPC_Combine::RangeAttack2Conditions( float flDot, float flDist )
 // Input  : &vecTarget - 
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
-bool CNPC_Combine::CanThrowGrenade( const Vector &vecTarget )
+bool CNPC_Combine::CanThrowGrenade( const Vector& vecTarget )
 {
-	if( m_iNumGrenades < 1 )
-	{
-		// Out of grenades!
-		return false;
-	}
+    if ( m_iNumGrenades < 1 )
+    {
+        // Out of grenades!
+        return false;
+    }
 
-	if (gpGlobals->curtime < m_flNextGrenadeCheck )
-	{
-		// Not allowed to throw another grenade right now.
-		return false;
-	}
+    if ( gpGlobals->curtime < m_flNextGrenadeCheck )
+    {
+        // Not allowed to throw another grenade right now.
+        return false;
+    }
 
-	float flDist;
-	flDist = ( vecTarget - GetAbsOrigin() ).Length();
+    float flDist;
+    flDist = (vecTarget - GetAbsOrigin()).Length();
 
-	if( flDist > 1024 || flDist < 128 )
-	{
-		// Too close or too far!
-		m_flNextGrenadeCheck = gpGlobals->curtime + 1; // one full second.
-		return false;
-	}
+    if ( flDist > 1024 || flDist < 128 )
+    {
+        // Too close or too far!
+        m_flNextGrenadeCheck = gpGlobals->curtime + 1; // one full second.
+        return false;
+    }
 
-	// -----------------------
-	// If moving, don't check.
-	// -----------------------
-	if ( m_flGroundSpeed != 0 )
-		return false;
+    // -----------------------
+    // If moving, don't check.
+    // -----------------------
+    if ( m_flGroundSpeed != 0 )
+        return false;
 
 #if 0
-	Vector vecEnemyLKP = GetEnemyLKP();
-	if ( !( GetEnemy()->GetFlags() & FL_ONGROUND ) && GetEnemy()->GetWaterLevel() == 0 && vecEnemyLKP.z > (GetAbsOrigin().z + WorldAlignMaxs().z)  )
-	{
-		//!!!BUGBUG - we should make this check movetype and make sure it isn't FLY? Players who jump a lot are unlikely to 
-		// be grenaded.
-		// don't throw grenades at anything that isn't on the ground!
-		return COND_NONE;
-	}
+    Vector vecEnemyLKP = GetEnemyLKP();
+    if ( !(GetEnemy()->GetFlags() & FL_ONGROUND) && GetEnemy()->GetWaterLevel() == 0 && vecEnemyLKP.z > (GetAbsOrigin().z + WorldAlignMaxs().z) )
+    {
+        //!!!BUGBUG - we should make this check movetype and make sure it isn't FLY? Players who jump a lot are unlikely to 
+        // be grenaded.
+        // don't throw grenades at anything that isn't on the ground!
+        return COND_NONE;
+    }
 #endif
 
-	// ---------------------------------------------------------------------
-	// Are any of my squad members near the intended grenade impact area?
-	// ---------------------------------------------------------------------
-	if ( m_pSquad )
-	{
-		if (m_pSquad->SquadMemberInRange( vecTarget, COMBINE_MIN_GRENADE_CLEAR_DIST ))
-		{
-			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
-			m_flNextGrenadeCheck = gpGlobals->curtime + 1; // one full second.
+    // ---------------------------------------------------------------------
+    // Are any of my squad members near the intended grenade impact area?
+    // ---------------------------------------------------------------------
+    if ( m_pSquad )
+    {
+        if ( m_pSquad->SquadMemberInRange( vecTarget, COMBINE_MIN_GRENADE_CLEAR_DIST ) )
+        {
+            // crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
+            m_flNextGrenadeCheck = gpGlobals->curtime + 1; // one full second.
 
-			// Tell my squad members to clear out so I can get a grenade in
-			CSoundEnt::InsertSound( SOUND_MOVE_AWAY | SOUND_CONTEXT_COMBINE_ONLY, vecTarget, COMBINE_MIN_GRENADE_CLEAR_DIST, 0.1 );
-			return false;
-		}
-	}
+            // Tell my squad members to clear out so I can get a grenade in
+            CSoundEnt::InsertSound( SOUND_MOVE_AWAY | SOUND_CONTEXT_COMBINE_ONLY, vecTarget, COMBINE_MIN_GRENADE_CLEAR_DIST, 0.1 );
+            return false;
+        }
+    }
 
-	return CheckCanThrowGrenade( vecTarget );
+    return CheckCanThrowGrenade( vecTarget );
 }
 
 //-----------------------------------------------------------------------------
@@ -3833,48 +3833,48 @@ bool CNPC_Combine::CanThrowGrenade( const Vector &vecTarget )
 // Input  : &vecTarget - 
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
-bool CNPC_Combine::CheckCanThrowGrenade( const Vector &vecTarget )
+bool CNPC_Combine::CheckCanThrowGrenade( const Vector& vecTarget )
 {
-	//NDebugOverlay::Line( EyePosition(), vecTarget, 0, 255, 0, false, 5 );
+    //NDebugOverlay::Line( EyePosition(), vecTarget, 0, 255, 0, false, 5 );
 
-	// ---------------------------------------------------------------------
-	// Check that throw is legal and clear
-	// ---------------------------------------------------------------------
-	// FIXME: this is only valid for hand grenades, not RPG's
-	Vector vecToss;
-	Vector vecMins = -Vector(4,4,4);
-	Vector vecMaxs = Vector(4,4,4);
-	if( FInViewCone( vecTarget ) && CBaseEntity::FVisible( vecTarget ) )
-	{
-		vecToss = VecCheckThrow( this, EyePosition(), vecTarget, COMBINE_GRENADE_THROW_SPEED, 1.0, &vecMins, &vecMaxs );
-	}
-	else
-	{
-		// Have to try a high toss. Do I have enough room?
-		trace_t tr;
-		AI_TraceLine( EyePosition(), EyePosition() + Vector( 0, 0, 64 ), MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
-		if( tr.fraction != 1.0 )
-		{
-			return false;
-		}
+    // ---------------------------------------------------------------------
+    // Check that throw is legal and clear
+    // ---------------------------------------------------------------------
+    // FIXME: this is only valid for hand grenades, not RPG's
+    Vector vecToss;
+    Vector vecMins = -Vector( 4, 4, 4 );
+    Vector vecMaxs = Vector( 4, 4, 4 );
+    if ( FInViewCone( vecTarget ) && CBaseEntity::FVisible( vecTarget ) )
+    {
+        vecToss = VecCheckThrow( this, EyePosition(), vecTarget, COMBINE_GRENADE_THROW_SPEED, 1.0, &vecMins, &vecMaxs );
+    }
+    else
+    {
+        // Have to try a high toss. Do I have enough room?
+        trace_t tr;
+        AI_TraceLine( EyePosition(), EyePosition() + Vector( 0, 0, 64 ), MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
+        if ( tr.fraction != 1.0 )
+        {
+            return false;
+        }
 
-		vecToss = VecCheckToss( this, EyePosition(), vecTarget, -1, 1.0, true, &vecMins, &vecMaxs );
-	}
+        vecToss = VecCheckToss( this, EyePosition(), vecTarget, -1, 1.0, true, &vecMins, &vecMaxs );
+    }
 
-	if ( vecToss != vec3_origin )
-	{
-		m_vecTossVelocity = vecToss;
+    if ( vecToss != vec3_origin )
+    {
+        m_vecTossVelocity = vecToss;
 
-		// don't check again for a while.
-		m_flNextGrenadeCheck = gpGlobals->curtime + 1; // 1/3 second.
-		return true;
-	}
-	else
-	{
-		// don't check again for a while.
-		m_flNextGrenadeCheck = gpGlobals->curtime + 1; // one full second.
-		return false;
-	}
+        // don't check again for a while.
+        m_flNextGrenadeCheck = gpGlobals->curtime + 1; // 1/3 second.
+        return true;
+    }
+    else
+    {
+        // don't check again for a while.
+        m_flNextGrenadeCheck = gpGlobals->curtime + 1; // one full second.
+        return false;
+    }
 }
 #endif
 
@@ -3883,94 +3883,94 @@ bool CNPC_Combine::CheckCanThrowGrenade( const Vector &vecTarget )
 bool CNPC_Combine::CanAltFireEnemy( bool bUseFreeKnowledge )
 {
 #ifdef MAPBASE
-	if ( !IsAltFireCapable() )
+    if ( !IsAltFireCapable() )
 #else
-	if ( !IsElite() )
+    if ( !IsElite() )
 #endif
-		return false;
+        return false;
 
-	if (IsCrouching())
-		return false;
+    if ( IsCrouching() )
+        return false;
 
-	if( gpGlobals->curtime < m_flNextAltFireTime )
-		return false;
+    if ( gpGlobals->curtime < m_flNextAltFireTime )
+        return false;
 
-	if( !GetEnemy() )
-		return false;
+    if ( !GetEnemy() )
+        return false;
 
-	if (gpGlobals->curtime < m_flNextGrenadeCheck )
-		return false;
+    if ( gpGlobals->curtime < m_flNextGrenadeCheck )
+        return false;
 
-	// See Steve Bond if you plan on changing this next piece of code!! (SJB) EP2_OUTLAND_10
-	if (m_iNumGrenades < 1)
-		return false;
+    // See Steve Bond if you plan on changing this next piece of code!! (SJB) EP2_OUTLAND_10
+    if ( m_iNumGrenades < 1 )
+        return false;
 
-	CBaseEntity *pEnemy = GetEnemy();
+    CBaseEntity* pEnemy = GetEnemy();
 
 #ifdef MAPBASE
-	// "Our weapons alone cannot take down the antlion guard!"
-	// "Wait, you're an elite, don't you have, like, disintegration balls or somethi--"
-	// "SHUT UP!"
-	if ( !npc_combine_altfire_not_allies_only.GetBool() && !pEnemy->IsPlayer() && (!pEnemy->IsNPC() || !pEnemy->MyNPCPointer()->IsPlayerAlly()) )
+    // "Our weapons alone cannot take down the antlion guard!"
+    // "Wait, you're an elite, don't you have, like, disintegration balls or somethi--"
+    // "SHUT UP!"
+    if ( !npc_combine_altfire_not_allies_only.GetBool() && !pEnemy->IsPlayer() && (!pEnemy->IsNPC() || !pEnemy->MyNPCPointer()->IsPlayerAlly()) )
 #else
-	if( !pEnemy->IsPlayer() && (!pEnemy->IsNPC() || !pEnemy->MyNPCPointer()->IsPlayerAlly()) )
+    if ( !pEnemy->IsPlayer() && (!pEnemy->IsNPC() || !pEnemy->MyNPCPointer()->IsPlayerAlly()) )
 #endif
-		return false;
+        return false;
 
-	Vector vecTarget;
+    Vector vecTarget;
 
-	// Determine what point we're shooting at
-	if( bUseFreeKnowledge )
-	{
-		vecTarget = GetEnemies()->LastKnownPosition( pEnemy ) + (pEnemy->GetViewOffset()*0.75);// approximates the chest
-	}
-	else
-	{
-		vecTarget = GetEnemies()->LastSeenPosition( pEnemy ) + (pEnemy->GetViewOffset()*0.75);// approximates the chest
-	}
+    // Determine what point we're shooting at
+    if ( bUseFreeKnowledge )
+    {
+        vecTarget = GetEnemies()->LastKnownPosition( pEnemy ) + (pEnemy->GetViewOffset() * 0.75);// approximates the chest
+    }
+    else
+    {
+        vecTarget = GetEnemies()->LastSeenPosition( pEnemy ) + (pEnemy->GetViewOffset() * 0.75);// approximates the chest
+    }
 
-	// Trace a hull about the size of the combine ball (don't shoot through grates!)
-	trace_t tr;
+    // Trace a hull about the size of the combine ball (don't shoot through grates!)
+    trace_t tr;
 
-	Vector mins( -12, -12, -12 );
-	Vector maxs( 12, 12, 12 );
+    Vector mins( -12, -12, -12 );
+    Vector maxs( 12, 12, 12 );
 
-	Vector vShootPosition = EyePosition();
+    Vector vShootPosition = EyePosition();
 
-	if ( GetActiveWeapon() )
-	{
-		GetActiveWeapon()->GetAttachment( "muzzle", vShootPosition );
-	}
+    if ( GetActiveWeapon() )
+    {
+        GetActiveWeapon()->GetAttachment( "muzzle", vShootPosition );
+    }
 
-	// Trace a hull about the size of the combine ball.
+    // Trace a hull about the size of the combine ball.
 #ifdef MAPBASE
-	UTIL_TraceHull( vShootPosition, vecTarget, mins, maxs, MASK_COMBINE_BALL_LOS, this, COLLISION_GROUP_NONE, &tr );
+    UTIL_TraceHull( vShootPosition, vecTarget, mins, maxs, MASK_COMBINE_BALL_LOS, this, COLLISION_GROUP_NONE, &tr );
 #else
-	UTIL_TraceHull( vShootPosition, vecTarget, mins, maxs, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
+    UTIL_TraceHull( vShootPosition, vecTarget, mins, maxs, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
 #endif
 
-	float flLength = (vShootPosition - vecTarget).Length();
+    float flLength = (vShootPosition - vecTarget).Length();
 
-	flLength *= tr.fraction;
+    flLength *= tr.fraction;
 
-	//If the ball can travel at least 65% of the distance to the player then let the NPC shoot it.
+    //If the ball can travel at least 65% of the distance to the player then let the NPC shoot it.
 #ifdef MAPBASE
-	// (unless it hit the world)
-	if( tr.fraction >= 0.65 && (!tr.m_pEnt || !tr.m_pEnt->IsWorld()) && flLength > 128.0f )
+    // (unless it hit the world)
+    if ( tr.fraction >= 0.65 && (!tr.m_pEnt || !tr.m_pEnt->IsWorld()) && flLength > 128.0f )
 #else
-	if( tr.fraction >= 0.65 && flLength > 128.0f )
+    if ( tr.fraction >= 0.65 && flLength > 128.0f )
 #endif
-	{
-		// Target is valid
-		m_vecAltFireTarget = vecTarget;
-		return true;
-	}
+    {
+        // Target is valid
+        m_vecAltFireTarget = vecTarget;
+        return true;
+    }
 
 
-	// Check again later
-	m_vecAltFireTarget = vec3_origin;
-	m_flNextGrenadeCheck = gpGlobals->curtime + 1.0f;
-	return false;
+    // Check again later
+    m_vecAltFireTarget = vec3_origin;
+    m_flNextGrenadeCheck = gpGlobals->curtime + 1.0f;
+    return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -3978,35 +3978,35 @@ bool CNPC_Combine::CanAltFireEnemy( bool bUseFreeKnowledge )
 bool CNPC_Combine::CanGrenadeEnemy( bool bUseFreeKnowledge )
 {
 #ifdef MAPBASE
-	if ( !IsGrenadeCapable() )
+    if ( !IsGrenadeCapable() )
 #else
-	if ( IsElite() )
+    if ( IsElite() )
 #endif
-		return false;
+        return false;
 
-	CBaseEntity *pEnemy = GetEnemy();
+    CBaseEntity* pEnemy = GetEnemy();
 
-	Assert( pEnemy != NULL );
+    Assert( pEnemy != NULL );
 
-	if( pEnemy )
-	{
-		// I'm not allowed to throw grenades during dustoff
-		if ( IsCurSchedule(SCHED_DROPSHIP_DUSTOFF) )
-			return false;
+    if ( pEnemy )
+    {
+        // I'm not allowed to throw grenades during dustoff
+        if ( IsCurSchedule( SCHED_DROPSHIP_DUSTOFF ) )
+            return false;
 
-		if( bUseFreeKnowledge )
-		{
-			// throw to where we think they are.
-			return CanThrowGrenade( GetEnemies()->LastKnownPosition( pEnemy ) );
-		}
-		else
-		{
-			// hafta throw to where we last saw them.
-			return CanThrowGrenade( GetEnemies()->LastSeenPosition( pEnemy ) );
-		}
-	}
+        if ( bUseFreeKnowledge )
+        {
+            // throw to where we think they are.
+            return CanThrowGrenade( GetEnemies()->LastKnownPosition( pEnemy ) );
+        }
+        else
+        {
+            // hafta throw to where we last saw them.
+            return CanThrowGrenade( GetEnemies()->LastSeenPosition( pEnemy ) );
+        }
+    }
 
-	return false;
+    return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -4014,62 +4014,62 @@ bool CNPC_Combine::CanGrenadeEnemy( bool bUseFreeKnowledge )
 // Input  :
 // Output :
 //-----------------------------------------------------------------------------
-int CNPC_Combine::MeleeAttack1Conditions ( float flDot, float flDist )
+int CNPC_Combine::MeleeAttack1Conditions( float flDot, float flDist )
 {
-	if (flDist > 64)
-	{
-		return COND_NONE; // COND_TOO_FAR_TO_ATTACK;
-	}
-	else if (flDot < 0.7)
-	{
-		return COND_NONE; // COND_NOT_FACING_ATTACK;
-	}
+    if ( flDist > 64 )
+    {
+        return COND_NONE; // COND_TOO_FAR_TO_ATTACK;
+    }
+    else if ( flDot < 0.7 )
+    {
+        return COND_NONE; // COND_NOT_FACING_ATTACK;
+    }
 
-	// Check Z
-	if ( GetEnemy() && fabs(GetEnemy()->GetAbsOrigin().z - GetAbsOrigin().z) > 64 )
-		return COND_NONE;
+    // Check Z
+    if ( GetEnemy() && fabs( GetEnemy()->GetAbsOrigin().z - GetAbsOrigin().z ) > 64 )
+        return COND_NONE;
 
-	if ( dynamic_cast<CBaseHeadcrab *>(GetEnemy()) != NULL )
-	{
-		return COND_NONE;
-	}
+    if ( dynamic_cast< CBaseHeadcrab* >(GetEnemy()) != NULL )
+    {
+        return COND_NONE;
+    }
 
-	// Make sure not trying to kick through a window or something. 
-	trace_t tr;
-	Vector vecSrc, vecEnd;
+    // Make sure not trying to kick through a window or something. 
+    trace_t tr;
+    Vector vecSrc, vecEnd;
 
-	vecSrc = WorldSpaceCenter();
-	vecEnd = GetEnemy()->WorldSpaceCenter();
+    vecSrc = WorldSpaceCenter();
+    vecEnd = GetEnemy()->WorldSpaceCenter();
 
-	AI_TraceLine(vecSrc, vecEnd, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr);
-	if( tr.m_pEnt != GetEnemy() )
-	{
-		return COND_NONE;
-	}
+    AI_TraceLine( vecSrc, vecEnd, MASK_SHOT, this, COLLISION_GROUP_NONE, &tr );
+    if ( tr.m_pEnt != GetEnemy() )
+    {
+        return COND_NONE;
+    }
 
-	return COND_CAN_MELEE_ATTACK1;
+    return COND_CAN_MELEE_ATTACK1;
 }
 
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Output : Vector
 //-----------------------------------------------------------------------------
-Vector CNPC_Combine::EyePosition( void ) 
+Vector CNPC_Combine::EyePosition( void )
 {
-	if ( !IsCrouching() )
-	{
-		return GetAbsOrigin() + COMBINE_EYE_STANDING_POSITION;
-	}
-	else
-	{
-		return GetAbsOrigin() + COMBINE_EYE_CROUCHING_POSITION;
-	}
+    if ( !IsCrouching() )
+    {
+        return GetAbsOrigin() + COMBINE_EYE_STANDING_POSITION;
+    }
+    else
+    {
+        return GetAbsOrigin() + COMBINE_EYE_CROUCHING_POSITION;
+    }
 
-	/*
-	Vector m_EyePos;
-	GetAttachment( "eyes", m_EyePos );
-	return m_EyePos;
-	*/
+    /*
+    Vector m_EyePos;
+    GetAttachment( "eyes", m_EyePos );
+    return m_EyePos;
+    */
 }
 
 #ifndef MAPBASE
@@ -4077,9 +4077,9 @@ Vector CNPC_Combine::EyePosition( void )
 //-----------------------------------------------------------------------------
 Vector CNPC_Combine::GetAltFireTarget()
 {
-	Assert( IsElite() );
+    Assert( IsElite() );
 
-	return m_vecAltFireTarget;
+    return m_vecAltFireTarget;
 }
 #endif
 
@@ -4090,21 +4090,21 @@ Vector CNPC_Combine::GetAltFireTarget()
 //-----------------------------------------------------------------------------
 Vector CNPC_Combine::EyeOffset( Activity nActivity )
 {
-	if (CapabilitiesGet() & bits_CAP_DUCK)
-	{
-		if ( IsCrouchedActivity( nActivity ) )
-			return COMBINE_EYE_CROUCHING_POSITION;
+    if ( CapabilitiesGet() & bits_CAP_DUCK )
+    {
+        if ( IsCrouchedActivity( nActivity ) )
+            return COMBINE_EYE_CROUCHING_POSITION;
 
-	}
-	// if the hint doesn't tell anything, assume current state
-	if ( !IsCrouching() )
-	{
-		return COMBINE_EYE_STANDING_POSITION;
-	}
-	else
-	{
-		return COMBINE_EYE_CROUCHING_POSITION;
-	}
+    }
+    // if the hint doesn't tell anything, assume current state
+    if ( !IsCrouching() )
+    {
+        return COMBINE_EYE_STANDING_POSITION;
+    }
+    else
+    {
+        return COMBINE_EYE_CROUCHING_POSITION;
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -4112,7 +4112,7 @@ Vector CNPC_Combine::EyeOffset( Activity nActivity )
 //-----------------------------------------------------------------------------
 Vector CNPC_Combine::GetCrouchEyeOffset( void )
 {
-	return COMBINE_EYE_CROUCHING_POSITION;
+    return COMBINE_EYE_CROUCHING_POSITION;
 }
 
 #ifdef MAPBASE
@@ -4121,28 +4121,28 @@ Vector CNPC_Combine::GetCrouchEyeOffset( void )
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::IsCrouchedActivity( Activity activity )
 {
-	if (BaseClass::IsCrouchedActivity( activity ))
-		return true;
+    if ( BaseClass::IsCrouchedActivity( activity ) )
+        return true;
 
-	Activity realActivity = TranslateActivity(activity);
+    Activity realActivity = TranslateActivity( activity );
 
-	// Soldiers need to consider these crouched activities, but not all NPCs should.
-	switch ( realActivity )
-	{
-		case ACT_RANGE_AIM_LOW:
-		case ACT_RANGE_AIM_AR2_LOW:
-		case ACT_RANGE_AIM_SMG1_LOW:
-		case ACT_RANGE_AIM_PISTOL_LOW:
-		case ACT_RANGE_ATTACK1_LOW:
-		case ACT_RANGE_ATTACK_AR2_LOW:
-		case ACT_RANGE_ATTACK_SMG1_LOW:
-		case ACT_RANGE_ATTACK_SHOTGUN_LOW:
-		case ACT_RANGE_ATTACK_PISTOL_LOW:
-		case ACT_RANGE_ATTACK2_LOW:
-			return true;
-	}
+    // Soldiers need to consider these crouched activities, but not all NPCs should.
+    switch ( realActivity )
+    {
+        case ACT_RANGE_AIM_LOW:
+        case ACT_RANGE_AIM_AR2_LOW:
+        case ACT_RANGE_AIM_SMG1_LOW:
+        case ACT_RANGE_AIM_PISTOL_LOW:
+        case ACT_RANGE_ATTACK1_LOW:
+        case ACT_RANGE_ATTACK_AR2_LOW:
+        case ACT_RANGE_ATTACK_SMG1_LOW:
+        case ACT_RANGE_ATTACK_SHOTGUN_LOW:
+        case ACT_RANGE_ATTACK_PISTOL_LOW:
+        case ACT_RANGE_ATTACK2_LOW:
+            return true;
+    }
 
-	return false;
+    return false;
 }
 #endif
 
@@ -4150,10 +4150,10 @@ bool CNPC_Combine::IsCrouchedActivity( Activity activity )
 //-----------------------------------------------------------------------------
 void CNPC_Combine::SetActivity( Activity NewActivity )
 {
-	BaseClass::SetActivity( NewActivity );
+    BaseClass::SetActivity( NewActivity );
 
 #ifndef MAPBASE // CAI_GrenadeUser
-	m_iLastAnimEventHandled = -1;
+    m_iLastAnimEventHandled = -1;
 #endif
 }
 
@@ -4161,32 +4161,32 @@ void CNPC_Combine::SetActivity( Activity NewActivity )
 //-----------------------------------------------------------------------------
 NPC_STATE CNPC_Combine::SelectIdealState( void )
 {
-	switch ( m_NPCState )
-	{
-	case NPC_STATE_COMBAT:
-		{
-			if ( GetEnemy() == NULL )
-			{
-				if ( !HasCondition( COND_ENEMY_DEAD ) )
-				{
-					// Lost track of my enemy. Patrol.
-					SetCondition( COND_COMBINE_SHOULD_PATROL );
-				}
-				return NPC_STATE_ALERT;
-			}
-			else if ( HasCondition( COND_ENEMY_DEAD ) )
-			{
-				AnnounceEnemyKill(GetEnemy());
-			}
-		}
+    switch ( m_NPCState )
+    {
+        case NPC_STATE_COMBAT:
+        {
+            if ( GetEnemy() == NULL )
+            {
+                if ( !HasCondition( COND_ENEMY_DEAD ) )
+                {
+                    // Lost track of my enemy. Patrol.
+                    SetCondition( COND_COMBINE_SHOULD_PATROL );
+                }
+                return NPC_STATE_ALERT;
+            }
+            else if ( HasCondition( COND_ENEMY_DEAD ) )
+            {
+                AnnounceEnemyKill( GetEnemy() );
+            }
+        }
 
-	default:
-		{
-			return BaseClass::SelectIdealState();
-		}
-	}
+        default:
+        {
+            return BaseClass::SelectIdealState();
+        }
+    }
 
-	return GetIdealState();
+    return GetIdealState();
 }
 
 
@@ -4194,87 +4194,87 @@ NPC_STATE CNPC_Combine::SelectIdealState( void )
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::OnBeginMoveAndShoot()
 {
-	if ( BaseClass::OnBeginMoveAndShoot() )
-	{
-		if( HasStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-			return true; // already have the slot I need
+    if ( BaseClass::OnBeginMoveAndShoot() )
+    {
+        if ( HasStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+            return true; // already have the slot I need
 
-		if( !HasStrategySlotRange( SQUAD_SLOT_GRENADE1, SQUAD_SLOT_ATTACK_OCCLUDER ) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
-			return true;
-	}
-	return false;
+        if ( !HasStrategySlotRange( SQUAD_SLOT_GRENADE1, SQUAD_SLOT_ATTACK_OCCLUDER ) && OccupyStrategySlotRange( SQUAD_SLOT_ATTACK1, SQUAD_SLOT_ATTACK2 ) )
+            return true;
+    }
+    return false;
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void CNPC_Combine::OnEndMoveAndShoot()
 {
-	VacateStrategySlot();
+    VacateStrategySlot();
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-WeaponProficiency_t CNPC_Combine::CalcWeaponProficiency( CBaseCombatWeapon *pWeapon )
+WeaponProficiency_t CNPC_Combine::CalcWeaponProficiency( CBaseCombatWeapon* pWeapon )
 {
 #ifdef MAPBASE
-	if( pWeapon->ClassMatches( gm_isz_class_AR2 ) )
+    if ( pWeapon->ClassMatches( gm_isz_class_AR2 ) )
 #else
-	if( FClassnameIs( pWeapon, "weapon_ar2" ) )
+    if ( FClassnameIs( pWeapon, "weapon_ar2" ) )
 #endif
-	{
-		if( hl2_episodic.GetBool() )
-		{
-			return WEAPON_PROFICIENCY_VERY_GOOD;
-		}
-		else
-		{
-			return WEAPON_PROFICIENCY_GOOD;
-		}
-	}
+    {
+        if ( hl2_episodic.GetBool() )
+        {
+            return WEAPON_PROFICIENCY_VERY_GOOD;
+        }
+        else
+        {
+            return WEAPON_PROFICIENCY_GOOD;
+        }
+    }
 #ifdef MAPBASE
-	else if( pWeapon->ClassMatches( gm_isz_class_Shotgun ) )
+    else if ( pWeapon->ClassMatches( gm_isz_class_Shotgun ) )
 #else
-	else if( FClassnameIs( pWeapon, "weapon_shotgun" )	)
+    else if ( FClassnameIs( pWeapon, "weapon_shotgun" ) )
 #endif
-	{
+    {
 #ifndef MAPBASE // Moved so soldiers don't change skin unnaturally and uncontrollably
-		if( m_nSkin != COMBINE_SKIN_SHOTGUNNER )
-		{
-			m_nSkin = COMBINE_SKIN_SHOTGUNNER;
-		}
+        if ( m_nSkin != COMBINE_SKIN_SHOTGUNNER )
+        {
+            m_nSkin = COMBINE_SKIN_SHOTGUNNER;
+        }
 #endif
 
-		return WEAPON_PROFICIENCY_PERFECT;
-	}
+        return WEAPON_PROFICIENCY_PERFECT;
+    }
 #ifdef MAPBASE
-	else if( pWeapon->ClassMatches( gm_isz_class_SMG1 ) )
+    else if ( pWeapon->ClassMatches( gm_isz_class_SMG1 ) )
 #else
-	else if( FClassnameIs( pWeapon, "weapon_smg1" ) )
+    else if ( FClassnameIs( pWeapon, "weapon_smg1" ) )
 #endif
-	{
-		return WEAPON_PROFICIENCY_GOOD;
-	}
+    {
+        return WEAPON_PROFICIENCY_GOOD;
+    }
 #ifdef MAPBASE
-	else if ( pWeapon->ClassMatches( gm_isz_class_Pistol ) )
-	{
-		// Mods which need a lower soldier pistol accuracy can either change this value or use proficiency override in Hammer.
-		return WEAPON_PROFICIENCY_VERY_GOOD;
-	}
+    else if ( pWeapon->ClassMatches( gm_isz_class_Pistol ) )
+    {
+        // Mods which need a lower soldier pistol accuracy can either change this value or use proficiency override in Hammer.
+        return WEAPON_PROFICIENCY_VERY_GOOD;
+    }
 #endif
 
-	return BaseClass::CalcWeaponProficiency( pWeapon );
+    return BaseClass::CalcWeaponProficiency( pWeapon );
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::HasShotgun()
 {
-	if( GetActiveWeapon() && GetActiveWeapon()->m_iClassname == s_iszShotgunClassname )
-	{
-		return true;
-	}
+    if ( GetActiveWeapon() && GetActiveWeapon()->m_iClassname == s_iszShotgunClassname )
+    {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -4282,15 +4282,15 @@ bool CNPC_Combine::HasShotgun()
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::ActiveWeaponIsFullyLoaded()
 {
-	CBaseCombatWeapon *pWeapon = GetActiveWeapon();
+    CBaseCombatWeapon* pWeapon = GetActiveWeapon();
 
-	if( !pWeapon )
-		return false;
+    if ( !pWeapon )
+        return false;
 
-	if( !pWeapon->UsesClipsForAmmo1() )
-		return false;
+    if ( !pWeapon->UsesClipsForAmmo1() )
+        return false;
 
-	return ( pWeapon->Clip1() >= pWeapon->GetMaxClip1() );
+    return (pWeapon->Clip1() >= pWeapon->GetMaxClip1());
 }
 
 
@@ -4302,24 +4302,24 @@ bool CNPC_Combine::ActiveWeaponIsFullyLoaded()
 // Output :	 true  - if sub-class has a response for the interaction
 //			 false - if sub-class has no response
 //-----------------------------------------------------------------------------
-bool CNPC_Combine::HandleInteraction(int interactionType, void *data, CBaseCombatCharacter *sourceEnt)
+bool CNPC_Combine::HandleInteraction( int interactionType, void* data, CBaseCombatCharacter* sourceEnt )
 {
-	if ( interactionType == g_interactionTurretStillStanding )
-	{
-		// A turret that I've kicked recently is still standing 5 seconds later. 
-		if ( sourceEnt == GetEnemy() )
-		{
-			// It's still my enemy. Time to grenade it.
-			Vector forward, up;
-			AngleVectors( GetLocalAngles(), &forward, NULL, &up );
-			m_vecTossVelocity = forward * 10;
-			SetCondition( COND_COMBINE_DROP_GRENADE );
-			ClearSchedule( "Failed to kick over turret" );
-		}
-		return true;
-	}
+    if ( interactionType == g_interactionTurretStillStanding )
+    {
+        // A turret that I've kicked recently is still standing 5 seconds later. 
+        if ( sourceEnt == GetEnemy() )
+        {
+            // It's still my enemy. Time to grenade it.
+            Vector forward, up;
+            AngleVectors( GetLocalAngles(), &forward, NULL, &up );
+            m_vecTossVelocity = forward * 10;
+            SetCondition( COND_COMBINE_DROP_GRENADE );
+            ClearSchedule( "Failed to kick over turret" );
+        }
+        return true;
+    }
 
-	return BaseClass::HandleInteraction( interactionType, data, sourceEnt );
+    return BaseClass::HandleInteraction( interactionType, data, sourceEnt );
 }
 
 //-----------------------------------------------------------------------------
@@ -4327,32 +4327,32 @@ bool CNPC_Combine::HandleInteraction(int interactionType, void *data, CBaseComba
 //-----------------------------------------------------------------------------
 const char* CNPC_Combine::GetSquadSlotDebugName( int iSquadSlot )
 {
-	switch( iSquadSlot )
-	{
-	case SQUAD_SLOT_GRENADE1:			return "SQUAD_SLOT_GRENADE1";	
-		break;
-	case SQUAD_SLOT_GRENADE2:			return "SQUAD_SLOT_GRENADE2";	
-		break;
-	case SQUAD_SLOT_ATTACK_OCCLUDER:	return "SQUAD_SLOT_ATTACK_OCCLUDER";	
-		break;
-	case SQUAD_SLOT_OVERWATCH:			return "SQUAD_SLOT_OVERWATCH";
-		break;
-	}
+    switch ( iSquadSlot )
+    {
+        case SQUAD_SLOT_GRENADE1:			return "SQUAD_SLOT_GRENADE1";
+            break;
+        case SQUAD_SLOT_GRENADE2:			return "SQUAD_SLOT_GRENADE2";
+            break;
+        case SQUAD_SLOT_ATTACK_OCCLUDER:	return "SQUAD_SLOT_ATTACK_OCCLUDER";
+            break;
+        case SQUAD_SLOT_OVERWATCH:			return "SQUAD_SLOT_OVERWATCH";
+            break;
+    }
 
-	return BaseClass::GetSquadSlotDebugName( iSquadSlot );
+    return BaseClass::GetSquadSlotDebugName( iSquadSlot );
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::IsUsingTacticalVariant( int variant )
 {
-	if( variant == TACTICAL_VARIANT_PRESSURE_ENEMY && m_iTacticalVariant == TACTICAL_VARIANT_PRESSURE_ENEMY_UNTIL_CLOSE )
-	{
-		// Essentially, fib. Just say that we are a 'pressure enemy' soldier.
-		return true;
-	}
+    if ( variant == TACTICAL_VARIANT_PRESSURE_ENEMY && m_iTacticalVariant == TACTICAL_VARIANT_PRESSURE_ENEMY_UNTIL_CLOSE )
+    {
+        // Essentially, fib. Just say that we are a 'pressure enemy' soldier.
+        return true;
+    }
 
-	return m_iTacticalVariant == variant;
+    return m_iTacticalVariant == variant;
 }
 
 //-----------------------------------------------------------------------------
@@ -4362,25 +4362,25 @@ bool CNPC_Combine::IsUsingTacticalVariant( int variant )
 //-----------------------------------------------------------------------------
 bool CNPC_Combine::IsRunningApproachEnemySchedule()
 {
-	if( IsCurSchedule( SCHED_CHASE_ENEMY ) )
-		return true;
+    if ( IsCurSchedule( SCHED_CHASE_ENEMY ) )
+        return true;
 
-	if( IsCurSchedule( SCHED_ESTABLISH_LINE_OF_FIRE ) )
-		return true;
+    if ( IsCurSchedule( SCHED_ESTABLISH_LINE_OF_FIRE ) )
+        return true;
 
-	if( IsCurSchedule( SCHED_COMBINE_PRESS_ATTACK, false ) )
-		return true;
+    if ( IsCurSchedule( SCHED_COMBINE_PRESS_ATTACK, false ) )
+        return true;
 
-	return false;
+    return false;
 }
 
-bool CNPC_Combine::ShouldPickADeathPose( void ) 
-{ 
+bool CNPC_Combine::ShouldPickADeathPose( void )
+{
 #ifdef MAPBASE
-	// Check base class as well
-	return !IsCrouching() && BaseClass::ShouldPickADeathPose();
+    // Check base class as well
+    return !IsCrouching() && BaseClass::ShouldPickADeathPose();
 #else
-	return !IsCrouching(); 
+    return !IsCrouching();
 #endif
 }
 
@@ -4445,735 +4445,735 @@ DECLARE_INTERACTION( g_interactionCombineBash );
 //
 //	hide from the loudest sound source (to run from grenade)
 //=========================================================
-DEFINE_SCHEDULE	
+DEFINE_SCHEDULE
 (
- SCHED_COMBINE_TAKE_COVER_FROM_BEST_SOUND,
-
- "	Tasks"
- "		 TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_COMBINE_RUN_AWAY_FROM_BEST_SOUND"
- "		 TASK_STOP_MOVING					0"
- "		 TASK_COMBINE_SIGNAL_BEST_SOUND		0"
- "		 TASK_FIND_COVER_FROM_BEST_SOUND	0"
- "		 TASK_RUN_PATH						0"
- "		 TASK_WAIT_FOR_MOVEMENT				0"
- "		 TASK_REMEMBER						MEMORY:INCOVER"
- "		 TASK_FACE_REASONABLE				0"
- ""
- "	Interrupts"
- )
-
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_RUN_AWAY_FROM_BEST_SOUND,
-
- "	Tasks"
- "		 TASK_SET_FAIL_SCHEDULE					SCHEDULE:SCHED_COWER"
- "		 TASK_GET_PATH_AWAY_FROM_BEST_SOUND		600"
- "		 TASK_RUN_PATH_TIMED					2"
- "		 TASK_STOP_MOVING						0"
- ""
- "	Interrupts"
- )
- //=========================================================
- //	SCHED_COMBINE_COMBAT_FAIL
- //=========================================================
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_COMBAT_FAIL,
-
- "	Tasks"
- "		TASK_STOP_MOVING			0"
- "		TASK_SET_ACTIVITY			ACTIVITY:ACT_IDLE "
- "		TASK_WAIT_FACE_ENEMY		2"
- "		TASK_WAIT_PVS				0"
- ""
- "	Interrupts"
- "		COND_CAN_RANGE_ATTACK1"
- "		COND_CAN_RANGE_ATTACK2"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK2"
- )
-
- //=========================================================
- // SCHED_COMBINE_VICTORY_DANCE
- //=========================================================
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_VICTORY_DANCE,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- "		TASK_FACE_ENEMY						0"
- "		TASK_WAIT							1.5"
- "		TASK_GET_PATH_TO_ENEMY_CORPSE		0"
- "		TASK_WALK_PATH						0"
- "		TASK_WAIT_FOR_MOVEMENT				0"
- "		TASK_FACE_ENEMY						0"
- "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_VICTORY_DANCE"
- ""
- "	Interrupts"
- "		COND_NEW_ENEMY"
- "		COND_LIGHT_DAMAGE"
- "		COND_HEAVY_DAMAGE"
- )
-
- //=========================================================
- // SCHED_COMBINE_ASSAULT
- //=========================================================
- DEFINE_SCHEDULE 
- (
- SCHED_COMBINE_ASSAULT,
-
- "	Tasks "
- "		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE"
- "		TASK_SET_TOLERANCE_DISTANCE		48"
- "		TASK_GET_PATH_TO_ENEMY_LKP		0"
- "		TASK_COMBINE_IGNORE_ATTACKS		0.2"
- "		TASK_SPEAK_SENTENCE				0"
- "		TASK_RUN_PATH					0"
- //		"		TASK_COMBINE_MOVE_AND_AIM		0"
- "		TASK_WAIT_FOR_MOVEMENT			0"
- "		TASK_COMBINE_IGNORE_ATTACKS		0.0"
- ""
- "	Interrupts "
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- "		COND_ENEMY_UNREACHABLE"
- "		COND_CAN_RANGE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_RANGE_ATTACK2"
- "		COND_CAN_MELEE_ATTACK2"
- "		COND_TOO_FAR_TO_ATTACK"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- )
-
- DEFINE_SCHEDULE 
- (
- SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE,
-
- "	Tasks "
- "		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_FAIL_ESTABLISH_LINE_OF_FIRE"
- "		TASK_SET_TOLERANCE_DISTANCE		48"
- "		TASK_GET_PATH_TO_ENEMY_LKP_LOS	0"
- "		TASK_COMBINE_SET_STANDING		1"
- "		TASK_SPEAK_SENTENCE				1"
- "		TASK_RUN_PATH					0"
- "		TASK_WAIT_FOR_MOVEMENT			0"
- "		TASK_COMBINE_IGNORE_ATTACKS		0.0"
- "		TASK_SET_SCHEDULE				SCHEDULE:SCHED_COMBAT_FACE"
- "	"
- "	Interrupts "
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- //"		COND_CAN_RANGE_ATTACK1"
- //"		COND_CAN_RANGE_ATTACK2"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK2"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_HEAVY_DAMAGE"
- )
-
- //=========================================================
- // SCHED_COMBINE_PRESS_ATTACK
- //=========================================================
- DEFINE_SCHEDULE 
- (
- SCHED_COMBINE_PRESS_ATTACK,
-
- "	Tasks "
- "		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE"
- "		TASK_SET_TOLERANCE_DISTANCE		72"
- "		TASK_GET_PATH_TO_ENEMY_LKP		0"
- "		TASK_COMBINE_SET_STANDING		1"
- "		TASK_RUN_PATH					0"
- "		TASK_WAIT_FOR_MOVEMENT			0"
- ""
- "	Interrupts "
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- "		COND_ENEMY_UNREACHABLE"
- "		COND_NO_PRIMARY_AMMO"
- "		COND_LOW_PRIMARY_AMMO"
- "		COND_TOO_CLOSE_TO_ATTACK"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK2"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- )
-
- //=========================================================
- // SCHED_COMBINE_COMBAT_FACE
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_COMBAT_FACE,
-
- "	Tasks"
- "		TASK_STOP_MOVING			0"
- "		TASK_SET_ACTIVITY			ACTIVITY:ACT_IDLE"
- "		TASK_FACE_ENEMY				0"
- "		 TASK_WAIT					1.5"
- //"		 TASK_SET_SCHEDULE			SCHEDULE:SCHED_COMBINE_SWEEP"
- ""
- "	Interrupts"
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- "		COND_CAN_RANGE_ATTACK1"
- "		COND_CAN_RANGE_ATTACK2"
- )
-
- //=========================================================
- // 	SCHED_HIDE_AND_RELOAD	
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_HIDE_AND_RELOAD,
-
- "	Tasks"
- "		TASK_SET_FAIL_SCHEDULE		SCHEDULE:SCHED_RELOAD"
- "		TASK_FIND_COVER_FROM_ENEMY	0"
- "		TASK_RUN_PATH				0"
- "		TASK_WAIT_FOR_MOVEMENT		0"
- "		TASK_REMEMBER				MEMORY:INCOVER"
- "		TASK_FACE_ENEMY				0"
- "		TASK_RELOAD					0"
- ""
- "	Interrupts"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK2"
- "		COND_HEAVY_DAMAGE"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- )
-
- //=========================================================
- // SCHED_COMBINE_SIGNAL_SUPPRESS
- //	don't stop shooting until the clip is
- //	empty or combine gets hurt.
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_SIGNAL_SUPPRESS,
-
- "	Tasks"
- "		TASK_STOP_MOVING				0"
- "		TASK_FACE_IDEAL					0"
- "		TASK_PLAY_SEQUENCE_FACE_ENEMY	ACTIVITY:ACT_SIGNAL_GROUP"
- "		TASK_COMBINE_SET_STANDING		0"
- "		TASK_RANGE_ATTACK1				0"
- ""
- "	Interrupts"
- "		COND_ENEMY_DEAD"
- "		COND_LIGHT_DAMAGE"
- "		COND_HEAVY_DAMAGE"
- "		COND_NO_PRIMARY_AMMO"
- "		COND_WEAPON_BLOCKED_BY_FRIEND"
- "		COND_WEAPON_SIGHT_OCCLUDED"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_COMBINE_NO_FIRE"
- )
-
- //=========================================================
- // SCHED_COMBINE_SUPPRESS
- //=========================================================
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_SUPPRESS,
-
- "	Tasks"
- "		TASK_STOP_MOVING			0"
- "		TASK_FACE_ENEMY				0"
- "		TASK_COMBINE_SET_STANDING	0"
- "		TASK_RANGE_ATTACK1			0"
- ""
- "	Interrupts"
- "		COND_ENEMY_DEAD"
- "		COND_LIGHT_DAMAGE"
- "		COND_HEAVY_DAMAGE"
- "		COND_NO_PRIMARY_AMMO"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_COMBINE_NO_FIRE"
- "		COND_WEAPON_BLOCKED_BY_FRIEND"
- )
-
- //=========================================================
- // 	SCHED_COMBINE_ENTER_OVERWATCH
- //
- // Parks a combine soldier in place looking at the player's
- // last known position, ready to attack if the player pops out
- //=========================================================
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_ENTER_OVERWATCH,
-
- "	Tasks"
- "		TASK_STOP_MOVING			0"
- "		TASK_COMBINE_SET_STANDING	0"
- "		TASK_SET_ACTIVITY			ACTIVITY:ACT_IDLE"
- "		TASK_FACE_ENEMY				0"
- "		TASK_SET_SCHEDULE			SCHEDULE:SCHED_COMBINE_OVERWATCH"
- ""
- "	Interrupts"
- "		COND_HEAR_DANGER"
- "		COND_NEW_ENEMY"
- )
-
- //=========================================================
- // 	SCHED_COMBINE_OVERWATCH
- //
- // Parks a combine soldier in place looking at the player's
- // last known position, ready to attack if the player pops out
- //=========================================================
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_OVERWATCH,
-
- "	Tasks"
- "		TASK_WAIT_FACE_ENEMY		10"
- ""
- "	Interrupts"
- "		COND_CAN_RANGE_ATTACK1"
- "		COND_ENEMY_DEAD"
- "		COND_LIGHT_DAMAGE"
- "		COND_HEAVY_DAMAGE"
- "		COND_NO_PRIMARY_AMMO"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_NEW_ENEMY"
- )
-
- //=========================================================
- // SCHED_COMBINE_WAIT_IN_COVER
- //	we don't allow danger or the ability
- //	to attack to break a combine's run to cover schedule but
- //	when a combine is in cover we do want them to attack if they can.
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_WAIT_IN_COVER,
-
- "	Tasks"
- "		TASK_STOP_MOVING				0"
- "		TASK_COMBINE_SET_STANDING		0"
- "		TASK_SET_ACTIVITY				ACTIVITY:ACT_IDLE"	// Translated to cover
- "		TASK_WAIT_FACE_ENEMY			1"
- ""
- "	Interrupts"
- "		COND_NEW_ENEMY"
- "		COND_CAN_RANGE_ATTACK1"
- "		COND_CAN_RANGE_ATTACK2"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK2"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_COMBINE_ATTACK_SLOT_AVAILABLE"
- )
-
- //=========================================================
- // SCHED_COMBINE_TAKE_COVER1
- //=========================================================
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_TAKE_COVER1  ,
-
- "	Tasks"
- "		TASK_SET_FAIL_SCHEDULE		SCHEDULE:SCHED_COMBINE_TAKECOVER_FAILED"
- "		TASK_STOP_MOVING				0"
- "		TASK_WAIT					0.2"
- "		TASK_FIND_COVER_FROM_ENEMY	0"
- "		TASK_RUN_PATH				0"
- "		TASK_WAIT_FOR_MOVEMENT		0"
- "		TASK_REMEMBER				MEMORY:INCOVER"
- "		TASK_SET_SCHEDULE			SCHEDULE:SCHED_COMBINE_WAIT_IN_COVER"
- ""
- "	Interrupts"
- )
-
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_TAKECOVER_FAILED,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- ""
- "	Interrupts"
- )
-
- //=========================================================
- // SCHED_COMBINE_GRENADE_COVER1
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_GRENADE_COVER1,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- "		TASK_FIND_COVER_FROM_ENEMY			99"
- "		TASK_FIND_FAR_NODE_COVER_FROM_ENEMY	384"
- "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_SPECIAL_ATTACK2"
- "		TASK_CLEAR_MOVE_WAIT				0"
- "		TASK_RUN_PATH						0"
- "		TASK_WAIT_FOR_MOVEMENT				0"
- "		TASK_SET_SCHEDULE					SCHEDULE:SCHED_COMBINE_WAIT_IN_COVER"
- ""
- "	Interrupts"
- )
-
- //=========================================================
- // SCHED_COMBINE_TOSS_GRENADE_COVER1
- //
- //	 drop grenade then run to cover.
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_TOSS_GRENADE_COVER1,
-
- "	Tasks"
- "		TASK_FACE_ENEMY						0"
- "		TASK_RANGE_ATTACK2 					0"
- "		TASK_SET_SCHEDULE					SCHEDULE:SCHED_TAKE_COVER_FROM_ENEMY"
- ""
- "	Interrupts"
- )
-
- //=========================================================
- // SCHED_COMBINE_RANGE_ATTACK1
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_RANGE_ATTACK1,
-
- "	Tasks"
- "		TASK_STOP_MOVING				0"
- "		TASK_FACE_ENEMY					0"
- "		TASK_ANNOUNCE_ATTACK			1"	// 1 = primary attack
- "		TASK_WAIT_RANDOM				0.3"
- "		TASK_RANGE_ATTACK1				0"
- "		TASK_COMBINE_IGNORE_ATTACKS		0.5"
- ""
- "	Interrupts"
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- "		COND_HEAVY_DAMAGE"
- "		COND_LIGHT_DAMAGE"
- "		COND_LOW_PRIMARY_AMMO"
- "		COND_NO_PRIMARY_AMMO"
- "		COND_WEAPON_BLOCKED_BY_FRIEND"
- "		COND_TOO_CLOSE_TO_ATTACK"
- "		COND_GIVE_WAY"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_COMBINE_NO_FIRE"
- ""
- // Enemy_Occluded				Don't interrupt on this.  Means
- //								comibine will fire where player was after
- //								he has moved for a little while.  Good effect!!
- // WEAPON_SIGHT_OCCLUDED		Don't block on this! Looks better for railings, etc.
- )
-
- //=========================================================
- // AR2 Alt Fire Attack
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_AR2_ALTFIRE,
-
- "	Tasks"
- "		TASK_STOP_MOVING									0"
- "		TASK_ANNOUNCE_ATTACK								1"
- "		TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET		ACTIVITY:ACT_COMBINE_AR2_ALTFIRE"
- ""
- "	Interrupts"
- )
-
- //=========================================================
- // Mapmaker forced grenade throw
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_FORCED_GRENADE_THROW,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- "		TASK_COMBINE_FACE_TOSS_DIR			0"
- "		TASK_ANNOUNCE_ATTACK				2"	// 2 = grenade
- "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_RANGE_ATTACK2"
- "		TASK_COMBINE_DEFER_SQUAD_GRENADES	0"
- ""
- "	Interrupts"
- )
-
- //=========================================================
- // Move to LOS of the mapmaker's forced grenade throw target
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_MOVE_TO_FORCED_GREN_LOS,
-
- "	Tasks "
- "		TASK_SET_TOLERANCE_DISTANCE					48"
- "		TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS	0"
- "		TASK_SPEAK_SENTENCE							1"
- "		TASK_RUN_PATH								0"
- "		TASK_WAIT_FOR_MOVEMENT						0"
- "	"
- "	Interrupts "
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK2"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_HEAVY_DAMAGE"
- )
-
- //=========================================================
- // 	SCHED_COMBINE_RANGE_ATTACK2	
- //
- //	secondary range attack. Overriden because base class stops attacking when the enemy is occluded.
- //	combines's grenade toss requires the enemy be occluded.
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_RANGE_ATTACK2,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- "		TASK_COMBINE_FACE_TOSS_DIR			0"
- "		TASK_ANNOUNCE_ATTACK				2"	// 2 = grenade
- "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_RANGE_ATTACK2"
- "		TASK_COMBINE_DEFER_SQUAD_GRENADES	0"
- "		TASK_SET_SCHEDULE					SCHEDULE:SCHED_COMBINE_WAIT_IN_COVER"	// don't run immediately after throwing grenade.
- ""
- "	Interrupts"
- )
-
-
- //=========================================================
- // Throw a grenade, then run off and reload.
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_GRENADE_AND_RELOAD,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- "		TASK_COMBINE_FACE_TOSS_DIR			0"
- "		TASK_ANNOUNCE_ATTACK				2"	// 2 = grenade
- "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_RANGE_ATTACK2"
- "		TASK_COMBINE_DEFER_SQUAD_GRENADES	0"
- "		TASK_SET_SCHEDULE					SCHEDULE:SCHED_HIDE_AND_RELOAD"	// don't run immediately after throwing grenade.
- ""
- "	Interrupts"
- )
-
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_PATROL,
-
- "	Tasks"
- "		TASK_STOP_MOVING				0"
- "		TASK_WANDER						900540" 
- "		TASK_WALK_PATH					0"
- "		TASK_WAIT_FOR_MOVEMENT			0"
- "		TASK_STOP_MOVING				0"
- "		TASK_FACE_REASONABLE			0"
- "		TASK_WAIT						3"
- "		TASK_WAIT_RANDOM				3"
- "		TASK_SET_SCHEDULE				SCHEDULE:SCHED_COMBINE_PATROL" // keep doing it
- ""
- "	Interrupts"
- "		COND_ENEMY_DEAD"
- "		COND_LIGHT_DAMAGE"
- "		COND_HEAVY_DAMAGE"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_NEW_ENEMY"
- "		COND_SEE_ENEMY"
- "		COND_CAN_RANGE_ATTACK1"
- "		COND_CAN_RANGE_ATTACK2"
- )
-
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_BUGBAIT_DISTRACTION,
-
- "	Tasks"
- "		TASK_STOP_MOVING		0"
- "		TASK_RESET_ACTIVITY		0"
- "		TASK_PLAY_SEQUENCE		ACTIVITY:ACT_COMBINE_BUGBAIT"
- ""
- "	Interrupts"
- ""
- )
-
- //=========================================================
- // SCHED_COMBINE_CHARGE_TURRET
- //
- //	Used to run straight at enemy turrets to knock them over.
- //  Prevents squadmates from throwing grenades during.
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_CHARGE_TURRET,
-
- "	Tasks"
- "		TASK_COMBINE_DEFER_SQUAD_GRENADES	0"
- "		TASK_STOP_MOVING					0"
- "		TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_CHASE_ENEMY_FAILED"
- "		TASK_GET_CHASE_PATH_TO_ENEMY		300"
- "		TASK_RUN_PATH						0"
- "		TASK_WAIT_FOR_MOVEMENT				0"
- "		TASK_FACE_ENEMY						0"
- ""
- "	Interrupts"
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- "		COND_ENEMY_UNREACHABLE"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK2"
- "		COND_TOO_CLOSE_TO_ATTACK"
- "		COND_TASK_FAILED"
- "		COND_LOST_ENEMY"
- "		COND_BETTER_WEAPON_AVAILABLE"
- "		COND_HEAR_DANGER"
- )
-
- //=========================================================
- // SCHED_COMBINE_CHARGE_PLAYER
- //
- //	Used to run straight at enemy player since physgun combat
- //  is more fun when the enemies are close
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_CHARGE_PLAYER,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- "		TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_CHASE_ENEMY_FAILED"
- "		TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY		192"
- "		TASK_FACE_ENEMY						0"
- ""
- "	Interrupts"
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- "		COND_ENEMY_UNREACHABLE"
- "		COND_CAN_MELEE_ATTACK1"
- "		COND_CAN_MELEE_ATTACK2"
- "		COND_TASK_FAILED"
- "		COND_LOST_ENEMY"
- "		COND_HEAR_DANGER"
- )
-
- //=========================================================
- // SCHED_COMBINE_DROP_GRENADE
- //
- //	Place a grenade at my feet
- //=========================================================
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_DROP_GRENADE,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_SPECIAL_ATTACK2"
- "		TASK_FIND_COVER_FROM_ENEMY			99"
- "		TASK_FIND_FAR_NODE_COVER_FROM_ENEMY	384"
- "		TASK_CLEAR_MOVE_WAIT				0"
- "		TASK_RUN_PATH						0"
- "		TASK_WAIT_FOR_MOVEMENT				0"
- ""
- "	Interrupts"
- )
-
- //=========================================================
- // SCHED_COMBINE_PATROL_ENEMY
- //
- // Used instead if SCHED_COMBINE_PATROL if I have an enemy.
- // Wait for the enemy a bit in the hopes of ambushing him.
- //=========================================================
- DEFINE_SCHEDULE	
- (
- SCHED_COMBINE_PATROL_ENEMY,
-
- "	Tasks"
- "		TASK_STOP_MOVING					0"
- "		TASK_WAIT_FACE_ENEMY				1" 
- "		TASK_WAIT_FACE_ENEMY_RANDOM			3" 
- ""
- "	Interrupts"
- "		COND_ENEMY_DEAD"
- "		COND_LIGHT_DAMAGE"
- "		COND_HEAVY_DAMAGE"
- "		COND_HEAR_DANGER"
- "		COND_HEAR_MOVE_AWAY"
- "		COND_NEW_ENEMY"
- "		COND_SEE_ENEMY"
- "		COND_CAN_RANGE_ATTACK1"
- "		COND_CAN_RANGE_ATTACK2"
- )
-
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_BURNING_STAND,
-
- "	Tasks"
- "		TASK_SET_ACTIVITY				ACTIVITY:ACT_COMBINE_BUGBAIT"
- "		TASK_RANDOMIZE_FRAMERATE		20"
- "		TASK_WAIT						2"
- "		TASK_WAIT_RANDOM				3"
- "		TASK_COMBINE_DIE_INSTANTLY		DMG_BURN"
- "		TASK_WAIT						1.0"
- "	"
- "	Interrupts"
- )
-
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_FACE_IDEAL_YAW,
-
- "	Tasks"
- "		TASK_FACE_IDEAL				0"
- "	"
- "	Interrupts"
- )
-
- DEFINE_SCHEDULE
- (
- SCHED_COMBINE_MOVE_TO_MELEE,
-
- "	Tasks"
- "		TASK_STORE_ENEMY_POSITION_IN_SAVEPOSITION	0"
- "		TASK_GET_PATH_TO_SAVEPOSITION				0"
- "		TASK_RUN_PATH								0"
- "		TASK_WAIT_FOR_MOVEMENT						0"
-  "	"
- "	Interrupts"
- "		COND_NEW_ENEMY"
- "		COND_ENEMY_DEAD"
- "		COND_CAN_MELEE_ATTACK1"
- )
-
- // SCHED_COMBINE_MOVE_TO_HIGH_COVER
+    SCHED_COMBINE_TAKE_COVER_FROM_BEST_SOUND,
+
+    "	Tasks"
+    "		 TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_COMBINE_RUN_AWAY_FROM_BEST_SOUND"
+    "		 TASK_STOP_MOVING					0"
+    "		 TASK_COMBINE_SIGNAL_BEST_SOUND		0"
+    "		 TASK_FIND_COVER_FROM_BEST_SOUND	0"
+    "		 TASK_RUN_PATH						0"
+    "		 TASK_WAIT_FOR_MOVEMENT				0"
+    "		 TASK_REMEMBER						MEMORY:INCOVER"
+    "		 TASK_FACE_REASONABLE				0"
+    ""
+    "	Interrupts"
+)
+
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_RUN_AWAY_FROM_BEST_SOUND,
+
+    "	Tasks"
+    "		 TASK_SET_FAIL_SCHEDULE					SCHEDULE:SCHED_COWER"
+    "		 TASK_GET_PATH_AWAY_FROM_BEST_SOUND		600"
+    "		 TASK_RUN_PATH_TIMED					2"
+    "		 TASK_STOP_MOVING						0"
+    ""
+    "	Interrupts"
+)
+//=========================================================
+//	SCHED_COMBINE_COMBAT_FAIL
 //=========================================================
 DEFINE_SCHEDULE
 (
-SCHED_COMBINE_MOVE_TO_HIGH_COVER, // [MODIFICATION-Dynamic Cover]
+    SCHED_COMBINE_COMBAT_FAIL,
 
-"	Tasks"
-"		TASK_STOP_MOVING						0"
-"		TASK_COMBINE_MOVE_TO_HIGH_COVER			0"
-"		TASK_RUN_PATH_TIMED						4"
-"		TASK_WAIT_FOR_MOVEMENT					0"
-"		TASK_FACE_ENEMY							0"
-"		TASK_RANGE_ATTACK1						0"
-"	"
-"	Interrupts"
+    "	Tasks"
+    "		TASK_STOP_MOVING			0"
+    "		TASK_SET_ACTIVITY			ACTIVITY:ACT_IDLE "
+    "		TASK_WAIT_FACE_ENEMY		2"
+    "		TASK_WAIT_PVS				0"
+    ""
+    "	Interrupts"
+    "		COND_CAN_RANGE_ATTACK1"
+    "		COND_CAN_RANGE_ATTACK2"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK2"
+)
+
+//=========================================================
+// SCHED_COMBINE_VICTORY_DANCE
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_VICTORY_DANCE,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_FACE_ENEMY						0"
+    "		TASK_WAIT							1.5"
+    "		TASK_GET_PATH_TO_ENEMY_CORPSE		0"
+    "		TASK_WALK_PATH						0"
+    "		TASK_WAIT_FOR_MOVEMENT				0"
+    "		TASK_FACE_ENEMY						0"
+    "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_VICTORY_DANCE"
+    ""
+    "	Interrupts"
+    "		COND_NEW_ENEMY"
+    "		COND_LIGHT_DAMAGE"
+    "		COND_HEAVY_DAMAGE"
+)
+
+//=========================================================
+// SCHED_COMBINE_ASSAULT
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_ASSAULT,
+
+    "	Tasks "
+    "		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE"
+    "		TASK_SET_TOLERANCE_DISTANCE		48"
+    "		TASK_GET_PATH_TO_ENEMY_LKP		0"
+    "		TASK_COMBINE_IGNORE_ATTACKS		0.2"
+    "		TASK_SPEAK_SENTENCE				0"
+    "		TASK_RUN_PATH					0"
+    //		"		TASK_COMBINE_MOVE_AND_AIM		0"
+    "		TASK_WAIT_FOR_MOVEMENT			0"
+    "		TASK_COMBINE_IGNORE_ATTACKS		0.0"
+    ""
+    "	Interrupts "
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    "		COND_ENEMY_UNREACHABLE"
+    "		COND_CAN_RANGE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_RANGE_ATTACK2"
+    "		COND_CAN_MELEE_ATTACK2"
+    "		COND_TOO_FAR_TO_ATTACK"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+)
+
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE,
+
+    "	Tasks "
+    "		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_FAIL_ESTABLISH_LINE_OF_FIRE"
+    "		TASK_SET_TOLERANCE_DISTANCE		48"
+    "		TASK_GET_PATH_TO_ENEMY_LKP_LOS	0"
+    "		TASK_COMBINE_SET_STANDING		1"
+    "		TASK_SPEAK_SENTENCE				1"
+    "		TASK_RUN_PATH					0"
+    "		TASK_WAIT_FOR_MOVEMENT			0"
+    "		TASK_COMBINE_IGNORE_ATTACKS		0.0"
+    "		TASK_SET_SCHEDULE				SCHEDULE:SCHED_COMBAT_FACE"
+    "	"
+    "	Interrupts "
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    //"		COND_CAN_RANGE_ATTACK1"
+    //"		COND_CAN_RANGE_ATTACK2"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK2"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_HEAVY_DAMAGE"
+)
+
+//=========================================================
+// SCHED_COMBINE_PRESS_ATTACK
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_PRESS_ATTACK,
+
+    "	Tasks "
+    "		TASK_SET_FAIL_SCHEDULE			SCHEDULE:SCHED_COMBINE_ESTABLISH_LINE_OF_FIRE"
+    "		TASK_SET_TOLERANCE_DISTANCE		72"
+    "		TASK_GET_PATH_TO_ENEMY_LKP		0"
+    "		TASK_COMBINE_SET_STANDING		1"
+    "		TASK_RUN_PATH					0"
+    "		TASK_WAIT_FOR_MOVEMENT			0"
+    ""
+    "	Interrupts "
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    "		COND_ENEMY_UNREACHABLE"
+    "		COND_NO_PRIMARY_AMMO"
+    "		COND_LOW_PRIMARY_AMMO"
+    "		COND_TOO_CLOSE_TO_ATTACK"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK2"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+)
+
+//=========================================================
+// SCHED_COMBINE_COMBAT_FACE
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_COMBAT_FACE,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING			0"
+    "		TASK_SET_ACTIVITY			ACTIVITY:ACT_IDLE"
+    "		TASK_FACE_ENEMY				0"
+    "		 TASK_WAIT					1.5"
+    //"		 TASK_SET_SCHEDULE			SCHEDULE:SCHED_COMBINE_SWEEP"
+    ""
+    "	Interrupts"
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    "		COND_CAN_RANGE_ATTACK1"
+    "		COND_CAN_RANGE_ATTACK2"
+)
+
+//=========================================================
+// 	SCHED_HIDE_AND_RELOAD	
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_HIDE_AND_RELOAD,
+
+    "	Tasks"
+    "		TASK_SET_FAIL_SCHEDULE		SCHEDULE:SCHED_RELOAD"
+    "		TASK_FIND_COVER_FROM_ENEMY	0"
+    "		TASK_RUN_PATH				0"
+    "		TASK_WAIT_FOR_MOVEMENT		0"
+    "		TASK_REMEMBER				MEMORY:INCOVER"
+    "		TASK_FACE_ENEMY				0"
+    "		TASK_RELOAD					0"
+    ""
+    "	Interrupts"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK2"
+    "		COND_HEAVY_DAMAGE"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+)
+
+//=========================================================
+// SCHED_COMBINE_SIGNAL_SUPPRESS
+//	don't stop shooting until the clip is
+//	empty or combine gets hurt.
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_SIGNAL_SUPPRESS,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING				0"
+    "		TASK_FACE_IDEAL					0"
+    "		TASK_PLAY_SEQUENCE_FACE_ENEMY	ACTIVITY:ACT_SIGNAL_GROUP"
+    "		TASK_COMBINE_SET_STANDING		0"
+    "		TASK_RANGE_ATTACK1				0"
+    ""
+    "	Interrupts"
+    "		COND_ENEMY_DEAD"
+    "		COND_LIGHT_DAMAGE"
+    "		COND_HEAVY_DAMAGE"
+    "		COND_NO_PRIMARY_AMMO"
+    "		COND_WEAPON_BLOCKED_BY_FRIEND"
+    "		COND_WEAPON_SIGHT_OCCLUDED"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_COMBINE_NO_FIRE"
+)
+
+//=========================================================
+// SCHED_COMBINE_SUPPRESS
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_SUPPRESS,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING			0"
+    "		TASK_FACE_ENEMY				0"
+    "		TASK_COMBINE_SET_STANDING	0"
+    "		TASK_RANGE_ATTACK1			0"
+    ""
+    "	Interrupts"
+    "		COND_ENEMY_DEAD"
+    "		COND_LIGHT_DAMAGE"
+    "		COND_HEAVY_DAMAGE"
+    "		COND_NO_PRIMARY_AMMO"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_COMBINE_NO_FIRE"
+    "		COND_WEAPON_BLOCKED_BY_FRIEND"
+)
+
+//=========================================================
+// 	SCHED_COMBINE_ENTER_OVERWATCH
+//
+// Parks a combine soldier in place looking at the player's
+// last known position, ready to attack if the player pops out
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_ENTER_OVERWATCH,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING			0"
+    "		TASK_COMBINE_SET_STANDING	0"
+    "		TASK_SET_ACTIVITY			ACTIVITY:ACT_IDLE"
+    "		TASK_FACE_ENEMY				0"
+    "		TASK_SET_SCHEDULE			SCHEDULE:SCHED_COMBINE_OVERWATCH"
+    ""
+    "	Interrupts"
+    "		COND_HEAR_DANGER"
+    "		COND_NEW_ENEMY"
+)
+
+//=========================================================
+// 	SCHED_COMBINE_OVERWATCH
+//
+// Parks a combine soldier in place looking at the player's
+// last known position, ready to attack if the player pops out
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_OVERWATCH,
+
+    "	Tasks"
+    "		TASK_WAIT_FACE_ENEMY		10"
+    ""
+    "	Interrupts"
+    "		COND_CAN_RANGE_ATTACK1"
+    "		COND_ENEMY_DEAD"
+    "		COND_LIGHT_DAMAGE"
+    "		COND_HEAVY_DAMAGE"
+    "		COND_NO_PRIMARY_AMMO"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_NEW_ENEMY"
+)
+
+//=========================================================
+// SCHED_COMBINE_WAIT_IN_COVER
+//	we don't allow danger or the ability
+//	to attack to break a combine's run to cover schedule but
+//	when a combine is in cover we do want them to attack if they can.
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_WAIT_IN_COVER,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING				0"
+    "		TASK_COMBINE_SET_STANDING		0"
+    "		TASK_SET_ACTIVITY				ACTIVITY:ACT_IDLE"	// Translated to cover
+    "		TASK_WAIT_FACE_ENEMY			1"
+    ""
+    "	Interrupts"
+    "		COND_NEW_ENEMY"
+    "		COND_CAN_RANGE_ATTACK1"
+    "		COND_CAN_RANGE_ATTACK2"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK2"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_COMBINE_ATTACK_SLOT_AVAILABLE"
+)
+
+//=========================================================
+// SCHED_COMBINE_TAKE_COVER1
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_TAKE_COVER1,
+
+    "	Tasks"
+    "		TASK_SET_FAIL_SCHEDULE		SCHEDULE:SCHED_COMBINE_TAKECOVER_FAILED"
+    "		TASK_STOP_MOVING				0"
+    "		TASK_WAIT					0.2"
+    "		TASK_FIND_COVER_FROM_ENEMY	0"
+    "		TASK_RUN_PATH				0"
+    "		TASK_WAIT_FOR_MOVEMENT		0"
+    "		TASK_REMEMBER				MEMORY:INCOVER"
+    "		TASK_SET_SCHEDULE			SCHEDULE:SCHED_COMBINE_WAIT_IN_COVER"
+    ""
+    "	Interrupts"
+)
+
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_TAKECOVER_FAILED,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    ""
+    "	Interrupts"
+)
+
+//=========================================================
+// SCHED_COMBINE_GRENADE_COVER1
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_GRENADE_COVER1,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_FIND_COVER_FROM_ENEMY			99"
+    "		TASK_FIND_FAR_NODE_COVER_FROM_ENEMY	384"
+    "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_SPECIAL_ATTACK2"
+    "		TASK_CLEAR_MOVE_WAIT				0"
+    "		TASK_RUN_PATH						0"
+    "		TASK_WAIT_FOR_MOVEMENT				0"
+    "		TASK_SET_SCHEDULE					SCHEDULE:SCHED_COMBINE_WAIT_IN_COVER"
+    ""
+    "	Interrupts"
+)
+
+//=========================================================
+// SCHED_COMBINE_TOSS_GRENADE_COVER1
+//
+//	 drop grenade then run to cover.
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_TOSS_GRENADE_COVER1,
+
+    "	Tasks"
+    "		TASK_FACE_ENEMY						0"
+    "		TASK_RANGE_ATTACK2 					0"
+    "		TASK_SET_SCHEDULE					SCHEDULE:SCHED_TAKE_COVER_FROM_ENEMY"
+    ""
+    "	Interrupts"
+)
+
+//=========================================================
+// SCHED_COMBINE_RANGE_ATTACK1
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_RANGE_ATTACK1,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING				0"
+    "		TASK_FACE_ENEMY					0"
+    "		TASK_ANNOUNCE_ATTACK			1"	// 1 = primary attack
+    "		TASK_WAIT_RANDOM				0.3"
+    "		TASK_RANGE_ATTACK1				0"
+    "		TASK_COMBINE_IGNORE_ATTACKS		0.5"
+    ""
+    "	Interrupts"
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    "		COND_HEAVY_DAMAGE"
+    "		COND_LIGHT_DAMAGE"
+    "		COND_LOW_PRIMARY_AMMO"
+    "		COND_NO_PRIMARY_AMMO"
+    "		COND_WEAPON_BLOCKED_BY_FRIEND"
+    "		COND_TOO_CLOSE_TO_ATTACK"
+    "		COND_GIVE_WAY"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_COMBINE_NO_FIRE"
+    ""
+    // Enemy_Occluded				Don't interrupt on this.  Means
+    //								comibine will fire where player was after
+    //								he has moved for a little while.  Good effect!!
+    // WEAPON_SIGHT_OCCLUDED		Don't block on this! Looks better for railings, etc.
+)
+
+//=========================================================
+// AR2 Alt Fire Attack
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_AR2_ALTFIRE,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING									0"
+    "		TASK_ANNOUNCE_ATTACK								1"
+    "		TASK_COMBINE_PLAY_SEQUENCE_FACE_ALTFIRE_TARGET		ACTIVITY:ACT_COMBINE_AR2_ALTFIRE"
+    ""
+    "	Interrupts"
+)
+
+//=========================================================
+// Mapmaker forced grenade throw
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_FORCED_GRENADE_THROW,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_COMBINE_FACE_TOSS_DIR			0"
+    "		TASK_ANNOUNCE_ATTACK				2"	// 2 = grenade
+    "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_RANGE_ATTACK2"
+    "		TASK_COMBINE_DEFER_SQUAD_GRENADES	0"
+    ""
+    "	Interrupts"
+)
+
+//=========================================================
+// Move to LOS of the mapmaker's forced grenade throw target
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_MOVE_TO_FORCED_GREN_LOS,
+
+    "	Tasks "
+    "		TASK_SET_TOLERANCE_DISTANCE					48"
+    "		TASK_COMBINE_GET_PATH_TO_FORCED_GREN_LOS	0"
+    "		TASK_SPEAK_SENTENCE							1"
+    "		TASK_RUN_PATH								0"
+    "		TASK_WAIT_FOR_MOVEMENT						0"
+    "	"
+    "	Interrupts "
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK2"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_HEAVY_DAMAGE"
+)
+
+//=========================================================
+// 	SCHED_COMBINE_RANGE_ATTACK2	
+//
+//	secondary range attack. Overriden because base class stops attacking when the enemy is occluded.
+//	combines's grenade toss requires the enemy be occluded.
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_RANGE_ATTACK2,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_COMBINE_FACE_TOSS_DIR			0"
+    "		TASK_ANNOUNCE_ATTACK				2"	// 2 = grenade
+    "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_RANGE_ATTACK2"
+    "		TASK_COMBINE_DEFER_SQUAD_GRENADES	0"
+    "		TASK_SET_SCHEDULE					SCHEDULE:SCHED_COMBINE_WAIT_IN_COVER"	// don't run immediately after throwing grenade.
+    ""
+    "	Interrupts"
+)
+
+
+//=========================================================
+// Throw a grenade, then run off and reload.
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_GRENADE_AND_RELOAD,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_COMBINE_FACE_TOSS_DIR			0"
+    "		TASK_ANNOUNCE_ATTACK				2"	// 2 = grenade
+    "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_RANGE_ATTACK2"
+    "		TASK_COMBINE_DEFER_SQUAD_GRENADES	0"
+    "		TASK_SET_SCHEDULE					SCHEDULE:SCHED_HIDE_AND_RELOAD"	// don't run immediately after throwing grenade.
+    ""
+    "	Interrupts"
+)
+
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_PATROL,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING				0"
+    "		TASK_WANDER						900540"
+    "		TASK_WALK_PATH					0"
+    "		TASK_WAIT_FOR_MOVEMENT			0"
+    "		TASK_STOP_MOVING				0"
+    "		TASK_FACE_REASONABLE			0"
+    "		TASK_WAIT						3"
+    "		TASK_WAIT_RANDOM				3"
+    "		TASK_SET_SCHEDULE				SCHEDULE:SCHED_COMBINE_PATROL" // keep doing it
+    ""
+    "	Interrupts"
+    "		COND_ENEMY_DEAD"
+    "		COND_LIGHT_DAMAGE"
+    "		COND_HEAVY_DAMAGE"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_NEW_ENEMY"
+    "		COND_SEE_ENEMY"
+    "		COND_CAN_RANGE_ATTACK1"
+    "		COND_CAN_RANGE_ATTACK2"
+)
+
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_BUGBAIT_DISTRACTION,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING		0"
+    "		TASK_RESET_ACTIVITY		0"
+    "		TASK_PLAY_SEQUENCE		ACTIVITY:ACT_COMBINE_BUGBAIT"
+    ""
+    "	Interrupts"
+    ""
+)
+
+//=========================================================
+// SCHED_COMBINE_CHARGE_TURRET
+//
+//	Used to run straight at enemy turrets to knock them over.
+//  Prevents squadmates from throwing grenades during.
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_CHARGE_TURRET,
+
+    "	Tasks"
+    "		TASK_COMBINE_DEFER_SQUAD_GRENADES	0"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_CHASE_ENEMY_FAILED"
+    "		TASK_GET_CHASE_PATH_TO_ENEMY		300"
+    "		TASK_RUN_PATH						0"
+    "		TASK_WAIT_FOR_MOVEMENT				0"
+    "		TASK_FACE_ENEMY						0"
+    ""
+    "	Interrupts"
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    "		COND_ENEMY_UNREACHABLE"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK2"
+    "		COND_TOO_CLOSE_TO_ATTACK"
+    "		COND_TASK_FAILED"
+    "		COND_LOST_ENEMY"
+    "		COND_BETTER_WEAPON_AVAILABLE"
+    "		COND_HEAR_DANGER"
+)
+
+//=========================================================
+// SCHED_COMBINE_CHARGE_PLAYER
+//
+//	Used to run straight at enemy player since physgun combat
+//  is more fun when the enemies are close
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_CHARGE_PLAYER,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_SET_FAIL_SCHEDULE				SCHEDULE:SCHED_CHASE_ENEMY_FAILED"
+    "		TASK_COMBINE_CHASE_ENEMY_CONTINUOUSLY		192"
+    "		TASK_FACE_ENEMY						0"
+    ""
+    "	Interrupts"
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    "		COND_ENEMY_UNREACHABLE"
+    "		COND_CAN_MELEE_ATTACK1"
+    "		COND_CAN_MELEE_ATTACK2"
+    "		COND_TASK_FAILED"
+    "		COND_LOST_ENEMY"
+    "		COND_HEAR_DANGER"
+)
+
+//=========================================================
+// SCHED_COMBINE_DROP_GRENADE
+//
+//	Place a grenade at my feet
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_DROP_GRENADE,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_PLAY_SEQUENCE					ACTIVITY:ACT_SPECIAL_ATTACK2"
+    "		TASK_FIND_COVER_FROM_ENEMY			99"
+    "		TASK_FIND_FAR_NODE_COVER_FROM_ENEMY	384"
+    "		TASK_CLEAR_MOVE_WAIT				0"
+    "		TASK_RUN_PATH						0"
+    "		TASK_WAIT_FOR_MOVEMENT				0"
+    ""
+    "	Interrupts"
+)
+
+//=========================================================
+// SCHED_COMBINE_PATROL_ENEMY
+//
+// Used instead if SCHED_COMBINE_PATROL if I have an enemy.
+// Wait for the enemy a bit in the hopes of ambushing him.
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_PATROL_ENEMY,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING					0"
+    "		TASK_WAIT_FACE_ENEMY				1"
+    "		TASK_WAIT_FACE_ENEMY_RANDOM			3"
+    ""
+    "	Interrupts"
+    "		COND_ENEMY_DEAD"
+    "		COND_LIGHT_DAMAGE"
+    "		COND_HEAVY_DAMAGE"
+    "		COND_HEAR_DANGER"
+    "		COND_HEAR_MOVE_AWAY"
+    "		COND_NEW_ENEMY"
+    "		COND_SEE_ENEMY"
+    "		COND_CAN_RANGE_ATTACK1"
+    "		COND_CAN_RANGE_ATTACK2"
+)
+
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_BURNING_STAND,
+
+    "	Tasks"
+    "		TASK_SET_ACTIVITY				ACTIVITY:ACT_COMBINE_BUGBAIT"
+    "		TASK_RANDOMIZE_FRAMERATE		20"
+    "		TASK_WAIT						2"
+    "		TASK_WAIT_RANDOM				3"
+    "		TASK_COMBINE_DIE_INSTANTLY		DMG_BURN"
+    "		TASK_WAIT						1.0"
+    "	"
+    "	Interrupts"
+)
+
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_FACE_IDEAL_YAW,
+
+    "	Tasks"
+    "		TASK_FACE_IDEAL				0"
+    "	"
+    "	Interrupts"
+)
+
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_MOVE_TO_MELEE,
+
+    "	Tasks"
+    "		TASK_STORE_ENEMY_POSITION_IN_SAVEPOSITION	0"
+    "		TASK_GET_PATH_TO_SAVEPOSITION				0"
+    "		TASK_RUN_PATH								0"
+    "		TASK_WAIT_FOR_MOVEMENT						0"
+    "	"
+    "	Interrupts"
+    "		COND_NEW_ENEMY"
+    "		COND_ENEMY_DEAD"
+    "		COND_CAN_MELEE_ATTACK1"
+)
+
+// SCHED_COMBINE_MOVE_TO_HIGH_COVER
+//=========================================================
+DEFINE_SCHEDULE
+(
+    SCHED_COMBINE_MOVE_TO_HIGH_COVER, // [MODIFICATION-Dynamic Cover]
+
+    "	Tasks"
+    "		TASK_STOP_MOVING						0"
+    "		TASK_COMBINE_MOVE_TO_HIGH_COVER			0"
+    "		TASK_RUN_PATH_TIMED						4"
+    "		TASK_WAIT_FOR_MOVEMENT					0"
+    "		TASK_FACE_ENEMY							0"
+    "		TASK_RANGE_ATTACK1						0"
+    "	"
+    "	Interrupts"
 
 )
 
@@ -5183,18 +5183,18 @@ SCHED_COMBINE_MOVE_TO_HIGH_COVER, // [MODIFICATION-Dynamic Cover]
 
 DEFINE_SCHEDULE
 (
-SCHED_COMBINE_MOVE_TO_LOW_COVER, // [MODIFICATION-Dynamic Cover]
+    SCHED_COMBINE_MOVE_TO_LOW_COVER, // [MODIFICATION-Dynamic Cover]
 
-"   Tasks"
-"		TASK_STOP_MOVING					    0"
-"		TASK_COMBINE_MOVE_TO_LOW_COVER			0"
-"		TASK_RUN_PATH_TIMED						8"
-"		TASK_WAIT_FOR_MOVEMENT					0"
-"		TASK_FACE_ENEMY							0"
-"		TASK_RANGE_ATTACK1						0"
-""
-"   Interrupts"
+    "   Tasks"
+    "		TASK_STOP_MOVING					    0"
+    "		TASK_COMBINE_MOVE_TO_LOW_COVER			0"
+    "		TASK_RUN_PATH_TIMED						8"
+    "		TASK_WAIT_FOR_MOVEMENT					0"
+    "		TASK_FACE_ENEMY							0"
+    "		TASK_RANGE_ATTACK1						0"
+    ""
+    "   Interrupts"
 
 )
 
- AI_END_CUSTOM_NPC()
+AI_END_CUSTOM_NPC()
