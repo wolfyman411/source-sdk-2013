@@ -359,7 +359,7 @@ const char* CBreakable::MaterialSound(Materials precacheMaterial)
 	case matRocks:
 		return "Breakable.MatConcrete";
 	case matIce:
-		return "Breakable.MatIce";
+		return "Ice.Damage";
 	case matCeilingTile:
 	case matNone:
 	default:
@@ -507,6 +507,7 @@ void CBreakable::Precache(void)
 	PrecacheScriptSound("Breakable.Flesh");
 	PrecacheScriptSound("Breakable.Concrete");
 	PrecacheScriptSound("Breakable.Ceiling");
+	PrecacheScriptSound("Ice.Damage");
 }
 
 // play shard sound when func_breakable takes damage.
@@ -554,6 +555,10 @@ void CBreakable::DamageSound(void)
 	case matRocks:
 	case matCinderBlock:
 		soundname = "Breakable.MatConcrete";
+		break;
+
+	case matIce:
+		soundname = "Ice.Damage";
 		break;
 
 	case matComputer:
@@ -995,6 +1000,11 @@ void CBreakable::Die(void)
 	case matCinderBlock:
 		soundname = "Breakable.Concrete";
 		cFlag = BREAK_CONCRETE;
+		break;
+
+	case matIce:
+		soundname = "Ice.Damage";
+		cFlag = BREAK_GLASS;
 		break;
 
 	case matCeilingTile:
