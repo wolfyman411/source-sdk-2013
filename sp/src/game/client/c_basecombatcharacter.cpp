@@ -93,6 +93,11 @@ void C_BaseCombatCharacter::OnDataChanged( DataUpdateType_t updateType )
 #endif // GLOWS_ENABLE
 }
 
+float C_BaseCombatCharacter::GetViewModelSnowOverlayAlpha( void )
+{
+    return m_flSnowOverlayAlpha;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Overload our muzzle flash and send it to any actively held weapon
 //-----------------------------------------------------------------------------
