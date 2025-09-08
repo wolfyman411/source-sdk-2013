@@ -493,6 +493,8 @@ BEGIN_DATADESC( CBasePlayer )
 
 	// DEFINE_UTLVECTOR( m_vecPlayerCmdInfo ),
 	// DEFINE_UTLVECTOR( m_vecPlayerSimInfo ),
+
+    DEFINE_FIELD( m_bShouldDrawSnowOverlay, FIELD_BOOLEAN ),
 END_DATADESC()
 
 #ifdef MAPBASE_VSCRIPT
@@ -792,6 +794,8 @@ CBasePlayer::CBasePlayer( )
 	m_flMovementTimeForUserCmdProcessingRemaining = 0.0f;
 
 	m_hPostProcessCtrl.Set( NULL );
+
+    m_bShouldDrawSnowOverlay = false;
 }
 
 CBasePlayer::~CBasePlayer( )
@@ -8919,6 +8923,8 @@ void SendProxy_ShiftPlayerSpawnflags( const SendProp *pProp, const void *pStruct
 
 		// Data that only gets sent to the local player.
 		SendPropDataTable( "localdata", 0, &REFERENCE_SEND_TABLE(DT_LocalPlayerExclusive), SendProxy_SendLocalDataTable ),
+
+        SendPropBool( SENDINFO( m_bShouldDrawSnowOverlay ) ),
 
 	END_SEND_TABLE()
 

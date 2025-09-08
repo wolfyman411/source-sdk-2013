@@ -971,6 +971,8 @@ public:
 	CNetworkVar( bool, m_bInTriggerFall );
 #endif
 
+    CNetworkVar( bool, m_bShouldDrawSnowOverlay );
+
 private:
 
 	Activity				m_Activity;
