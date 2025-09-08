@@ -1,7 +1,7 @@
 // /========= Copyright Bernt Andreas Eide, All rights reserved. ============//
 //
-// Purpose: When you take damage or you damage someone and blood splats on 
-//          you then you'll draw that blood on your hands/weapon. (overlay)
+// Purpose: Handles drawing a snow overlay on the player's hands or weapon
+//          when appropriate (e.g., when in snowy environments). (overlay)
 //
 //=============================================================================//
 
