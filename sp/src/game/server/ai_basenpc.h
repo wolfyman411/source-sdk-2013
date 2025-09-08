@@ -594,6 +594,8 @@ public:
 	virtual void		UpdateOnRemove( void );
 
 	virtual int			UpdateTransmitState();
+	virtual int			GetSkin() const { return m_nSkin; }
+	void				SetSkin( int iSkin ) { m_nSkin = iSkin; }
 
 	//---------------------------------
 	// Component creation factories

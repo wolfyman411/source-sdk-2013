@@ -7,6 +7,7 @@
 
 #define ENV_PROJECTEDTEXTURE_STARTON			(1<<0)
 #define ENV_PROJECTEDTEXTURE_ALWAYSUPDATE		(1<<1)
+#define ENV_PROJECTEDTEXTURE_ANIMATED			(1<<2)
 
 #ifdef ASW_PROJECTED_TEXTURES
 //-----------------------------------------------------------------------------
@@ -73,6 +74,7 @@ public:
 #endif
 
 	void InitialThink( void );
+	void MainThink( void ); // Addition. -TheMaster974
 
 	CNetworkHandle( CBaseEntity, m_hTargetEntity );
 #ifdef MAPBASE
@@ -114,6 +116,11 @@ private:
 	// 0 = Non-Mapbase projected texture, e.g. one that uses the VDC parenting fix instead of the spawnflag
 	// Not needed on the client right now, change to CNetworkVar when it actually is needed
 	bool m_bProjectedTextureVersion;
+
+	// Additions. -TheMaster974
+	bool m_bIsAnimated; // Is the projected texture animated?
+	int m_iFrameTotal; // Total number of frames in the material.
+	int m_iFrameRate; // Framerate of the animated projected texture.
 #endif
 };
 #endif

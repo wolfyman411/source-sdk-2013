@@ -1496,6 +1496,35 @@ ConVar  alyx_darkness_force( "alyx_darkness_force", "0", FCVAR_CHEAT | FCVAR_REP
 		CBaseCombatCharacter::SetDefaultRelationship(CLASS_HACKED_ROLLERMINE,			CLASS_PLAYER_ALLY,		D_LI, 0);
 		CBaseCombatCharacter::SetDefaultRelationship(CLASS_HACKED_ROLLERMINE,			CLASS_PLAYER_ALLY_VITAL,D_LI, 0);
 		CBaseCombatCharacter::SetDefaultRelationship(CLASS_HACKED_ROLLERMINE,			CLASS_HACKED_ROLLERMINE,D_LI, 0);
+
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_NONE, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_PLAYER, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_ANTLION, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_BARNACLE, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_BULLSEYE, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_BULLSQUID, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_CITIZEN_PASSIVE, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_CITIZEN_REBEL, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_COMBINE, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_COMBINE_GUNSHIP, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_COMBINE_HUNTER, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_CONSCRIPT, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_FLARE, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_HEADCRAB, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_MANEQUIN, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_MANHACK, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_METROPOLICE, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_MILITARY, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_MISSILE, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_SCANNER, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_STALKER, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_VORTIGAUNT, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_ZOMBIE, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_PROTOSNIPER, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_EARTH_FAUNA, D_NU, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_PLAYER_ALLY, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_PLAYER_ALLY_VITAL, D_HT, 0 );
+		CBaseCombatCharacter::SetDefaultRelationship( CLASS_MANEQUIN, CLASS_HACKED_ROLLERMINE, D_HT, 0 );
 	}
 
 

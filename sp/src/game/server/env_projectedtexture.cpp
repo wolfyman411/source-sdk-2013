@@ -52,6 +52,9 @@ BEGIN_DATADESC( CEnvProjectedTexture )
 	DEFINE_KEYFIELD( m_flShadowAtten, FIELD_FLOAT, "shadowatten" ),
 	DEFINE_KEYFIELD( m_flShadowFilter, FIELD_FLOAT, "shadowfilter" ),
 #endif
+	// Additions. -TheMaster974
+	DEFINE_KEYFIELD( m_iFrameTotal, FIELD_INTEGER, "frameTotal" ),
+	DEFINE_KEYFIELD( m_iFrameRate, FIELD_INTEGER, "frameRate" ),
 
 	DEFINE_INPUTFUNC( FIELD_VOID, "TurnOn", InputTurnOn ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "TurnOff", InputTurnOff ),
@@ -87,6 +90,7 @@ BEGIN_DATADESC( CEnvProjectedTexture )
 	DEFINE_INPUTFUNC( FIELD_VOID, "StartFollowingTarget", InputStartFollowingTarget ),
 #endif
 	DEFINE_THINKFUNC( InitialThink ),
+	DEFINE_THINKFUNC( MainThink ), // Addition. -TheMaster974
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST( CEnvProjectedTexture, DT_EnvProjectedTexture )
@@ -163,6 +167,9 @@ CEnvProjectedTexture::CEnvProjectedTexture( void )
 	m_flShadowAtten = 0.0f;
 	m_flShadowFilter = 0.5f;
 #endif
+	// Additions, give some stock values to prevent errors! -TheMaster974
+	m_iFrameRate = 30;
+	m_iFrameTotal = 30;
 }
 
 void UTIL_ColorStringToLinearFloatColor( Vector &color, const char *pString )
@@ -410,6 +417,7 @@ void CEnvProjectedTexture::Spawn( void )
 
 	m_bState = ( ( GetSpawnFlags() & ENV_PROJECTEDTEXTURE_STARTON ) != 0 );
 	m_bAlwaysUpdate = ( ( GetSpawnFlags() & ENV_PROJECTEDTEXTURE_ALWAYSUPDATE ) != 0 );
+	m_bIsAnimated = ( ( GetSpawnFlags() & ENV_PROJECTEDTEXTURE_ANIMATED ) != 0 ); // Addition. -TheMaster974
 
 	BaseClass::Spawn();
 }
@@ -458,11 +466,27 @@ void CEnvProjectedTexture::SetParent( CBaseEntity* pNewParent, int iAttachment )
 void CEnvProjectedTexture::InitialThink( void )
 {
 	m_hTargetEntity = gEntList.FindEntityByName( NULL, m_target );
+
+	// Additions. -TheMaster974
+	SetThink(&CEnvProjectedTexture::MainThink);
+	SetNextThink(gpGlobals->curtime);
 }
 
 int CEnvProjectedTexture::UpdateTransmitState()
 {
 	return SetTransmitState( FL_EDICT_ALWAYS );
+}
+
+// Here is the function that changes the frames of the projected texture's material. -TheMaster974
+void CEnvProjectedTexture::MainThink( void )
+{
+	if (m_bIsAnimated)
+	{
+		m_nSpotlightTextureFrame += 1;
+		if (m_nSpotlightTextureFrame >= m_iFrameTotal)
+			m_nSpotlightTextureFrame = 0;
+		SetNextThink(gpGlobals->curtime + (float)1 / m_iFrameRate);
+	}
 }
 
 #else
