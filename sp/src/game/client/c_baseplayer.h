@@ -413,7 +413,9 @@ public:
 	void					SetFiredWeapon( bool bFlag ) { m_bFiredWeapon = bFlag; }
 
 	virtual bool			CanUseFirstPersonCommand( void ){ return true; }
-	
+
+    bool                    m_bShouldDrawSnowOverlay;
+
 protected:
 	fogparams_t				m_CurrentFog;
 	EHANDLE					m_hOldFogController;
