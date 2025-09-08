@@ -246,6 +246,7 @@
 		"friendly_fire_override" : "Mapbase: Friendly fire override (on = enabled, off = disabled, dead = no override)"
 		"antlion_noinstakill" : "Mapbase: Antlion-to-soldier insta-kill disabled"
 		"game_temperature" : "Infinite Finality: Temperature system enabled"
+		"global_frost_proxy": "Infinite Finality: Global snow viewmodel spatter opaqueness."
 	]
 ]
 
