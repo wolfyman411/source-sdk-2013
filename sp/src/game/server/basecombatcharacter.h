@@ -583,6 +583,8 @@ public:
     CNetworkVar( bool, m_bShouldDrawSnowOverlay );
     CNetworkVar( float, m_flSnowOverlayAlpha );
 
+    virtual float GetViewModelSnowOverlayAlpha( void );
+
 #ifdef GLOWS_ENABLE
 protected:
 	CNetworkVar( bool, m_bGlowEnabled );

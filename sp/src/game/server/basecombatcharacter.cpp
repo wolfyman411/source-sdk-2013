@@ -140,6 +140,10 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 	DEFINE_INPUTFUNC( FIELD_STRING, "GiveWeapon", InputGiveWeapon ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "DropWeapon", InputDropWeapon ),
 	DEFINE_INPUTFUNC( FIELD_EHANDLE, "PickupWeaponInstant", InputPickupWeaponInstant ),
+
+    DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetShouldDrawSnowOverlay", InputSetShouldDrawSnowOverlay ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetSnowOverlayAlpha", InputSetSnowOverlayAlpha ),
+
 	DEFINE_OUTPUT( m_OnWeaponEquip, "OnWeaponEquip" ),
 	DEFINE_OUTPUT( m_OnWeaponDrop, "OnWeaponDrop" ),
 
@@ -899,7 +903,7 @@ CBaseCombatCharacter::CBaseCombatCharacter( void )
 #endif // GLOWS_ENABLE
 
     m_bShouldDrawSnowOverlay = false;
-    m_flSnowOverlayAlpha = 0.0f;
+    m_flSnowOverlayAlpha = GlobalEntity_GetCounter( "global_frost_proxy" ) / 100.0f || 0.0f;
 }
 
 //------------------------------------------------------------------------------
@@ -2688,6 +2692,12 @@ bool CBaseCombatCharacter::Weapon_SlotOccupied( CBaseCombatWeapon *pWeapon )
 	return true;
 }
 
+float CBaseCombatCharacter::GetViewModelSnowOverlayAlpha()
+{
+    return GlobalEntity_GetCounter( "global_frost_proxy" );
+}
+
+
 //-----------------------------------------------------------------------------
 // Purpose: Returns the weapon (if any) in the requested slot
 // Input  : slot - which slot to poll
@@ -2729,7 +2739,6 @@ CBaseCombatWeapon *CBaseCombatCharacter::Weapon_GetWpnForAmmo( int iAmmoIndex )
 
 	return NULL;
 }
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Can this character operate this weapon?
