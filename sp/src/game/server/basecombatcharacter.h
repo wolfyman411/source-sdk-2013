@@ -124,7 +124,6 @@ public:
 #endif
 
 public:
-
 	virtual void		Spawn( void );
 	virtual void		Precache();
 
@@ -321,6 +320,9 @@ public:
 	virtual void	InputUnholsterWeapon( inputdata_t &inputdata );
 	void			InputSwitchToWeapon( inputdata_t &inputdata );
 
+    void            InputSetSnowOverlayAlpha( inputdata_t& inputdata );
+    void            InputSetShouldDrawSnowOverlay( inputdata_t& inputdata );
+
 	COutputEHANDLE	m_OnKilledEnemy;
 	COutputEHANDLE	m_OnKilledPlayer;
 	virtual void OnKilledNPC( CBaseCombatCharacter *pKilled ); 
@@ -350,6 +352,8 @@ public:
 	// A version of BecomeRagdollBoogie() that allows the color to change and returns the entity itself instead.
 	// In order to avoid breaking anything, it doesn't change the original function.
 	virtual CBaseEntity		*BecomeRagdollBoogie( CBaseEntity *pKiller, const Vector &forceVector, float duration, int flags, const Vector *vecColor );
+
+	bool					ShouldFadeServerRagdolls() const;
 #endif
 
 	CBaseEntity				*FindHealthItem( const Vector &vecPosition, const Vector &range );
@@ -382,6 +386,10 @@ public:
 
 	virtual void			SetLightingOriginRelative( CBaseEntity *pLightingOrigin );
 
+	float					m_flTemperature;
+	float					m_flFreezeMultiplier;
+
+    virtual float           GetViewModelSnowOverlayAlpha( void ) const { return m_flSnowOverlayAlpha; }
 protected:
 	Relationship_t			*FindEntityRelationship( CBaseEntity *pTarget );
 
@@ -530,6 +538,7 @@ public:
 	void				AddGlowEffect( void );
 	void				RemoveGlowEffect( void );
 	bool				IsGlowEffectActive( void );
+	void				SetGlowColor( float red, float green, float blue, float alpha );
 #endif // GLOWS_ENABLE
 
 #ifdef INVASION_DLL
@@ -571,9 +580,16 @@ protected:
 public:
 	CNetworkVar( float, m_flNextAttack );			// cannot attack again until this time
 
+    CNetworkVar( bool, m_bShouldDrawSnowOverlay );
+    CNetworkVar( float, m_flSnowOverlayAlpha );
+
+    virtual float GetViewModelSnowOverlayAlpha( void );
+
 #ifdef GLOWS_ENABLE
 protected:
 	CNetworkVar( bool, m_bGlowEnabled );
+	CNetworkVector( m_GlowColor );
+	CNetworkVar( float, m_GlowAlpha );
 #endif // GLOWS_ENABLE
 
 private:

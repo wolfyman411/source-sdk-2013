@@ -52,6 +52,12 @@ public:
 	// Ladder related data
 	EHANDLE			m_hLadder;
 	LadderMove_t	m_LadderMove;
+
+	float	m_flTemperature;
+	float	m_flFreezeMultiplier;
+	float	m_flTemperatureNextHurt;
+	float	m_flMaxTemperature;
+	float	m_flMinTemperature;
 };
 
 

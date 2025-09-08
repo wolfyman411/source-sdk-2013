@@ -1,0 +1,340 @@
+@include "base.fgd"
+@include "halflife2.fgd"
+
+@BaseClass base(Targetname, Parentname, Angles, RenderFields, DamageFilter, ResponseContext, Shadow, CombatCharacterFields, StudiomodelBase) color(0 200 200) = BaseNPC
+[
+	target(target_destination) : "Target Path Corner" : : "If set, the name of a path corner entity that this NPC will walk to, after spawning."
+	squadname(String) : "Squad Name" : : "NPCs that are in the same squad (i.e. have matching squad names) will share information about enemies, take turns attacking and covering each other, etc. Squads work differently from NPC to NPC and some don't support them by default."
+	hintgroup(String) : "Hint Group" : "" : "Hint groups are used by NPCs to restrict their hint searching to a subset of the map's hint nodes. Only hint nodes with matching hint group names will be considered by this NPC."
+	hintlimiting(choices) : "Hint Limit Nav" : 0 : "Limits NPC to using its specified hint group for navigation requests, but does not limit local navigation." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+
+	spawnflags(Flags) =
+	[
+		1 : "[1] Wait Till Seen (No sensing until player sees me)" : 0
+		2 : "[2] Gag (No IDLE sounds until angry)" : 0
+		4 : "[4] Fall to ground (unchecked means *teleport* to ground)" : 1
+		8 : "[8] Drop Healthkit (drops health vial on death)" : 0
+		16 : "[16] Efficient - Don't acquire enemies or avoid obstacles" : 0
+		32 : "[32] Use Temperature - Use the Temperature System" : 0
+		128 : "[128] Wait For Script" : 0
+		256 : "[256] Long Visibility/Shoot" : 0
+		512 : "[512] Fade Corpse" : 1
+		1024 : "[1024] Think outside PVS (allows AI to stay active outside of combat and PVS)" : 0
+		2048 : "[2048] Template NPC (used by npc_maker, will not spawn; NOT used by point_template)" : 0
+		4096 : "[4096] Do alternate collision/player avoidance (largely obsolete, use Start/StopScripting)" : 0
+		8192 : "[8192] Don't drop weapons" : 0
+		16384 : "[16384] Ignore player push (dont give way to player)" : 0
+	]
+
+	//initialidle(string) : "Initial Idle Activity" :: "Activity the NPC should use to idle until becomes alert"
+	sleepstate(choices) : "Sleep State" : 0 : "Holds the NPC in stasis until specified condition. See also 'Wake Radius' and 'Wake Squad'." =
+	[
+		0 : "None"
+		1 : "Waiting for threat"
+		2 : "Waiting for PVS"
+		3 : "Waiting for input, ignore PVS"
+		4 : "Auto PVS"
+		5 : "Auto PVS after PVS"
+	]
+
+	wakeradius(float) : "Wake Radius" : 0 : "Auto-wake if player within this distance"
+	wakesquad(choices) : "Wake Squad" : 0 : "Wake all of the NPCs squadmates if the NPC is woken" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+
+	enemyfilter(filterclass) : "Enemy Filter" : "" : "Filter by which to filter potential enemies"
+
+	ignoreunseenenemies(choices) : "Ignore unseen enemies" : 0 : "Prefer visible enemies, regardless of distance or relationship priority" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+
+	physdamagescale(float) : "Physics Impact Damage Scale" : "1.0" : "Scales damage energy when this character is hit by a physics object. With a value of 0 the NPC will take no damage from physics."
+
+	FriendlyFireOverride(choices) : "Friendly fire override" : 2 : "Overrides whether friendly fire is allowed on this NPC or not. 'Disabled' makes this NPC immune to damage from its allies. 'Enabled' makes this NPC vulnerable to damage from its allies, including players. 'Default' uses the NPC's settings and won't change anything." =
+	[
+		0 : "Disabled"
+		1 : "Enabled"
+		2 : "Default (No override)"
+	]
+
+	SetDynamicInteractions(choices) : "Dynamic interactions enabled" : 2 : "Episodic only. Enables or disables dynamic interactions on this NPC, if it has them. If set to Default, only dynamic interactions from the original episodes (Alyx, vorts, etc.) will be enabled. If set to Yes, dynamic interactions introduced with Mapbase will be enabled as well. If set to No, this NPC will never perform dynamic interactions." =
+	[
+		0 : "No"
+		1 : "Yes"
+		2 : "Default (No override)"
+	]
+
+	SetProficiencyOverride(choices) : "Proficiency override" : -1 : "Overrides this NPC's weapon proficiency." =
+	[
+		-1 : "Default (No override)"
+		0 : "Poor"
+		1 : "Average"
+		2 : "Good"
+		3 : "Very Good"
+		4 : "Perfect"
+	]
+
+	SetForceServerRagdoll(choices) : "Force server ragdoll" : 0 : "Forces this NPC to turn into a serverside prop_ragdoll instead of a clientside ragdoll when it dies." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+
+	SpawnWithStartScripting(choices) : "Spawn with StartScripting" : 0 : "Spawns the NPC in the StartScripting state." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+
+	BaseSpeedModifier(float) : "Speed Modifier" : "1.0" : "Multiplies how far a NPC travels while moving. Does not affect the animation itself."
+
+	Temperature(float) : "Temperature" : "33.0" : "The temperature of this NPC. Used for temperature system."
+	MaxTemperature(float) : "Max Temperature" : "40.0" : "The maximum temperature of this NPC. Used for temperature system."
+	MinTemperature(float) : "Min Temperature" : "25.0" : "The minimum temperature of this NPC. Used for temperature system."
+	Frozen(choices) : "Frozen" : 0 : "Whether this NPC is frozen. Used for temperature system." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+
+	// Outputs
+	output OnDamaged(void) : "Fired when this NPC takes damage."
+	output OnDeath(void) : "Fired when this NPC is killed."
+	output OnHalfHealth(void) : "Fired when this NPC reaches half of its maximum health."
+	output OnHearWorld(void) : "Fired when this NPC hears a sound (other than combat or the player)."
+	output OnHearPlayer(void) : "Fired when this NPC hears the player."
+	output OnHearCombat(void) : "Fired when this NPC hears combat sounds."
+	output OnFoundEnemy(string) : "Fired when this NPC establishes line of sight to its enemy (outputs entity)."
+	output OnLostEnemyLOS(void) : "Fired when this NPC loses line of sight to its enemy."
+	output OnLostEnemy(void) : "Fired when this NPC loses its enemy. Usually due to the enemy being killed/removed, or because this NPC has selected a newer, more dangerous enemy."
+	output OnFoundPlayer(string) : "Fired when this NPC establishes line of sight to its enemy, and that enemy is a player (outputs player entity)."
+	output OnLostPlayerLOS(void) : "Fired when this NPC loses line of sight to its enemy, and that enemy is a player."
+	output OnLostPlayer(void) : "Fired when this NPC loses its enemy, and that enemy was a player. Usually due to the enemy being killed/removed, or because this NPC has selected a newer, more dangerous enemy."
+	output OnDamagedByPlayer(void) : "Fired when this NPC is hurt by a player."
+	output OnDamagedByPlayerSquad(void) : "Fired when this NPC is hurt by a player OR by one of the player's squadmates."
+	output OnDenyCommanderUse(void) : "Fired when this NPC has refused to join the player's squad."
+	output OnSleep(void) : "Fired when this NPC enters a sleep state."
+	output OnWake(void) : "Fired when this NPC comes out of a sleep state."
+	output OnHolsterWeapon(string) : "Fired when the NPC holsters a weapon. Passes the weapon."
+	output OnUnholsterWeapon(string) : "Fired when the NPC unholsters a weapon. Passes the weapon."
+	output OnForcedInteractionStarted(void) : "Fired when the NPC starts a forced interaction."
+	output OnForcedInteractionAborted(void) : "Fired when the NPC aborts a forced interaction for some reason (target NPC died, couldn't be pathed to, etc)"
+	output OnForcedInteractionFinished(void) : "Fired when the NPC successfully finishes a forced interaction."
+	output OnItemPickup(void) : "Fires when a NPC picks up an item, e.g. a citizen picking up a health kit or a scripted item picked up in response to PickupItem."
+	output OnStateChange(integer) : "Fires when a NPC's state changes, outputting the new state. (1 = Idle, 2 = Alert, 3 = Combat...)"
+
+	output OnFrozen(void) : "Fires when the NPC is frozen."
+	output OnUnFrozen(void) : "Fires when the NPC is unfrozen."
+	output OnBurnFromTemperature(void) : "Fires when the NPC is ignited due to their temperature."
+	output OnChangeTemperature(void) : "Fires when the NPC's temperature changes through an input."
+	output OnChangeIgniteTemperature(void) : "Fires when the NPC's ignite temperature changes through an input."
+	output OnChangeFreezeTemperature(void) : "Fires when the NPC's freeze temperature changes through an input."
+	output OnChangeMaxTemperature(void) : "Fires when the NPC's max temperature changes through an input."
+	output OnChangeMinTemperature(void) : "Fires when the NPC's min temperature changes through an input."
+
+	// Inputs
+	input SetEnemyFilter(target_destination) : "Changes this NPC's enemy filter to the named filter."
+	input SetHealth(integer) : "Set this NPC's health."
+	input SetHealthFraction(float) : "Sets the NPC's health as a fraction of its max health."
+	input SetBodyGroup(integer) : "HACK: Sets this NPC's body group (from 0 - n). You'd better know what you are doing!"
+	input physdamagescale(float) : "Sets the value that scales damage energy when this character is hit by a physics object. NOTE: 0 means this feature is disabled for backwards compatibility."
+	input Ignite(void) : "Ignite, burst into flames"
+	input IgniteLifetime(float) : "Ignite, with a parameter lifetime."
+	input IgniteNumHitboxFires(integer) : "Ignite, with a parameter number of hitbox fires."
+	input IgniteHitboxFireScale(float) : "Ignite, with a parameter hitbox fire scale."
+	input Break(void) : "Break, smash into pieces"
+	input StartScripting(void) : "Enter scripting state. In this state, NPCs ignore a variety of stimulus that would make them break out of their scripts: They ignore danger sounds, ignore +USE, don't idle speak or respond to other NPC's idle speech, and so on."
+	input StopScripting(void) : "Exit scripting state."
+	input SetSquad(string) : "Set the name of this NPC's squad. It will be removed from any existing squad automatically. Leaving the parameter blank will remove the NPC from any existing squad."
+	input Wake(void) : "Wakes up the NPC if it is sleeping."
+	input ForgetEntity(target_destination) : "Clears out the NPC's knowledge of a named entity."
+	input GagEnable(void) : "Turn on the NPC Gag flag. NPC won't speak outside of choreographed scenes."
+	input GagDisable(void) : "Turn off the NPC Gag flag."
+	input IgnoreDangerSounds(float) : "Ignore danger sounds for the specified number of seconds."
+	input ForceInteractionWithNPC(target_destination) : "Force the NPC to use a dynamic interaction with another NPC. Parameter format: <target NPC name> <dynamic interaction name>"
+	input UpdateEnemyMemory(target_destination) : "Update (or Create) this NPC's memory of an enemy and its location"
+
+	input SetMoveType(integer) : "Sets this NPC's movetype."
+	input AddCapabilities(integer) : "Adds capabilities to this NPC."
+	input RemoveCapabilities(integer) : "Removes capabilities from this NPC."
+	input SetCondition(integer) : "Sets a condition. Can use a condition's string ID or its integer."
+	input RemoveCondition(integer) : "Removes a condition. Can use a condition's string ID or its integer."
+
+	input GiveWeapon(string) : "Gives the NPC a weapon of the specified class name. They will drop their current weapon if it is not holstered."
+	input GiveWeaponHolstered(string) : "Puts the weapon of the specified class name in the NPC's inventory. If they do not have a weapon equipped, they will unholster it when given the 'UnholsterWeapon' input or when they see an enemy."
+	input DropWeapon(string) : "Forces the NPC to drop its current weapon in front of it. No animation will play."
+	input ChangeWeapon(string) : "Causes the NPC to change to the specified weapon. They will holster their current weapon and unholster the specified weapon, creating it if they don't already have it."
+	input PickupWeapon(target_destination) : "Causes the NPC to seek and pick up the specified weapon."
+	input PickupItem(target_destination) : "Causes the NPC to seek and pick up the specified item."
+
+	input SetFriendlyFire(integer) : "Overrides our friendly fire. 0 = No friendly fire, 1 = Friendly fire enabled, 2 = Default (No override)"
+	input SetDynamicInteractions(integer) : "Sets whether we could use dynamic interactions. 0 = Disabled, 1 = Enabled, 2 = Default."
+	input SetProficiencyOverride(integer) : "Sets our weapon's proficiency. Use integer."
+	input SetForceServerRagdoll(integer) : "Sets whether we should be a serverside ragdoll when we die."
+
+	input SetThinkNPC(float) : "Sets this entity's general think function to CallNPCThink. This is only necessary if it was disabled by SetThinkNull before."
+
+	input SetDistLook(float) : "Manually sets this NPC's sight distance. Pass '0' to reset."
+	input SetDistTooFar(float) : "Manually sets the distance in which NPCs will consider a target too far to attack. Pass '0' to reset."
+
+	input SetSpeedModifier(float) : "Set a float value to multiply movement animation speed."
+
+	input SetHintGroup(string) : "Sets this NPC's hint group."
+	input SetFrozen(integer) : "Freezes or unfreezes this NPC."
+	input SetTemperature(float) : "Sets the temperature of this NPC."
+	input SetMaxTemperature(float) : "Sets the maximum temperature of this NPC."
+	input SetMinTemperature(float) : "Sets the minimum temperature of this NPC."
+	input SetIgniteTemperature(float) : "Sets the temperature at which this NPC will ignite."
+]
+
+@NPCClass base(BaseCombine) studio() = npc_combine_s : "Combine Soldier"
+[
+	model(choices) : "Model" : "models/combine_soldier.mdl" : "Sets this soldier's model." =
+	[
+		"models/combine_soldier.mdl" : "Regular Soldier"
+		"models/combine_soldier_prisonguard.mdl" : "Nova Prospekt Soldier"
+		"models/combine_super_soldier.mdl" : "Elite Soldier"
+		"models/combine_soldirt.mdl" : "Dirty Soldier/EP2 Soldier"
+		"models/combine_super_soldirt.mdl" : "Dirty Elite Soldier/EP2 Elite"
+		"models/combine_soldirt_prisonguard.mdl" : "Dirty Nova Prospekt Soldier"
+		"models/baresoldier/baresoldier.mdl" : "Stripped Soldier"
+	]
+
+	tacticalvariant(choices) : "Tactical Variant" : "0" =
+	[
+		"0" : "Normal Tactics"
+		"1" : "Pressure the enemy (Keep advancing)"
+		"2" : "Pressure until within 30ft, then normal"
+		"3" : "Grenade Happy"
+	]
+
+	usemarch(choices) : "Use March" : "0" : "When true, will use a special walking animation which blends itself between the idle walking animation and the regular walking animation, allowing for a variety of casual walking animations instead of the standard walk. Used in EP2 for the soldiers in the bridge convoy. WARNING: This animation only has a north component, so it can't sidestep or walk backwards. This keyvalue was previously named 'Walk Easy', but it was changed to avoid confusion with ACT_WALK_EASY, the main idle walking animation." =
+	[
+		"0" : "No"
+		"2" : "Yes"
+	]
+
+	input Assault(target_destination) : "Start an assault. Parameter passed in should be the name of the rally point."
+	input SetTacticalVariant(integer) : "Sets this soldier's tactical variant based on integer value."
+]
+
+@PointClass base(EnvGlobal) iconsprite("editor/env_global.vmt") = env_global :
+	"An entity to control a game-specific global states."
+[
+	globalstate(choices) : "Global State to Set" =
+	[
+		"gordon_precriminal" : "Gordon pre-criminal"
+		"antlion_allied" : "Antlions are player allies"
+//		"player_stealth" : "Player in APC is disguised as combine"
+		"suit_no_sprint" : "Suit sprint function not yet enabled"
+		"super_phys_gun" : "Super phys gun is enabled (Mapbase: Counter 1 prevents item dissolve)"
+		"friendly_encounter" : "Friendly encounter sequence (lower weapons, etc.)"
+//		"citizens_passive" : "Citizens are *not* player allies (cannot be commanded)"
+		"gordon_invulnerable" : "Gordon is invulnerable"
+		"no_seagulls_on_jeep" : "Don't spawn seagulls on the jeep"
+		"ep2_alyx_injured" : "Episode 2: Alyx injured"
+		"ep_alyx_darknessmode" : "Episodic: Alyx darkness mode"
+		"hunters_to_run_over" : "Ep2 Counter: Hunters to run over before they dodge"
+		"friendly_fire_override" : "Mapbase: Friendly fire override (on = enabled, off = disabled, dead = no override)"
+		"antlion_noinstakill" : "Mapbase: Antlion-to-soldier insta-kill disabled"
+		"game_temperature" : "Infinite Finality: Temperature system enabled"
+		"global_frost_proxy": "Infinite Finality: Global snow viewmodel spatter opaqueness."
+	]
+]
+
+@SolidClass base(Trigger, Targetname) = trigger_freeze :
+	"A trigger volume that freezes the player."
+[
+	FreezeMultiplier(float) : "Freeze Multiplayer" : "2.0" : "The rate at which the player/NPC freezes."
+	WarmthMultiplier(float) : "Warmth Multiplier" : "1.25" : "The rate at which the player/NPC warms up."
+]
+
+@PointClass base(Weapon) studio("models/weapons/w_iceaxe.mdl") = weapon_iceaxe: "Ice Axe" []
+
+@BaseClass = Targetname
+[
+	targetname(target_source) : "Name" : : "The name that other entities refer to this entity by."
+
+	vscripts(string) : "Entity Scripts" : "" : "Name(s) of script files that are executed after all entities have spawned."
+	thinkfunction(string) : "Script think function" : "" : "Name of a function in this entity's script scope which will be called automatically."
+
+	input RunScriptFile(string) : "Execute a game script file from disk"
+	input RunScriptCode(string) : "Execute a string of script source code"
+	input RunScriptCodeQuotable(string) : "Execute a string of script source code which converts double apostrophes ('') to quotation marks for strings"
+	input CallScriptFunction(string) : "Call a named function from this entity's Activation Script"
+	input ClearScriptScope(void) : "Clears this entity's script scope"
+
+
+	// Inputs
+	input Kill(void) : "Removes this entity from the world."
+	input KillHierarchy(void) : "Removes this entity and all its children from the world."
+	input KillIfNotVisible(void) : "Removes this entity if it is not in a player's viewcone."
+	input KillWhenNotVisible(float) : "Removes this entity when it is not in a player's viewcone. You can pass a time for when this should start."
+	input AddOutput(string) : "Adds an entity I/O connection or a keyvalue to this entity. Format: '<output name> <targetname>:<inputname>:<parameter>:<delay>:<max times to fire (-1 == infinite)>'. You could also use it on regular keyvalues: '<key name> <key value>'. Very dangerous, use with care."
+	input ChangeVariable(string) : "Similar to AddOutput, except it changes an internal variable similar to logic_datadesc_accessor instead. Very dangerous, use with care."
+	input FireUser1(void) : "Causes this entity's OnUser1 output to be fired."
+	input FireUser2(void) : "Causes this entity's OnUser2 output to be fired."
+	input FireUser3(void) : "Causes this entity's OnUser3 output to be fired."
+	input FireUser4(void) : "Causes this entity's OnUser4 output to be fired."
+	// Mapbase -- New User I
+	input PassUser1(string) : "Causes this entity's OutUser1 output to be fired. Can pass any parameter."
+	input PassUser2(string) : "Causes this entity's OutUser2 output to be fired. Can pass any parameter."
+	input PassUser3(string) : "Causes this entity's OutUser3 output to be fired. Can pass any parameter."
+	input PassUser4(string) : "Causes this entity's OutUser4 output to be fired. Can pass any parameter."
+
+	input FireRandomUser(void) : "Fires OnUser1, OnUser2, OnUser3, or OnUser4 with a 25% chance of each."
+	input PassRandomUser(string) : "Fires OutUser1, OutUser2, OutUser3, or OutUser4 with a 25% chance of each. Can pass any parameter."
+
+	// Mapbase -- BaseEntity I/O
+	input FireOutput(string) : "Fires the named output on this entity. Format: '<output name>:<activator>:<caller>:<parameter>:<delay>' (OnDeath:hl3cardgame:gaben). Everything beyond the output name is optional."
+	input RemoveOutput(string) : "Removes all instances of the named output on this entity. Wildcards are supported, meaning you could just pass '*' to wipe all outputs from this entity."
+	input AcceptInput(string) : "Fires the named input on this entity. Format: '<input name>:<parameter>:<activator>:<caller>:<output ID>' (SetTarget:cheese). Everything beyond the input name is optional. Mind the fact this is arranged differently from FireOutput, having the parameter right after the input name."
+	input CancelPending(void) : "Cancels any events fired by this entity that are currently pending in the I/O event queue."
+	input SetLocalOrigin(vector) : "Sets this entity's origin in local space, relative to its parent if one exists. Otherwise relative to the world."
+	input SetAbsOrigin(vector) : "Sets this entity's origin in the map, always relative to the world origin."
+	input SetLocalVelocity(vector) : "Sets this entity's current velocity."
+	input SetLocalAngularVelocity(vector) : "Sets this entity's current angular velocity."
+
+	input AddSpawnFlags(integer) : "Adds spawnflag(s) to this entity. Many spawnflags have their respective numbers suffixed in this FGD."
+	input RemoveSpawnFlags(integer) : "Removes spawnflag(s) from this entity. Many spawnflags have their respective numbers suffixed in this FGD."
+
+	input AddSolidFlags(integer) : "Adds solid flags to this entity."
+	input RemoveSolidFlags(integer) : "Removes solid flags from this entity."
+
+	input SetHealth(integer) : "Sets this entity's health."
+	input AddHealth(integer) : "Adds to this entity's health."
+	input RemoveHealth(integer) : "Removes from this entity's health."
+
+	input SetMaxHealth(integer) : "Sets this entity's max health."
+
+	input SetEntityName(target_destination) : "Sets this entity's name that other entities should refer to it by."
+
+	input SetTarget(target_destination) : "Sets this entity's target. This is specific to certain entities, particularly logic entities that involve a target."
+	input SetOwnerEntity(target_destination) : "Sets this entity's owner entity. This has nothing to do with parenting and has more to do with collision and kill credits."
+
+	input SetThinkNull(void) : "Sets this entity's general think function to null. Behavior varies from entity to entity.."
+
+	input Use(void) : "More or less replicates the player interacting with an entity. (+USE)"
+	input Touch(target_destination) : "Simulates this entity touching the specified entity."
+
+	output OnKilled(void) : "Fires when this entity is removed with the 'Kill' input."
+
+	// Outputs
+	output OnUser1(void) : "Fires in response to FireUser1 input."
+	output OnUser2(void) : "Fires in response to FireUser2 input."
+	output OnUser3(void) : "Fires in response to FireUser3 input."
+	output OnUser4(void) : "Fires in response to FireUser4 input."
+	// Mapbase -- New User O
+	output OutUser1(string) : "Fires in response to PassUser1 input. Can pass any parameter."
+	output OutUser2(string) : "Fires in response to PassUser2 input. Can pass any parameter."
+	output OutUser3(string) : "Fires in response to PassUser3 input. Can pass any parameter."
+	output OutUser4(string) : "Fires in response to PassUser4 input. Can pass any parameter."
+]

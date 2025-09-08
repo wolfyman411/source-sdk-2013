@@ -25,6 +25,7 @@
 	
 	#include "baseentity.h"
 	#include "recipientfilter.h"
+	#include "globalstate.h"
 
 #endif
 
@@ -178,7 +179,12 @@ public:
 	//Allow thirdperson camera.
 	virtual bool AllowThirdPersonCamera( void ) { return false; }
 
-	virtual void ClientCommandKeyValues( edict_t *pEntity, KeyValues *pKeyValues ) {} 
+#ifdef MAPBASE
+	virtual void ClientCommandKeyValues(edict_t* pEntity, KeyValues* pKeyValues);
+#else
+	virtual void ClientCommandKeyValues(edict_t* pEntity, KeyValues* pKeyValues) {}
+#endif // MAPBASE
+
 
 	// IsConnectedUserInfoChangeAllowed allows the clients to change
 	// cvars with the FCVAR_NOT_CONNECTED rule if it returns true
@@ -425,6 +431,19 @@ public:
 	virtual void OnFileReceived( const char * fileName, unsigned int transferID ) { return; }
 
 	virtual bool IsHolidayActive( /*EHoliday*/ int eHoliday ) const { return false; }
+
+#ifndef CLIENT_DLL
+	virtual bool IsTemperatureEnabled( int mode ) {
+		if ( GlobalEntity_GetIndex( "game_temperature" ) == TEMPERATURE_MODE_NONE ) return false;
+		else if ( GlobalEntity_GetIndex( "game_temperature" ) == TEMPERATURE_MODE_ALL ) return true;
+
+		if ( mode > 2 || mode < -1 ) DevMsg( "Mode must be between -1 and 2!" ); return false;
+
+		return GlobalEntity_GetIndex( "game_temperature" ) == mode;
+
+		return true;
+	}
+#endif
 
 #ifndef CLIENT_DLL
 private:

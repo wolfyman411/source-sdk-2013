@@ -27,11 +27,14 @@ BEGIN_RECV_TABLE_NOBASE( C_HL2PlayerLocalData, DT_HL2Local )
 	RecvPropBool( RECVINFO(m_bAutoAimTarget) ),
 #ifdef HL2_EPISODIC
 	RecvPropFloat( RECVINFO(m_flFlashBattery) ),
-	RecvPropFloat( RECVINFO( m_flTemperature ) ),
 	RecvPropVector( RECVINFO(m_vecLocatorOrigin) ),
 #endif
 
+	RecvPropFloat( RECVINFO( m_flTemperature ) ),
 	RecvPropFloat( RECVINFO( m_flFreezeMultiplier ) ),
+	RecvPropFloat( RECVINFO( m_flTemperatureNextHurt ) ),
+	RecvPropFloat( RECVINFO( m_flMaxTemperature ) ),
+	RecvPropFloat( RECVINFO( m_flMinTemperature ) ),
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA_NO_BASE( C_HL2PlayerLocalData )
@@ -49,9 +52,13 @@ C_HL2PlayerLocalData::C_HL2PlayerLocalData()
 	m_hLadder = NULL;
 #ifdef HL2_EPISODIC
 	m_flFlashBattery = 0.0f;
-	m_flTemperature = 0.0f;
 	m_vecLocatorOrigin = vec3_origin;
 #endif
-	m_flFreezeMultiplier = 0.0f;
+
+	m_flTemperature = 33.0f;
+	m_flFreezeMultiplier = -1.25f;
+	m_flTemperatureNextHurt = 0.0f;
+	m_flMaxTemperature = 33.0f;
+	m_flMinTemperature = -10.0f;
 }
 

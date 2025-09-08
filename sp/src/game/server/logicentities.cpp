@@ -7,6 +7,7 @@
 #include "cbase.h"
 #include "entityinput.h"
 #include "entityoutput.h"
+#include "basecombatcharacter.h"
 #include "eventqueue.h"
 #include "mathlib/mathlib.h"
 #include "globalstate.h"
@@ -1339,6 +1340,18 @@ void CEnvGlobal::InputSetCounter( inputdata_t &inputdata )
 	}
 
 	GlobalEntity_SetCounter( m_globalstate, inputdata.value.Int() );
+
+    if ( m_globalstate == MAKE_STRING( "global_frost_proxy" ) )
+    {
+        // Run a for i loop through all map entities, if they're CBaseCombatCharacter, change their float for snow overlay alpha
+        for ( CBaseCombatCharacter* pEnt = ( CBaseCombatCharacter* ) gEntList.FirstEnt(); pEnt != NULL; pEnt = ( CBaseCombatCharacter* ) gEntList.NextEnt( pEnt ) )
+        {
+            if ( pEnt && pEnt->IsAlive() )
+            {
+                pEnt->m_flSnowOverlayAlpha = GlobalEntity_GetCounter( m_globalstate );
+            }
+        }
+    }
 }
 
 
@@ -1352,6 +1365,18 @@ void CEnvGlobal::InputAddToCounter( inputdata_t &inputdata )
 	}
 
 	GlobalEntity_AddToCounter( m_globalstate, inputdata.value.Int() );
+
+    if ( m_globalstate == MAKE_STRING( "global_frost_proxy" ) )
+    {
+        // Run a for i loop through all map entities, if they're CBaseCombatCharacter, change their float for snow overlay alpha
+        for ( CBaseCombatCharacter* pEnt = ( CBaseCombatCharacter* ) gEntList.FirstEnt(); pEnt != NULL; pEnt = ( CBaseCombatCharacter* ) gEntList.NextEnt( pEnt ) )
+        {
+            if ( pEnt && pEnt->IsAlive() )
+            {
+                pEnt->m_flSnowOverlayAlpha = GlobalEntity_GetCounter( m_globalstate );
+            }
+        }
+    }
 }
 
 

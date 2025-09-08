@@ -174,7 +174,7 @@ enum Interruptability_t
 #define SF_NPC_FALL_TO_GROUND			( 1 << 2  )	// used my NPC_Maker
 #define SF_NPC_DROP_HEALTHKIT			( 1 << 3  )	// Drop a healthkit upon death
 #define SF_NPC_START_EFFICIENT			( 1 << 4  ) // Set into efficiency mode from spawn
-//										( 1 << 5  )
+#define SF_NPC_USE_TEMPERATURE			( 1 << 5 )	// This NPC will use the temperature system
 //										( 1 << 6  )
 #define SF_NPC_WAIT_FOR_SCRIPT			( 1 << 7  )	// spawnflag that makes npcs wait to check for attacking until the script is done or they've been attacked
 #define SF_NPC_LONG_RANGE				( 1 << 8  )	// makes npcs look far and relaxes weapon range limit 
@@ -183,7 +183,7 @@ enum Interruptability_t
 #define SF_NPC_TEMPLATE					( 1 << 11 )	// This NPC will be used as a template by an npc_maker -- do not spawn.
 #define SF_NPC_ALTCOLLISION				( 1 << 12 )
 #define SF_NPC_NO_WEAPON_DROP			( 1 << 13 )	// This NPC will not actually drop a weapon that can be picked up
-#define SF_NPC_NO_PLAYER_PUSHAWAY		( 1 << 14 )	
+#define SF_NPC_NO_PLAYER_PUSHAWAY		( 1 << 14 )
 //										( 1 << 15 )	
 // !! Flags above ( 1 << 15 )	 are reserved for NPC sub-classes
 
@@ -594,6 +594,8 @@ public:
 	virtual void		UpdateOnRemove( void );
 
 	virtual int			UpdateTransmitState();
+	virtual int			GetSkin() const { return m_nSkin; }
+	void				SetSkin( int iSkin ) { m_nSkin = iSkin; }
 
 	//---------------------------------
 	// Component creation factories
@@ -692,6 +694,30 @@ public:
 		NEXT_TASK		= LAST_SHARED_TASK,
 		NEXT_CONDITION 	= LAST_SHARED_CONDITION,
 	};
+
+	virtual void		HandleTemperature( void );
+
+	float				m_flTemperature;
+	float				m_flFreezeMultiplier;
+	float				m_flMaxTemperature;
+	float				m_flMinTemperature;
+
+	bool				m_bIsFrozen;
+
+	virtual void		OnFrozen( void );
+	virtual void		OnUnFrozen( void );
+	virtual bool		IsFrozen( void ) { return m_bIsFrozen; }
+
+	void				InputSetFrozen( inputdata_t& inputdata );
+	void				InputSetTemperature( inputdata_t& inputdata );
+	void				InputSetMaxTemperature( inputdata_t& inputdata );
+	void				InputSetMinTemperature( inputdata_t& inputdata );
+
+	COutputEvent		m_OnFrozen;
+	COutputEvent		m_OnUnFrozen;
+	COutputEvent		m_OnChangeTemperature;
+	COutputEvent		m_OnChangeMaxTemperature;
+	COutputEvent		m_OnChangeMinTemperature;
 
 protected:
 	// Used by derived classes to chain a task to a task that might not be the 
@@ -1401,6 +1427,11 @@ public:
 	virtual void		FearSound( void )				 			{ return; };
 	virtual void		LostEnemySound( void ) 						{ return; };
 	virtual void		FoundEnemySound( void ) 					{ return; };
+#ifdef MAPBASE
+	// New versions of the above functions which pass the enemy in question as a parameter. Chains to the original by default
+	virtual void		LostEnemySound( CBaseEntity *pEnemy )		{ LostEnemySound(); };
+	virtual void		FoundEnemySound( CBaseEntity *pEnemy )		{ FoundEnemySound(); };
+#endif
 	virtual void		BarnacleDeathSound( void )					{ CTakeDamageInfo info;	PainSound( info ); }
 
 	virtual void		SpeakSentence( int sentenceType ) 			{ return; };
@@ -1991,6 +2022,9 @@ public:
 	float				OpenDoorAndWait( CBaseEntity *pDoor );
 
 	bool				BBoxFlat( void );
+
+	// Have we started to freeze? -TheMaster974
+	bool 				hasFrozen;
 
 	//---------------------------------
 

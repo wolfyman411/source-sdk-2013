@@ -131,6 +131,7 @@ const char *pFGDPropData[] =
 	"Pottery.Large",
 	"Pottery.Huge",
 	"Glass.Window",
+	"Ice.Tiny",
 };
 
 LINK_ENTITY_TO_CLASS( func_breakable, CBreakable );
@@ -357,6 +358,8 @@ const char *CBreakable::MaterialSound( Materials precacheMaterial )
 	case matCinderBlock:
 	case matRocks:
 		return "Breakable.MatConcrete";
+	case matIce:
+		return "Breakable.MatIce";
 	case matCeilingTile:
 	case matNone:
 	default:
@@ -412,6 +415,10 @@ void CBreakable::Precache( void )
 
 	case matRocks:
 		pGibName = "ConcreteChunks";
+		break;
+
+	case matIce:
+		pGibName = "IceChunks";
 		break;
 
 #ifdef HL1_DLL
@@ -993,8 +1000,11 @@ void CBreakable::Die( void )
 	case matCeilingTile:
 		soundname = "Breakable.Ceiling";
 		break;
+	case matIce:
+		soundname = "Ice.Damage";
+		break;
 	}
-    
+	
 	if ( soundname )
 	{
 		if ( m_hBreaker && m_hBreaker->IsPlayer() )

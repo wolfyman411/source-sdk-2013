@@ -414,6 +414,7 @@ public:
 	void EnableMotion( void );
 	bool CanBePickedUpByPhyscannon( void );
 	void OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t reason );
+	void OnPhysGunPull( CBasePlayer *pPhysGunUser );
 	void OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t reason );
 
 	bool GetPropDataAngles( const char *pKeyName, QAngle &vecAngles );
@@ -437,6 +438,7 @@ public:
 
 	string_t GetPhysOverrideScript( void ) { return m_iszOverrideScript; }
 	float	GetMassScale( void ) { return m_massScale; }
+	CAI_BaseNPC *pFrozenNPC; // What NPC is frozen inside? -TheMaster974
 
 private:
 	// Compute impulse to apply to the enabled entity.
@@ -447,6 +449,7 @@ private:
 	COutputEvent m_OnPhysGunPickup;
 	COutputEvent m_OnPhysGunPunt;
 	COutputEvent m_OnPhysGunOnlyPickup;
+	COutputEvent m_OnPhysGunPull;
 	COutputEvent m_OnPhysGunDrop;
 	COutputEvent m_OnPlayerUse;
 	COutputEvent m_OnPlayerPickup;

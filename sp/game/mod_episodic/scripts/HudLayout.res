@@ -1,5 +1,22 @@
 "Resource/HudLayout.res"
 {
+	HudTemperature [$WIN32]
+	{
+		"fieldName"		"HudTemperature"
+		"xpos"	"16"
+		"ypos"	"316"
+		"wide"	"102"
+		"tall"  "36"
+		"visible" "1"
+		"enabled" "1"
+
+		"PaintBackgroundType"	"2"
+
+		"text_xpos" "8"
+		"text_ypos" "20"
+		"digit_xpos" "50"
+		"digit_ypos" "2"
+	}
 	HudHealth [$WIN32]
 	{
 		"fieldName"		"HudHealth"
@@ -11,7 +28,7 @@
 		"enabled" "1"
 
 		"PaintBackgroundType"	"2"
-		
+
 		"text_xpos" "8"
 		"text_ypos" "20"
 		"digit_xpos" "50"
@@ -28,13 +45,13 @@
 		"enabled" "1"
 
 		"PaintBackgroundType"	"2"
-		
+
 		"text_xpos" "8"
 		"text_ypos" "18"
 		"digit_xpos" "60"
 		"digit_ypos" "-1"
 	}
-	
+
 	HudSuit [$WIN32]
 	{
 		"fieldName"		"HudSuit"
@@ -180,7 +197,7 @@
 		"ypos"	"396"
 		"wide"	"102"
 		"tall"	"26"
-		
+
 		"AuxPowerLowColor" "255 0 0 220"
 		"AuxPowerHighColor" "255 220 0 220"
 		"AuxPowerDisabledAlpha" "70"
@@ -209,7 +226,7 @@
 		"ypos"	"370"
 		"wide"	"102"
 		"tall"	"26"
-		
+
 		"AuxPowerLowColor" "255 100 0 220"
 		"AuxPowerHighColor" "255 220 0 220"
 		"AuxPowerDisabledAlpha" "70"
@@ -229,7 +246,7 @@
 
 		"PaintBackgroundType"	"2"
 	}
-	
+
 	HudFlashlight
 	{
 		"fieldName" "HudFlashlight"
@@ -239,14 +256,14 @@
 		"ypos"	"444"		[$WIN32]
 		"xpos_hidef"	"306"		[$X360]		// aligned to left
 		"xpos_lodef"	"c-18"		[$X360]		// centered in screen
-		"ypos"	"428"		[$X360]				
+		"ypos"	"428"		[$X360]
 		"tall"  "24"
 		"wide"	"36"
 		"font"	"WeaponIconsSmall"
-		
+
 		"icon_xpos"	"4"
 		"icon_ypos" "-8"
-		
+
 		"BarInsetX" "4"
 		"BarInsetY" "18"
 		"BarWidth" "28"
@@ -276,7 +293,7 @@
 		"enabled" "1"
 		"DmgColorLeft" "255 0 0 0"
 		"DmgColorRight" "255 0 0 0"
-		
+
 		"dmg_xpos" "30"
 		"dmg_ypos" "100"
 		"dmg_wide" "36"
@@ -293,7 +310,7 @@
 		"Circle2Radius"	"74"
 		"DashGap"	"16"
 		"DashHeight" "4"	[$WIN32]
-		"DashHeight" "6"	[$X360]		
+		"DashHeight" "6"	[$X360]
 		"BorderThickness" "88"
 	}
 
@@ -448,7 +465,7 @@
 		"visible" "1"
 		"enabled" "1"
 		"xpos"	"r300"
-		"ypos"	"40" 
+		"ypos"	"40"
 		"wide"	 "248"
 		"tall"	 "240"
 
@@ -625,7 +642,7 @@
 		"TextColor"	"255 255 255 192"
 
 	}
-	
+
 	HUDAutoAim
 	{
 		"fieldName" "HUDAutoAim"
@@ -646,9 +663,9 @@
 		"tall"  "40"
 		"visible" "1"
 		"enabled" "1"
-		
+
 		"PaintBackgroundType"	"2"
-		
+
 		"bar_xpos"		"50"
 		"bar_ypos"		"20"
 		"bar_height"	"8"
@@ -657,14 +674,14 @@
 		"speaker_ypos"	"8"
 		"count_xpos_from_right"	"10"	// Counts from the right side
 		"count_ypos"	"8"
-		
+
 		"icon_texture"	"vgui/hud/icon_commentary"
 		"icon_xpos"		"0"
-		"icon_ypos"		"0"		
+		"icon_ypos"		"0"
 		"icon_width"	"40"
 		"icon_height"	"40"
 	}
-	
+
 	HudHDRDemo
 	{
 		"fieldName" "HudHDRDemo"
@@ -674,17 +691,17 @@
 		"tall"  "480"
 		"visible" "1"
 		"enabled" "1"
-		
+
 		"Alpha"	"255"
 		"PaintBackgroundType"	"2"
-		
+
 		"BorderColor"	"0 0 0 255"
 		"BorderLeft"	"16"
 		"BorderRight"	"16"
 		"BorderTop"		"16"
 		"BorderBottom"	"64"
 		"BorderCenter"	"0"
-		
+
 		"TextColor"		"255 255 255 255"
 		"LeftTitleY"	"422"
 		"RightTitleY"	"422"
@@ -708,7 +725,7 @@
 		"maxchars"		"-1"
 	}
 
-	AchievementNotificationPanel	
+	AchievementNotificationPanel
 	{
 		"fieldName"				"AchievementNotificationPanel"
 		"visible"				"1"

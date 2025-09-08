@@ -1072,4 +1072,13 @@ enum
 };
 #endif
 
+// Global Temperature Modes
+enum
+{
+	TEMPERATURE_MODE_NONE = -1,
+	TEMPERATURE_MODE_PLAYER,
+	TEMPERATURE_MODE_NPC,
+	TEMPERATURE_MODE_ALL,
+};
+
 #endif // SHAREDDEFS_H

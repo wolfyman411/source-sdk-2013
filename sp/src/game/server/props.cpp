@@ -1340,6 +1340,12 @@ int CBreakableProp::OnTakeDamage( const CTakeDamageInfo &inputInfo )
 //-----------------------------------------------------------------------------
 void CBreakableProp::Event_Killed( const CTakeDamageInfo &info )
 {
+#ifdef MAPBASE_VSCRIPT
+	// False = Cheat death
+	if (ScriptDeathHook( const_cast<CTakeDamageInfo *>(&info) ) == false)
+		return;
+#endif
+
 	IPhysicsObject *pPhysics = VPhysicsGetObject();
 	if ( pPhysics && !pPhysics->IsMoveable() )
 	{
@@ -3047,6 +3053,7 @@ void CInteractableProp::PushThink()
 LINK_ENTITY_TO_CLASS( physics_prop, CPhysicsProp );
 LINK_ENTITY_TO_CLASS( prop_physics, CPhysicsProp );	
 LINK_ENTITY_TO_CLASS( prop_physics_override, CPhysicsProp );	
+LINK_ENTITY_TO_CLASS( prop_physics_frozen, CPhysicsProp ); // For frozen NPCs. -TheMaster974
 
 BEGIN_DATADESC( CPhysicsProp )
 
@@ -3072,6 +3079,7 @@ BEGIN_DATADESC( CPhysicsProp )
 	DEFINE_OUTPUT( m_MotionEnabled, "OnMotionEnabled" ),
 	DEFINE_OUTPUT( m_OnPhysGunPickup, "OnPhysGunPickup" ),
 	DEFINE_OUTPUT( m_OnPhysGunOnlyPickup, "OnPhysGunOnlyPickup" ),
+	DEFINE_OUTPUT( m_OnPhysGunPull, "OnPhysGunPull" ),
 	DEFINE_OUTPUT( m_OnPhysGunPunt, "OnPhysGunPunt" ),
 	DEFINE_OUTPUT( m_OnPhysGunDrop, "OnPhysGunDrop" ),
 	DEFINE_OUTPUT( m_OnPlayerUse, "OnPlayerUse" ),
@@ -3445,6 +3453,13 @@ void CPhysicsProp::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t r
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+void CPhysicsProp::OnPhysGunPull( CBasePlayer* pPhysGunUser ) {
+	m_OnPhysGunPull.FireOutput(pPhysGunUser, this);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
 void CPhysicsProp::OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t Reason )
 {
 	BaseClass::OnPhysGunDrop( pPhysGunUser, Reason );
@@ -3463,6 +3478,13 @@ void CPhysicsProp::OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t Reaso
 
 		PhysSetGameFlags( VPhysicsGetObject(), FVPHYSICS_WAS_THROWN );
 		m_bFirstCollisionAfterLaunch = true;
+
+		// If we are a frozen prop, break when punted. -TheMaster974
+		if (FClassnameIs(this, "prop_physics_frozen"))
+		{
+			CTakeDamageInfo info(pPhysGunUser, pPhysGunUser, 1000, DMG_PHYSGUN);
+			Break(pPhysGunUser, info);
+		}
 	}
 	else if ( Reason == THROWN_BY_PLAYER )
 	{
@@ -4249,6 +4271,12 @@ BEGIN_DATADESC(CBasePropDoor)
 #ifdef MAPBASE
 	DEFINE_INPUTFUNC(FIELD_VOID, "AllowPlayerUse", InputAllowPlayerUse),
 	DEFINE_INPUTFUNC(FIELD_VOID, "DisallowPlayerUse", InputDisallowPlayerUse),
+
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetFullyOpenSound", InputSetFullyOpenSound ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetFullyClosedSound", InputSetFullyClosedSound ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetMovingSound", InputSetMovingSound ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetLockedSound", InputSetLockedSound ),
+	DEFINE_INPUTFUNC( FIELD_STRING, "SetUnlockedSound", InputSetUnlockedSound ),
 #endif
 
 	DEFINE_OUTPUT(m_OnBlockedOpening, "OnBlockedOpening"),
@@ -4270,6 +4298,34 @@ END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CBasePropDoor, DT_BasePropDoor)
 END_SEND_TABLE()
+
+#ifdef MAPBASE_VSCRIPT
+BEGIN_ENT_SCRIPTDESC( CBasePropDoor, CBaseAnimating, "The base class used by prop doors, such as prop_door_rotating." )
+
+	DEFINE_SCRIPTFUNC_NAMED( ScriptIsDoorOpen, "IsDoorOpen", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptIsDoorAjar, "IsDoorAjar", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptIsDoorOpening, "IsDoorOpening", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptIsDoorClosed, "IsDoorClosed", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptIsDoorClosing, "IsDoorClosing", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptIsDoorLocked, "IsDoorLocked", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptIsDoorBlocked, "IsDoorBlocked", "" )
+
+	DEFINE_SCRIPTFUNC_NAMED( ScriptGetActivator, "GetActivator", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptGetDoorList, "GetDoorList", "Get connected door entity by index." )
+	DEFINE_SCRIPTFUNC( GetDoorListCount, "Get number of connected doors." )
+
+	DEFINE_SCRIPTFUNC_NAMED( ScriptGetFullyOpenSound, "GetFullyOpenSound", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptGetFullyClosedSound, "GetFullyClosedSound", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptGetMovingSound, "GetMovingSound", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptGetLockedSound, "GetLockedSound", "" )
+	DEFINE_SCRIPTFUNC_NAMED( ScriptGetUnlockedSound, "GetUnlockedSound", "" )
+
+	DEFINE_SCRIPTFUNC( DoorCanClose, "Return true if the door has room to close. Boolean is for whether or not this is an automatic close and not manually triggered by someone." )
+	DEFINE_SCRIPTFUNC( DoorCanOpen, "Return true if there are other doors connected to this one." )
+	DEFINE_SCRIPTFUNC( HasSlaves, "" )
+
+END_SCRIPTDESC();
+#endif
 
 CBasePropDoor::CBasePropDoor( void )
 {
@@ -4742,6 +4798,54 @@ void CBasePropDoor::InputOpenAwayFrom(inputdata_t &inputdata)
 	CBaseEntity *pOpenAwayFrom = gEntList.FindEntityByName( NULL, inputdata.value.String(), NULL, inputdata.pActivator, inputdata.pCaller );
 	OpenIfUnlocked(inputdata.pActivator, pOpenAwayFrom);
 }
+
+
+#ifdef MAPBASE
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBasePropDoor::InputSetFullyOpenSound( inputdata_t &inputdata )
+{
+	m_SoundOpen = inputdata.value.StringID();
+	PrecacheScriptSound( STRING( m_SoundOpen ) );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBasePropDoor::InputSetFullyClosedSound( inputdata_t &inputdata )
+{
+	m_SoundClose = inputdata.value.StringID();
+	PrecacheScriptSound( STRING( m_SoundClose ) );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBasePropDoor::InputSetMovingSound( inputdata_t &inputdata )
+{
+	m_SoundMoving = inputdata.value.StringID();
+	PrecacheScriptSound( STRING( m_SoundMoving ) );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBasePropDoor::InputSetLockedSound( inputdata_t &inputdata )
+{
+	m_ls.sLockedSound = inputdata.value.StringID();
+	PrecacheScriptSound( STRING( m_ls.sLockedSound ) );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+void CBasePropDoor::InputSetUnlockedSound( inputdata_t &inputdata )
+{
+	m_ls.sUnlockedSound = inputdata.value.StringID();
+	PrecacheScriptSound( STRING( m_ls.sUnlockedSound ) );
+}
+#endif
 
 
 //-----------------------------------------------------------------------------

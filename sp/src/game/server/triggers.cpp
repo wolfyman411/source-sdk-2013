@@ -47,6 +47,7 @@
 
 #define DEBUG_TRANSITIONS_VERBOSE	2
 ConVar g_debug_transitions( "g_debug_transitions", "0", FCVAR_NONE, "Set to 1 and restart the map to be warned if the map has no trigger_transition volumes. Set to 2 to see a dump of all entities & associated results during a transition." );
+ConVar noclip_changelevel("noclip_changelevel", "0", FCVAR_CHEAT);
 
 // Global list of triggers that care about weapon fire
 // Doesn't need saving, the triggers re-add themselves on restore.
@@ -1848,7 +1849,8 @@ void CChangeLevel::TouchChangeLevel( CBaseEntity *pOther )
 		return;
 	}
 
-	if ( !pPlayer->IsInAVehicle() && pPlayer->GetMoveType() == MOVETYPE_NOCLIP )
+	
+	if ( !pPlayer->IsInAVehicle() && pPlayer->GetMoveType() == MOVETYPE_NOCLIP && !noclip_changelevel.GetBool())
 	{
 		DevMsg("In level transition: %s %s\n", st_szNextMap, st_szNextSpot );
 		return;
@@ -5678,16 +5680,12 @@ bool IsTriggerClass( CBaseEntity *pEntity )
 }
 
 BEGIN_DATADESC( CTriggerFreeze )
-	DEFINE_KEYFIELD( m_flFreezeMultiplier, FIELD_FLOAT, "freezemultiplier" ),
+	DEFINE_KEYFIELD( m_flFreezeMultiplier, FIELD_FLOAT, "FreezeMultiplier" ),
+	DEFINE_KEYFIELD( m_flWarmMultiplier, FIELD_FLOAT, "WarmthMultiplier" ),
 END_DATADESC()
-
 
 LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
 
-
-//-----------------------------------------------------------------------------
-// Purpose: Called when spawning, after keyvalues have been handled.
-//-----------------------------------------------------------------------------
 void CTriggerFreeze::Spawn( void ) {
 	BaseClass::Spawn();
 
@@ -5697,30 +5695,37 @@ void CTriggerFreeze::Spawn( void ) {
 	SetThink( NULL );
 }
 
-void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
-	if ( PassesTriggerFilters( pOther ) ) {
-		EHANDLE hOther;
-		hOther = pOther;
-
-		if ( pOther->IsPlayer() ) {
-			CBasePlayer* player = dynamic_cast< CBasePlayer* >( pOther );
-
-			player->m_flFreezeMultiplier = 0.0f;
-		}
-	}
-
-	BaseClass::EndTouch( pOther );
-}
 
 void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
-	if ( PassesTriggerFilters( pOther ) ) {
-		EHANDLE hOther;
-		hOther = pOther;
-		if ( hOther->IsPlayer() ) {
-			CBasePlayer* pPlayer = ToBasePlayer( hOther );
+	if ( !PassesTriggerFilters( pOther ) ) return;
 
+	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
+		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
+		if ( pPlayer ) {
 			pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
-			DevMsg( "Player %s entered trigger_hurt\n", pPlayer->GetPlayerName() );
+		}
+	}
+	else if ( pOther->IsNPC() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NPC ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
+		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
+		if ( pNPC ) {
+			pNPC->m_flFreezeMultiplier = m_flFreezeMultiplier;
+		}
+	}
+}
+
+void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
+	if ( !PassesTriggerFilters( pOther ) ) return;
+
+	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
+		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
+		if ( pPlayer ) {
+			pPlayer->m_flFreezeMultiplier = -m_flWarmMultiplier;
+		}
+	}
+	else if ( pOther->IsNPC() && ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NPC) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
+		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
+		if ( pNPC ) {
+			pNPC->m_flFreezeMultiplier = -m_flWarmMultiplier;
 		}
 	}
 }

@@ -117,6 +117,8 @@ extern ConVar sk_healthkit;
 #include "utlbuffer.h"
 #include "gamestats.h"
 
+#include "props.h" // Addition -TheMaster974
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -161,6 +163,9 @@ ConVar	ai_frametime_limit( "ai_frametime_limit", "50", FCVAR_NONE, "frametime li
 ConVar	ai_use_think_optimizations( "ai_use_think_optimizations", "1" );
 
 ConVar	ai_test_moveprobe_ignoresmall( "ai_test_moveprobe_ignoresmall", "0" );
+
+ConVar ai_use_temperature( "ai_use_temperature", "1", FCVAR_NONE, "Enable temperature system for NPCs" );
+ConVar ai_debug_temperature( "ai_debug_temperature", "0", FCVAR_NONE, "Enable temperature system debugging for NPC" );
 
 #ifdef HL2_EPISODIC
 extern ConVar ai_vehicle_avoidance;
@@ -871,6 +876,10 @@ HSCRIPT CAI_BaseNPC::VScriptGetSquad()
 
 bool CAI_BaseNPC::PassesDamageFilter( const CTakeDamageInfo &info )
 {
+	if ( ai_use_temperature.GetBool() && IsFrozen() ) {
+		return false;
+	}
+
 	if ( ai_block_damage.GetBool() )
 		return false;
 	// FIXME: hook a friendly damage filter to the npc instead?
@@ -1836,6 +1845,10 @@ void CAI_BaseNPC::MakeDamageBloodDecal ( int cCount, float flNoise, trace_t *ptr
 	trace_t Bloodtr;
 	Vector vecTraceDir;
 	int i;
+
+	if ( IsFrozen() ) {
+		return;
+	}
 
 	if ( !IsAlive() )
 	{
@@ -3329,6 +3342,7 @@ void CAI_BaseNPC::PostMovement()
 float g_AINextDisabledMessageTime;
 extern bool IsInCommentaryMode( void );
 
+int nextTempDebugPrint = 0;
 bool CAI_BaseNPC::PreThink( void )
 {
 	// ----------------------------------------------------------
@@ -3389,6 +3403,29 @@ bool CAI_BaseNPC::PreThink( void )
 	{
 		NDebugOverlay::Line( EyePosition(), m_hOpeningDoor->WorldSpaceCenter(), 255, 255, 255, false, .1 );
 	}
+
+	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) && ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NPC) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
+		if ( m_flTemperature <= m_flMinTemperature * 1.2f ) {
+			if ( ai_debug_temperature.GetBool() && nextTempDebugPrint <= gpGlobals->curtime ) {
+				ConDColorMsg( Color( 100, 100, 100 ), "[AI] Freezing from temperature - Playback Animation Reduced\n" );
+				nextTempDebugPrint = gpGlobals->curtime + 1;
+			}
+
+			float temperatureRange = m_flMaxTemperature - m_flMinTemperature;
+			float normalizedTemperature = ( m_flTemperature - m_flMinTemperature ) / temperatureRange;
+			byte blueValue = 255 * ( 1.0f - normalizedTemperature );
+
+			SetRenderColor( 0, 0, blueValue );
+
+			float playbackRate = 1.0f - ( 1.0f - 0.5f ) * ( 1.0f - m_flTemperature / 100.0f );
+			SetPlaybackRate( playbackRate );
+		}
+
+		if ( IsFrozen() ) {
+			return false;
+		}
+	}
+	
 
 	return true;
 }
@@ -4342,6 +4379,10 @@ bool CAI_BaseNPC::CheckPVSCondition()
 
 void CAI_BaseNPC::NPCThink( void )
 {
+	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NPC ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
+		HandleTemperature();
+	}
+
 	if ( m_bCheckContacts )
 	{
 		CheckPhysicsContacts();
@@ -4363,6 +4404,44 @@ void CAI_BaseNPC::NPCThink( void )
 
 	//---------------------------------
 	bool bRanDecision = false;
+
+	// If we are frozen solid, don't do anything!
+	if (GetPlaybackRate() <= FLT_EPSILON)
+	{
+		if (!hasFrozen)
+		{
+			Vector center, worldCenter;
+			center = CollisionProp()->OBBCenter();
+			CollisionProp()->CollisionToWorldSpace(center, &worldCenter);
+			VPhysicsDestroyObject();
+
+			CBaseEntity *pNewEnt = CreateEntityByName("prop_physics_frozen");
+//			pNewEnt->KeyValue("model", "models/props_c17/furniturefridge001a.mdl");
+			pNewEnt->KeyValue("model", "models/props_c17/furnituredresser001a.mdl");
+			pNewEnt->SetAbsOrigin(worldCenter);
+			pNewEnt->SetAbsAngles(GetAbsAngles());
+
+			IPhysicsObject* pNewObj = VPhysicsInitNormal(SOLID_BBOX, GetSolidFlags(), false);
+
+			pNewEnt->VPhysicsSetObject(pNewObj);
+			pNewEnt->Spawn();
+			SetParent(pNewEnt);
+			pNewEnt->AddEffects(EF_NODRAW);
+
+			CPhysicsProp* pPhysProp = dynamic_cast<CPhysicsProp*>(pNewEnt);
+			if (pPhysProp)
+			{
+				pPhysProp->pFrozenNPC = this;
+			}
+
+			VPhysicsSwapObject(NULL);
+
+			hasFrozen = true;
+		}
+
+		SetNextThink(TICK_NEVER_THINK);
+		return;
+	}
 
 	if ( GetEfficiency() < AIE_DORMANT && GetSleepState() == AISS_AWAKE )
 	{
@@ -6110,7 +6189,11 @@ bool CAI_BaseNPC::UpdateEnemyMemory( CBaseEntity *pEnemy, const Vector &position
 		// If the was eluding me and allow the NPC to play a sound
 		if (GetEnemies()->HasEludedMe(pEnemy))
 		{
+#ifdef MAPBASE
+			FoundEnemySound( pEnemy );
+#else
 			FoundEnemySound();
+#endif
 		}
 		float reactionDelay = ( !pInformer || pInformer == this ) ? GetReactionDelay( pEnemy ) : 0.0;
 		bool result = GetEnemies()->UpdateMemory(GetNavigator()->GetNetwork(), pEnemy, position, reactionDelay, firstHand);
@@ -8045,10 +8128,13 @@ int CAI_BaseNPC::UnholsterWeapon( void )
 	if (i == -1)
 	{
 		// Set i to the first weapon you can find
-		for (i = 0; i < WeaponCount(); i++)
+		for (i = 0;;)
 		{
 			if (GetWeapon(i))
 				break;
+
+			if (++i >= WeaponCount())
+				return -1;
 		}
 	}
 #else
@@ -11731,7 +11817,11 @@ bool CAI_BaseNPC::ChooseEnemy( void )
 			if ( fEnemyEluded )
 			{
 				SetCondition( COND_LOST_ENEMY );
+#ifdef MAPBASE
+				LostEnemySound( pInitialEnemy );
+#else
 				LostEnemySound();
+#endif
 			}
 
 			if ( fEnemyWasPlayer )
@@ -12166,12 +12256,32 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_FIELD( m_bImportanRagdoll,			FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bPlayerAvoidState,			FIELD_BOOLEAN ),
 
+	DEFINE_FIELD( hasFrozen, FIELD_BOOLEAN ),
+
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
 
 	DEFINE_KEYFIELD( m_flSpeedModifier, FIELD_FLOAT, "BaseSpeedModifier" ),
 	DEFINE_FIELD( m_FakeSequenceGestureLayer,	FIELD_INTEGER ),
 #endif
+
+	DEFINE_FIELD( m_flFreezeMultiplier,			FIELD_FLOAT),
+
+	DEFINE_KEYFIELD( m_flTemperature, FIELD_FLOAT, "Temperature" ),
+	DEFINE_KEYFIELD( m_flMaxTemperature, FIELD_FLOAT, "MaxTemperature" ),
+	DEFINE_KEYFIELD( m_flMinTemperature, FIELD_FLOAT, "MinTemperature" ),
+	DEFINE_KEYFIELD( m_bIsFrozen, FIELD_BOOLEAN, "Frozen"),
+
+	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
+	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
+
+	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
+	DEFINE_OUTPUT( m_OnUnFrozen, "OnUnFrozen" ),
+	DEFINE_OUTPUT( m_OnChangeTemperature, "OnChangeTemperature" ),
+	DEFINE_OUTPUT( m_OnChangeMaxTemperature, "OnChangeMaxTemperature" ),
+	DEFINE_OUTPUT( m_OnChangeMinTemperature, "OnChangeMinTemperature" ),
 
 	// Satisfy classcheck
 	// DEFINE_FIELD( m_ScheduleHistory, CUtlVector < AIScheduleChoice_t > ),
@@ -12533,6 +12643,10 @@ void CAI_BaseNPC::Precache( void )
 	PrecacheScriptSound( "AI_BaseNPC.BodyDrop_Heavy" );
 	PrecacheScriptSound( "AI_BaseNPC.BodyDrop_Light" );
 	PrecacheScriptSound( "AI_BaseNPC.SentenceStop" );
+
+	// Precache our frozen models here. -TheMaster974
+	// PrecacheModel("models/props_c17/furniturefridge001a.mdl");
+	PrecacheModel("models/props_c17/furnituredresser001a.mdl");
 
 	BaseClass::Precache();
 }
@@ -13055,6 +13169,11 @@ CAI_BaseNPC::CAI_BaseNPC(void)
 
 	m_FakeSequenceGestureLayer = -1;
 #endif
+
+	m_flTemperature = 33.0f;
+	m_flMaxTemperature = 40.0f;
+	m_flMinTemperature = 20.0f;
+	hasFrozen = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -14895,22 +15014,39 @@ void CAI_BaseNPC::ParseScriptedNPCInteractions(void)
 						else if (!Q_strncmp(szName, "their_", 6))
 						{
 							const char *szTheirName = szName + 6;
-							sInteraction.bHasSeparateSequenceNames = true;
 
 							if (!Q_strncmp(szTheirName, "entry_sequence", 14))
+							{
+								sInteraction.bHasSeparateSequenceNames = true;
 								sInteraction.sTheirPhases[SNPCINT_ENTRY].iszSequence = AllocPooledString(szValue);
+							}
 							else if (!Q_strncmp(szTheirName, "entry_activity", 14))
+							{
+								sInteraction.bHasSeparateSequenceNames = true;
 								sInteraction.sTheirPhases[SNPCINT_ENTRY].iActivity = GetOrRegisterActivity(szValue);
+							}
 
 							else if (!Q_strncmp(szTheirName, "sequence", 8))
+							{
+								sInteraction.bHasSeparateSequenceNames = true;
 								sInteraction.sTheirPhases[SNPCINT_SEQUENCE].iszSequence = AllocPooledString(szValue);
+							}
 							else if (!Q_strncmp(szTheirName, "activity", 8))
+							{
+								sInteraction.bHasSeparateSequenceNames = true;
 								sInteraction.sTheirPhases[SNPCINT_SEQUENCE].iActivity = GetOrRegisterActivity(szValue);
+							}
 
 							else if (!Q_strncmp(szTheirName, "exit_sequence", 13))
+							{
+								sInteraction.bHasSeparateSequenceNames = true;
 								sInteraction.sTheirPhases[SNPCINT_EXIT].iszSequence = AllocPooledString(szValue);
+							}
 							else if (!Q_strncmp(szTheirName, "exit_activity", 13))
+							{
+								sInteraction.bHasSeparateSequenceNames = true;
 								sInteraction.sTheirPhases[SNPCINT_EXIT].iActivity = GetOrRegisterActivity(szValue);
+							}
 
 							// Add anything else to our miscellaneous criteria
 							else
@@ -15890,12 +16026,11 @@ bool CAI_BaseNPC::InteractionIsAllowed( CAI_BaseNPC *pOtherNPC, ScriptedNPCInter
 	if (pOtherNPC->Classify() == CLASS_PLAYER_ALLY_VITAL)
 		return false;
 
-	// This convar allows all NPCs to perform Mapbase interactions for both testing and player fun.
-	if (ai_dynint_always_enabled.GetBool() && m_iDynamicInteractionsAllowed != TRS_FALSE)
-		return true;
+	if (m_iDynamicInteractionsAllowed == TRS_FALSE)
+		return false;
 
-	// m_iDynamicInteractionsAllowed == TRS_FALSE case is already handled in CanRunAScriptedNPCInteraction().
-	if (pInteraction->iFlags & SCNPC_FLAG_MAPBASE_ADDITION && m_iDynamicInteractionsAllowed == TRS_NONE)
+	// To maintain existing behavior, Mapbase additions require either explicit TRS_YES or ai_dynint_always_enabled.
+	if (pInteraction->iFlags & SCNPC_FLAG_MAPBASE_ADDITION && m_iDynamicInteractionsAllowed == TRS_NONE && !ai_dynint_always_enabled.GetBool())
 		return false;
 	
 	// Test misc. criteria here since some of it may not have been valid on initial calculation, but could be now
@@ -16714,4 +16849,80 @@ void CAI_BaseNPC::DesireCrouch( void )
 bool CAI_BaseNPC::IsInChoreo() const
 {
 	return m_bInChoreo;
+}
+
+void CAI_BaseNPC::HandleTemperature( void ) {
+	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
+
+	if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
+	else if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
+
+	if ( m_flTemperature <= m_flMinTemperature ) {
+		if ( !IsFrozen() ) {
+			OnFrozen();
+		}
+	}
+}
+
+void CAI_BaseNPC::OnFrozen( void ) {
+	m_bIsFrozen = true;
+	m_OnFrozen.FireOutput( this, this );
+
+	//SetRenderColor( 0, 0, 255 );
+	//SetActivity( ACT_IDLE );
+
+	/*
+		CBaseEntity* pFrozenCorpse = CreateEntityByName("prop_dynamic");
+		pFrozenCorpse->SetModel( STRING( GetModelName() ) );
+		pFrozenCorpse->SetAbsOrigin( GetAbsOrigin() );
+		pFrozenCorpse->SetAbsAngles( GetAbsAngles() );
+		pFrozenCorpse->SetSolid( SOLID_BBOX );
+		pFrozenCorpse->VPhysicsInitNormal(SOLID_BBOX, 0, false, 0);
+		DispatchSpawn( pFrozenCorpse );
+
+		if ( pFrozenCorpse ) {
+			IPhysicsObject* physObj = pFrozenCorpse->VPhysicsGetObject();
+			if ( physObj ) {
+				physObj->EnableMotion( false );
+			}
+
+			pFrozenCorpse->SetCollisionBounds( CollisionProp()->OBBMins(), CollisionProp()->OBBMaxs() );
+			pFrozenCorpse->SetRenderColor( 0, 0, 255 );
+
+			Remove();
+		}
+	*/
+
+	// bloodycop: Someone more experiences gotta make a frozen statue ;9
+}
+
+void CAI_BaseNPC::OnUnFrozen( void ) {
+	m_bIsFrozen = false;
+	m_OnUnFrozen.FireOutput( this, this );
+
+	SetRenderColor( 255, 255, 255 );
+}
+
+void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
+	if ( inputdata.value.Bool() ) {
+		if ( !IsFrozen() ) OnFrozen();
+	}
+	else {
+		if ( IsFrozen() ) OnUnFrozen();
+	}
+}
+
+void CAI_BaseNPC::InputSetTemperature( inputdata_t& inputdata ) {
+	m_flTemperature = inputdata.value.Float();
+	m_OnChangeTemperature.FireOutput( this, this );
+}
+
+void CAI_BaseNPC::InputSetMaxTemperature( inputdata_t& inputdata ) {
+	m_flMaxTemperature = inputdata.value.Float();
+	m_OnChangeMaxTemperature.FireOutput( this, this );
+}
+
+void CAI_BaseNPC::InputSetMinTemperature( inputdata_t& inputdata ) {
+	m_flMinTemperature = inputdata.value.Float();
+	m_OnChangeMinTemperature.FireOutput( this, this );
 }

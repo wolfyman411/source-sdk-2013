@@ -408,6 +408,9 @@ public:
 	// was pev->framerate
 	CNetworkVar( float, m_flPlaybackRate );
 
+	// This is needed so the playback rate of freezing NPCs does not reset back to 1. -TheMaster974
+	CNetworkVar( bool, shouldFreeze );
+
 public:
 	void InitStepHeightAdjust( void );
 	void SetIKGroundContactInfo( float minHeight, float maxHeight );

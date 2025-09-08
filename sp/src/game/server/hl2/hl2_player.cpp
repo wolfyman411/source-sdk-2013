@@ -128,8 +128,6 @@ ConVar hl2_use_sp_animstate( "hl2_use_sp_animstate", "1", FCVAR_NONE, "Allows SP
 #define	FLASH_DRAIN_TIME	 1.1111	// 100 units / 90 secs
 #define	FLASH_CHARGE_TIME	 50.0f	// 100 units / 2 secs
 
-#define TEMP_DRAIN_TIME		10
-
 
 //==============================================================================================
 // CAPPED PLAYER PHYSICS DAMAGE TABLE
@@ -244,6 +242,10 @@ public:
 
 	COutputEvent m_OnPlayerSpawn;
 #endif
+
+	COutputEvent		m_OnPlayerTemperatureHurt;
+	COutputEvent		m_OnPlayerChangeMaxTemperature;
+	COutputEvent		m_OnPlayerChangeMinTemperature;
 
 	void InputRequestPlayerHealth( inputdata_t &inputdata );
 	void InputSetFlashlightSlowDrain( inputdata_t &inputdata );
@@ -510,106 +512,113 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 	DEFINE_FIELD( m_vecStartPosition, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_hForceLadder, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_hReservedSpot, FIELD_EHANDLE ),
-END_DATADESC()
+		END_DATADESC()
 
-// Global Savedata for HL2 player
-BEGIN_DATADESC( CHL2_Player )
+		// Global Savedata for HL2 player
+		BEGIN_DATADESC( CHL2_Player )
 
-	DEFINE_FIELD( m_nControlClass, FIELD_INTEGER ),
-	DEFINE_EMBEDDED( m_HL2Local ),
+		DEFINE_FIELD( m_nControlClass, FIELD_INTEGER ),
+		DEFINE_EMBEDDED( m_HL2Local ),
 
-	DEFINE_FIELD( m_bSprintEnabled, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_flTimeAllSuitDevicesOff, FIELD_TIME ),
-	DEFINE_FIELD( m_fIsSprinting, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fIsWalking, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
+		DEFINE_FIELD( m_bSprintEnabled, FIELD_BOOLEAN ),
+		DEFINE_FIELD( m_flTimeAllSuitDevicesOff, FIELD_TIME ),
+		DEFINE_FIELD( m_fIsSprinting, FIELD_BOOLEAN ),
+		DEFINE_FIELD( m_fIsWalking, FIELD_BOOLEAN ),
 
-	/*
-	// These are initialized every time the player calls Activate()
-	DEFINE_FIELD( m_bIsAutoSprinting, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fAutoSprintMinTime, FIELD_TIME ),
-	*/
+		/*
+		// These are initialized every time the player calls Activate()
+		DEFINE_FIELD( m_bIsAutoSprinting, FIELD_BOOLEAN ),
+		DEFINE_FIELD( m_fAutoSprintMinTime, FIELD_TIME ),
+		*/
 
-	// 	Field is used within a single tick, no need to save restore
-	// DEFINE_FIELD( m_bPlayUseDenySound, FIELD_BOOLEAN ),  
-	//							m_pPlayerAISquad reacquired on load
+		// 	Field is used within a single tick, no need to save restore
+		// DEFINE_FIELD( m_bPlayUseDenySound, FIELD_BOOLEAN ),  
+		//							m_pPlayerAISquad reacquired on load
 
-	DEFINE_AUTO_ARRAY( m_vecMissPositions, FIELD_POSITION_VECTOR ),
-	DEFINE_FIELD( m_nNumMissPositions, FIELD_INTEGER ),
+		DEFINE_AUTO_ARRAY( m_vecMissPositions, FIELD_POSITION_VECTOR ),
+		DEFINE_FIELD( m_nNumMissPositions, FIELD_INTEGER ),
 
-	//					m_pPlayerAISquad
-	DEFINE_EMBEDDED( m_CommanderUpdateTimer ),
-	//					m_RealTimeLastSquadCommand
-	DEFINE_FIELD( m_QueuedCommand, FIELD_INTEGER ),
+		//					m_pPlayerAISquad
+		DEFINE_EMBEDDED( m_CommanderUpdateTimer ),
+		//					m_RealTimeLastSquadCommand
+		DEFINE_FIELD( m_QueuedCommand, FIELD_INTEGER ),
 
-	DEFINE_FIELD( m_flTimeIgnoreFallDamage, FIELD_TIME ),
-	DEFINE_FIELD( m_bIgnoreFallDamageResetAfterImpact, FIELD_BOOLEAN ),
+		DEFINE_FIELD( m_flTimeIgnoreFallDamage, FIELD_TIME ),
+		DEFINE_FIELD( m_bIgnoreFallDamageResetAfterImpact, FIELD_BOOLEAN ),
 
-	// Suit power fields
-	DEFINE_FIELD( m_flSuitPowerLoad, FIELD_FLOAT ),
+		// Suit power fields
+		DEFINE_FIELD( m_flSuitPowerLoad, FIELD_FLOAT ),
 
-	DEFINE_FIELD( m_flIdleTime, FIELD_TIME ),
-	DEFINE_FIELD( m_flMoveTime, FIELD_TIME ),
-	DEFINE_FIELD( m_flLastDamageTime, FIELD_TIME ),
-	DEFINE_FIELD( m_flTargetFindTime, FIELD_TIME ),
+		DEFINE_FIELD( m_flIdleTime, FIELD_TIME ),
+		DEFINE_FIELD( m_flMoveTime, FIELD_TIME ),
+		DEFINE_FIELD( m_flLastDamageTime, FIELD_TIME ),
+		DEFINE_FIELD( m_flTargetFindTime, FIELD_TIME ),
 
-	DEFINE_FIELD( m_flAdmireGlovesAnimTime, FIELD_TIME ),
-	DEFINE_FIELD( m_flNextFlashlightCheckTime, FIELD_TIME ),
-	DEFINE_FIELD( m_flFlashlightPowerDrainScale, FIELD_FLOAT ),
-	DEFINE_FIELD( m_bFlashlightDisabled, FIELD_BOOLEAN ),
+		DEFINE_FIELD( m_flAdmireGlovesAnimTime, FIELD_TIME ),
+		DEFINE_FIELD( m_flNextFlashlightCheckTime, FIELD_TIME ),
+		DEFINE_FIELD( m_flFlashlightPowerDrainScale, FIELD_FLOAT ),
+		DEFINE_FIELD( m_bFlashlightDisabled, FIELD_BOOLEAN ),
 
-	DEFINE_FIELD( m_bUseCappedPhysicsDamageTable, FIELD_BOOLEAN ),
+		DEFINE_FIELD( m_bUseCappedPhysicsDamageTable, FIELD_BOOLEAN ),
 
-	DEFINE_FIELD( m_hLockedAutoAimEntity, FIELD_EHANDLE ),
+		DEFINE_FIELD( m_hLockedAutoAimEntity, FIELD_EHANDLE ),
 
-	DEFINE_EMBEDDED( m_LowerWeaponTimer ),
-	DEFINE_EMBEDDED( m_AutoaimTimer ),
+		DEFINE_EMBEDDED( m_LowerWeaponTimer ),
+		DEFINE_EMBEDDED( m_AutoaimTimer ),
 
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "IgnoreFallDamage", InputIgnoreFallDamage ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "IgnoreFallDamageWithoutReset", InputIgnoreFallDamageWithoutReset ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "IgnoreFallDamage", InputIgnoreFallDamage ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "IgnoreFallDamageWithoutReset", InputIgnoreFallDamageWithoutReset ),
 #ifdef MAPBASE
-	DEFINE_INPUTFUNC( FIELD_EHANDLE, "OnSquadMemberKilled", OnSquadMemberKilled ),
+		DEFINE_INPUTFUNC( FIELD_EHANDLE, "OnSquadMemberKilled", OnSquadMemberKilled ),
 #else
-	DEFINE_INPUTFUNC( FIELD_VOID, "OnSquadMemberKilled", OnSquadMemberKilled ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "OnSquadMemberKilled", OnSquadMemberKilled ),
 #endif
-	DEFINE_INPUTFUNC( FIELD_VOID, "DisableFlashlight", InputDisableFlashlight ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "EnableFlashlight", InputEnableFlashlight ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "ForceDropPhysObjects", InputForceDropPhysObjects ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "DisableFlashlight", InputDisableFlashlight ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "EnableFlashlight", InputEnableFlashlight ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "ForceDropPhysObjects", InputForceDropPhysObjects ),
 #ifdef MAPBASE
-	DEFINE_INPUTFUNC( FIELD_VOID, "SquadForceSummon", InputSquadForceSummon ),
-	DEFINE_INPUTFUNC( FIELD_INPUT, "SquadForceGoTo", InputSquadForceGoTo ), // FIELD_INPUT so it supports vectors, ehandles, and strings
+		DEFINE_INPUTFUNC( FIELD_VOID, "SquadForceSummon", InputSquadForceSummon ),
+		DEFINE_INPUTFUNC( FIELD_INPUT, "SquadForceGoTo", InputSquadForceGoTo ), // FIELD_INPUT so it supports vectors, ehandles, and strings
 
-	DEFINE_INPUTFUNC( FIELD_INTEGER, "AddArmor", InputAddArmor ),
-	DEFINE_INPUTFUNC( FIELD_INTEGER, "RemoveArmor", InputRemoveArmor ),
-	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetArmor", InputSetArmor ),
+		DEFINE_INPUTFUNC( FIELD_INTEGER, "AddArmor", InputAddArmor ),
+		DEFINE_INPUTFUNC( FIELD_INTEGER, "RemoveArmor", InputRemoveArmor ),
+		DEFINE_INPUTFUNC( FIELD_INTEGER, "SetArmor", InputSetArmor ),
 
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "AddAuxPower", InputAddAuxPower ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "RemoveAuxPower", InputRemoveAuxPower ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetAuxPower", InputSetAuxPower ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "AddAuxPower", InputAddAuxPower ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "RemoveAuxPower", InputRemoveAuxPower ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "SetAuxPower", InputSetAuxPower ),
 
-	DEFINE_INPUTFUNC( FIELD_VOID, "TurnFlashlightOn", InputTurnFlashlightOn ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "TurnFlashlightOff", InputTurnFlashlightOff ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "TurnFlashlightOn", InputTurnFlashlightOn ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "TurnFlashlightOff", InputTurnFlashlightOff ),
 
-	DEFINE_INPUTFUNC( FIELD_VOID, "EnableGeigerCounter", InputEnableGeigerCounter ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "DisableGeigerCounter", InputDisableGeigerCounter ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "ShowSquadHUD", InputShowSquadHUD ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "HideSquadHUD", InputHideSquadHUD ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "EnableGeigerCounter", InputEnableGeigerCounter ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "DisableGeigerCounter", InputDisableGeigerCounter ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "ShowSquadHUD", InputShowSquadHUD ),
+		DEFINE_INPUTFUNC( FIELD_VOID, "HideSquadHUD", InputHideSquadHUD ),
 #endif
 
-	DEFINE_SOUNDPATCH( m_sndLeeches ),
-	DEFINE_SOUNDPATCH( m_sndWaterSplashes ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", SetMaxTemperature ),
+		DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", SetMinTemperature ),
 
-	DEFINE_FIELD( m_flArmorReductionTime, FIELD_TIME ),
-	DEFINE_FIELD( m_iArmorReductionFrom, FIELD_INTEGER ),
+		DEFINE_SOUNDPATCH( m_sndLeeches ),
+		DEFINE_SOUNDPATCH( m_sndWaterSplashes ),
 
-	DEFINE_FIELD( m_flTimeUseSuspended, FIELD_TIME ),
+		DEFINE_FIELD( m_flArmorReductionTime, FIELD_TIME ),
+		DEFINE_FIELD( m_iArmorReductionFrom, FIELD_INTEGER ),
 
-	DEFINE_FIELD( m_hLocatorTargetEntity, FIELD_EHANDLE ),
+		DEFINE_FIELD( m_flTimeUseSuspended, FIELD_TIME ),
 
-	DEFINE_FIELD( m_flTimeNextLadderHint, FIELD_TIME ),
+		DEFINE_FIELD( m_hLocatorTargetEntity, FIELD_EHANDLE ),
 
-	//DEFINE_FIELD( m_hPlayerProxy, FIELD_EHANDLE ), //Shut up class check!
+		DEFINE_FIELD( m_flTimeNextLadderHint, FIELD_TIME ),
 
+		//DEFINE_FIELD( m_hPlayerProxy, FIELD_EHANDLE ), //Shut up class check!
+
+		DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+		DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
+		DEFINE_FIELD( m_flTemperatureNextHurt, FIELD_TIME ),
+		DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
+		DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
 END_DATADESC()
 
 #ifdef MAPBASE_VSCRIPT
@@ -641,6 +650,12 @@ CHL2_Player::CHL2_Player()
 
 	m_flArmorReductionTime = 0.0f;
 	m_iArmorReductionFrom = 0;
+
+	m_flTemperature = 33.0f;
+	m_flFreezeMultiplier = -1.25f;
+	m_flTemperatureNextHurt = 0.0f;
+	m_flMaxTemperature = 33.0f;
+	m_flMinTemperature = -20.0f;
 }
 
 //
@@ -659,9 +674,7 @@ CHL2_Player::CHL2_Player()
 #else
 	CSuitPowerDevice SuitDeviceFlashlight( bits_SUIT_DEVICE_FLASHLIGHT, 2.222 );	// 100 units in 45 second
 #endif
-
 CSuitPowerDevice SuitDeviceBreather( bits_SUIT_DEVICE_BREATHER, 6.7f );		// 100 units in 15 seconds (plus three padded seconds)
-CSuitPowerDevice SuitDeviceTemperature( bits_SUIT_DEVICE_TEMPERATURE, 1.111 );	// 100 units in 90 second
 
 #ifdef MAPBASE
 // Default: 100 units in 8 seconds
@@ -1173,6 +1186,95 @@ void CHL2_Player::PostThink( void )
 		m_flAnimRenderYaw.Set( m_pPlayerAnimState->GetRenderAngles().y );
 	}
 #endif
+
+	HandleTemperature();
+}
+
+ConVar sv_temperature_water_affect( "sv_temperature_water_affect", "1", FCVAR_REPLICATED| FCVAR_CHEAT, "Should the player slowly freeze in water." );
+ConVar sv_temperature_take_damage( "sv_temperature_take_damage", "1", FCVAR_REPLICATED| FCVAR_CHEAT, "Should the player take damage depending on his temperature." );
+ConVar sv_temperature_damage_temp_min( "sv_temperature_damage_temp_min", "-5.0", FCVAR_REPLICATED| FCVAR_CHEAT, "Below what temperature should the player start taking damage");
+ConVar sv_temperature_damage_temp_max( "sv_temperature_damage_temp_max", "40.0", FCVAR_REPLICATED| FCVAR_CHEAT, "Above what temperature should the player start taking damage" );
+ConVar sv_temperature_debug( "sv_temperature_debug", "0", FCVAR_REPLICATED, "Should the debugging mode for the temperature system be enabled" );
+ConVar sv_temperature_affect_speed( "sv_temperature_affect_speed", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Should the player speed be affected by temperature");
+
+int nextPrint = 0;
+void CHL2_Player::HandleTemperature( void ) {
+	if ( !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) return;
+
+	if ( sv_infinite_aux_power.GetBool() ) {
+		SetMaxSpeed( HL2_NORM_SPEED );
+		m_flTemperature = m_flMaxTemperature;
+		m_HL2Local.m_flTemperature = m_flMaxTemperature;
+
+		return;
+	}
+
+	if ( sv_temperature_water_affect.GetBool() ) {
+		switch ( GetWaterLevel() ) {
+		case 1:
+			//m_flFreezeMultiplier *= 1.5f;
+			break;
+		case 2:
+			//m_flFreezeMultiplier *= 2.0f;
+			break;
+		case 3:
+			//m_flFreezeMultiplier *= 3.0f;
+			break;
+		}
+	}
+
+	if ( sv_temperature_debug.GetBool() && nextPrint <= gpGlobals->curtime  ) {
+		ConDColorMsg( Color( 100, 100, 100 ), "Player Temperature %f\n", m_flTemperature );
+		ConDColorMsg( Color( 100, 100, 100 ), "Player Temperature Multiplier %f\n", m_flFreezeMultiplier );
+		ConDColorMsg( Color( 100, 100, 100 ), "Player Minimum Temperature %f\n", m_flMinTemperature );
+		ConDColorMsg( Color( 100, 100, 100 ), "Player Minimum Temperature %f\n", m_flMaxTemperature );
+	}
+
+	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
+	
+	if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
+	else if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
+
+	m_HL2Local.m_flTemperature = m_flTemperature;
+	m_HL2Local.m_flMaxTemperature = m_flMaxTemperature;
+	m_HL2Local.m_flMinTemperature = m_flMinTemperature;
+
+	SetMaxSpeed( m_flTemperature <= m_flMinTemperature ? HL2_WALK_SPEED : HL2_NORM_SPEED );
+
+	if ( sv_temperature_take_damage.GetBool() ) {
+		if ( ( m_flTemperature <= sv_temperature_damage_temp_min.GetFloat() || m_flTemperature >= sv_temperature_damage_temp_max.GetFloat() ) && m_flTemperatureNextHurt <= gpGlobals->curtime ) {
+			CTakeDamageInfo dmgInfo;
+
+			dmgInfo.SetDamage( sv_temperature_take_damage.GetInt() );
+			dmgInfo.SetDamageForce( Vector( 1, 1, 1 ) );
+			dmgInfo.SetDamageType( DMG_DIRECT );
+			dmgInfo.SetDamagePosition( GetAbsOrigin() );
+			dmgInfo.SetAttacker( this );
+			dmgInfo.SetInflictor( this );
+
+			TakeDamage( dmgInfo );
+
+			GetPlayerProxy()->m_OnPlayerTemperatureHurt.FireOutput(this, this);
+
+			if ( sv_temperature_debug.GetBool() && nextPrint <= gpGlobals->curtime ) {
+				ConDColorMsg( Color(100, 100, 100), "Player taken damage from temperature: %i", sv_temperature_take_damage.GetInt() );
+			}
+
+			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
+		}	
+	}
+
+	nextPrint = gpGlobals->curtime + 1;
+}
+
+void CHL2_Player::SetMaxTemperature( inputdata_t& inputdata ) {
+	m_flMaxTemperature = inputdata.value.Float();
+	GetPlayerProxy()->m_OnPlayerChangeMaxTemperature.FireOutput(this, this);
+}
+
+void CHL2_Player::SetMinTemperature( inputdata_t& inputdata ) {
+	m_flMinTemperature = inputdata.value.Float();
+	GetPlayerProxy()->m_OnPlayerChangeMinTemperature.FireOutput( this, this );
 }
 
 void CHL2_Player::StartAdmireGlovesAnimation( void )
@@ -1543,7 +1645,6 @@ void CHL2_Player::Spawn(void)
 	// Setup our flashlight values
 #ifdef HL2_EPISODIC
 	m_HL2Local.m_flFlashBattery = 100.0f;
-	m_HL2Local.m_flTemperature = 100.0f;
 #endif 
 
 	GetPlayerProxy();
@@ -2407,28 +2508,6 @@ void CHL2_Player::SuitPower_Update( void )
 				FlashlightTurnOff();
 #endif
 			}
-		}
-	}
-
-	if ( GlobalEntity_GetIndex( "gordon_freezing" ) == 1 ) {
-		m_HL2Local.m_flTemperature = ( m_HL2Local.m_flTemperature * m_flFreezeMultiplier ) + gpGlobals->frametime;
-
-		if ( m_HL2Local.m_flTemperature >= 100.0f ) {
-			SetMaxSpeed( HL2_NORM_SPEED );
-			m_HL2Local.m_flTemperature = 100.0f;
-		}
-
-		if ( m_HL2Local.m_flTemperature <= 2.0f ) {
-			SetMaxSpeed( HL2_WALK_SPEED );
-		}
-	}
-	else {
-		m_HL2Local.m_flTemperature = ( m_HL2Local.m_flTemperature * m_flFreezeMultiplier ) - gpGlobals->frametime;
-
-		if ( m_HL2Local.m_flTemperature <= 0.0f ) {
-			SetMaxSpeed( HL2_NORM_SPEED / 2);
-
-			m_HL2Local.m_flTemperature = 0.0f;
 		}
 	}
 }
@@ -3645,6 +3724,20 @@ void CHL2_Player::UpdateWeaponPosture( void )
 	{
 		m_LowerWeaponTimer.Set( .3 );
 		VPROF( "CHL2_Player::UpdateWeaponPosture-CheckLower" );
+
+#ifdef MAPBASE
+		if (m_nButtons & IN_VGUIMODE)
+		{
+			//We're over a friendly, drop our weapon
+			if (Weapon_Lower() == false)
+			{
+				//FIXME: We couldn't lower our weapon!
+			}
+
+			return;
+		}
+#endif // MAPBASE
+
 		Vector vecAim = BaseClass::GetAutoaimVector( AUTOAIM_SCALE_DIRECT_ONLY );
 
 		const float CHECK_FRIENDLY_RANGE = 50 * 12;
@@ -3991,24 +4084,6 @@ void CHL2_Player::UpdateClientData( void )
 	else
 	{
 		m_HL2Local.m_flFlashBattery = -1.0f;
-	}
-
-	if ( !sv_infinite_aux_power.GetBool() ) {
-		if ( GlobalEntity_GetIndex( "gordon_freezing" ) == 1 ) {
-			m_HL2Local.m_flTemperature += ( TEMP_DRAIN_TIME * m_flFreezeMultiplier ) * gpGlobals->frametime;
-
-			if ( m_HL2Local.m_flTemperature <= 0.0f ) {
-				SetMaxSpeed( HL2_WALK_SPEED / 1.5 );
-				m_HL2Local.m_flTemperature = 0.0f;
-			}
-			else {
-				SetMaxSpeed( HL2_WALK_SPEED );
-			}
-		}
-		else {
-			m_HL2Local.m_flTemperature = 100.0f;
-			SetMaxSpeed( HL2_WALK_SPEED );
-		}
 	}
 #endif // HL2_EPISODIC
 
@@ -4605,6 +4680,11 @@ BEGIN_DATADESC( CLogicPlayerProxy )
 	DEFINE_OUTPUT( m_RequestedPlayerFlashBattery, "PlayerFlashBattery" ),
 	DEFINE_OUTPUT( m_OnPlayerSpawn, "OnPlayerSpawn" ),
 #endif
+
+	DEFINE_OUTPUT(m_OnPlayerTemperatureHurt, "OnPlayerTemperatureHurt"),
+	DEFINE_OUTPUT(m_OnPlayerChangeMaxTemperature, "OnPlayerChangeMaxTemperature"),
+	DEFINE_OUTPUT(m_OnPlayerChangeMinTemperature, "OnPlayerChangeMinTemperature"),
+
 	DEFINE_INPUTFUNC( FIELD_VOID,	"RequestPlayerHealth",	InputRequestPlayerHealth ),
 	DEFINE_INPUTFUNC( FIELD_VOID,	"SetFlashlightSlowDrain",	InputSetFlashlightSlowDrain ),
 	DEFINE_INPUTFUNC( FIELD_VOID,	"SetFlashlightNormalDrain",	InputSetFlashlightNormalDrain ),

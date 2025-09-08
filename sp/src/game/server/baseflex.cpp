@@ -535,7 +535,8 @@ bool CBaseFlex::HandleStartSequenceSceneEvent( CSceneEventInfo *info, CChoreoSce
 	}
 	else
 	{
-		SetLayerPlaybackRate( info->m_iLayer, 1.0 );
+		// SetLayerPlaybackRate( info->m_iLayer, 1.0 );
+		SetLayerPlaybackRate( info->m_iLayer, GetPlaybackRate() ); // Is this even needed? -TheMaster974
 	}
 
 	if (IsMoving())
@@ -2521,7 +2522,7 @@ void CFlexCycler::Spawn( )
 	m_takedamage		= DAMAGE_YES;
 	m_iHealth			= 80000;// no cycler should die
 	
-	m_flPlaybackRate	= 1.0f;
+//	m_flPlaybackRate	= 1.0f; // Can this be left as is? -TheMaster974
 	m_flGroundSpeed		= 0;
 
 
@@ -2649,7 +2650,7 @@ void CFlexCycler::Think( void )
 		// ResetSequenceInfo();
 		// hack to avoid reloading model every frame
 		m_flAnimTime = gpGlobals->curtime;
-		m_flPlaybackRate = 1.0;
+		// m_flPlaybackRate = 1.0; // Can this be left as is? -TheMaster974
 		m_bSequenceFinished = false;
 		m_flLastEventCheck = 0;
 		m_flCycle = 0;
