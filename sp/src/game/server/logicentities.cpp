@@ -1348,8 +1348,7 @@ void CEnvGlobal::InputSetCounter( inputdata_t &inputdata )
         {
             if ( pEnt && pEnt->IsAlive() )
             {
-                float flAlpha = inputdata.value.Float();
-                pEnt->m_flSnowOverlayAlpha = flAlpha;
+                pEnt->m_flSnowOverlayAlpha = GlobalEntity_GetCounter( m_globalstate );
             }
         }
     }
@@ -1374,8 +1373,7 @@ void CEnvGlobal::InputAddToCounter( inputdata_t &inputdata )
         {
             if ( pEnt && pEnt->IsAlive() )
             {
-                float flAlpha = inputdata.value.Float();
-                pEnt->m_flSnowOverlayAlpha = flAlpha;
+                pEnt->m_flSnowOverlayAlpha = GlobalEntity_GetCounter( m_globalstate );
             }
         }
     }
