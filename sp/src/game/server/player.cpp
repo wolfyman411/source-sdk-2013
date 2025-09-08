@@ -462,6 +462,7 @@ BEGIN_DATADESC( CBasePlayer )
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetHealth", InputSetHealth ),
+    DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SnowyHands", InputSnowyHands ),
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetHUDVisibility", InputSetHUDVisibility ),
 #ifdef MAPBASE // From Alien Swarm SDK (kind of)
 	DEFINE_INPUTFUNC( FIELD_INPUT, "SetFogController", InputSetFogController ),
@@ -9585,6 +9586,11 @@ void CBasePlayer::InputSetHealth( inputdata_t &inputdata )
 		TakeDamage( CTakeDamageInfo( this, this, iDelta, DMG_GENERIC ) );
 		m_ArmorValue = armor;
 	}
+}
+
+void CBasePlayer::InputSnowyHands( inputdata_t& inputdata )
+{
+    m_bShouldDrawSnowOverlay = inputdata.value.Bool();
 }
 
 //-----------------------------------------------------------------------------
