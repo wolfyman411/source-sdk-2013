@@ -109,6 +109,9 @@ public:
 #endif
 
 public:
+    bool                m_bShouldDrawSnowOverlay;
+    float               m_flSnowOverlayAlpha;
+    virtual float GetViewModelSnowOverlayAlpha( void ) const { return m_flSnowOverlayAlpha; }
 
 	float			m_flNextAttack;
 

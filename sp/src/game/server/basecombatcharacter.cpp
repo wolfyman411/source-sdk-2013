@@ -120,6 +120,9 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
 	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
 
+    DEFINE_FIELD( m_bShouldDrawSnowOverlay, FIELD_BOOLEAN ),
+    DEFINE_FIELD( m_flSnowOverlayAlpha, FIELD_FLOAT ),
+
 #ifndef MAPBASE // See CBaseEntity::InputKilledNPC()
 	DEFINE_INPUTFUNC( FIELD_VOID, "KilledNPC", InputKilledNPC ),
 #endif
@@ -310,10 +313,12 @@ IMPLEMENT_SERVERCLASS_ST(CBaseCombatCharacter, DT_BaseCombatCharacter)
 
 	SendPropEHandle( SENDINFO( m_hActiveWeapon ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_hMyWeapons), SendPropEHandle( SENDINFO_ARRAY(m_hMyWeapons) ) ),
-
 #ifdef INVASION_DLL
 	SendPropInt( SENDINFO(m_iPowerups), MAX_POWERUPS, SPROP_UNSIGNED ), 
 #endif
+
+    SendPropBool( SENDINFO( m_bShouldDrawSnowOverlay ) ),
+    SendPropFloat( SENDINFO( m_flSnowOverlayAlpha ) ),
 
 END_SEND_TABLE()
 
@@ -892,6 +897,9 @@ CBaseCombatCharacter::CBaseCombatCharacter( void )
 	m_GlowColor.GetForModify().Init( 0.76f, 0.76f, 0.76f );
 	m_GlowAlpha.Set(1.0f);
 #endif // GLOWS_ENABLE
+
+    m_bShouldDrawSnowOverlay = false;
+    m_flSnowOverlayAlpha = 0.0f;
 }
 
 //------------------------------------------------------------------------------
@@ -4366,6 +4374,19 @@ void CBaseCombatCharacter::InputSwitchToWeapon( inputdata_t &inputdata )
 			Warning( "Couldn't create weapon %s to give %s.\n", inputdata.value.String(), GetDebugName() );
 		}
 	}
+}
+
+void CBaseCombatCharacter::InputSetSnowOverlayAlpha( inputdata_t &inputdata )
+{
+    float flAlpha = inputdata.value.Float();
+    flAlpha = clamp( flAlpha, 0.0f, 1.0f );
+
+    m_flSnowOverlayAlpha = flAlpha;
+}
+
+void CBaseCombatCharacter::InputSetShouldDrawSnowOverlay( inputdata_t &inputdata )
+{
+    m_bShouldDrawSnowOverlay = inputdata.value.Bool();
 }
 
 #define FINDNAMEDENTITY_MAX_ENTITIES	32

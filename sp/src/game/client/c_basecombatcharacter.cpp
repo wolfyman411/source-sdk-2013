@@ -39,6 +39,9 @@ C_BaseCombatCharacter::C_BaseCombatCharacter()
 	m_GlowAlpha = 1.0f;
 	m_OldGlowAlpha = 1.0f;
 #endif // GLOWS_ENABLE
+
+    m_bShouldDrawSnowOverlay = false;
+    m_flSnowOverlayAlpha = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -176,6 +179,9 @@ BEGIN_RECV_TABLE(C_BaseCombatCharacter, DT_BaseCombatCharacter)
 #ifdef INVASION_CLIENT_DLL
 	RecvPropInt( RECVINFO( m_iPowerups ) ),
 #endif
+
+    RecvPropBool( RECVINFO( m_bShouldDrawSnowOverlay ) ),
+    RecvPropFloat( RECVINFO( m_flSnowOverlayAlpha ) ),
 
 END_RECV_TABLE()
 
