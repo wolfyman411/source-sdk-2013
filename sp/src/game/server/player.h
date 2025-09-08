@@ -835,6 +835,8 @@ public:
 	// Here so that derived classes can use the expresser
 	virtual CAI_Expresser *GetExpresser() { return NULL; };
 
+    void    InputSnowyHands( inputdata_t& inputdata );
+
 #if !defined(NO_STEAM)
 	//----------------------------
 	// Steam handling
@@ -970,6 +972,8 @@ public:
 #ifdef MAPBASE
 	CNetworkVar( bool, m_bInTriggerFall );
 #endif
+
+    CNetworkVar( bool, m_bShouldDrawSnowOverlay );
 
 private:
 
