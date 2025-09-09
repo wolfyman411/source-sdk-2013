@@ -5690,23 +5690,41 @@ class CTriggerFreeze : public CBaseTrigger
         virtual void Think( void );
         virtual void Spawn( void );
 
+        virtual void InputTemperatureIncrementer( inputdata_t& inputdata );
+        virtual void InputIdealTemperature( inputdata_t& inputdata );
+
         float	m_flTemperatureIncrementer;
         float	m_flIdealTemperature;
+
+        
 };
 
 LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
 
 BEGIN_DATADESC( CTriggerFreeze )
+    DEFINE_FUNCTION( Think ),
+
 	DEFINE_KEYFIELD( m_flTemperatureIncrementer, FIELD_FLOAT, "TemperatureIncrementer"),
-    DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" )
+    DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" ),
+
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperatureIncrementer", InputTemperatureIncrementer ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputIdealTemperature ),
 END_DATADESC()
 
 CTriggerFreeze::CTriggerFreeze()
 {
     m_flTemperatureIncrementer = 1.0f;
     m_flIdealTemperature = 70.0f; // This is in Fahrenheit
+}
 
-    DevMsg( "Running constructor for CTriggerFreeze\n" );
+void CTriggerFreeze::InputTemperatureIncrementer( inputdata_t& inputdata )
+{
+    m_flTemperatureIncrementer = inputdata.value.Float();
+}
+
+void CTriggerFreeze::InputIdealTemperature( inputdata_t& inputdata )
+{
+    m_flIdealTemperature = inputdata.value.Float();
 }
 
 void CTriggerFreeze::Spawn( void ) {
@@ -5714,18 +5732,16 @@ void CTriggerFreeze::Spawn( void ) {
 
 	InitTrigger();
 
-    DevMsg( "Temp inc: %3.2f, ideal: %3.2f\n", m_flTemperatureIncrementer, m_flIdealTemperature );
+    SetNextThink( gpGlobals->curtime + 1.0f );
 	SetThink( &CTriggerFreeze::Think );
 }
 
 void CTriggerFreeze::Think( void )
 {
-    DevMsg( "Entities touching: %d\n", m_hTouchingEntities.Count() );
     for ( CBaseEntity* pOther : m_hTouchingEntities )
     {
         if ( !pOther )
         {
-            DevMsg( "No entity\n" );
             continue;
         }
 
@@ -5745,16 +5761,17 @@ void CTriggerFreeze::Think( void )
             }
             */
 
+            if ( !pNPC->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { continue; }
+
             float flCurrentTemp = pNPC->GetTemperature();
             if ( ( m_flTemperatureIncrementer < 0.0f && flCurrentTemp < m_flIdealTemperature ) || ( m_flTemperatureIncrementer > 0.0f && flCurrentTemp > m_flIdealTemperature ) )
             {
-                DevMsg( "Temp: %3.2f (ideal: %3.2f)\n", pNPC->GetTemperature(), m_flIdealTemperature );
+                DevMsg( 2, "[ FREEZE TRIGGER ] %s's temperature is already at or beyond the ideal temperature of %3.2fF (current: %3.2fF)\n", pNPC->GetDebugName(), m_flIdealTemperature, flCurrentTemp );
                 continue;
             }
 
+            DevMsg( "[ FREEZE TRIGGER ] %s's temperature has been incremented.\n", pNPC->GetDebugName() );
             pNPC->AddTemperature( m_flTemperatureIncrementer );
-            debugoverlay->AddTextOverlay( pNPC->GetAbsOrigin() + Vector( 0, 0, 72 ), 0.0f, "Temp: %3.2f", pNPC->GetTemperature() );
-            DevMsg( "Temp: %3.2f\n", pNPC->GetTemperature() );
         }
     }
 
