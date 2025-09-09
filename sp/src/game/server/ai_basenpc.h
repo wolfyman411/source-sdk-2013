@@ -695,30 +695,6 @@ public:
 		NEXT_CONDITION 	= LAST_SHARED_CONDITION,
 	};
 
-	virtual void		HandleTemperature( void );
-
-	float				m_flTemperature;
-	float				m_flFreezeMultiplier;
-	float				m_flMaxTemperature;
-	float				m_flMinTemperature;
-
-	bool				m_bIsFrozen;
-
-	virtual void		OnFrozen( void );
-	virtual void		OnUnFrozen( void );
-	virtual bool		IsFrozen( void ) { return m_bIsFrozen; }
-
-	void				InputSetFrozen( inputdata_t& inputdata );
-	void				InputSetTemperature( inputdata_t& inputdata );
-	void				InputSetMaxTemperature( inputdata_t& inputdata );
-	void				InputSetMinTemperature( inputdata_t& inputdata );
-
-	COutputEvent		m_OnFrozen;
-	COutputEvent		m_OnUnFrozen;
-	COutputEvent		m_OnChangeTemperature;
-	COutputEvent		m_OnChangeMaxTemperature;
-	COutputEvent		m_OnChangeMinTemperature;
-
 protected:
 	// Used by derived classes to chain a task to a task that might not be the 
 	// one they are currently handling:
@@ -796,6 +772,8 @@ public:
 	virtual int			GetLocalTaskId( int globalTaskId)			{ return GetClassScheduleIdSpace()->TaskGlobalToLocal( globalTaskId ); }
 
 	virtual const char *GetSchedulingErrorName()					{ return "CAI_BaseNPC"; }
+
+    
 
 protected:
 	static bool			LoadSchedules(void);
@@ -1014,10 +992,36 @@ public:
 	void				Sleep();
 	bool				WokeThisTick() const;
 
+    float               GetTemperature() const { return m_flTemperature; }
+    virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
+    virtual void        AddTemperature( float flTemp );
+
+    virtual float       GetMinTemperature( void ) { return m_flMinTemperature; }
+    virtual float       GetMaxTemperature( void ) { return m_flMaxTemperature; }
+
+    virtual float       GetTemperatureChangeRate( void ) { return m_flTemperatureChangeRate; }
+
+    virtual void        SetMinTemperature( float flTemp ) { m_flMinTemperature = flTemp; }
+    virtual void        SetMaxTemperature( float flTemp ) { m_flMaxTemperature = flTemp; }
+
+    virtual void        SetTemperatureChangeRate( float rate ) { m_flTemperatureChangeRate = rate; }
+
+    virtual bool        IsOverheating( void )   { return m_flTemperature >= m_flMaxTemperature; }
+    virtual bool        IsFreezing( void )      { return m_flTemperature <= m_flMinTemperature; }
+
+    virtual void        HandleTemperature( void );
+
+    virtual bool        IsFrozen( void ) { return m_bHasFrozen; }
+
 	//---------------------------------
 
 	NPC_STATE			m_NPCState;				// npc's current state
 	float				m_flLastStateChangeTime;
+
+    CNetworkVar( float, m_flTemperature );
+    CNetworkVar( float, m_flMaxTemperature );
+    CNetworkVar( float, m_flMinTemperature );
+    CNetworkVar( float, m_flTemperatureChangeRate );
 
 private:
 	NPC_STATE			m_IdealNPCState;		// npc should change to this state
@@ -2024,7 +2028,7 @@ public:
 	bool				BBoxFlat( void );
 
 	// Have we started to freeze? -TheMaster974
-	bool 				hasFrozen;
+	bool 				m_bHasFrozen;
 
 	//---------------------------------
 

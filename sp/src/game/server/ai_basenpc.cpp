@@ -3399,33 +3399,10 @@ bool CAI_BaseNPC::PreThink( void )
 		}
 	}
 
-	if ( m_hOpeningDoor.Get() && AIIsDebuggingDoors( this ) )
-	{
-		NDebugOverlay::Line( EyePosition(), m_hOpeningDoor->WorldSpaceCenter(), 255, 255, 255, false, .1 );
-	}
-
-	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) && ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NPC) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
-		if ( m_flTemperature <= m_flMinTemperature * 1.2f ) {
-			if ( ai_debug_temperature.GetBool() && nextTempDebugPrint <= gpGlobals->curtime ) {
-				ConDColorMsg( Color( 100, 100, 100 ), "[AI] Freezing from temperature - Playback Animation Reduced\n" );
-				nextTempDebugPrint = gpGlobals->curtime + 1;
-			}
-
-			float temperatureRange = m_flMaxTemperature - m_flMinTemperature;
-			float normalizedTemperature = ( m_flTemperature - m_flMinTemperature ) / temperatureRange;
-			byte blueValue = 255 * ( 1.0f - normalizedTemperature );
-
-			SetRenderColor( 0, 0, blueValue );
-
-			float playbackRate = 1.0f - ( 1.0f - 0.5f ) * ( 1.0f - m_flTemperature / 100.0f );
-			SetPlaybackRate( playbackRate );
-		}
-
-		if ( IsFrozen() ) {
-			return false;
-		}
-	}
-	
+    if ( m_hOpeningDoor.Get() && AIIsDebuggingDoors( this ) )
+    {
+        NDebugOverlay::Line( EyePosition(), m_hOpeningDoor->WorldSpaceCenter(), 255, 255, 255, false, .1 );
+    }
 
 	return true;
 }
@@ -4371,6 +4348,73 @@ bool CAI_BaseNPC::CheckPVSCondition()
 	return bInPVS;
 }
 
+void CAI_BaseNPC::HandleTemperature( void )
+{
+    if ( IsFreezing() )
+    {
+        if ( GetPlaybackRate() <= FLT_EPSILON )
+        {
+            if ( !IsFrozen() )
+            {
+                Vector center, worldCenter;
+                center = CollisionProp()->OBBCenter();
+                CollisionProp()->CollisionToWorldSpace( center, &worldCenter );
+                VPhysicsDestroyObject();
+
+                CBaseEntity* pNewEnt = CreateEntityByName( "prop_physics_frozen" );
+                //            pNewEnt->KeyValue("model", "models/props_c17/furniturefridge001a.mdl");
+                pNewEnt->KeyValue( "model", "models/props_c17/furnituredresser001a.mdl" );
+                pNewEnt->SetAbsOrigin( worldCenter );
+                pNewEnt->SetAbsAngles( GetAbsAngles() );
+
+                IPhysicsObject* pNewObj = VPhysicsInitNormal( SOLID_BBOX, GetSolidFlags(), false );
+
+                pNewEnt->VPhysicsSetObject( pNewObj );
+                pNewEnt->Spawn();
+                SetParent( pNewEnt );
+                pNewEnt->AddEffects( EF_NODRAW );
+
+                CPhysicsProp* pPhysProp = dynamic_cast< CPhysicsProp* >( pNewEnt );
+                if ( pPhysProp )
+                {
+                    pPhysProp->pFrozenNPC = this;
+                }
+
+                VPhysicsSwapObject( NULL );
+
+                m_bHasFrozen = true;
+            }
+
+            SetNextThink( TICK_NEVER_THINK );
+            return;
+        }
+
+        float playbackRate = GetPlaybackRate();
+        playbackRate -= 0.04f; // This needs to be investigated.
+
+        // This is the freezing effect.
+        byte colour = ( 1 + playbackRate ) * 140;
+        if ( colour > 255 )
+            colour = 255;
+
+        SetRenderColorR( colour );
+
+        // If we fall below a certain threshold, effectively freeze the NPC.
+        if ( playbackRate < 0.02f )
+            playbackRate = FLT_EPSILON;
+
+        SetPlaybackRate( playbackRate );
+    }
+    else if ( IsOverheating() )
+    {
+        Ignite( 1, false, 0, false );
+    }
+}
+
+void CAI_BaseNPC::AddTemperature( float newTemp )
+{
+    SetTemperature( GetTemperature() + ( newTemp * m_flTemperatureChangeRate ) );
+}
 
 //-----------------------------------------------------------------------------
 // NPC Think - calls out to core AI functions and handles this
@@ -4379,8 +4423,17 @@ bool CAI_BaseNPC::CheckPVSCondition()
 
 void CAI_BaseNPC::NPCThink( void )
 {
-	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NPC ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
-		HandleTemperature();
+	if ( HasSpawnFlags(SF_NPC_USE_TEMPERATURE) ) {
+        if ( IsPlayer() && !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER | TEMPERATURE_MODE_ALL) ) {
+            return;
+		}
+
+        if ( IsNPC() && !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NPC | TEMPERATURE_MODE_ALL ) )
+        {
+            return;
+        }
+
+        HandleTemperature();
 	}
 
 	if ( m_bCheckContacts )
@@ -4404,44 +4457,6 @@ void CAI_BaseNPC::NPCThink( void )
 
 	//---------------------------------
 	bool bRanDecision = false;
-
-	// If we are frozen solid, don't do anything!
-	if (GetPlaybackRate() <= FLT_EPSILON)
-	{
-		if (!hasFrozen)
-		{
-			Vector center, worldCenter;
-			center = CollisionProp()->OBBCenter();
-			CollisionProp()->CollisionToWorldSpace(center, &worldCenter);
-			VPhysicsDestroyObject();
-
-			CBaseEntity *pNewEnt = CreateEntityByName("prop_physics_frozen");
-//			pNewEnt->KeyValue("model", "models/props_c17/furniturefridge001a.mdl");
-			pNewEnt->KeyValue("model", "models/props_c17/furnituredresser001a.mdl");
-			pNewEnt->SetAbsOrigin(worldCenter);
-			pNewEnt->SetAbsAngles(GetAbsAngles());
-
-			IPhysicsObject* pNewObj = VPhysicsInitNormal(SOLID_BBOX, GetSolidFlags(), false);
-
-			pNewEnt->VPhysicsSetObject(pNewObj);
-			pNewEnt->Spawn();
-			SetParent(pNewEnt);
-			pNewEnt->AddEffects(EF_NODRAW);
-
-			CPhysicsProp* pPhysProp = dynamic_cast<CPhysicsProp*>(pNewEnt);
-			if (pPhysProp)
-			{
-				pPhysProp->pFrozenNPC = this;
-			}
-
-			VPhysicsSwapObject(NULL);
-
-			hasFrozen = true;
-		}
-
-		SetNextThink(TICK_NEVER_THINK);
-		return;
-	}
 
 	if ( GetEfficiency() < AIE_DORMANT && GetSleepState() == AISS_AWAKE )
 	{
@@ -12256,7 +12271,7 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_FIELD( m_bImportanRagdoll,			FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bPlayerAvoidState,			FIELD_BOOLEAN ),
 
-	DEFINE_FIELD( hasFrozen, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
 
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
@@ -12264,24 +12279,6 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_KEYFIELD( m_flSpeedModifier, FIELD_FLOAT, "BaseSpeedModifier" ),
 	DEFINE_FIELD( m_FakeSequenceGestureLayer,	FIELD_INTEGER ),
 #endif
-
-	DEFINE_FIELD( m_flFreezeMultiplier,			FIELD_FLOAT),
-
-	DEFINE_KEYFIELD( m_flTemperature, FIELD_FLOAT, "Temperature" ),
-	DEFINE_KEYFIELD( m_flMaxTemperature, FIELD_FLOAT, "MaxTemperature" ),
-	DEFINE_KEYFIELD( m_flMinTemperature, FIELD_FLOAT, "MinTemperature" ),
-	DEFINE_KEYFIELD( m_bIsFrozen, FIELD_BOOLEAN, "Frozen"),
-
-	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetFrozen", InputSetFrozen ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
-	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
-
-	DEFINE_OUTPUT( m_OnFrozen, "OnFrozen" ),
-	DEFINE_OUTPUT( m_OnUnFrozen, "OnUnFrozen" ),
-	DEFINE_OUTPUT( m_OnChangeTemperature, "OnChangeTemperature" ),
-	DEFINE_OUTPUT( m_OnChangeMaxTemperature, "OnChangeMaxTemperature" ),
-	DEFINE_OUTPUT( m_OnChangeMinTemperature, "OnChangeMinTemperature" ),
 
 	// Satisfy classcheck
 	// DEFINE_FIELD( m_ScheduleHistory, CUtlVector < AIScheduleChoice_t > ),
@@ -13170,10 +13167,7 @@ CAI_BaseNPC::CAI_BaseNPC(void)
 	m_FakeSequenceGestureLayer = -1;
 #endif
 
-	m_flTemperature = 33.0f;
-	m_flMaxTemperature = 40.0f;
-	m_flMinTemperature = 20.0f;
-	hasFrozen = false;
+	m_bHasFrozen = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -16849,80 +16843,4 @@ void CAI_BaseNPC::DesireCrouch( void )
 bool CAI_BaseNPC::IsInChoreo() const
 {
 	return m_bInChoreo;
-}
-
-void CAI_BaseNPC::HandleTemperature( void ) {
-	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
-
-	if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
-	else if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
-
-	if ( m_flTemperature <= m_flMinTemperature ) {
-		if ( !IsFrozen() ) {
-			OnFrozen();
-		}
-	}
-}
-
-void CAI_BaseNPC::OnFrozen( void ) {
-	m_bIsFrozen = true;
-	m_OnFrozen.FireOutput( this, this );
-
-	//SetRenderColor( 0, 0, 255 );
-	//SetActivity( ACT_IDLE );
-
-	/*
-		CBaseEntity* pFrozenCorpse = CreateEntityByName("prop_dynamic");
-		pFrozenCorpse->SetModel( STRING( GetModelName() ) );
-		pFrozenCorpse->SetAbsOrigin( GetAbsOrigin() );
-		pFrozenCorpse->SetAbsAngles( GetAbsAngles() );
-		pFrozenCorpse->SetSolid( SOLID_BBOX );
-		pFrozenCorpse->VPhysicsInitNormal(SOLID_BBOX, 0, false, 0);
-		DispatchSpawn( pFrozenCorpse );
-
-		if ( pFrozenCorpse ) {
-			IPhysicsObject* physObj = pFrozenCorpse->VPhysicsGetObject();
-			if ( physObj ) {
-				physObj->EnableMotion( false );
-			}
-
-			pFrozenCorpse->SetCollisionBounds( CollisionProp()->OBBMins(), CollisionProp()->OBBMaxs() );
-			pFrozenCorpse->SetRenderColor( 0, 0, 255 );
-
-			Remove();
-		}
-	*/
-
-	// bloodycop: Someone more experiences gotta make a frozen statue ;9
-}
-
-void CAI_BaseNPC::OnUnFrozen( void ) {
-	m_bIsFrozen = false;
-	m_OnUnFrozen.FireOutput( this, this );
-
-	SetRenderColor( 255, 255, 255 );
-}
-
-void CAI_BaseNPC::InputSetFrozen( inputdata_t& inputdata ) {
-	if ( inputdata.value.Bool() ) {
-		if ( !IsFrozen() ) OnFrozen();
-	}
-	else {
-		if ( IsFrozen() ) OnUnFrozen();
-	}
-}
-
-void CAI_BaseNPC::InputSetTemperature( inputdata_t& inputdata ) {
-	m_flTemperature = inputdata.value.Float();
-	m_OnChangeTemperature.FireOutput( this, this );
-}
-
-void CAI_BaseNPC::InputSetMaxTemperature( inputdata_t& inputdata ) {
-	m_flMaxTemperature = inputdata.value.Float();
-	m_OnChangeMaxTemperature.FireOutput( this, this );
-}
-
-void CAI_BaseNPC::InputSetMinTemperature( inputdata_t& inputdata ) {
-	m_flMinTemperature = inputdata.value.Float();
-	m_OnChangeMinTemperature.FireOutput( this, this );
 }
