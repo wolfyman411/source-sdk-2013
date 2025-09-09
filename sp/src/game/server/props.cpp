@@ -3483,7 +3483,7 @@ void CPhysicsProp::OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t Reaso
 		if (FClassnameIs(this, "prop_physics_frozen"))
 		{
 			CTakeDamageInfo info(pPhysGunUser, pPhysGunUser, 1000, DMG_PHYSGUN);
-			Break(pPhysGunUser, info);
+            SetHealth( 1 );
 		}
 	}
 	else if ( Reason == THROWN_BY_PLAYER )
