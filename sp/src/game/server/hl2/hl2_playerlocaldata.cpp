@@ -32,9 +32,6 @@ SendPropBool( SENDINFO( m_bAutoAimTarget ) ),
 SendPropFloat( SENDINFO( m_flFlashBattery ) ),
 SendPropVector( SENDINFO( m_vecLocatorOrigin ) ),
 #endif
-
-SendPropFloat( SENDINFO( m_flTemperature) ),
-SendPropFloat( SENDINFO( m_flFreezeMultiplier ) ),
 END_SEND_TABLE()
 
 BEGIN_SIMPLE_DATADESC( CHL2PlayerLocalData )
@@ -54,12 +51,6 @@ BEGIN_SIMPLE_DATADESC( CHL2PlayerLocalData )
 	// Ladder related stuff
 	DEFINE_FIELD( m_hLadder, FIELD_EHANDLE ),
 	DEFINE_EMBEDDED( m_LadderMove ),
-
-	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
-	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
-	DEFINE_FIELD( m_flTemperatureNextHurt, FIELD_FLOAT ),
-	DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
-	DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
 END_DATADESC()
 
 CHL2PlayerLocalData::CHL2PlayerLocalData()
@@ -74,11 +65,5 @@ CHL2PlayerLocalData::CHL2PlayerLocalData()
 #ifdef HL2_EPISODIC
 	m_flFlashBattery = 0.0f;
 #endif
-
-	m_flTemperature = 33.0f;
-	m_flFreezeMultiplier = 0.0f;
-	m_flTemperatureNextHurt = 0.0f;
-	m_flMaxTemperature = 33.0f;
-	m_flMinTemperature = -10.0f;
 }
 

@@ -48,12 +48,6 @@ public:
 	// Ladder related data
 	CNetworkVar( EHANDLE, m_hLadder );
 	LadderMove_t			m_LadderMove;
-
-	CNetworkVar( float, m_flTemperature );
-	CNetworkVar( float, m_flFreezeMultiplier );
-	CNetworkVar( float, m_flTemperatureNextHurt );
-	CNetworkVar( float,	m_flMaxTemperature );
-	CNetworkVar( float,	m_flMinTemperature );
 };
 
 EXTERN_SEND_TABLE(DT_HL2Local);

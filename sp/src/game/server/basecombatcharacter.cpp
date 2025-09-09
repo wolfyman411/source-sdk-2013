@@ -117,8 +117,6 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 	DEFINE_FIELD( m_bForceServerRagdoll, FIELD_BOOLEAN ),
 #endif
 	DEFINE_FIELD( m_bPreventWeaponPickup, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
-	DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
 
     DEFINE_FIELD( m_bShouldDrawSnowOverlay, FIELD_BOOLEAN ),
     DEFINE_FIELD( m_flSnowOverlayAlpha, FIELD_FLOAT ),

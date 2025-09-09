@@ -243,9 +243,10 @@ public:
 	COutputEvent m_OnPlayerSpawn;
 #endif
 
-	COutputEvent		m_OnPlayerTemperatureHurt;
-	COutputEvent		m_OnPlayerChangeMaxTemperature;
-	COutputEvent		m_OnPlayerChangeMinTemperature;
+    COutputFloat m_MinimumTemperatureChanged;
+    COutputFloat m_MaximumTemperatureChanged;
+    COutputFloat m_TemperatureRiseRateChanged;
+    COutputFloat m_TemperatureFallRateChanged;
 
 	void InputRequestPlayerHealth( inputdata_t &inputdata );
 	void InputSetFlashlightSlowDrain( inputdata_t &inputdata );
@@ -597,9 +598,6 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 		DEFINE_INPUTFUNC( FIELD_VOID, "HideSquadHUD", InputHideSquadHUD ),
 #endif
 
-		DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", SetMaxTemperature ),
-		DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", SetMinTemperature ),
-
 		DEFINE_SOUNDPATCH( m_sndLeeches ),
 		DEFINE_SOUNDPATCH( m_sndWaterSplashes ),
 
@@ -613,12 +611,6 @@ BEGIN_SIMPLE_DATADESC( LadderMove_t )
 		DEFINE_FIELD( m_flTimeNextLadderHint, FIELD_TIME ),
 
 		//DEFINE_FIELD( m_hPlayerProxy, FIELD_EHANDLE ), //Shut up class check!
-
-		DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
-		DEFINE_FIELD( m_flFreezeMultiplier, FIELD_FLOAT ),
-		DEFINE_FIELD( m_flTemperatureNextHurt, FIELD_TIME ),
-		DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
-		DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
 END_DATADESC()
 
 #ifdef MAPBASE_VSCRIPT
@@ -650,12 +642,6 @@ CHL2_Player::CHL2_Player()
 
 	m_flArmorReductionTime = 0.0f;
 	m_iArmorReductionFrom = 0;
-
-	m_flTemperature = 33.0f;
-	m_flFreezeMultiplier = -1.25f;
-	m_flTemperatureNextHurt = 0.0f;
-	m_flMaxTemperature = 33.0f;
-	m_flMinTemperature = -20.0f;
 }
 
 //
@@ -1186,8 +1172,6 @@ void CHL2_Player::PostThink( void )
 		m_flAnimRenderYaw.Set( m_pPlayerAnimState->GetRenderAngles().y );
 	}
 #endif
-
-	HandleTemperature();
 }
 
 ConVar sv_temperature_water_affect( "sv_temperature_water_affect", "1", FCVAR_REPLICATED| FCVAR_CHEAT, "Should the player slowly freeze in water." );
@@ -1196,86 +1180,6 @@ ConVar sv_temperature_damage_temp_min( "sv_temperature_damage_temp_min", "-5.0",
 ConVar sv_temperature_damage_temp_max( "sv_temperature_damage_temp_max", "40.0", FCVAR_REPLICATED| FCVAR_CHEAT, "Above what temperature should the player start taking damage" );
 ConVar sv_temperature_debug( "sv_temperature_debug", "0", FCVAR_REPLICATED, "Should the debugging mode for the temperature system be enabled" );
 ConVar sv_temperature_affect_speed( "sv_temperature_affect_speed", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Should the player speed be affected by temperature");
-
-int nextPrint = 0;
-void CHL2_Player::HandleTemperature( void ) {
-	if ( !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) return;
-
-	if ( sv_infinite_aux_power.GetBool() ) {
-		SetMaxSpeed( HL2_NORM_SPEED );
-		m_flTemperature = m_flMaxTemperature;
-		m_HL2Local.m_flTemperature = m_flMaxTemperature;
-
-		return;
-	}
-
-	if ( sv_temperature_water_affect.GetBool() ) {
-		switch ( GetWaterLevel() ) {
-		case 1:
-			//m_flFreezeMultiplier *= 1.5f;
-			break;
-		case 2:
-			//m_flFreezeMultiplier *= 2.0f;
-			break;
-		case 3:
-			//m_flFreezeMultiplier *= 3.0f;
-			break;
-		}
-	}
-
-	if ( sv_temperature_debug.GetBool() && nextPrint <= gpGlobals->curtime  ) {
-		ConDColorMsg( Color( 100, 100, 100 ), "Player Temperature %f\n", m_flTemperature );
-		ConDColorMsg( Color( 100, 100, 100 ), "Player Temperature Multiplier %f\n", m_flFreezeMultiplier );
-		ConDColorMsg( Color( 100, 100, 100 ), "Player Minimum Temperature %f\n", m_flMinTemperature );
-		ConDColorMsg( Color( 100, 100, 100 ), "Player Minimum Temperature %f\n", m_flMaxTemperature );
-	}
-
-	m_flTemperature -= m_flFreezeMultiplier * gpGlobals->frametime;
-	
-	if ( m_flTemperature >= m_flMaxTemperature ) m_flTemperature = m_flMaxTemperature;
-	else if ( m_flTemperature <= m_flMinTemperature ) m_flTemperature = m_flMinTemperature;
-
-	m_HL2Local.m_flTemperature = m_flTemperature;
-	m_HL2Local.m_flMaxTemperature = m_flMaxTemperature;
-	m_HL2Local.m_flMinTemperature = m_flMinTemperature;
-
-	SetMaxSpeed( m_flTemperature <= m_flMinTemperature ? HL2_WALK_SPEED : HL2_NORM_SPEED );
-
-	if ( sv_temperature_take_damage.GetBool() ) {
-		if ( ( m_flTemperature <= sv_temperature_damage_temp_min.GetFloat() || m_flTemperature >= sv_temperature_damage_temp_max.GetFloat() ) && m_flTemperatureNextHurt <= gpGlobals->curtime ) {
-			CTakeDamageInfo dmgInfo;
-
-			dmgInfo.SetDamage( sv_temperature_take_damage.GetInt() );
-			dmgInfo.SetDamageForce( Vector( 1, 1, 1 ) );
-			dmgInfo.SetDamageType( DMG_DIRECT );
-			dmgInfo.SetDamagePosition( GetAbsOrigin() );
-			dmgInfo.SetAttacker( this );
-			dmgInfo.SetInflictor( this );
-
-			TakeDamage( dmgInfo );
-
-			GetPlayerProxy()->m_OnPlayerTemperatureHurt.FireOutput(this, this);
-
-			if ( sv_temperature_debug.GetBool() && nextPrint <= gpGlobals->curtime ) {
-				ConDColorMsg( Color(100, 100, 100), "Player taken damage from temperature: %i", sv_temperature_take_damage.GetInt() );
-			}
-
-			m_flTemperatureNextHurt = gpGlobals->curtime + 1.0f;
-		}	
-	}
-
-	nextPrint = gpGlobals->curtime + 1;
-}
-
-void CHL2_Player::SetMaxTemperature( inputdata_t& inputdata ) {
-	m_flMaxTemperature = inputdata.value.Float();
-	GetPlayerProxy()->m_OnPlayerChangeMaxTemperature.FireOutput(this, this);
-}
-
-void CHL2_Player::SetMinTemperature( inputdata_t& inputdata ) {
-	m_flMinTemperature = inputdata.value.Float();
-	GetPlayerProxy()->m_OnPlayerChangeMinTemperature.FireOutput( this, this );
-}
 
 void CHL2_Player::StartAdmireGlovesAnimation( void )
 {
@@ -4680,10 +4584,6 @@ BEGIN_DATADESC( CLogicPlayerProxy )
 	DEFINE_OUTPUT( m_RequestedPlayerFlashBattery, "PlayerFlashBattery" ),
 	DEFINE_OUTPUT( m_OnPlayerSpawn, "OnPlayerSpawn" ),
 #endif
-
-	DEFINE_OUTPUT(m_OnPlayerTemperatureHurt, "OnPlayerTemperatureHurt"),
-	DEFINE_OUTPUT(m_OnPlayerChangeMaxTemperature, "OnPlayerChangeMaxTemperature"),
-	DEFINE_OUTPUT(m_OnPlayerChangeMinTemperature, "OnPlayerChangeMinTemperature"),
 
 	DEFINE_INPUTFUNC( FIELD_VOID,	"RequestPlayerHealth",	InputRequestPlayerHealth ),
 	DEFINE_INPUTFUNC( FIELD_VOID,	"SetFlashlightSlowDrain",	InputSetFlashlightSlowDrain ),

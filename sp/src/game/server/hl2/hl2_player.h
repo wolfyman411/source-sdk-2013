@@ -362,16 +362,6 @@ public:
 
 	CSoundPatch *m_sndLeeches;
 	CSoundPatch *m_sndWaterSplashes;
-
-	float				m_flTemperature;
-	float				m_flFreezeMultiplier;
-	float				m_flTemperatureNextHurt;
-	float				m_flMaxTemperature;
-	float				m_flMinTemperature;
-
-	void				SetMaxTemperature( inputdata_t& inputdata );
-	void				SetMinTemperature( inputdata_t& inputdata );
-	void				HandleTemperature( void );
 protected:
 	virtual void		PreThink( void );
 	virtual	void		PostThink( void );
