@@ -4423,13 +4423,16 @@ void CAI_BaseNPC::AddTemperature( float newTemp )
 
 void CAI_BaseNPC::NPCThink( void )
 {
+    printf( "NPCThink: %s\n", GetClassname() );
 	if ( HasSpawnFlags(SF_NPC_USE_TEMPERATURE) ) {
         if ( IsPlayer() && !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER | TEMPERATURE_MODE_ALL) ) {
+            DevMsg( "NPCThink: Temperature disabled for players\n" );
             return;
 		}
 
         if ( IsNPC() && !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NPC | TEMPERATURE_MODE_ALL ) )
         {
+            DevMsg( "NPCThink: Temperature disabled for NPCs\n" );
             return;
         }
 

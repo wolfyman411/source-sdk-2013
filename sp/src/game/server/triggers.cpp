@@ -5720,8 +5720,6 @@ void CTriggerFreeze::Spawn( void ) {
 
 void CTriggerFreeze::Think( void )
 {
-    SetNextThink( gpGlobals->curtime + 1.0f );
-
     DevMsg( "Entities touching: %d\n", m_hTouchingEntities.Count() );
     for ( CBaseEntity* pOther : m_hTouchingEntities )
     {
@@ -5759,4 +5757,6 @@ void CTriggerFreeze::Think( void )
             DevMsg( "Temp: %3.2f\n", pNPC->GetTemperature() );
         }
     }
+
+    SetNextThink( gpGlobals->curtime + 1.0f );
 }
