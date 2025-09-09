@@ -357,23 +357,3 @@ private:
 };
 
 #endif // TRIGGERS_H
-
-class CTriggerFreeze : public CBaseTrigger
-{
-public:
-	CTriggerFreeze() {
-		m_flFreezeMultiplier = 2.0;
-		m_flWarmMultiplier = 1.25;
-	}
-
-	DECLARE_CLASS( CTriggerFreeze, CBaseTrigger );
-
-	void Spawn( void );
-	void Touch( CBaseEntity* pOther );
-	void EndTouch( CBaseEntity* pOther );
-
-	DECLARE_DATADESC();
-
-	float	m_flFreezeMultiplier;
-	float	m_flWarmMultiplier;
-};

@@ -5679,53 +5679,84 @@ bool IsTriggerClass( CBaseEntity *pEntity )
 	return false;
 }
 
-BEGIN_DATADESC( CTriggerFreeze )
-	DEFINE_KEYFIELD( m_flFreezeMultiplier, FIELD_FLOAT, "FreezeMultiplier" ),
-	DEFINE_KEYFIELD( m_flWarmMultiplier, FIELD_FLOAT, "WarmthMultiplier" ),
-END_DATADESC()
+class CTriggerFreeze : public CBaseTrigger
+{
+    public:
+        DECLARE_CLASS( CTriggerFreeze, CBaseTrigger );
+        DECLARE_DATADESC();
+
+        CTriggerFreeze();
+        
+        virtual void Think( void );
+        virtual void Spawn( void );
+
+        float	m_flTemperatureIncrementer;
+        float	m_flIdealTemperature;
+};
 
 LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
+
+BEGIN_DATADESC( CTriggerFreeze )
+	DEFINE_KEYFIELD( m_flTemperatureIncrementer, FIELD_FLOAT, "TemperatureIncrementer"),
+    DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" )
+END_DATADESC()
+
+CTriggerFreeze::CTriggerFreeze()
+{
+    m_flTemperatureIncrementer = 1.0f;
+    m_flIdealTemperature = 70.0f; // This is in Fahrenheit
+
+    DevMsg( "Running constructor for CTriggerFreeze\n" );
+}
 
 void CTriggerFreeze::Spawn( void ) {
 	BaseClass::Spawn();
 
 	InitTrigger();
 
-	SetNextThink( TICK_NEVER_THINK );
-	SetThink( NULL );
+    DevMsg( "Temp inc: %3.2f, ideal: %3.2f\n", m_flTemperatureIncrementer, m_flIdealTemperature );
+	SetThink( &CTriggerFreeze::Think );
 }
 
+void CTriggerFreeze::Think( void )
+{
+    SetNextThink( gpGlobals->curtime + 1.0f );
 
-void CTriggerFreeze::Touch( CBaseEntity* pOther ) {
-	if ( !PassesTriggerFilters( pOther ) ) return;
+    DevMsg( "Entities touching: %d\n", m_hTouchingEntities.Count() );
+    for ( CBaseEntity* pOther : m_hTouchingEntities )
+    {
+        if ( !pOther )
+        {
+            DevMsg( "No entity\n" );
+            continue;
+        }
 
-	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
-		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
-		if ( pPlayer ) {
-			pPlayer->m_flFreezeMultiplier = m_flFreezeMultiplier;
-		}
-	}
-	else if ( pOther->IsNPC() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_NPC ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
-		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
-		if ( pNPC ) {
-			pNPC->m_flFreezeMultiplier = m_flFreezeMultiplier;
-		}
-	}
-}
+        CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
+        if ( pNPC )
+        {
+            /*
+            if ( pNPC->IsPlayer() && !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL | TEMPERATURE_MODE_PLAYER ) )
+            {
+                printf( "Temp: %3.2f (disabled player)\n", pNPC->GetTemperature() );
+                continue;
+            }
+            else if ( pNPC->IsNPC() && !g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_ALL | TEMPERATURE_MODE_NPC) )
+            {
+                printf( "Temp: %3.2f (disabled npc)\n", pNPC->GetTemperature() );
+                continue;
+            }
+            */
 
-void CTriggerFreeze::EndTouch( CBaseEntity* pOther ) {
-	if ( !PassesTriggerFilters( pOther ) ) return;
+            float flCurrentTemp = pNPC->GetTemperature();
+            if ( ( m_flTemperatureIncrementer < 0.0f && flCurrentTemp < m_flIdealTemperature ) || ( m_flTemperatureIncrementer > 0.0f && flCurrentTemp > m_flIdealTemperature ) )
+            {
+                DevMsg( "Temp: %3.2f (ideal: %3.2f)\n", pNPC->GetTemperature(), m_flIdealTemperature );
+                continue;
+            }
 
-	if ( pOther->IsPlayer() && ( g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER ) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
-		CHL2_Player* pPlayer = dynamic_cast< CHL2_Player* >( pOther );
-		if ( pPlayer ) {
-			pPlayer->m_flFreezeMultiplier = -m_flWarmMultiplier;
-		}
-	}
-	else if ( pOther->IsNPC() && ( g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_NPC) || g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL ) ) ) {
-		CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
-		if ( pNPC ) {
-			pNPC->m_flFreezeMultiplier = -m_flWarmMultiplier;
-		}
-	}
+            pNPC->AddTemperature( m_flTemperatureIncrementer );
+            debugoverlay->AddTextOverlay( pNPC->GetAbsOrigin() + Vector( 0, 0, 72 ), 0.0f, "Temp: %3.2f", pNPC->GetTemperature() );
+            DevMsg( "Temp: %3.2f\n", pNPC->GetTemperature() );
+        }
+    }
 }
