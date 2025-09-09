@@ -253,8 +253,8 @@
 @SolidClass base(Trigger, Targetname) = trigger_freeze :
 	"A trigger volume that freezes the player."
 [
-	FreezeMultiplier(float) : "Freeze Multiplayer" : "2.0" : "The rate at which the player/NPC freezes."
-	WarmthMultiplier(float) : "Warmth Multiplier" : "1.25" : "The rate at which the player/NPC warms up."
+	TemperatureIncrementer(float) : "Temperature Incrementer" : "1.0" : "The temperature increment rate."
+	IdealTemperature(float) : "Ideal Temperature" : "70.0" : "The ideal temperature within the trigger."
 ]
 
 @PointClass base(Weapon) studio("models/weapons/w_iceaxe.mdl") = weapon_iceaxe: "Ice Axe" []
