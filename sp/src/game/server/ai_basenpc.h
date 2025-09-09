@@ -998,11 +998,13 @@ public:
 
     virtual float       GetMinTemperature( void ) { return m_flMinTemperature; }
     virtual float       GetMaxTemperature( void ) { return m_flMaxTemperature; }
+	virtual float       GetIdealTemperature(void) { return m_flIdealTemperature; }
 
     virtual float       GetTemperatureChangeRate( void ) { return m_flTemperatureChangeRate; }
 
     virtual void        SetMinTemperature( float flTemp ) { m_flMinTemperature = flTemp; }
     virtual void        SetMaxTemperature( float flTemp ) { m_flMaxTemperature = flTemp; }
+	virtual void        SetIdealTemperature(float flTemp) { m_flIdealTemperature = flTemp; }
 
     virtual void        SetTemperatureChangeRate( float rate ) { m_flTemperatureChangeRate = rate; }
 
@@ -1021,6 +1023,7 @@ public:
     CNetworkVar( float, m_flTemperature );
     CNetworkVar( float, m_flMaxTemperature );
     CNetworkVar( float, m_flMinTemperature );
+	CNetworkVar(float, m_flIdealTemperature );
     CNetworkVar( float, m_flTemperatureChangeRate );
 
 private:

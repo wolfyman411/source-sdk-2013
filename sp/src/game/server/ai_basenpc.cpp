@@ -4387,54 +4387,50 @@ void CAI_BaseNPC::HandleTemperature( void )
 
             return;
         }
+		else // Slow the npc to a crawl
+		{
+			float playbackRate = GetPlaybackRate();
+			playbackRate -= 0.04f; // This needs to be investigated.
 
-        float playbackRate = GetPlaybackRate();
-        playbackRate -= 0.04f; // This needs to be investigated.
+			/* // This is the freezing effect.
+			byte colour = (1 + playbackRate) * 140;
+			if (colour > 255)
+				colour = 255;
 
-        // This is the freezing effect.
-        byte colour = ( 1 + playbackRate ) * 140;
-        if ( colour > 255 )
-            colour = 255;
+			SetRenderColorR(colour); */ // We're using material proxies now, no recolors
 
-        SetRenderColorR( colour );
+			// If we fall below a certain threshold, effectively freeze the NPC.
+			if (playbackRate < 0.02f)
+				playbackRate = FLT_EPSILON;
 
-        // If we fall below a certain threshold, effectively freeze the NPC.
-        if ( playbackRate < 0.02f )
-            playbackRate = FLT_EPSILON;
-
-        SetPlaybackRate( playbackRate );
+			SetPlaybackRate(playbackRate);
+		}
     }
     else if ( IsOverheating() )
     {
-        if ( IsFrozen() )
-        {
-            // Unfreeze
-            CBaseEntity* pParent = GetParent();
-            if ( pParent )
-            {
-                CPhysicsProp* pPhysProp = dynamic_cast< CPhysicsProp* >( pParent );
-                if ( pPhysProp && pPhysProp->pFrozenNPC == this )
-                {
-                    pPhysProp->Remove();
-                    pPhysProp->pFrozenNPC = NULL;
-                }
-
-                SetParent( NULL );
-                UTIL_Remove( pParent );
-
-                SetAbsOrigin( GetAbsOrigin() );
-                SetAbsAngles( GetAbsAngles() );
-
-                VPhysicsInitNormal( SOLID_BBOX, GetSolidFlags(), false );
-                Spawn();
-
-                m_bHasFrozen = false;
-            }
-        }
-
-        DevMsg( "Overheating!\n" );
         Ignite( 1.0f , true, 0.0f, true );
     }
+
+	// Check to see if the npc has been frozen, if so slowly thaw them.
+	if (!IsFreezing() && GetPlaybackRate() < 1.0f)
+	{
+		float playbackRate = GetPlaybackRate();
+		playbackRate += 0.04f;
+
+		if (playbackRate >= 1.0f) {
+			playbackRate = 1.0f;
+		}
+
+		SetPlaybackRate(playbackRate);
+	}
+
+	// Passively try to return to ideal temperature
+	if (GetTemperature() > GetIdealTemperature()) {
+		AddTemperature(-0.1f);
+	}
+	else if (GetTemperature() < GetIdealTemperature()) {
+		AddTemperature(0.1f);
+	}
 }
 
 void CAI_BaseNPC::AddTemperature( float newTemp )
@@ -13204,7 +13200,8 @@ CAI_BaseNPC::CAI_BaseNPC(void)
     m_flMaxTemperature = 100.0f;
     m_flTemperatureChangeRate = 1.0f;
 
-    m_flTemperature = ( abs( m_flMinTemperature ) + m_flMaxTemperature ) / 2.0f;
+    m_flIdealTemperature = ( abs( m_flMinTemperature ) + m_flMaxTemperature ) / 2.0f;
+	m_flTemperature = m_flIdealTemperature;
 }
 
 //-----------------------------------------------------------------------------
