@@ -437,7 +437,7 @@ public:
 		if ( GlobalEntity_GetIndex( "game_temperature" ) == TEMPERATURE_MODE_NONE ) return false;
 		else if ( GlobalEntity_GetIndex( "game_temperature" ) == TEMPERATURE_MODE_ALL ) return true;
 
-		if ( mode > 2 || mode < -1 ) DevMsg( "Mode must be between -1 and 2!" ); return false;
+		if ( mode > 2 || mode < -1 ) DevMsg( "[TEMPERATURE MODE] Mode must be between -1 and 2!" ); return false;
 
 		return GlobalEntity_GetIndex( "game_temperature" ) == mode;
 
