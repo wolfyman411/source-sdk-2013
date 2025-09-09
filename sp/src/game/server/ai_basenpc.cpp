@@ -4383,8 +4383,6 @@ void CAI_BaseNPC::HandleTemperature( void )
 
                 m_bHasFrozen = true;
             }
-
-            return;
         }
 		else // Slow the npc to a crawl
 		{
@@ -4479,8 +4477,13 @@ void CAI_BaseNPC::NPCThink( void )
         */
 
         HandleTemperature();
+		debugoverlay->AddEntityTextOverlay(entindex(), 0, 0.5f, 255, 255, 255, 255, "Temp: %.2f", GetTemperature());
 
-        debugoverlay->AddEntityTextOverlay( entindex(), 0, 0.5f, 255, 255, 255, 255, "Temp: %.2f", GetTemperature() );
+		if (IsFrozen()) {
+			
+			SetNextThink(TICK_NEVER_THINK);
+			return;
+		}
 	}
 
 	if ( m_bCheckContacts )
