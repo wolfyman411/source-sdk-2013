@@ -3482,8 +3482,7 @@ void CPhysicsProp::OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t Reaso
 		// If we are a frozen prop, break when punted. -TheMaster974
 		if (FClassnameIs(this, "prop_physics_frozen"))
 		{
-			CTakeDamageInfo info(pPhysGunUser, pPhysGunUser, 1000, DMG_PHYSGUN);
-            SetHealth( 1 );
+            this->SetHealth( 1 );
 		}
 	}
 	else if ( Reason == THROWN_BY_PLAYER )

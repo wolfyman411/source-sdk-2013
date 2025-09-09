@@ -4362,7 +4362,6 @@ void CAI_BaseNPC::HandleTemperature( void )
                 VPhysicsDestroyObject();
 
                 CBaseEntity* pNewEnt = CreateEntityByName( "prop_physics_frozen" );
-                //            pNewEnt->KeyValue("model", "models/props_c17/furniturefridge001a.mdl");
                 pNewEnt->KeyValue( "model", "models/props_c17/furnituredresser001a.mdl" );
                 pNewEnt->SetAbsOrigin( worldCenter );
                 pNewEnt->SetAbsAngles( GetAbsAngles() );
@@ -4390,7 +4389,27 @@ void CAI_BaseNPC::HandleTemperature( void )
 		else // Slow the npc to a crawl
 		{
 			float playbackRate = GetPlaybackRate();
-			playbackRate -= 0.04f; // This needs to be investigated.
+			playbackRate -= 0.02f;
+
+			// Get a percentage amount based on max and current health.
+			if (this != nullptr) {
+				if (GetMaxHealth() > 0.0f) {
+					float healthRatio = GetHealth() / GetMaxHealth();
+					playbackRate -= (0.01f / healthRatio);
+				}
+			}
+
+			CTakeDamageInfo freezeDamage;
+			freezeDamage.AddDamageType(DMG_BURN);
+			freezeDamage.SetDamage(1.0f);
+
+			// If the damage would kill the NPC, freeze instead
+			if (GetHealth() <= 1.0f) {
+				playbackRate = FLT_EPSILON;
+			}
+			else {
+				TakeDamage(freezeDamage);
+			}
 
 			/* // This is the freezing effect.
 			byte colour = (1 + playbackRate) * 140;
@@ -12300,6 +12319,7 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_FIELD( m_bPlayerAvoidState,			FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
+	DEFINE_FIELD(m_flTemperature, FIELD_FLOAT),
 
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
@@ -12670,7 +12690,6 @@ void CAI_BaseNPC::Precache( void )
 	PrecacheScriptSound( "AI_BaseNPC.SentenceStop" );
 
 	// Precache our frozen models here. -TheMaster974
-	// PrecacheModel("models/props_c17/furniturefridge001a.mdl");
 	PrecacheModel("models/props_c17/furnituredresser001a.mdl");
 
 	BaseClass::Precache();
