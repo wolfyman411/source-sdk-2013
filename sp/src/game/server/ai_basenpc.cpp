@@ -4385,7 +4385,6 @@ void CAI_BaseNPC::HandleTemperature( void )
                 m_bHasFrozen = true;
             }
 
-            SetNextThink( TICK_NEVER_THINK );
             return;
         }
 
@@ -4407,7 +4406,34 @@ void CAI_BaseNPC::HandleTemperature( void )
     }
     else if ( IsOverheating() )
     {
-        Ignite( 1, false, 0, false );
+        if ( IsFrozen() )
+        {
+            // Unfreeze
+            CBaseEntity* pParent = GetParent();
+            if ( pParent )
+            {
+                CPhysicsProp* pPhysProp = dynamic_cast< CPhysicsProp* >( pParent );
+                if ( pPhysProp && pPhysProp->pFrozenNPC == this )
+                {
+                    pPhysProp->Remove();
+                    pPhysProp->pFrozenNPC = NULL;
+                }
+
+                SetParent( NULL );
+                UTIL_Remove( pParent );
+
+                SetAbsOrigin( GetAbsOrigin() );
+                SetAbsAngles( GetAbsAngles() );
+
+                VPhysicsInitNormal( SOLID_BBOX, GetSolidFlags(), false );
+                Spawn();
+
+                m_bHasFrozen = false;
+            }
+        }
+
+        DevMsg( "Overheating!\n" );
+        Ignite( 1.0f , true, 0.0f, true );
     }
 }
 
@@ -4423,9 +4449,9 @@ void CAI_BaseNPC::AddTemperature( float newTemp )
 
 void CAI_BaseNPC::NPCThink( void )
 {
-    printf( "NPCThink: %s\n", GetClassname() );
 	if ( HasSpawnFlags(SF_NPC_USE_TEMPERATURE) ) {
-        if ( IsPlayer() && !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_PLAYER | TEMPERATURE_MODE_ALL) ) {
+        /*
+        if ( IsPlayer() && !g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_PLAYER | TEMPERATURE_MODE_ALL) ) {
             DevMsg( "NPCThink: Temperature disabled for players\n" );
             return;
 		}
@@ -4435,8 +4461,11 @@ void CAI_BaseNPC::NPCThink( void )
             DevMsg( "NPCThink: Temperature disabled for NPCs\n" );
             return;
         }
+        */
 
         HandleTemperature();
+
+        debugoverlay->AddEntityTextOverlay( entindex(), 0, 0.5f, 255, 255, 255, 255, "Temp: %.2f", GetTemperature() );
 	}
 
 	if ( m_bCheckContacts )
@@ -13171,6 +13200,11 @@ CAI_BaseNPC::CAI_BaseNPC(void)
 #endif
 
 	m_bHasFrozen = false;
+    m_flMinTemperature = 0.0f;
+    m_flMaxTemperature = 100.0f;
+    m_flTemperatureChangeRate = 1.0f;
+
+    m_flTemperature = ( abs( m_flMinTemperature ) + m_flMaxTemperature ) / 2.0f;
 }
 
 //-----------------------------------------------------------------------------
