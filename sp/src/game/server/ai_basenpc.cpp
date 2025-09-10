@@ -86,6 +86,7 @@
 #include "death_pose.h"
 #include "datacache/imdlcache.h"
 #include "vstdlib/jobthread.h"
+#include "ai_baseactor.h"
 
 #ifdef HL2_EPISODIC
 #include "npc_alyx_episodic.h"
@@ -3418,8 +3419,8 @@ void CAI_BaseNPC::RunAnimation( void )
 		return;
 
 	float flInterval = GetAnimTimeInterval();
-		
-	StudioFrameAdvance( ); // animate
+	
+	StudioFrameAdvance(); // animate
 
 	if ((CAI_BaseNPC::m_nDebugBits & bits_debugStepAI) && !GetNavigator()->IsGoalActive())
 	{
@@ -4381,16 +4382,14 @@ void CAI_BaseNPC::HandleTemperature( void )
                 }
 
                 VPhysicsSwapObject( NULL );
-
-                CapabilitiesRemove( bits_CAP_ANIMATEDFACE );
-                CapabilitiesRemove( bits_CAP_TURN_HEAD );
-
-                GetBaseAnimating()->SetNextThink( TICK_NEVER_THINK );
-                GetBaseAnimating()->SetCycle( 0.0f );
-
-                DevMsg( "NPC %s has frozen!\n", GetClassname() );
-
                 m_bHasFrozen = true;
+
+				if (CapabilitiesGet() & bits_CAP_ANIMATEDFACE) {
+					CAI_BaseActor* ref = dynamic_cast<CAI_BaseActor*>(this);
+					if (ref) {
+						ref->SetExpression(NULL);
+					}
+				}
             }
         }
         else // Slow the npc to a crawl
@@ -4487,7 +4486,6 @@ void CAI_BaseNPC::NPCThink( void )
 		debugoverlay->AddEntityTextOverlay(entindex(), 0, 0.5f, 255, 255, 255, 255, "Temp: %.2f", GetTemperature());
 
 		if (IsFrozen()) {
-			
 			SetNextThink(TICK_NEVER_THINK);
 			return;
 		}
