@@ -4400,7 +4400,7 @@ void CAI_BaseNPC::HandleTemperature( void )
             // Get a percentage amount based on max and current health.
             if ( this != nullptr )
             {
-                if ( GetMaxHealth() > 0.0f )
+                if ( GetMaxHealth() > 0 )
                 {
                     float healthRatio = GetHealth() / GetMaxHealth();
                     playbackRate -= ( 0.01f / MAX( healthRatio, 0.01f ) );
@@ -4412,7 +4412,7 @@ void CAI_BaseNPC::HandleTemperature( void )
             freezeDamage.SetDamage( 1.0f );
 
             // If the damage would kill the NPC, freeze instead
-            if ( GetHealth() <= 1.0f )
+            if ( GetHealth() <= 1 )
             {
                 playbackRate = FLT_EPSILON;
             }
