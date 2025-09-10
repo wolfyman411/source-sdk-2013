@@ -3154,6 +3154,7 @@ void CAI_BaseNPC::AimGun()
 //-----------------------------------------------------------------------------
 void CAI_BaseNPC::MaintainLookTargets ( float flInterval )
 {
+    if ( IsFrozen() ) { return; }
 	// --------------------------------------------------------
 	// Try to look at enemy if I have one
 	// --------------------------------------------------------
@@ -4381,73 +4382,79 @@ void CAI_BaseNPC::HandleTemperature( void )
 
                 VPhysicsSwapObject( NULL );
 
+                CapabilitiesRemove( bits_CAP_ANIMATEDFACE );
+                CapabilitiesRemove( bits_CAP_TURN_HEAD );
+
+                GetBaseAnimating()->SetNextThink( TICK_NEVER_THINK );
+                GetBaseAnimating()->SetCycle( 0.0f );
+
+                DevMsg( "NPC %s has frozen!\n", GetClassname() );
+
                 m_bHasFrozen = true;
             }
         }
-		else // Slow the npc to a crawl
-		{
-			float playbackRate = GetPlaybackRate();
-			playbackRate -= 0.02f;
+        else // Slow the npc to a crawl
+        {
+            float playbackRate = GetPlaybackRate();
+            playbackRate -= 0.02f;
 
-			// Get a percentage amount based on max and current health.
-			if (this != nullptr) {
-				if (GetMaxHealth() > 0.0f) {
-					float healthRatio = GetHealth() / GetMaxHealth();
-					playbackRate -= (0.01f / healthRatio);
-				}
-			}
+            // Get a percentage amount based on max and current health.
+            if ( this != nullptr )
+            {
+                if ( GetMaxHealth() > 0.0f )
+                {
+                    float healthRatio = GetHealth() / GetMaxHealth();
+                    playbackRate -= ( 0.01f / MAX( healthRatio, 0.01f ) );
+                }
+            }
 
-			CTakeDamageInfo freezeDamage;
-			freezeDamage.AddDamageType(DMG_BURN);
-			freezeDamage.SetDamage(1.0f);
+            CTakeDamageInfo freezeDamage;
+            freezeDamage.AddDamageType( DMG_BURN );
+            freezeDamage.SetDamage( 1.0f );
 
-			// If the damage would kill the NPC, freeze instead
-			if (GetHealth() <= 1.0f) {
-				playbackRate = FLT_EPSILON;
-			}
-			else {
-				TakeDamage(freezeDamage);
-			}
+            // If the damage would kill the NPC, freeze instead
+            if ( GetHealth() <= 1.0f )
+            {
+                playbackRate = FLT_EPSILON;
+            }
+            else
+            {
+                TakeDamage( freezeDamage );
+            }
 
-			/* // This is the freezing effect.
-			byte colour = (1 + playbackRate) * 140;
-			if (colour > 255)
-				colour = 255;
+            // If we fall below a certain threshold, effectively freeze the NPC.
+            if ( playbackRate < 0.02f )
+                playbackRate = FLT_EPSILON;
 
-			SetRenderColorR(colour); */ // We're using material proxies now, no recolors
+            SetPlaybackRate( playbackRate );
 
-			// If we fall below a certain threshold, effectively freeze the NPC.
-			if (playbackRate < 0.02f)
-				playbackRate = FLT_EPSILON;
-
-			SetPlaybackRate(playbackRate);
-		}
+        }
     }
     else if ( IsOverheating() )
     {
         Ignite( 1.0f , true, 0.0f, true );
     }
 
-	// Check to see if the npc has been frozen, if so slowly thaw them.
-	if (!IsFreezing() && GetPlaybackRate() < 1.0f)
-	{
-		float playbackRate = GetPlaybackRate();
-		playbackRate += 0.04f;
+    // Check to see if the npc has been frozen, if so slowly thaw them.
+    if ( !IsFreezing() && GetPlaybackRate() < 1.0f )
+    {
+        float playbackRate = GetPlaybackRate();
+        playbackRate += 0.04f;
 
-		if (playbackRate >= 1.0f) {
-			playbackRate = 1.0f;
-		}
+        if ( playbackRate >= 1.0f ) {
+            playbackRate = 1.0f;
+        }
 
-		SetPlaybackRate(playbackRate);
-	}
+        SetPlaybackRate( playbackRate );
+    }
 
-	// Passively try to return to ideal temperature
-	if (GetTemperature() > GetIdealTemperature()) {
-		AddTemperature(-0.1f);
-	}
-	else if (GetTemperature() < GetIdealTemperature()) {
-		AddTemperature(0.1f);
-	}
+    // Passively try to return to ideal temperature
+    if ( GetTemperature() > GetIdealTemperature() ) {
+        AddTemperature( -0.1f );
+    }
+    else if ( GetTemperature() < GetIdealTemperature() ) {
+        AddTemperature( 0.1f );
+    }
 }
 
 void CAI_BaseNPC::AddTemperature( float newTemp )
@@ -12322,7 +12329,7 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_FIELD( m_bPlayerAvoidState,			FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
-	DEFINE_FIELD(m_flTemperature, FIELD_FLOAT),
+	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
 
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
@@ -12585,6 +12592,7 @@ IMPLEMENT_SERVERCLASS_ST( CAI_BaseNPC, DT_AI_BaseNPC )
 	SendPropInt( SENDINFO( m_iSpeedModSpeed ) ),
 	SendPropBool( SENDINFO( m_bImportanRagdoll ) ),
 	SendPropFloat( SENDINFO( m_flTimePingEffect ) ),
+    SendPropBool( SENDINFO( m_bHasFrozen ) ),
 END_SEND_TABLE()
 
 //-------------------------------------

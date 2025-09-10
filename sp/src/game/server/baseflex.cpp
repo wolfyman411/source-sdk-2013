@@ -984,6 +984,13 @@ bool CBaseFlex::CheckSceneEventCompletion( CSceneEventInfo *info, float currentt
 void CBaseFlex::ProcessSceneEvents( void )
 {
 	VPROF( "CBaseFlex::ProcessSceneEvents" );
+
+    CAI_BaseNPC* myNpc = MyNPCPointer();
+    if ( myNpc && myNpc->IsFrozen() )
+    {
+        return;
+    }
+
 	// slowly decay to netural expression
 	for ( LocalFlexController_t i = LocalFlexController_t(0); i < GetNumFlexControllers(); i++)
 	{
