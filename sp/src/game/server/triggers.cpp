@@ -5745,32 +5745,30 @@ void CTriggerFreeze::Think( void )
             continue;
         }
 
+        CBasePlayer* pPlayer = ToBasePlayer( pOther );
+        if ( pPlayer )
+        {
+
+            float flCurrentTemp = pPlayer->GetTemperature();
+            if ( ( m_flTemperatureIncrementer < 0.0f && flCurrentTemp < m_flIdealTemperature ) || ( m_flTemperatureIncrementer > 0.0f && flCurrentTemp > m_flIdealTemperature ) )
+            {
+                continue;
+            }
+
+            pPlayer->AddTemperature( m_flTemperatureIncrementer );
+        }
+
         CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
         if ( pNPC )
         {
-            /*
-            if ( pNPC->IsPlayer() && !g_pGameRules->IsTemperatureEnabled( TEMPERATURE_MODE_ALL | TEMPERATURE_MODE_PLAYER ) )
-            {
-                printf( "Temp: %3.2f (disabled player)\n", pNPC->GetTemperature() );
-                continue;
-            }
-            else if ( pNPC->IsNPC() && !g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_ALL | TEMPERATURE_MODE_NPC) )
-            {
-                printf( "Temp: %3.2f (disabled npc)\n", pNPC->GetTemperature() );
-                continue;
-            }
-            */
-
             if ( !pNPC->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { continue; }
 
             float flCurrentTemp = pNPC->GetTemperature();
             if ( ( m_flTemperatureIncrementer < 0.0f && flCurrentTemp < m_flIdealTemperature ) || ( m_flTemperatureIncrementer > 0.0f && flCurrentTemp > m_flIdealTemperature ) )
             {
-                DevMsg( 2, "[ FREEZE TRIGGER ] %s's temperature is already at or beyond the ideal temperature of %3.2fF (current: %3.2fF)\n", pNPC->GetDebugName(), m_flIdealTemperature, flCurrentTemp );
                 continue;
             }
 
-            DevMsg( "[ FREEZE TRIGGER ] %s's temperature has been incremented.\n", pNPC->GetDebugName() );
             pNPC->AddTemperature( m_flTemperatureIncrementer );
         }
     }
