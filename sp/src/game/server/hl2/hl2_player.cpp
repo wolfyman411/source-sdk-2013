@@ -243,11 +243,6 @@ public:
 	COutputEvent m_OnPlayerSpawn;
 #endif
 
-    COutputFloat m_MinimumTemperatureChanged;
-    COutputFloat m_MaximumTemperatureChanged;
-    COutputFloat m_TemperatureRiseRateChanged;
-    COutputFloat m_TemperatureFallRateChanged;
-
 	void InputRequestPlayerHealth( inputdata_t &inputdata );
 	void InputSetFlashlightSlowDrain( inputdata_t &inputdata );
 	void InputSetFlashlightNormalDrain( inputdata_t &inputdata );
