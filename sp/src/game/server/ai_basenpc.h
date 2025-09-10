@@ -992,7 +992,7 @@ public:
 	void				Sleep();
 	bool				WokeThisTick() const;
 
-    float               GetTemperature() const { return m_flTemperature; }
+    virtual float       GetTemperature() const { return m_flTemperature; }
     virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
     virtual void        AddTemperature( float flTemp );
 
