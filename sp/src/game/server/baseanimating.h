@@ -409,7 +409,7 @@ public:
 	CNetworkVar( float, m_flPlaybackRate );
 
 	// This is needed so the playback rate of freezing NPCs does not reset back to 1. -TheMaster974
-	CNetworkVar( bool, shouldFreeze );
+	CNetworkVar( bool, m_bHasFrozen );
 
 public:
 	void InitStepHeightAdjust( void );

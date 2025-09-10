@@ -694,7 +694,7 @@ int	CBaseAnimatingOverlay::AddLayeredSequence( int sequence, int iPriority )
 		m_AnimOverlay[i].m_flPrevCycle = 0;
 
 		// Is this even needed? -TheMaster974
-		if(!shouldFreeze)
+		if(!m_bHasFrozen)
 			m_AnimOverlay[i].m_flPlaybackRate = 1.0;
 		
 		m_AnimOverlay[i].m_nActivity = ACT_INVALID;

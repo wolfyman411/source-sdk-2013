@@ -13,7 +13,7 @@
 	CAI_BaseNPC* pHitNPC = dynamic_cast<CAI_BaseNPC*>(tr.m_pEnt);
 	if (pHitNPC)
 	{
-		pHitNPC->shouldFreeze = true; // This makes it so the NPC can be slowed down.
+		pHitNPC->m_bHasFrozen = true; // This makes it so the NPC can be slowed down.
 		float playbackrate = pHitNPC->GetPlaybackRate();
 		playbackrate -= 0.04f; // This needs to be investigated.
 

@@ -556,7 +556,7 @@ protected:
 	float							m_flPlaybackRate;
 
 	// Obtain this variable from the Server. -TheMaster974
-	bool 							shouldFreeze;
+	bool 							m_bHasFrozen;
 
 	// Decomposed ragdoll info
 	bool							m_bStoreRagdollInfo;

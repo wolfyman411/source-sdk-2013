@@ -185,7 +185,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseAnimating, DT_BaseAnimating, CBaseAnimating)
 	RecvPropArray3(RECVINFO_ARRAY(m_flPoseParameter), RecvPropFloat(RECVINFO(m_flPoseParameter[0])) ),
 	
 	RecvPropFloat(RECVINFO(m_flPlaybackRate)),
-	RecvPropBool(RECVINFO(shouldFreeze)), // Receive variable from the Server. -TheMaster974
+	RecvPropBool(RECVINFO(m_bHasFrozen)), // Receive variable from the Server. -TheMaster974
 
 	RecvPropArray3( RECVINFO_ARRAY(m_flEncodedController), RecvPropFloat(RECVINFO(m_flEncodedController[0]))),
 
@@ -5791,7 +5791,7 @@ void C_BaseAnimating::ResetSequenceInfo( void )
 	// m_flAnimTime = gpGlobals->time;
 
 	// Is this even needed? -TheMaster974
-	if(!shouldFreeze)
+	if(!m_bHasFrozen)
 		m_flPlaybackRate = 1.0;
 	
 	m_bSequenceFinished = false;
