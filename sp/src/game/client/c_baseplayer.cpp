@@ -341,6 +341,8 @@ END_RECV_TABLE()
 		RecvPropUtlVector( RECVINFO_UTLVECTOR( m_hMyWearables ), MAX_WEARABLES_SENT_FROM_SERVER,	RecvPropEHandle(NULL, 0, 0) ),
 #endif
 
+        RecvPropFloat( RECVINFO( m_flTemperature ) ),
+
 	END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA_NO_BASE( CPlayerState )
@@ -508,6 +510,10 @@ C_BasePlayer::~C_BasePlayer()
 	delete m_pFlashlight;
 }
 
+void C_BasePlayer::AddTemperature( float increment )
+{
+    SetTemperature( GetTemperature() + increment);
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 

@@ -18,6 +18,7 @@
 #include "hintsystem.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "util_shared.h"
+#include "globalstate.h"
 
 #if defined USES_ECON_ITEMS
 #include "game_item_schema.h"
@@ -663,6 +664,8 @@ public:
 
 	virtual bool			ShouldAnnounceAchievement( void ){ return true; }
 
+    CNetworkVar( float, m_flTemperature );
+
 #if defined USES_ECON_ITEMS
 	// Wearables
 	virtual void			EquipWearable( CEconWearable *pItem );
@@ -828,6 +831,18 @@ public:
 #ifdef MAPBASE
 	void	InputSetSuppressAttacks( inputdata_t &inputdata );
 #endif
+
+    bool    ShouldTakeTemperature( void ) const 
+    { 
+        return GlobalEntity_GetCounter( "global_frost_proxy" ) == TEMPERATURE_MODE_ALL
+            || GlobalEntity_GetCounter( "global_frost_proxy" ) == TEMPERATURE_MODE_PLAYER;
+    }
+
+    virtual float       GetTemperature() const { return m_flTemperature; }
+    virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
+    virtual void        AddTemperature( float flTemp );
+    virtual void        HandleTemperature( void );
+    float               m_flNextTemperatureDamage;
 
 	surfacedata_t *GetSurfaceData( void ) { return m_pSurfaceData; }
 	void SetLadderNormal( Vector vecLadderNormal ) { m_vecLadderNormal = vecLadderNormal; }

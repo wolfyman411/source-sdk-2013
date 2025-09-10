@@ -474,6 +474,12 @@ public:
 	bool			m_bInTriggerFall;
 #endif
 
+    virtual float       GetTemperature() const { return m_flTemperature; }
+    virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
+    virtual void        AddTemperature( float flTemp );
+
+    float           m_flTemperature;
+
 protected:
 
 	//Tony; made all of these virtual so mods can override.

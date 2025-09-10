@@ -277,6 +277,8 @@ BEGIN_DATADESC( CBasePlayer )
 
 	DEFINE_FIELD( m_StuckLast, FIELD_INTEGER ),
 
+    DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flNextTemperatureDamage, FIELD_FLOAT ),
 	DEFINE_FIELD( m_nButtons, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonLast, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonPressed, FIELD_INTEGER ),
@@ -792,6 +794,14 @@ CBasePlayer::CBasePlayer( )
 	m_flMovementTimeForUserCmdProcessingRemaining = 0.0f;
 
 	m_hPostProcessCtrl.Set( NULL );
+
+    m_flTemperature = 70.0f;
+    m_flNextTemperatureDamage = 0.0f;
+}
+
+void CBasePlayer::AddTemperature( float increment )
+{
+    SetTemperature( GetTemperature() + increment );
 }
 
 CBasePlayer::~CBasePlayer( )
@@ -4015,6 +4025,32 @@ void CBasePlayer::HandleFuncTrain(void)
 	}
 }
 
+void CBasePlayer::HandleTemperature( void )
+{
+    DevMsg( 2, "Temp: %.1f\n", GetTemperature() );
+    if ( GetTemperature() > 100 || GetTemperature() < 0 && m_flNextTemperatureDamage < gpGlobals->curtime )
+    {
+        CTakeDamageInfo info;
+        info.SetDamage( 1 );
+        info.SetDamageType( DMG_SLOWBURN );
+        info.SetAttacker( this );
+        info.SetInflictor( this );
+
+        TakeDamage( info );
+
+        m_flNextTemperatureDamage = gpGlobals->curtime + 1.0f;
+    }
+
+    // Passively try to return to ideal temperature
+    if ( GetTemperature() > 70.0f )
+    {
+        AddTemperature( -0.1f );
+    }
+    else if ( GetTemperature() < 70.0f )
+    {
+        AddTemperature( 0.1f );
+    }
+}
 
 void CBasePlayer::PreThink(void)
 {						
@@ -4886,6 +4922,8 @@ void CBasePlayer::PostThink()
 	// Even if dead simulate entities
 	SimulatePlayerSimulatedEntities();
 #endif
+
+    HandleTemperature();
 }
 
 // handles touching physics objects
@@ -8921,6 +8959,7 @@ void SendProxy_ShiftPlayerSpawnflags( const SendProp *pProp, const void *pStruct
 		// Data that only gets sent to the local player.
 		SendPropDataTable( "localdata", 0, &REFERENCE_SEND_TABLE(DT_LocalPlayerExclusive), SendProxy_SendLocalDataTable ),
 
+        SendPropFloat( SENDINFO( m_flTemperature) ),
 	END_SEND_TABLE()
 
 //=============================================================================
