@@ -4371,15 +4371,18 @@ void CAI_BaseNPC::HandleTemperature( void )
                 IPhysicsObject* pNewObj = VPhysicsInitNormal( SOLID_BBOX, GetSolidFlags(), false );
 
                 pNewEnt->VPhysicsSetObject( pNewObj );
+
+				CPhysicsProp* pPhysProp = dynamic_cast<CPhysicsProp*>(pNewEnt);
+				if (pPhysProp)
+				{
+					pPhysProp->pFrozenNPC = this;
+					pPhysProp->AddSpawnFlags(SF_PHYSPROP_MOTIONDISABLED);
+					pPhysProp->AddSpawnFlags(SF_PHYSPROP_ENABLE_ON_PHYSCANNON);
+				}
+
                 pNewEnt->Spawn();
                 SetParent( pNewEnt );
                 pNewEnt->AddEffects( EF_NODRAW );
-
-                CPhysicsProp* pPhysProp = dynamic_cast< CPhysicsProp* >( pNewEnt );
-                if ( pPhysProp )
-                {
-                    pPhysProp->pFrozenNPC = this;
-                }
 
                 VPhysicsSwapObject( NULL );
                 m_bHasFrozen = true;
