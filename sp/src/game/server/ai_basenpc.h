@@ -1019,13 +1019,6 @@ public:
 
 	NPC_STATE			m_NPCState;				// npc's current state
 	float				m_flLastStateChangeTime;
-
-    CNetworkVar( float, m_flTemperature );
-    CNetworkVar( float, m_flMaxTemperature );
-    CNetworkVar( float, m_flMinTemperature );
-	CNetworkVar(float, m_flIdealTemperature );
-    CNetworkVar( float, m_flTemperatureChangeRate );
-
 private:
 	NPC_STATE			m_IdealNPCState;		// npc should change to this state
 	AI_Efficiency_t		m_Efficiency;
@@ -2030,9 +2023,6 @@ public:
 
 	bool				BBoxFlat( void );
 
-	// Have we started to freeze? -TheMaster974
-	bool 				m_bHasFrozen;
-
 	//---------------------------------
 
 	virtual void		Ignite( float flFlameLifetime, bool bNPCOnly = true, float flSize = 0.0f, bool bCalledByLevelDesigner = false );
@@ -2458,6 +2448,13 @@ public:
 	CNetworkVar( int,   m_iSpeedModRadius );
 	CNetworkVar( int,   m_iSpeedModSpeed );
 	CNetworkVar( float, m_flTimePingEffect );			// Display the pinged effect until this time
+
+    CNetworkVar( float, m_flTemperature );
+    CNetworkVar( float, m_flMaxTemperature );
+    CNetworkVar( float, m_flMinTemperature );
+    CNetworkVar( float, m_flIdealTemperature );
+    CNetworkVar( float, m_flTemperatureChangeRate );
+    CNetworkVar( bool,  m_bHasFrozen );
 
 	void				InputActivateSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = true; }
 	void				InputDisableSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = false; }
