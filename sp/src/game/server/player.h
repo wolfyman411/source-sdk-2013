@@ -832,10 +832,10 @@ public:
 	void	InputSetSuppressAttacks( inputdata_t &inputdata );
 #endif
 
-    bool    ShouldTakeTemperature( void ) const 
+    virtual bool    ShouldTakeTemperature( void ) const 
     { 
-        return GlobalEntity_GetCounter( "global_frost_proxy" ) == TEMPERATURE_MODE_ALL
-            || GlobalEntity_GetCounter( "global_frost_proxy" ) == TEMPERATURE_MODE_PLAYER;
+        // comment@bloodycop6385 -- dunno
+        return true;
     }
 
     virtual float       GetTemperature() const { return m_flTemperature; }
