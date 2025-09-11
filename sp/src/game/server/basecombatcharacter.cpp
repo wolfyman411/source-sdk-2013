@@ -901,7 +901,7 @@ CBaseCombatCharacter::CBaseCombatCharacter( void )
 #endif // GLOWS_ENABLE
 
     m_bShouldDrawSnowOverlay = false;
-    m_flSnowOverlayAlpha = GlobalEntity_GetCounter( "global_frost_proxy" ) / 100.0f || 0.0f;
+    m_flSnowOverlayAlpha = GlobalEntity_GetCounter( "global_frost_proxy" ) / 10 || 0.0f;
 }
 
 //------------------------------------------------------------------------------
