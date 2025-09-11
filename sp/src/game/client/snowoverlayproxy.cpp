@@ -82,8 +82,9 @@ void C_SnowyTextureProxy::OnBind( void *pC_BaseEntity )
 	if ( pViewModel )
 	{
 		C_BaseCombatCharacter *pOwner = ToBaseCombatCharacter( pViewModel->GetOwner() );
-        if ( pOwner )
-            m_pBlendFactor->SetFloatValue( pOwner->GetViewModelSnowOverlayAlpha() );
+		if (pOwner) {
+			m_pBlendFactor->SetFloatValue(pOwner->GetViewModelSnowOverlayAlpha());
+		}
 	}
 
 	if ( ToolsEnabled() )

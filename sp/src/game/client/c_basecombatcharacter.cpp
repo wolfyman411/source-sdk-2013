@@ -42,6 +42,7 @@ C_BaseCombatCharacter::C_BaseCombatCharacter()
 
     m_bShouldDrawSnowOverlay = false;
     m_flSnowOverlayAlpha = 0.0f;
+	m_flSnowFadeRate = 0.01f;
 }
 
 //-----------------------------------------------------------------------------
@@ -95,7 +96,19 @@ void C_BaseCombatCharacter::OnDataChanged( DataUpdateType_t updateType )
 
 float C_BaseCombatCharacter::GetViewModelSnowOverlayAlpha( void )
 {
-    return m_flSnowOverlayAlpha;
+
+	// Fade in and out
+	if (m_flNextFade < gpGlobals->curtime) {
+		m_flNextFade = gpGlobals->curtime + 0.1f;
+		if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
+			m_flCurrentSnowOverlayAlpha += m_flSnowFadeRate;
+		}
+		else if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
+			m_flCurrentSnowOverlayAlpha -= m_flSnowFadeRate;
+		}
+	}
+
+    return clamp(m_flCurrentSnowOverlayAlpha,0.0f,1.0f);
 }
 
 //-----------------------------------------------------------------------------
