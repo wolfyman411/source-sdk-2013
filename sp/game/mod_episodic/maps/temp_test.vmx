@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8870"
-	"mapversion" "2"
+	"mapversion" "4"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -89,7 +89,7 @@ bgimages_plus
 world
 {
 	"id" "1"
-	"mapversion" "2"
+	"mapversion" "4"
 	"classname" "worldspawn"
 	"chaptertitlenomessage" "1"
 	"detailmaterial" "detail/detailsprites"
@@ -862,7 +862,7 @@ entity
 				"v" "-256 -128 192"
 				"v" "-384 -128 192"
 			}
-			"material" "TOOLS/TOOLSSKYBOX2D"
+			"material" "TOOLS/TOOLSTRIGGER"
 			"uaxis" "[1 0 0 0] 0.25"
 			"vaxis" "[0 -1 0 0] 0.25"
 			"rotation" "0"
@@ -880,7 +880,7 @@ entity
 				"v" "-256 128 56"
 				"v" "-384 128 56"
 			}
-			"material" "TOOLS/TOOLSSKYBOX2D"
+			"material" "TOOLS/TOOLSTRIGGER"
 			"uaxis" "[1 0 0 0] 0.25"
 			"vaxis" "[0 -1 0 0] 0.25"
 			"rotation" "0"
@@ -898,7 +898,7 @@ entity
 				"v" "-384 -128 56"
 				"v" "-384 128 56"
 			}
-			"material" "TOOLS/TOOLSSKYBOX2D"
+			"material" "TOOLS/TOOLSTRIGGER"
 			"uaxis" "[0 1 0 0] 0.25"
 			"vaxis" "[0 0 -1 -32] 0.25"
 			"rotation" "0"
@@ -916,7 +916,7 @@ entity
 				"v" "-256 -128 192"
 				"v" "-256 128 192"
 			}
-			"material" "TOOLS/TOOLSSKYBOX2D"
+			"material" "TOOLS/TOOLSTRIGGER"
 			"uaxis" "[0 1 0 0] 0.25"
 			"vaxis" "[0 0 -1 -32] 0.25"
 			"rotation" "0"
@@ -934,7 +934,7 @@ entity
 				"v" "-384 128 56"
 				"v" "-256 128 56"
 			}
-			"material" "TOOLS/TOOLSSKYBOX2D"
+			"material" "TOOLS/TOOLSTRIGGER"
 			"uaxis" "[1 0 0 0] 0.25"
 			"vaxis" "[0 0 -1 -32] 0.25"
 			"rotation" "0"
@@ -952,7 +952,7 @@ entity
 				"v" "-384 -128 192"
 				"v" "-256 -128 192"
 			}
-			"material" "TOOLS/TOOLSSKYBOX2D"
+			"material" "TOOLS/TOOLSTRIGGER"
 			"uaxis" "[1 0 0 0] 0.25"
 			"vaxis" "[0 0 -1 -32] 0.25"
 			"rotation" "0"
@@ -972,6 +972,22 @@ entity
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
 		"logicalpos" "[0 4000]"
+	}
+}
+entity
+{
+	"id" "45"
+	"classname" "env_global"
+	"counter" "100"
+	"globalstate" "global_frost_proxy"
+	"spawnflags" "1"
+	"origin" "-192 96 72"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
 	}
 }
 cameras
