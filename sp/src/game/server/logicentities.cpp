@@ -1283,7 +1283,7 @@ void CEnvGlobal::Spawn( void )
 // Input  : szKeyName - Key to handle.
 //			szValue - Value for key.
 // Output : Returns true if the key was handled, false if not.
-//----------------------------------------------------------------------------- 
+//-----------------------------------------------------------------------------
 bool CEnvGlobal::KeyValue( const char *szKeyName, const char *szValue )
 {
 	// Any "Counter" outputs are changed to "OutCounter" before spawning.
