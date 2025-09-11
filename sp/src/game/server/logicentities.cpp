@@ -1359,11 +1359,6 @@ void CEnvGlobal::InputSetCounter( inputdata_t &inputdata )
     {
         for ( CBaseCombatCharacter* pEnt = ( CBaseCombatCharacter* ) gEntList.FirstEnt(); pEnt != NULL; pEnt = ( CBaseCombatCharacter* ) gEntList.NextEnt( pEnt ) )
         {
-            // if the GetClassname() doesn't start with "weapon_", continue
-            if ( pEnt->GetClassname() && V_strnicmp( pEnt->GetClassname(), "weapon_", 7 ) == 0 )
-                continue;
-
-            // works with "ent_fire env_global setcounter 10"
             pEnt->m_flSnowOverlayAlpha = ( float ) GlobalEntity_GetCounter( m_globalstate ) / 100.0f;
         }
     }
@@ -1383,14 +1378,8 @@ void CEnvGlobal::InputAddToCounter( inputdata_t &inputdata )
 
     if ( m_globalstate != NULL_STRING && stricmp( STRING( m_globalstate ), "global_frost_proxy" ) == 0 )
     {
-        // Run a for i loop through all map entities, if they're CBaseCombatCharacter, change their float for snow overlay alpha
         for ( CBaseCombatCharacter* pEnt = ( CBaseCombatCharacter* ) gEntList.FirstEnt(); pEnt != NULL; pEnt = ( CBaseCombatCharacter* ) gEntList.NextEnt( pEnt ) )
         {
-            // if the GetClassname() doesn't start with "weapon_", continue
-            if ( pEnt->GetClassname() && V_strnicmp( pEnt->GetClassname(), "weapon_", 7 ) == 0 )
-                continue;
-
-            // works with "ent_fire env_global setcounter 10"
             pEnt->m_flSnowOverlayAlpha = ( float ) GlobalEntity_GetCounter( m_globalstate ) / 100.0f;
         }
     }

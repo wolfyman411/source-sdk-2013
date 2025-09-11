@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8870"
-	"mapversion" "4"
+	"mapversion" "5"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -89,7 +89,7 @@ bgimages_plus
 world
 {
 	"id" "1"
-	"mapversion" "4"
+	"mapversion" "5"
 	"classname" "worldspawn"
 	"chaptertitlenomessage" "1"
 	"detailmaterial" "detail/detailsprites"
@@ -980,7 +980,7 @@ entity
 	"classname" "env_global"
 	"counter" "100"
 	"globalstate" "global_frost_proxy"
-	"spawnflags" "1"
+	"spawnflags" "0"
 	"origin" "-192 96 72"
 	editor
 	{
