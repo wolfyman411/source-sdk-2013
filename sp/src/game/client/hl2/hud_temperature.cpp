@@ -37,7 +37,7 @@ using namespace vgui;
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-#define INIT_TEMPERATURE 33.0f
+#define INIT_TEMPERATURE 70.0f
 
 //-----------------------------------------------------------------------------
 // Purpose: Temperature panel
@@ -55,7 +55,7 @@ public:
 
 private:
 	// old variables
-	float		m_iTemperature;
+	float		m_flTemperature;
 };	
 
 DECLARE_HUDELEMENT( CHudTemperature );
@@ -81,7 +81,7 @@ void CHudTemperature::Init()
 //-----------------------------------------------------------------------------
 void CHudTemperature::Reset()
 {
-	m_iTemperature		= INIT_TEMPERATURE;
+    m_flTemperature = INIT_TEMPERATURE;
 
 	wchar_t *tempString = g_pVGuiLocalize->Find("#Valve_Hud_TEMPERATURE");
 
@@ -94,7 +94,7 @@ void CHudTemperature::Reset()
 		SetLabelText(L"TEMP");
 	}
 
-	SetDisplayValue( m_iTemperature );
+	SetDisplayValue( m_flTemperature );
 }
 
 //-----------------------------------------------------------------------------
@@ -110,32 +110,26 @@ void CHudTemperature::VidInit()
 //-----------------------------------------------------------------------------
 void CHudTemperature::OnThink()
 {
-	C_BaseHLPlayer* local = dynamic_cast< C_BaseHLPlayer* >( C_BasePlayer::GetLocalPlayer() );
-	if ( !local )
-		return;
+    C_BasePlayer* local = C_BasePlayer::GetLocalPlayer();
 
-	float newTemperature = local->m_HL2Local.m_flTemperature;
+    float newTemperature = local->m_flTemperature;
 	
-	if ( local->m_HL2Local.m_flTemperature >= local->m_HL2Local.m_flMaxTemperature ) {
-		newTemperature = local->m_HL2Local.m_flMaxTemperature;
-	} else if ( local->m_HL2Local.m_flTemperature <= local->m_HL2Local.m_flMinTemperature ) {
-		newTemperature = local->m_HL2Local.m_flMinTemperature;
-	}
-
 	// Only update the fade if we've changed temperature
-	if ( newTemperature == m_iTemperature ) return;
+	if ( newTemperature == m_flTemperature ) return;
 
-	m_iTemperature = local->m_HL2Local.m_flTemperature;
+	m_flTemperature = local->m_flTemperature;
 
-	if ( m_iTemperature <= local->m_HL2Local.m_flMinTemperature ) {
-		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureMinimum" );
-	}
-	else if ( m_iTemperature >= local->m_HL2Local.m_flMaxTemperature ) {
+    if ( m_flTemperature <= 0.0f )
+    {
+        g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureMinimum" );
+    }
+    else if ( m_flTemperature >= 100.0f )
+    {
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureMaximum" );
 	}
-	else if ( m_iTemperature >= local->m_HL2Local.m_flMaxTemperature / 2 ) {
+	else if ( m_flTemperature >= 100.0f ) {
 		g_pClientMode->GetViewportAnimationController()->StartAnimationSequence( "TemperatureHalf" );
 	}
 
-	SetDisplayValue(m_iTemperature);
+	SetDisplayValue( m_flTemperature );
 }
