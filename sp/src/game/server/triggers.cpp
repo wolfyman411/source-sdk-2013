@@ -5756,6 +5756,7 @@ void CTriggerFreeze::Think( void )
             }
 
             pPlayer->AddTemperature( m_flTemperatureIncrementer );
+            continue; // move to the next entity
         }
 
         CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
