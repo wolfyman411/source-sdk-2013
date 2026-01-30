@@ -15,6 +15,9 @@
 #include "materialsub.h"
 #include "fgdlib/fgdlib.h"
 #include "manifest.h"
+#ifdef PARALLAX_CORRECTED_CUBEMAPS
+#include "mathlib/vmatrix.h"
+#endif
 #ifdef MAPBASE_VSCRIPT
 #include "vscript_vbsp.h"
 #endif
@@ -1656,8 +1659,9 @@ ChunkFileResult_t CMapFile::LoadEntityCallback(CChunkFile *pFile, int nParam)
 		{
 			//Originally was matrix3x2. Now we use built-in functions to the engine instead of a custom invert matrix
 			VMatrix obbMatrix, invObbMatrix;
-			MatrixSetIdentity( obbMatrix );
-			MatrixSetIdentity( invObbMatrix );
+			MatrixSetIdentity(obbMatrix);
+			MatrixSetIdentity(invObbMatrix);
+			
 
 			// Get corner and its 3 edges (scaled, local x, y, and z axes)
 			mapbrush_t *brush = &mapbrushes[mapent->firstbrush];
@@ -1713,14 +1717,14 @@ ChunkFileResult_t CMapFile::LoadEntityCallback(CChunkFile *pFile, int nParam)
 
 				// Build transformation matrix (what is needed to turn a [0,0,0] - [1,1,1] cube into this brush)
 				//Originally was MatrixSetColum. Since we use VMatrix now, changed to obbMatrix
-				obbMatrix.SetForward( x );
-				obbMatrix.SetLeft( y );
-				obbMatrix.SetUp( z );
-				obbMatrix.SetTranslation( corner );
+				obbMatrix.SetForward(x);
+				obbMatrix.SetLeft(y);
+				obbMatrix.SetUp(z);
+				obbMatrix.SetTranslation(corner);
 
 				//find inverse (we need the world to local matrix, "transformationmatrix" is kind of a misnomer)
 				//Originally was MatrixInversion. This is now using the built in functions, not relying on MatrixInversion and matrixinvert.h anymore
-				MatrixInverseGeneral( obbMatrix, invObbMatrix );
+				MatrixInverseGeneral(obbMatrix, invObbMatrix);
 				break;
 			}
 			
