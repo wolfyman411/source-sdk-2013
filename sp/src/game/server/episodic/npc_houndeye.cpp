@@ -391,11 +391,10 @@ void CNPC_Houndeye::HandleAnimEvent(animevent_t* pEvent)
 }
 
 int ACT_HOUNDEYE_FLIP;
-int ACT_HOUNDEYE_ZAP_FLIP;
 
 inline bool CNPC_Houndeye::IsFlipped(void)
 {
-	return (GetActivity() == ACT_HOUNDEYE_FLIP || GetActivity() == ACT_HOUNDEYE_ZAP_FLIP);
+	return (GetActivity() == ACT_HOUNDEYE_FLIP);
 }
 
 //-----------------------------------------------------------------------------
@@ -416,13 +415,6 @@ void CNPC_Houndeye::Flip(bool bZapped /*= false*/)
 		return;
 
 	SetCondition(COND_HOUNDEYE_FLIPPED);
-
-	if (bZapped)
-	{
-		m_flZapDuration = gpGlobals->curtime + SequenceDuration(SelectWeightedSequence((Activity)ACT_HOUNDEYE_ZAP_FLIP)) + 0.1f;
-
-		EmitSound("HoundEye.ZappedFlip");
-	}
 }
 
 //-----------------------------------------------------------------------------
