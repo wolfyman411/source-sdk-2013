@@ -1047,7 +1047,7 @@ int CNPC_Houndeye::SelectSchedule(void)
 	if (HasCondition(COND_HOUNDEYE_FLIPPED))
 	{
 		ClearCondition(COND_HOUNDEYE_FLIPPED);
-		return COND_HOUNDEYE_FLIPPED;
+		return SCHED_HOUNDEYE_FLIP;
 	}
 
 	switch (m_NPCState)
