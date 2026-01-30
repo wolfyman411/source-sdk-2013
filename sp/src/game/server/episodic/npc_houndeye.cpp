@@ -31,6 +31,7 @@
 #include "movevars_shared.h"
 #include "hl2_shareddefs.h"
 #include "particle_parse.h"
+#include "vehicle_base.h"
 
 // houndeye does 20 points of damage spread over a sphere 384 units in diameter, and each additional 
 // squad member increases the BASE damage by 110%, per the spec.
@@ -382,6 +383,191 @@ void CNPC_Houndeye::HandleAnimEvent(animevent_t* pEvent)
 		BaseClass::HandleAnimEvent(pEvent);
 		break;
 	}
+}
+
+int ACT_HOUNDEYE_FLIP;
+int ACT_HOUNDEYE_ZAP_FLIP;
+
+inline bool CNPC_Houndeye::IsFlipped(void)
+{
+	return (GetActivity() == ACT_HOUNDEYE_FLIP || GetActivity() == ACT_HOUNDEYE_ZAP_FLIP);
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Flip the antlion over
+//-----------------------------------------------------------------------------
+void CNPC_Houndeye::Flip(bool bZapped /*= false*/)
+{
+	// We can't flip an already flipped antlion
+	if (IsFlipped())
+		return;
+
+	// Must be on the ground
+	if ((GetFlags() & FL_ONGROUND) == false)
+		return;
+
+	// Can't be in a dynamic interation
+	if (IsRunningDynamicInteraction())
+		return;
+
+	SetCondition(COND_HOUNDEYE_FLIPPED);
+
+	if (bZapped)
+	{
+		m_flZapDuration = gpGlobals->curtime + SequenceDuration(SelectWeightedSequence((Activity)ACT_HOUNDEYE_ZAP_FLIP)) + 0.1f;
+
+		EmitSound("HoundEye.ZappedFlip");
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Antlion who are flipped will knock over other antlions behind them!
+//-----------------------------------------------------------------------------
+void CNPC_Houndeye::CascadePush(const Vector& vecForce)
+{
+	// Controlled via this convar until this is proven worthwhile
+	if (hl2_episodic.GetBool() == false /*|| g_antlion_cascade_push.GetBool() == false*/)
+		return;
+
+	Vector vecForceDir = vecForce;
+	float flMagnitude = VectorNormalize(vecForceDir);
+	Vector vecPushBack = GetAbsOrigin() + (vecForceDir * (flMagnitude * 0.1f));
+
+	// Make houndeyes flip all around us!
+	CBaseEntity* pEnemySearch[32];
+	int nNumEnemies = UTIL_EntitiesInBox(pEnemySearch, ARRAYSIZE(pEnemySearch), vecPushBack - Vector(32, 32, 0), vecPushBack + Vector(32, 32, 64), FL_NPC);
+	for (int i = 0; i < nNumEnemies; i++)
+	{
+		// We only care about antlions
+		if (pEnemySearch[i] == NULL || pEnemySearch[i]->Classify() != CLASS_HOUNDEYE || pEnemySearch[i] == this)
+			continue;
+
+		CNPC_Houndeye* pHoundeye = dynamic_cast<CNPC_Houndeye*>(pEnemySearch[i]);
+		if (pHoundeye != NULL)
+		{
+			Vector vecDir = (pHoundeye->GetAbsOrigin() - GetAbsOrigin());
+			vecDir[2] = 0.0f;
+			float flDist = VectorNormalize(vecDir);
+			float flFalloff = RemapValClamped(flDist, 0, 256, 1.0f, 0.1f);
+
+			vecDir *= (flMagnitude * flFalloff);
+			vecDir[2] += ((flMagnitude * 0.25f) * flFalloff);
+
+			pHoundeye->ApplyAbsVelocityImpulse(vecDir);
+
+			// Turn them over
+			pHoundeye->Flip(false);
+		}
+	}
+}
+
+void CNPC_Houndeye::Touch(CBaseEntity* pOther) {
+	//See if the touching entity is a vehicle
+	CBasePlayer* pPlayer = ToBasePlayer(AI_GetSinglePlayer());
+
+	// FIXME: Technically we'll want to check to see if a vehicle has touched us with the player OR NPC driver
+
+	if (pPlayer && pPlayer->IsInAVehicle())
+	{
+		IServerVehicle* pVehicle = pPlayer->GetVehicle();
+		CBaseEntity* pVehicleEnt = pVehicle->GetVehicleEnt();
+
+		if (pVehicleEnt == pOther)
+		{
+			CPropVehicleDriveable* pDrivableVehicle = dynamic_cast<CPropVehicleDriveable*>(pVehicleEnt);
+
+			if (pDrivableVehicle != NULL)
+			{
+				//Get tossed!
+				Vector	vecShoveDir = pOther->GetAbsVelocity();
+				Vector	vecTargetDir = GetAbsOrigin() - pOther->GetAbsOrigin();
+
+				VectorNormalize(vecShoveDir);
+				VectorNormalize(vecTargetDir);
+
+				if (((pDrivableVehicle->m_nRPM > 75) && DotProduct(vecShoveDir, vecTargetDir) <= 0) && !IsFlipped() )
+				{
+						CTakeDamageInfo	dmgInfo(pVehicleEnt, pPlayer, 0, DMG_VEHICLE);
+						PainSound(dmgInfo);
+
+						SetCondition(COND_HOUNDEYE_FLIPPED);
+
+						vecTargetDir[2] = 0.0f;
+
+						ApplyAbsVelocityImpulse((vecTargetDir * 250.0f) + Vector(0, 0, 64.0f));
+						SetGroundEntity(NULL);
+
+						CSoundEnt::InsertSound(SOUND_PHYSICS_DANGER, GetAbsOrigin(), 256, 0.5f, this);
+					}
+				}
+			}
+		}
+}
+
+void CNPC_Houndeye::TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr, CDmgAccumulator* pAccumulator) {
+	CTakeDamageInfo newInfo = info;
+
+	Vector	vecShoveDir = vecDir;
+	vecShoveDir.z = 0.0f;
+
+	//Are we already flipped?
+	if (IsFlipped())
+	{
+		//If we were hit by physics damage, move with it
+		if (newInfo.GetDamageType() & (DMG_CRUSH | DMG_PHYSGUN))
+		{
+			PainSound(newInfo);
+			Vector vecForce = (vecShoveDir * random->RandomInt(500.0f, 1000.0f)) + Vector(0, 0, 64.0f);
+			CascadePush(vecForce);
+			ApplyAbsVelocityImpulse(vecForce);
+			SetGroundEntity(NULL);
+		}
+
+		//More vulnerable when flipped
+		newInfo.ScaleDamage(4.0f);
+	}
+	else if (newInfo.GetDamageType() & (DMG_PHYSGUN) ||
+		(newInfo.GetDamageType() & (DMG_BLAST | DMG_CRUSH) && newInfo.GetDamage() >= 25.0f))
+	{
+		// Don't do this if we're in an interaction
+		if (!IsRunningDynamicInteraction())
+		{
+			//Grenades, physcannons, and physics impacts make us fuh-lip!
+
+			if (hl2_episodic.GetBool())
+			{
+				PainSound(newInfo);
+
+				if (GetFlags() & FL_ONGROUND)
+				{
+					// Only flip if on the ground.
+					SetCondition(COND_HOUNDEYE_FLIPPED);
+				}
+
+				Vector vecForce = (vecShoveDir * random->RandomInt(500.0f, 1000.0f)) + Vector(0, 0, 64.0f);
+
+				CascadePush(vecForce);
+				ApplyAbsVelocityImpulse(vecForce);
+				SetGroundEntity(NULL);
+			}
+			else
+			{
+				//Don't flip off the deck
+				if (GetFlags() & FL_ONGROUND)
+				{
+					PainSound(newInfo);
+
+					SetCondition(COND_HOUNDEYE_FLIPPED);
+
+					//Get tossed!
+					ApplyAbsVelocityImpulse((vecShoveDir * random->RandomInt(500.0f, 1000.0f)) + Vector(0, 0, 64.0f));
+					SetGroundEntity(NULL);
+				}
+			}
+		}
+	}
+
+	BaseClass::TraceAttack(newInfo, vecDir, ptr, pAccumulator);
 }
 
 //=========================================================
@@ -853,6 +1039,12 @@ int CNPC_Houndeye::TranslateSchedule(int scheduleType)
 
 int CNPC_Houndeye::SelectSchedule(void)
 {
+	if (HasCondition(COND_HOUNDEYE_FLIPPED))
+	{
+		ClearCondition(COND_HOUNDEYE_FLIPPED);
+		return COND_HOUNDEYE_FLIPPED;
+	}
+
 	switch (m_NPCState)
 	{
 	case NPC_STATE_IDLE:
@@ -1180,6 +1372,22 @@ DEFINE_SCHEDULE
 	"		COND_CAN_RANGE_ATTACK1"
 	"		COND_CAN_MELEE_ATTACK1"
 	"		COND_CAN_MELEE_ATTACK2"
+	"		COND_TASK_FAILED"
+)
+
+DECLARE_ACTIVITY(ACT_HOUNDEYE_FLIP)
+DECLARE_CONDITION(COND_HOUNDEYE_FLIPPED)
+
+DEFINE_SCHEDULE
+(
+	SCHED_HOUNDEYE_FLIP,
+
+	"	Tasks"
+	"		TASK_STOP_MOVING	0"
+	"		TASK_RESET_ACTIVITY		0"
+	"		TASK_PLAY_SEQUENCE		ACTIVITY:ACT_HOUNDEYE_FLIP"
+
+	"	Interrupts"
 	"		COND_TASK_FAILED"
 )
 
