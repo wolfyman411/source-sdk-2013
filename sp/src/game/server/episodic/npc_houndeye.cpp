@@ -59,6 +59,7 @@ ConVar sk_houndeye_dmg_blast("sk_houndeye_dmg_blast", "15");
 #define		HOUND_AE_ANGERSOUND2	5
 #define		HOUND_AE_HOPBACK		6
 #define		HOUND_AE_CLOSE_EYE		7
+int ACT_HOUNDEYE_FLIP;
 
 BEGIN_DATADESC(CNPC_Houndeye)
 DEFINE_FIELD(m_iSpriteTexture, FIELD_INTEGER),
@@ -389,8 +390,6 @@ void CNPC_Houndeye::HandleAnimEvent(animevent_t* pEvent)
 		break;
 	}
 }
-
-int ACT_HOUNDEYE_FLIP;
 
 inline bool CNPC_Houndeye::IsFlipped(void)
 {
