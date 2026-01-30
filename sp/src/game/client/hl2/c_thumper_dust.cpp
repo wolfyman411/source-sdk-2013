@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -27,7 +27,7 @@ extern IPhysicsSurfaceProps *physprops;
 class ThumperDustEmitter : public CSimpleEmitter
 {
 public:
-	
+
 	ThumperDustEmitter( const char *pDebugName ) : CSimpleEmitter( pDebugName ) {}
 
 	static ThumperDustEmitter *Create( const char *pDebugName )
@@ -48,7 +48,7 @@ public:
 	virtual	float UpdateRoll( SimpleParticle *pParticle, float timeDelta )
 	{
 		pParticle->m_flRoll += pParticle->m_flRollDelta * timeDelta;
-		
+
 		pParticle->m_flRollDelta += pParticle->m_flRollDelta * ( timeDelta * -4.0f );
 
 		//Cap the minimum roll
@@ -70,17 +70,12 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // Input  : bNewEntity - whether or not to start a new entity
 //-----------------------------------------------------------------------------
 
 void FX_ThumperDust( const CEffectData &data )
 {
-	Vector vecDustColor;
-	vecDustColor.x = 0.85f;
-	vecDustColor.y = 0.75f;
-	vecDustColor.z = 0.52f;
-
 	CSmartPtr<ThumperDustEmitter> pSimple = ThumperDustEmitter::Create( "thumperdust" );
 
 	C_BaseEntity *pEnt = C_BaseEntity::Instance( data.m_hEntity );
@@ -117,23 +112,23 @@ void FX_ThumperDust( const CEffectData &data )
 
 	// Setup the color for these particles
 	engine->ComputeLighting( data.m_vOrigin, NULL, true, vecColor );
-	VectorLerp( vecColor, vecDustColor, 0.5, vecColor );
+	VectorLerp( vecColor, data.m_CustomColors.m_vecColor1, 0.5, vecColor );
 	vecColor *= 255;
 
 	for ( i = 0; i < numPuffs; i++ )
 	{
 		flYaw += flIncr;
-		SinCos( flYaw, &forward.y, &forward.x );	
+		SinCos( flYaw, &forward.y, &forward.x );
 		forward.z = 0.0f;
 
 		offset = ( RandomVector( -4.0f, 4.0f ) + data.m_vOrigin ) + ( forward * 128.0f );
 
 		pParticle = (SimpleParticle *) pSimple->AddParticle( sizeof(SimpleParticle), g_Mat_DustPuff[random->RandomInt(0,1)], offset );
 		if ( pParticle != NULL )
-		{	
+		{
 			pParticle->m_flLifetime		= 0.0f;
 			pParticle->m_flDieTime		= 1.5f;
-	
+
 			Vector dir = (offset - data.m_vOrigin);
 			float length = dir.Length();
 			VectorNormalize( dir );
@@ -159,8 +154,8 @@ void FX_ThumperDust( const CEffectData &data )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &data - 
+// Purpose:
+// Input  : &data -
 //-----------------------------------------------------------------------------
 void ThumperDustCallback( const CEffectData &data )
 {
