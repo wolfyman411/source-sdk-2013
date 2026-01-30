@@ -71,14 +71,6 @@ private:
 	bool m_fDontBlink;// don't try to open/close eye if this bit is set!
 	Vector	m_vecPackCenter; // the center of the pack. The leader maintains this by averaging the origins of all pack members.
 	float m_flZapDuration;
-
-	enum {
-		COND_HOUNDEYE_FLIPPED = LAST_SHARED_CONDITION,
-	};
-
-	enum {
-		SCHED_HOUNDEYE_FLIP = LAST_SHARED_SCHEDULE,
-	};
 };
 
 #endif // NPC_HOUNDEYE_H
