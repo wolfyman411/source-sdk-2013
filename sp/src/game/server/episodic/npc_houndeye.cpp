@@ -416,47 +416,6 @@ void CNPC_Houndeye::Flip(bool bZapped /*= false*/)
 	SetCondition(COND_HOUNDEYE_FLIPPED);
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: Antlion who are flipped will knock over other antlions behind them!
-//-----------------------------------------------------------------------------
-void CNPC_Houndeye::CascadePush(const Vector& vecForce)
-{
-	// Controlled via this convar until this is proven worthwhile
-	if (hl2_episodic.GetBool() == false /*|| g_antlion_cascade_push.GetBool() == false*/)
-		return;
-
-	Vector vecForceDir = vecForce;
-	float flMagnitude = VectorNormalize(vecForceDir);
-	Vector vecPushBack = GetAbsOrigin() + (vecForceDir * (flMagnitude * 0.1f));
-
-	// Make houndeyes flip all around us!
-	CBaseEntity* pEnemySearch[32];
-	int nNumEnemies = UTIL_EntitiesInBox(pEnemySearch, ARRAYSIZE(pEnemySearch), vecPushBack - Vector(32, 32, 0), vecPushBack + Vector(32, 32, 64), FL_NPC);
-	for (int i = 0; i < nNumEnemies; i++)
-	{
-		// We only care about antlions
-		if (pEnemySearch[i] == NULL || pEnemySearch[i]->Classify() != CLASS_HOUNDEYE || pEnemySearch[i] == this)
-			continue;
-
-		CNPC_Houndeye* pHoundeye = dynamic_cast<CNPC_Houndeye*>(pEnemySearch[i]);
-		if (pHoundeye != NULL)
-		{
-			Vector vecDir = (pHoundeye->GetAbsOrigin() - GetAbsOrigin());
-			vecDir[2] = 0.0f;
-			float flDist = VectorNormalize(vecDir);
-			float flFalloff = RemapValClamped(flDist, 0, 256, 1.0f, 0.1f);
-
-			vecDir *= (flMagnitude * flFalloff);
-			vecDir[2] += ((flMagnitude * 0.25f) * flFalloff);
-
-			pHoundeye->ApplyAbsVelocityImpulse(vecDir);
-
-			// Turn them over
-			pHoundeye->Flip(false);
-		}
-	}
-}
-
 void CNPC_Houndeye::Touch(CBaseEntity* pOther) {
 	//See if the touching entity is a vehicle
 	CBasePlayer* pPlayer = ToBasePlayer(AI_GetSinglePlayer());
@@ -514,7 +473,6 @@ void CNPC_Houndeye::TraceAttack(const CTakeDamageInfo& info, const Vector& vecDi
 		{
 			PainSound(newInfo);
 			Vector vecForce = (vecShoveDir * random->RandomInt(500.0f, 1000.0f)) + Vector(0, 0, 64.0f);
-			CascadePush(vecForce);
 			ApplyAbsVelocityImpulse(vecForce);
 			SetGroundEntity(NULL);
 		}
@@ -542,7 +500,6 @@ void CNPC_Houndeye::TraceAttack(const CTakeDamageInfo& info, const Vector& vecDi
 
 				Vector vecForce = (vecShoveDir * random->RandomInt(500.0f, 1000.0f)) + Vector(0, 0, 64.0f);
 
-				CascadePush(vecForce);
 				ApplyAbsVelocityImpulse(vecForce);
 				SetGroundEntity(NULL);
 			}
@@ -1168,6 +1125,7 @@ DEFINE_SCHEDULE
 	"	Interrupts"
 	"		COND_NEW_ENEMY"
 	"		COND_HEAVY_DAMAGE"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1183,6 +1141,7 @@ DEFINE_SCHEDULE
 	"		TASK_SET_SCHEDULE			SCHEDULE:SCHED_TAKE_COVER_FROM_ENEMY"
 	"	"
 	"	Interrupts"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1199,6 +1158,7 @@ DEFINE_SCHEDULE
 	"		TASK_SET_SCHEDULE			SCHEDULE:SCHED_HOUND_AGITATED"
 	"	"
 	"	Interrupts"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1214,6 +1174,7 @@ DEFINE_SCHEDULE
 	"		TASK_RANGE_ATTACK1			0"
 	"	"
 	"	Interrupts"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1229,6 +1190,7 @@ DEFINE_SCHEDULE
 	"	Interrupts"
 	"		COND_LIGHT_DAMAGE"
 	"		COND_HEAVY_DAMAGE"
+	"		COND_NEW_ENEMY"
 )
 
 //=========================================================
@@ -1256,6 +1218,7 @@ DEFINE_SCHEDULE
 	"		COND_HEAR_DANGER"
 	"		COND_HEAR_PLAYER"
 	"		COND_HEAR_WORLD"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1273,6 +1236,7 @@ DEFINE_SCHEDULE
 	"		TASK_HOUND_WAKE_UP			0"
 	"	"
 	"	Interrupts"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1289,6 +1253,7 @@ DEFINE_SCHEDULE
 	"		TASK_HOUND_WAKE_UP			0"
 	"	"
 	"	Interrupts"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1310,6 +1275,7 @@ DEFINE_SCHEDULE
 	"		COND_LIGHT_DAMAGE"
 	"		COND_HEAVY_DAMAGE"
 	"		COND_ENEMY_OCCLUDED"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1329,6 +1295,7 @@ DEFINE_SCHEDULE
 	"		COND_NEW_ENEMY"
 	"		COND_LIGHT_DAMAGE"
 	"		COND_HEAVY_DAMAGE"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 //=========================================================
@@ -1349,6 +1316,7 @@ DEFINE_SCHEDULE
 	"		COND_NEW_ENEMY"
 	"		COND_LIGHT_DAMAGE"
 	"		COND_HEAVY_DAMAGE"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 //=========================================================
 // > SCHED_HOUND_CHASE_ENEMY
@@ -1373,6 +1341,7 @@ DEFINE_SCHEDULE
 	"		COND_CAN_MELEE_ATTACK1"
 	"		COND_CAN_MELEE_ATTACK2"
 	"		COND_TASK_FAILED"
+	"		COND_HOUNDEYE_FLIPPED"
 )
 
 DEFINE_SCHEDULE
