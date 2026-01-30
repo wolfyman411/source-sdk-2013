@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
+//========= Copyright ï¿½ 1996-2005, Valve Corporation, All rights reserved. ============//
 //
 // Purpose:		Cute hound like Alien.
 //
@@ -104,7 +104,7 @@ enum
 	SCHED_HOUND_COMBAT_FAIL_PVS,
 	SCHED_HOUND_COMBAT_FAIL_NOPVS,
 	SCHED_HOUND_CHASE_ENEMY,
-	SCHED_HOUNDEYE_FLIP,
+	SCHED_HOUND_FLIP,
 	//	SCHED_HOUND_FAIL,
 };
 
@@ -1039,7 +1039,7 @@ int CNPC_Houndeye::SelectSchedule(void)
 	if (HasCondition(COND_HOUNDEYE_FLIPPED))
 	{
 		ClearCondition(COND_HOUNDEYE_FLIPPED);
-		return SCHED_HOUNDEYE_FLIP;
+		return SCHED_HOUND_FLIP;
 	}
 
 	switch (m_NPCState)
@@ -1150,6 +1150,10 @@ DECLARE_TASK(TASK_HOUND_THREAT_DISPLAY)
 DECLARE_TASK(TASK_HOUND_FALL_ASLEEP)
 DECLARE_TASK(TASK_HOUND_WAKE_UP)
 DECLARE_TASK(TASK_HOUND_HOP_BACK)
+
+DECLARE_CONDITION(COND_HOUNDEYE_FLIPPED)
+
+DECLARE_ACTIVITY(ACT_HOUNDEYE_FLIP)
 
 //=========================================================
 // > SCHED_HOUND_AGITATED
@@ -1372,12 +1376,9 @@ DEFINE_SCHEDULE
 	"		COND_TASK_FAILED"
 )
 
-DECLARE_ACTIVITY(ACT_HOUNDEYE_FLIP)
-DECLARE_CONDITION(COND_HOUNDEYE_FLIPPED)
-
 DEFINE_SCHEDULE
 (
-	SCHED_HOUNDEYE_FLIP,
+	SCHED_HOUND_FLIP,
 
 	"	Tasks"
 	"		TASK_STOP_MOVING	0"
