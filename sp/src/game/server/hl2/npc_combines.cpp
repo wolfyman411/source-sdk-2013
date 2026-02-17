@@ -24,6 +24,7 @@
 #include "hl2_gamerules.h"
 #include "gameweaponmanager.h"
 #include "vehicle_base.h"
+#include "props.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -50,6 +51,60 @@ LINK_ENTITY_TO_CLASS( npc_combine_s, CNPC_CombineS );
 
 extern Activity ACT_WALK_EASY;
 extern Activity ACT_WALK_MARCH;
+
+BEGIN_DATADESC( CCombineArmourPart )
+
+DEFINE_THINKFUNC( WornThink ),
+
+END_DATADESC()
+
+int CCombineArmourPart::OnTakeDamage(const CTakeDamageInfo& info)
+{
+    
+    DevLog( "Damaged!\n" );
+    DevLog( "This is being worn by %s\n", m_hCombine ? m_hCombine->GetDebugName() : "no one" );
+
+    DevLog( "Damage type: %d\n", info.GetDamageType() );
+    DevLog( "Damage is bullet: %s\n", ( info.GetDamageType() & DMG_BULLET ) ? "yes" : "no" );
+
+    DevLog( "hits: %d\n", m_iHitsBeforeFall );
+
+    if ( info.GetDamageType() & DMG_BULLET && m_iHitsBeforeFall >= 3 )
+    {
+        this->m_hCombine = NULL;
+        this->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
+        this->SetMoveType( MOVETYPE_VPHYSICS );
+        EmitSound( "Metal_Box.Break" );
+
+        UTIL_Remove( this );
+    }
+
+    m_iHitsBeforeFall++;
+    return 0;
+}
+
+void CCombineArmourPart::Spawn( void )
+{
+    BaseClass::Spawn();
+    m_iHitsBeforeFall = 0;
+    DevLog( "CONFIRMATION THIS IS CALLED!\n" );
+}
+
+void CCombineArmourPart::WornThink( void )
+{
+    DevMsg( "THINK!\n" );
+    if ( m_hCombine )
+    {
+        QAngle angles = m_hCombine->GetAbsAngles();
+        Vector forward, right, up;
+
+        AngleVectors( angles, &forward, &right, &up );
+        SetAbsOrigin( m_hCombine->GetAbsOrigin() + forward * 20 + right * 0 + up * 60 );
+        SetAbsAngles( m_hCombine->GetAbsAngles() );
+    }
+
+    SetNextThink( gpGlobals->curtime + 0.1f );
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -89,6 +144,25 @@ void CNPC_CombineS::Spawn( void )
 	{
 		Msg( "Soldier %s is set to use march anim, but is not an efficient AI. The blended march anim can only be used for dead-ahead walks!\n", GetDebugName() );
 	}
+#endif
+
+#if HL2_EPISODIC
+    CCombineArmourPart* armour1 = ( CCombineArmourPart* ) CreateEntityByName( "combine_armour_part" );
+    if ( armour1 )
+    {
+        armour1->SetModelName( MAKE_STRING( "models/props_combine/combine_barricade_short01a.mdl" ) );
+
+        armour1->Spawn();
+        armour1->Activate();
+        armour1->SetHealth( 70 );
+        armour1->m_hCombine = this;
+        armour1->SetThink( &CCombineArmourPart::WornThink );
+        armour1->WornThink();
+        armour1->SetCollisionGroup( COLLISION_GROUP_NPC );
+        armour1->SetSolid( SOLID_BBOX );
+        
+        m_ArmourParts.AddToHead( armour1 );
+    }
 #endif
 }
 

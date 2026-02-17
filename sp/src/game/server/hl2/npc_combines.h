@@ -11,10 +11,30 @@
 #endif
 
 #include "npc_combine.h"
+#include "props.h"
+
+class CCombineArmourPart : public CDynamicProp {
+
+    DECLARE_CLASS( CCombineArmourPart, CDynamicProp );
+    DECLARE_DATADESC();
+
+    public:
+        virtual int OnTakeDamage( const CTakeDamageInfo& info );
+        virtual void Spawn( void );
+        virtual void WornThink( void );
+    
+        CBaseEntity* m_hCombine;
+    private:
+        int m_iHitsBeforeFall;
+        
+};
+
+LINK_ENTITY_TO_CLASS( combine_armour_part, CCombineArmourPart );
 
 //=========================================================
 //	>> CNPC_CombineS
 //=========================================================
+
 class CNPC_CombineS : public CNPC_Combine
 {
 	DECLARE_CLASS( CNPC_CombineS, CNPC_Combine );
@@ -48,6 +68,8 @@ public:
 
 	bool		IsArmorless() { return m_fIsArmorless; }
 	bool		m_fIsArmorless;
+
+    CUtlVector< CCombineArmourPart* > m_ArmourParts;
 
 private:
 	bool		ShouldHitPlayer( const Vector &targetDir, float targetDist );
