@@ -396,19 +396,6 @@ void CNPC_CombineS::Event_Killed( const CTakeDamageInfo& info )
 		}
 	}
 
-    if ( m_ArmourParts.Count() > 0 )
-    {
-        for ( CCombineArmourPart* armour : m_ArmourParts )
-        {
-            if ( armour )
-            {
-                armour->OnBroken();
-            }
-        }
-
-        m_ArmourParts.Purge();
-    }
-
 	BaseClass::Event_Killed( info );
 }
 
