@@ -12,45 +12,68 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-ConVar	sk_combine_armored_health( "sk_combine_armored_health","0");
-ConVar	sk_combine_armored_kick( "sk_combine_armored_kick","0");
+ConVar	sk_combine_armored_health( "sk_combine_armored_health", "0" );
+ConVar	sk_combine_armored_kick( "sk_combine_armored_kick", "0" );
 
 //-----------------------------------------------------------------------------
 // Purpose: Heavily armored combine infantry
 //-----------------------------------------------------------------------------
-class CArmorPiece : public CBaseAnimating
+class CArmorPiece : public CDynamicProp
 {
-	DECLARE_CLASS( CArmorPiece, CBaseAnimating );
-public: 
-	void Spawn( void )
-	{
-		BaseClass::Spawn();
-		Precache();
+    DECLARE_CLASS( CArmorPiece, CDynamicProp );
+    public:
+    CBaseEntity* m_pCombineUnit;
 
-		SetModel( STRING(GetModelName()) );
+    void Spawn( void )
+    {
+        Precache();
 
-		CreateVPhysics();
-	}
+        BaseClass::Spawn();
+        SetModel( STRING( GetModelName() ) );
 
-	void Precache( void )
-	{
-		PrecacheModel( STRING(GetModelName()) );
-	}
+        CreateVPhysics();
+    }
 
-	bool CreateVPhysics( void )
-	{
-		SetSolid( SOLID_VPHYSICS );
-		IPhysicsObject *pPhysicsObject = VPhysicsInitShadow( false, false );
+    void Precache( void )
+    {
+        PrecacheModel( STRING( GetModelName() ) );
+    }
 
-		if ( !pPhysicsObject )
-		{
-			SetSolid( SOLID_NONE );
-			SetMoveType( MOVETYPE_NONE );
-			Warning("ERROR!: Can't create physics object for %s\n", STRING( GetModelName() ) );
-		}
+    bool CreateVPhysics( void )
+    {
+        SetSolid( SOLID_VPHYSICS );
+        IPhysicsObject* pPhysicsObject = VPhysicsInitShadow( false, false );
 
-		return true;
-	}
+        if ( !pPhysicsObject )
+        {
+            SetSolid( SOLID_NONE );
+            SetMoveType( MOVETYPE_NONE );
+            Warning( "ERROR!: Can't create physics object for %s\n", STRING( GetModelName() ) );
+        }
+
+        return true;
+    }
+
+    int OnTakeDamage( const CTakeDamageInfo& info )
+    {
+        if ( this->GetHealth() <= 0 )
+        {
+            this->OnPieceBreak();
+        }
+
+        DevLog( "Armor piece took damage: %f\n", info.GetDamage() );
+        DevLog( "Current armor piece health: %d\n", this->GetHealth() );
+        DevLog( "Damage is fit: %s\n", ( info.GetDamageType() & ( DMG_CLUB | DMG_BULLET | DMG_BLAST ) ) ? "true" : "false" );
+
+        if ( ( info.GetDamageType() & ( DMG_CLUB | DMG_BULLET | DMG_BLAST ) ) )
+        {
+            this->SetHealth( this->GetHealth() - info.GetDamage() );
+        }
+        
+        return 0;
+    }
+   
+    void OnPieceBreak( void );
 };
 
 LINK_ENTITY_TO_CLASS( combine_armor_piece, CArmorPiece );
@@ -66,6 +89,9 @@ public:
 	void		Precache( void );
 
 	void		SpawnArmorPieces( void );
+    void        Event_Killed( const CTakeDamageInfo &info );
+
+    CUtlVector<CArmorPiece*> m_ArmorPieces;
 };
 
 LINK_ENTITY_TO_CLASS( npc_combine_armored, CNPC_Combine_Armored );
@@ -77,6 +103,8 @@ void CNPC_Combine_Armored::Spawn( void )
 {
 	Precache();
 	SetModel( STRING( GetModelName() ) );
+
+    m_nSkin = 1;
 
 	SetHealth( sk_combine_armored_health.GetFloat() );
 	SetMaxHealth( sk_combine_armored_health.GetFloat() );
@@ -100,7 +128,7 @@ void CNPC_Combine_Armored::Precache()
 {
 	if( !GetModelName() )
 	{
-		SetModelName( MAKE_STRING( "models/armored_soldier.mdl" ) );
+		SetModelName( MAKE_STRING( "models/combine_soldier.mdl" ) );
 	}
 
 	PrecacheModel( STRING( GetModelName() ) );
@@ -115,29 +143,71 @@ void CNPC_Combine_Armored::Precache()
 //-----------------------------------------------------------------------------
 void CNPC_Combine_Armored::SpawnArmorPieces( void )
 {
-	struct armorpiecepositions_t
+	struct ArmorPieceStruct
 	{
-		char	*pszAttachment;
+		Vector	vecOffset;
+        QAngle  angOffset;
+
+        int     iHealth;
+
 		char	*pszModel;
 	};
 
-	armorpiecepositions_t ArmorPiecesPositions[] =
+    ArmorPieceStruct ArmorPiecesData[] =
 	{
-		{ "attach_L_Thigh_armor",		"models/combine_armor.mdl" },
-		{ "attach_L_UpperArm_armor",	"models/combine_armor.mdl" },
-		{ "attach_R_Thigh_armor",		"models/combine_armor.mdl" },  
-		{ "attach_R_UpperArm_armor",	"models/combine_armor.mdl" },
-		{ "attach_chest_armor",			"models/combine_armor_chest.mdl" },
+		{ Vector(2, -8, 60),       QAngle(0, 0, 0),     20.0f,		"models/combine_scanner.mdl"},
+		{ Vector(2, 8, 60),		   QAngle(0, 0, 0),     20.0f,		"models/Gibs/HGIBS.mdl"},
 	};
 
-	for ( int i = 0; i < ARRAYSIZE(ArmorPiecesPositions); i++ )
+	for ( int i = 0; i < ARRAYSIZE(ArmorPiecesData); i++ )
 	{
-		CArmorPiece *pArmor = (CArmorPiece *)CBaseEntity::CreateNoSpawn( "combine_armor_piece", GetAbsOrigin(), GetAbsAngles(), this );
-		pArmor->SetModelName( MAKE_STRING(ArmorPiecesPositions[i].pszModel) );
-		pArmor->SetParent( this, LookupAttachment(ArmorPiecesPositions[i].pszAttachment) );
-		pArmor->SetLocalOrigin( vec3_origin );
-		pArmor->SetLocalAngles( vec3_angle );
-		DispatchSpawn( pArmor );
-		pArmor->Activate();
+		CArmorPiece* pArmor = (CArmorPiece*) CBaseEntity::CreateNoSpawn( "combine_armor_piece", GetAbsOrigin(), GetAbsAngles(), this );
+        if ( pArmor )
+        {
+            pArmor->SetModelName( MAKE_STRING( ArmorPiecesData[i].pszModel ) );
+            pArmor->SetParent( this );
+            pArmor->SetLocalOrigin( ArmorPiecesData[i].vecOffset );
+            pArmor->SetLocalAngles( ArmorPiecesData[ i ].angOffset );
+
+            DispatchSpawn( pArmor );
+
+            pArmor->Activate();
+            pArmor->SetHealth( ArmorPiecesData[ i ].iHealth );
+
+            pArmor->m_pCombineUnit = this;
+            m_ArmorPieces.AddToHead( pArmor );
+        }
+		
 	}
+}
+
+void CNPC_Combine_Armored::Event_Killed( const CTakeDamageInfo &info )
+{
+    BaseClass::Event_Killed( info );
+}
+
+// NOTE: Keep this here, cus otherwise 'CArmorPiece' isn't even aware of 'CNPC_Combine_Armored' existing, and thus can't call 'pCombine->m_ArmorPieces.FindAndRemove( this )' in the case of an armor piece breaking
+void CArmorPiece::OnPieceBreak( void ) {
+    if ( m_pCombineUnit )
+    {
+        CNPC_Combine_Armored* pCombine = ( CNPC_Combine_Armored* ) m_pCombineUnit;
+        if ( pCombine )
+        {
+            DevLog( "Valid combine unit found, removing self from its armor pieces list\n" );
+            pCombine->m_ArmorPieces.FindAndRemove( this );
+        }
+    }
+
+    CPhysicsProp* pProp = ( CPhysicsProp* ) CreateEntityByName( "prop_physics" );
+    if ( pProp )
+    {
+        pProp->SetModelName( this->GetModelName() );
+        pProp->SetAbsOrigin( this->GetAbsOrigin() );
+        pProp->SetAbsAngles( this->GetAbsAngles() );
+
+        DispatchSpawn( pProp );
+        pProp->Activate();
+    }
+
+    UTIL_Remove( this );
 }
