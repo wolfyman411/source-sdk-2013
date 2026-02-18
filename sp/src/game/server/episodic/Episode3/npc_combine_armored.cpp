@@ -14,6 +14,8 @@
 
 ConVar	sk_combine_armored_health( "sk_combine_armored_health", "0" );
 ConVar	sk_combine_armored_kick( "sk_combine_armored_kick", "0" );
+ConVar	sk_combine_armored_armor_chest_health( "sk_combine_armored_armor_chest_health", "0" );
+ConVar	sk_combine_armored_armor_health( "sk_combine_armored_armor_health", "0" );
 
 //-----------------------------------------------------------------------------
 // Purpose: Heavily armored combine infantry
@@ -172,7 +174,9 @@ void CNPC_Combine_Armored::SpawnArmorPieces( void )
             DispatchSpawn( pArmor );
 
             pArmor->Activate();
-            pArmor->SetHealth( ArmorPiecesData[ i ].iHealth );
+            pArmor->SetHealth( i == 0 ? sk_combine_armored_armor_chest_health.GetInt() : sk_combine_armored_armor_health.GetInt() );
+
+            DevLog( "Spawning armor piece with health: %d\n", pArmor->GetHealth() );
 
             pArmor->m_pCombineUnit = this;
             m_ArmorPieces.AddToHead( pArmor );
@@ -181,9 +185,17 @@ void CNPC_Combine_Armored::SpawnArmorPieces( void )
 	}
 }
 
-void CNPC_Combine_Armored::Event_Killed( const CTakeDamageInfo &info )
+void CNPC_Combine_Armored::Event_Killed( const CTakeDamageInfo& info )
 {
-    BaseClass::Event_Killed( info );
+    for ( int i = 0; i < m_ArmorPieces.Count(); i++ )
+    {
+        if ( m_ArmorPieces[i] )
+        {
+            m_ArmorPieces[ i ]->RemoveDeferred();
+        }
+    }
+
+    m_ArmorPieces.Purge();
 }
 
 // NOTE: Keep this here, cus otherwise 'CArmorPiece' isn't even aware of 'CNPC_Combine_Armored' existing, and thus can't call 'pCombine->m_ArmorPieces.FindAndRemove( this )' in the case of an armor piece breaking
