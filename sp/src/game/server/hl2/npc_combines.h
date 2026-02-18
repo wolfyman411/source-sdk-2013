@@ -37,9 +37,6 @@ public:
 	void		Event_Killed( const CTakeDamageInfo &info );
 	void		OnListened();
 
-    void        InputEnableArmour( inputdata_t& inputdata );
-    void        InputDisableArmour( inputdata_t& inputdata );
-
 #ifndef MAPBASE // Moved to CAI_GrenadeUser
 	void		ClearAttackConditions( void );
 #endif
