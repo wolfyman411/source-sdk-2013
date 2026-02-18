@@ -58,6 +58,43 @@ DEFINE_THINKFUNC( WornThink ),
 
 END_DATADESC()
 
+void CNPC_CombineS::InputEnableArmour( inputdata_t& inputdata )
+{
+    CCombineArmourPart* armour1 = ( CCombineArmourPart* ) CreateEntityByName( "combine_armour_part" );
+    if ( armour1 )
+    {
+        armour1->m_hCombine = this;
+        armour1->SetModelName( MAKE_STRING( "models/props_combine/combine_barricade_short01a.mdl" ) );
+
+        DevLog( "Spawning armour1\n" );
+
+        armour1->Spawn();
+        armour1->Activate();
+
+        Vector forward, right, up;
+        AngleVectors( this->GetAbsAngles(), &forward, &right, &up );
+
+        armour1->SetThink( &CCombineArmourPart::WornThink );
+        armour1->WornThink();
+
+        this->m_ArmourParts.AddToHead( armour1 );
+    }
+}
+
+void CNPC_CombineS::InputDisableArmour( inputdata_t& inputdata )
+{
+    for ( CCombineArmourPart* armour : m_ArmourParts )
+    {
+        if ( armour )
+        {
+            armour->Remove();
+        }
+    }
+
+    m_ArmourParts.Purge();
+}
+
+
 int CCombineArmourPart::OnTakeDamage(const CTakeDamageInfo& info)
 {
     
@@ -67,43 +104,85 @@ int CCombineArmourPart::OnTakeDamage(const CTakeDamageInfo& info)
     DevLog( "Damage type: %d\n", info.GetDamageType() );
     DevLog( "Damage is bullet: %s\n", ( info.GetDamageType() & DMG_BULLET ) ? "yes" : "no" );
 
-    DevLog( "hits: %d\n", m_iHitsBeforeFall );
+    DevLog( "health: %d\n", this->GetHealth() );
 
-    if ( info.GetDamageType() & DMG_BULLET && m_iHitsBeforeFall >= 3 )
+    if ( info.GetDamageType() & DMG_BULLET && this->GetHealth() <= 0 )
     {
-        this->m_hCombine = NULL;
-        this->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
-        this->SetMoveType( MOVETYPE_VPHYSICS );
-        EmitSound( "Metal_Box.Break" );
-
-        UTIL_Remove( this );
+        DevLog( "Breaking!\n" );
+        this->OnBroken();
     }
 
-    m_iHitsBeforeFall++;
+    this->SetHealth( this->GetHealth() - info.GetDamage() );
     return 0;
+}
+
+void CCombineArmourPart::Precache( void )
+{
+    DevLog( "Calling precache for armour part\n" );
+    PrecacheModel( STRING(GetModelName()) );
+
+    BaseClass::Precache();
 }
 
 void CCombineArmourPart::Spawn( void )
 {
+    this->Precache();
+
+    SetModel( STRING( GetModelName() ) );
+
+    this->SetHealth( 20 );
+    this->SetSolid( SOLID_VPHYSICS );
+
+    DevLog( "Spawning armour part with health %d\n", this->GetHealth() );
     BaseClass::Spawn();
-    m_iHitsBeforeFall = 0;
-    DevLog( "CONFIRMATION THIS IS CALLED!\n" );
+}
+
+void CCombineArmourPart::OnBroken( void )
+{
+    DevLog( "Broken!\n" );
+    DevLog( "This is being worn by %s\n", m_hCombine ? m_hCombine->GetDebugName() : "no one" );
+    if ( m_hCombine )
+    {
+        CNPC_CombineS* pCombine = assert_cast< CNPC_CombineS* >( m_hCombine );
+        DevLog( "Removing self from %s's armour parts list\n", pCombine->GetDebugName() );
+
+        this->m_hCombine = nullptr;
+        pCombine->m_ArmourParts.FindAndRemove( this );
+
+        CPhysicsProp* pProp = ( CPhysicsProp* ) CreateEntityByName( "prop_physics" );
+        if ( pProp )
+        {
+            pProp->SetModelName( this->GetModelName() );
+            pProp->SetAbsOrigin( this->GetAbsOrigin() );
+            pProp->SetAbsAngles( this->GetAbsAngles() );
+            pProp->SetCollisionGroup( COLLISION_GROUP_DEBRIS );
+            DispatchSpawn( pProp );
+
+            DevLog( "Spawning physics prop with model %s\n", STRING( this->GetModelName() ) );
+        }
+    }
+
+    UTIL_Remove( this );
 }
 
 void CCombineArmourPart::WornThink( void )
 {
-    DevMsg( "THINK!\n" );
     if ( m_hCombine )
     {
         QAngle angles = m_hCombine->GetAbsAngles();
         Vector forward, right, up;
 
         AngleVectors( angles, &forward, &right, &up );
-        SetAbsOrigin( m_hCombine->GetAbsOrigin() + forward * 20 + right * 0 + up * 60 );
-        SetAbsAngles( m_hCombine->GetAbsAngles() );
-    }
+        this->SetAbsOrigin( m_hCombine->GetAbsOrigin() + forward * 20 + right * 0 + up * 60 );
+        this->SetAbsAngles( m_hCombine->GetAbsAngles() );
 
-    SetNextThink( gpGlobals->curtime + 0.1f );
+        this->SetNextThink( gpGlobals->curtime );
+    }
+    else
+    {
+        this->SetThink( NULL );
+        this->OnBroken();
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -144,25 +223,6 @@ void CNPC_CombineS::Spawn( void )
 	{
 		Msg( "Soldier %s is set to use march anim, but is not an efficient AI. The blended march anim can only be used for dead-ahead walks!\n", GetDebugName() );
 	}
-#endif
-
-#if HL2_EPISODIC
-    CCombineArmourPart* armour1 = ( CCombineArmourPart* ) CreateEntityByName( "combine_armour_part" );
-    if ( armour1 )
-    {
-        armour1->SetModelName( MAKE_STRING( "models/props_combine/combine_barricade_short01a.mdl" ) );
-
-        armour1->Spawn();
-        armour1->Activate();
-        armour1->SetHealth( 70 );
-        armour1->m_hCombine = this;
-        armour1->SetThink( &CCombineArmourPart::WornThink );
-        armour1->WornThink();
-        armour1->SetCollisionGroup( COLLISION_GROUP_NPC );
-        armour1->SetSolid( SOLID_BBOX );
-        
-        m_ArmourParts.AddToHead( armour1 );
-    }
 #endif
 }
 
@@ -469,6 +529,19 @@ void CNPC_CombineS::Event_Killed( const CTakeDamageInfo& info )
 		}
 	}
 
+    if ( m_ArmourParts.Count() > 0 )
+    {
+        for ( CCombineArmourPart* armour : m_ArmourParts )
+        {
+            if ( armour )
+            {
+                armour->OnBroken();
+            }
+        }
+
+        m_ArmourParts.Purge();
+    }
+
 	BaseClass::Event_Killed( info );
 }
 
@@ -529,13 +602,14 @@ Activity CNPC_CombineS::NPC_TranslateActivity( Activity eNewActivity )
 	return BaseClass::NPC_TranslateActivity( eNewActivity );
 }
 
-
 //---------------------------------------------------------
 // Save/Restore
 //---------------------------------------------------------
 BEGIN_DATADESC( CNPC_CombineS )
 
 DEFINE_KEYFIELD( m_iUseMarch, FIELD_INTEGER, "usemarch" ),
+DEFINE_INPUTFUNC( FIELD_VOID, "EnableArmour", InputEnableArmour ),
+DEFINE_INPUTFUNC( FIELD_VOID, "DisableArmour", InputDisableArmour ),
 
 END_DATADESC()
 #endif

@@ -22,6 +22,10 @@ class CCombineArmourPart : public CDynamicProp {
         virtual int OnTakeDamage( const CTakeDamageInfo& info );
         virtual void Spawn( void );
         virtual void WornThink( void );
+
+        virtual void Precache( void );
+        virtual void OnBroken( void );
+
     
         CBaseEntity* m_hCombine;
     private:
@@ -54,6 +58,9 @@ public:
 	void		OnChangeActivity( Activity eNewActivity );
 	void		Event_Killed( const CTakeDamageInfo &info );
 	void		OnListened();
+
+    void        InputEnableArmour( inputdata_t& inputdata );
+    void        InputDisableArmour( inputdata_t& inputdata );
 
 #ifndef MAPBASE // Moved to CAI_GrenadeUser
 	void		ClearAttackConditions( void );
