@@ -93,6 +93,8 @@ public:
 	void		SpawnArmorPieces( void );
     void        Event_Killed( const CTakeDamageInfo &info );
 
+    int         OnTakeDamage_Alive( const CTakeDamageInfo& info );
+
     CUtlVector<CArmorPiece*> m_ArmorPieces;
 };
 
@@ -117,6 +119,8 @@ void CNPC_Combine_Armored::Spawn( void )
 	CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
 	BaseClass::Spawn();
+    CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
+    CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
 	SpawnArmorPieces();
 }
@@ -200,6 +204,31 @@ void CNPC_Combine_Armored::Event_Killed( const CTakeDamageInfo& info )
     BaseClass::Event_Killed( info );
 }
 
+int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
+{
+    if ( info.GetDamageType() & DMG_CLUB )
+    {
+        CArmorPiece* pClosestArmour = NULL;
+        Vector vecDamage = info.GetDamagePosition();
+        for ( int i = 0; i < m_ArmorPieces.Count(); i++ )
+        {
+            if ( m_ArmorPieces[ i ] && !pClosestArmour || ( vecDamage - m_ArmorPieces[ i ]->GetAbsOrigin() ).LengthSqr() < ( vecDamage - pClosestArmour->GetAbsOrigin() ).LengthSqr() )
+            {
+                pClosestArmour = m_ArmorPieces[ i ];
+            }
+        }
+
+        if ( pClosestArmour )
+        {
+            float flDot = ( vecDamage - GetAbsOrigin() ).Normalized().Dot( ( pClosestArmour->GetAbsOrigin() - GetAbsOrigin() ).Normalized() );
+            if ( flDot >= 0.975 )
+            {
+                pClosestArmour->TakeDamage( info );
+            }
+        }
+    }
+
+    return BaseClass::OnTakeDamage_Alive( info );
 }
 
 // NOTE: Keep this here, cus otherwise 'CArmorPiece' isn't even aware of 'CNPC_Combine_Armored' existing, and thus can't call 'pCombine->m_ArmorPieces.FindAndRemove( this )' in the case of an armor piece breaking
