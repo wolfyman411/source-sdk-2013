@@ -249,30 +249,7 @@ int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
         CArmorPiece* pArmour = GetClosestArmourPlate( this, vecDamage );
         if ( pArmour )
         {
-            /*
-            DevLog("%s\n", STRING(pArmour->GetModelName()));
-            Vector vecMins = pArmour->CollisionProp()->OBBMins();
-            Vector vecMaxs = pArmour->CollisionProp()->OBBMaxs();
-
-            DevLog( "Armor plate bounds: mins=(%.2f, %.2f, %.2f), maxs=(%.2f, %.2f, %.2f)\n", vecMins.x, vecMins.y, vecMins.z, vecMaxs.x, vecMaxs.y, vecMaxs.z );
-
-            Vector vecClosestPoint;
-            vecClosestPoint.x = clamp( vecDamage.x - pArmour->CollisionProp()->GetCollisionOrigin().x, vecMins.x, vecMaxs.x);
-            vecClosestPoint.y = clamp( vecDamage.y - pArmour->CollisionProp()->GetCollisionOrigin().y, vecMins.y, vecMaxs.y );
-            vecClosestPoint.z = clamp( vecDamage.z - pArmour->CollisionProp()->GetCollisionOrigin().z, vecMins.z, vecMaxs.z );
-
-            float flDist = (vecDamage - pArmour->CollisionProp()->GetCollisionOrigin() - vecClosestPoint).Length();
-            DevLog( "Distance from damage point to closest point on armor plate\t%.2f\t%.2f\n", flDist, sk_combine_armored_armour_tolerance_dist.GetFloat() );
-
-            if ( flDist > sk_combine_armored_armour_tolerance_dist.GetFloat() )
-            {
-                return BaseClass::OnTakeDamage_Alive( info );
-            }
-
-            
-
-            pArmour->TakeDamage( info );
-            */
+            // TODO: make it good
         }
     }
 
