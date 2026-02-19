@@ -44,14 +44,12 @@ class CArmorPiece : public CDynamicProp
     bool CreateVPhysics( void )
     {
         SetSolid( SOLID_VPHYSICS );
-        SetMoveType( MOVETYPE_NONE );
 
         IPhysicsObject* pPhysicsObject = VPhysicsInitShadow(false, false);
-
         if ( !pPhysicsObject )
         {
-            SetSolid( SOLID_BBOX );
-            AddSolidFlags( FSOLID_NOT_SOLID );
+            SetSolid( SOLID_NONE );
+            SetMoveType( MOVETYPE_NONE );
             Warning( "ERROR!: Can't create physics object for %s\n", STRING( GetModelName() ) );
         }
 
