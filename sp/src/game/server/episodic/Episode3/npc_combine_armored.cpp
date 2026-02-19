@@ -44,12 +44,14 @@ class CArmorPiece : public CDynamicProp
     bool CreateVPhysics( void )
     {
         SetSolid( SOLID_VPHYSICS );
-        IPhysicsObject* pPhysicsObject = VPhysicsInitShadow( false, false );
+        SetMoveType( MOVETYPE_NONE );
+
+        IPhysicsObject* pPhysicsObject = VPhysicsInitShadow(false, false);
 
         if ( !pPhysicsObject )
         {
-            SetSolid( SOLID_NONE );
-            SetMoveType( MOVETYPE_NONE );
+            SetSolid( SOLID_BBOX );
+            AddSolidFlags( FSOLID_NOT_SOLID );
             Warning( "ERROR!: Can't create physics object for %s\n", STRING( GetModelName() ) );
         }
 
@@ -202,27 +204,75 @@ void CNPC_Combine_Armored::Event_Killed( const CTakeDamageInfo& info )
     BaseClass::Event_Killed( info );
 }
 
+ConVar sk_combine_armored_armour_tolerance_dist( "sk_combine_armored_armour_tolerance_dist", "5.0");
+
+inline CArmorPiece* GetClosestArmourPlate( CNPC_Combine_Armored* m_hCombine, Vector vecPoint )
+{
+    CArmorPiece* pClosestArmour = NULL;
+    float flClosestDistSqr = FLT_MAX;
+
+    for ( int i = 0; i < m_hCombine->m_ArmorPieces.Count(); i++ )
+    {
+        if ( m_hCombine->m_ArmorPieces[ i ] )
+        {
+            if ( m_hCombine->m_ArmorPieces[ i ]->CollisionProp()->IsPointInBounds( vecPoint ) )
+            {
+                return m_hCombine->m_ArmorPieces[ i ];
+            }
+            else
+            {
+                float flDistSqr = m_hCombine->m_ArmorPieces[ i ]->GetAbsOrigin().DistToSqr( vecPoint );
+                if ( flDistSqr < flClosestDistSqr )
+                {
+                    flClosestDistSqr = flDistSqr;
+                    pClosestArmour = m_hCombine->m_ArmorPieces[ i ];
+                }
+            }
+        }
+    }
+
+    if ( pClosestArmour )
+    {
+        return pClosestArmour;
+    }
+
+    return NULL;
+}
+
 int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
 {
     if ( info.GetDamageType() & DMG_CLUB )
     {
-        CArmorPiece* pClosestArmour = NULL;
         Vector vecDamage = info.GetDamagePosition();
-        for ( int i = 0; i < m_ArmorPieces.Count(); i++ )
-        {
-            if ( m_ArmorPieces[ i ] && !pClosestArmour || ( vecDamage - m_ArmorPieces[ i ]->GetAbsOrigin() ).LengthSqr() < ( vecDamage - pClosestArmour->GetAbsOrigin() ).LengthSqr() )
-            {
-                pClosestArmour = m_ArmorPieces[ i ];
-            }
-        }
+        DevLog( "Combine Armored taking club damage at position: %.2f, %.2f, %.2f\n", vecDamage.x, vecDamage.y, vecDamage.z );
 
-        if ( pClosestArmour )
+        CArmorPiece* pArmour = GetClosestArmourPlate( this, vecDamage );
+        if ( pArmour )
         {
-            float flDot = ( vecDamage - GetAbsOrigin() ).Normalized().Dot( ( pClosestArmour->GetAbsOrigin() - GetAbsOrigin() ).Normalized() );
-            if ( flDot >= 0.975 )
+            /*
+            DevLog("%s\n", STRING(pArmour->GetModelName()));
+            Vector vecMins = pArmour->CollisionProp()->OBBMins();
+            Vector vecMaxs = pArmour->CollisionProp()->OBBMaxs();
+
+            DevLog( "Armor plate bounds: mins=(%.2f, %.2f, %.2f), maxs=(%.2f, %.2f, %.2f)\n", vecMins.x, vecMins.y, vecMins.z, vecMaxs.x, vecMaxs.y, vecMaxs.z );
+
+            Vector vecClosestPoint;
+            vecClosestPoint.x = clamp( vecDamage.x - pArmour->CollisionProp()->GetCollisionOrigin().x, vecMins.x, vecMaxs.x);
+            vecClosestPoint.y = clamp( vecDamage.y - pArmour->CollisionProp()->GetCollisionOrigin().y, vecMins.y, vecMaxs.y );
+            vecClosestPoint.z = clamp( vecDamage.z - pArmour->CollisionProp()->GetCollisionOrigin().z, vecMins.z, vecMaxs.z );
+
+            float flDist = (vecDamage - pArmour->CollisionProp()->GetCollisionOrigin() - vecClosestPoint).Length();
+            DevLog( "Distance from damage point to closest point on armor plate\t%.2f\t%.2f\n", flDist, sk_combine_armored_armour_tolerance_dist.GetFloat() );
+
+            if ( flDist > sk_combine_armored_armour_tolerance_dist.GetFloat() )
             {
-                pClosestArmour->TakeDamage( info );
+                return BaseClass::OnTakeDamage_Alive( info );
             }
+
+            
+
+            pArmour->TakeDamage( info );
+            */
         }
     }
 
