@@ -58,11 +58,6 @@ class CArmorPiece : public CDynamicProp
 
     int OnTakeDamage( const CTakeDamageInfo& info )
     {
-        if ( this->GetHealth() <= 0 )
-        {
-            this->OnPieceBreak();
-        }
-
         DevLog( "Armor piece took damage: %f\n", info.GetDamage() );
         DevLog( "Current armor piece health: %d\n", this->GetHealth() );
         DevLog( "Damage is fit: %s\n", ( info.GetDamageType() & ( DMG_CLUB | DMG_BULLET | DMG_BLAST ) ) ? "true" : "false" );
@@ -70,11 +65,16 @@ class CArmorPiece : public CDynamicProp
         if ( ( info.GetDamageType() & ( DMG_CLUB | DMG_BULLET | DMG_BLAST ) ) )
         {
             this->SetHealth( this->GetHealth() - info.GetDamage() );
+
+            if ( this->GetHealth() <= 0 )
+            {
+                this->OnPieceBreak();
+            }
         }
-        
-        return 0;
+
+        return BaseClass::OnTakeDamage( info );
     }
-   
+
     void OnPieceBreak( void );
 };
 
@@ -108,17 +108,15 @@ void CNPC_Combine_Armored::Spawn( void )
 	Precache();
 	SetModel( STRING( GetModelName() ) );
 
+	BaseClass::Spawn();
+
     m_nSkin = 1;
 
-	SetHealth( sk_combine_armored_health.GetFloat() );
-	SetMaxHealth( sk_combine_armored_health.GetFloat() );
-	SetKickDamage( sk_combine_armored_kick.GetFloat() );
+    SetHealth( sk_combine_armored_health.GetFloat() );
+    SetMaxHealth( sk_combine_armored_health.GetFloat() );
+    SetKickDamage( sk_combine_armored_kick.GetFloat() );
 
-	CapabilitiesAdd( bits_CAP_ANIMATEDFACE );
-	CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
-	CapabilitiesAdd( bits_CAP_DOORS_GROUP );
-
-	BaseClass::Spawn();
+    CapabilitiesAdd( bits_CAP_ANIMATEDFACE );
     CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
     CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
