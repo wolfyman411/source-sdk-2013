@@ -54,24 +54,7 @@ class CArmorPiece : public CDynamicProp
         return true;
     }
 
-    int OnTakeDamage( const CTakeDamageInfo& info )
-    {
-        DevLog( "Armor piece took damage: %f\n", info.GetDamage() );
-        DevLog( "Current armor piece health: %d\n", this->GetHealth() );
-        DevLog( "Damage is fit: %s\n", ( info.GetDamageType() & ( DMG_BULLET | DMG_BLAST ) ) ? "true" : "false" );
-
-        if ( info.GetDamageType() & DMG_BULLET )
-        {
-            this->SetHealth( this->GetHealth() - info.GetDamage() );
-
-            if ( this->GetHealth() <= 0 )
-            {
-                this->OnPieceBreak();
-            }
-        }
-
-        return BaseClass::OnTakeDamage( info );
-    }
+    int OnTakeDamage( const CTakeDamageInfo& info );
 
     void OnPieceBreak( void );
 };
@@ -215,7 +198,7 @@ void CNPC_Combine_Armored::SpawnArmorPieces( void )
             DispatchSpawn( pArmor );
 
             pArmor->Activate();
-            pArmor->SetHealth( i == 0 ? sk_combine_armored_armor_chest_health.GetInt() : sk_combine_armored_armor_health.GetInt() );
+            pArmor->SetHealth( i == 2 ? sk_combine_armored_armor_chest_health.GetInt() : sk_combine_armored_armor_health.GetInt() );
 
             DevLog( "Spawning armor piece with health: %d\n", pArmor->GetHealth() );
 
@@ -308,37 +291,6 @@ int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
 
         return BaseClass::OnTakeDamage_Alive( newInfo );
     }
-    else if ( info.GetDamageType() & DMG_BLAST )
-    {
-        // Explosive damage is split between pieces of armor, and can only deal damage to the combine if no armor is left. For example if a grenade did 65 damage, and the total armor HP was 50, the combine would take 15 damage.
-        float flTotalArmourHealth = 0.0f;
-        for ( int i = 0; i < iArmourCount; i++ )
-        {
-            flTotalArmourHealth += m_ArmorPieces[ i ] ? m_ArmorPieces[ i ]->GetHealth() : 0.0f;
-        }
-
-        if ( flTotalArmourHealth > 0.0f )
-        {
-            float flDamageToArmor = MIN( info.GetDamage(), flTotalArmourHealth );
-            float flDamageToCombine = info.GetDamage() - flDamageToArmor;
-            float flDamagePerArmour = flDamageToArmor / iArmourCount;
-
-            for ( int i = 0; i < iArmourCount; i++ )
-            {
-                if ( m_ArmorPieces[ i ] )
-                {
-                    CTakeDamageInfo newInfo = info;
-                    newInfo.SetDamage( flDamagePerArmour );
-                    m_ArmorPieces[ i ]->TakeDamage( newInfo );
-                }
-            }
-
-            CTakeDamageInfo newInfo = info;
-            newInfo.SetDamage( flDamageToCombine );
-
-            return BaseClass::OnTakeDamage_Alive( newInfo );
-        }
-    }
 
     return BaseClass::OnTakeDamage_Alive( info );
 }
@@ -367,4 +319,61 @@ void CArmorPiece::OnPieceBreak( void ) {
     }
 
     UTIL_Remove( this );
+}
+
+int CArmorPiece::OnTakeDamage( const CTakeDamageInfo& info )
+{
+    DevLog( "Armor piece took damage: %f\n", info.GetDamage() );
+    DevLog( "Current armor piece health: %d\n", this->GetHealth() );
+
+    if ( info.GetDamageType() & DMG_BULLET )
+    {
+        this->SetHealth( this->GetHealth() - info.GetDamage() );
+
+        if ( this->GetHealth() <= 0 )
+        {
+            this->OnPieceBreak();
+        }
+    }
+    else if ( info.GetDamageType() & DMG_BLAST )
+    {
+        CNPC_Combine_Armored* pCombine = ( CNPC_Combine_Armored* ) this->m_pCombineUnit;
+        if ( pCombine )
+        {
+            // Explosive damage is split between pieces of armor, and can only deal damage to the combine if no armor is left. For example if a grenade did 65 damage, and the total armor HP was 50, the combine would take 15 damage.
+            float flTotalArmourHealth = 0.0f;
+            int iArmourCount = pCombine->m_ArmorPieces.Count();
+            for ( int i = 0; i < iArmourCount; i++ )
+            {
+                flTotalArmourHealth += pCombine->m_ArmorPieces[ i ] ? pCombine->m_ArmorPieces[ i ]->GetHealth() : 0.0f;
+            }
+
+            DevLog( "Total armor health: %f\n", flTotalArmourHealth );
+
+            if ( flTotalArmourHealth > 0.0f )
+            {
+                float flDamageToArmor = MIN( info.GetDamage(), flTotalArmourHealth );
+                float flDamageToCombine = info.GetDamage() - flDamageToArmor;
+                float flDamagePerArmour = flDamageToArmor / iArmourCount;
+
+                CTakeDamageInfo newInfo = info;
+                newInfo.SetDamage( flDamagePerArmour );
+
+                this->SetHealth( this->GetHealth() - newInfo.GetDamage() );
+
+                if ( this->GetHealth() <= 0 )
+                {
+                    this->OnPieceBreak();
+                }
+
+                CTakeDamageInfo newInfoCombine = info;
+                newInfoCombine.SetDamage( flDamageToCombine );
+                pCombine->TakeDamage( newInfoCombine );
+
+                return BaseClass::OnTakeDamage( newInfo );
+            }
+        }
+    }
+
+    return BaseClass::OnTakeDamage( info );
 }
