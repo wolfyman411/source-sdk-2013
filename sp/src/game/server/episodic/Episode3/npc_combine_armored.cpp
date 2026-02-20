@@ -293,7 +293,7 @@ float CNPC_Combine_Armored::GetHitgroupDamageMultiplier( int iHitGroup, const CT
 int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
 {
     int iArmourCount = m_ArmorPieces.Count();
-    if ( iArmourCount <= 0 ) { return BaseClass::OnTakeDamage( info ); }
+    if ( iArmourCount <= 0 ) { return BaseClass::OnTakeDamage_Alive( info ); }
 
     if ( info.GetDamageType() & DMG_CLUB )
     {
