@@ -279,11 +279,25 @@ $Project "Server (Episodic)"
 					}
 				}
 			}
+
 			$File	"hl2\func_bulletshield.cpp"
 			$File	"hl2\func_bulletshield.h"
 			$File	"episodic\npc_puppet.cpp"
 
+			$File	"episodic\npc_houndeye.cpp"
+			$File	"episodic\npc_houndeye.h"
 
+			$File	"episodic\npc_bullsquid.cpp"
+			$File	"episodic\npc_bullsquid.h"
+
+			$File	"episodic\weapon_iceaxe.cpp"
+			$File	"episodic\weapon_iceaxe.h"
+
+			$File	"episodic\npc_combine_armored.cpp"
+			$File	"episodic\npc_combine_armored.h"
+
+			$File	"episodic\xentree.cpp"
+			
 			$Folder	"unused"
 			{
 				$File	"hl2\grenade_beam.cpp"
