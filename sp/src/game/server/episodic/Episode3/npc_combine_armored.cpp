@@ -146,17 +146,20 @@ void CNPC_Combine_Armored::Precache()
 // Purpose: 
 //-----------------------------------------------------------------------------
 
+// TODO: Rework this when we have a bloody modeller do attachments
 struct ArmourPieceHitgroupStruct
 {
     int iHitGroup;
-    int iArmorPieceIndex;
+    int iArmourPieceIndex;
 };
 
 static const ArmourPieceHitgroupStruct g_ArmorHitgroups[] = 
 {
-    { HITGROUP_CHEST,       0 }, 
-    { HITGROUP_RIGHTARM,    0 },
-    { HITGROUP_LEFTARM,     1 },
+    { HITGROUP_RIGHTARM, 0 },
+    { HITGROUP_LEFTARM, 1 },
+    { HITGROUP_CHEST, 2 },
+    { HITGROUP_RIGHTLEG, 3 },
+    { HITGROUP_LEFTLEG, 4 },
 };
 
 inline CArmorPiece* GetArmourPieceHitgroup( CNPC_Combine_Armored* m_pCombine, int iHitGroup )
@@ -165,7 +168,7 @@ inline CArmorPiece* GetArmourPieceHitgroup( CNPC_Combine_Armored* m_pCombine, in
     {
         if ( g_ArmorHitgroups[ i ].iHitGroup == iHitGroup )
         {
-            int iIndex = g_ArmorHitgroups[ i ].iArmorPieceIndex;
+            int iIndex = g_ArmorHitgroups[ i ].iArmourPieceIndex;
             if ( m_pCombine->m_ArmorPieces.IsValidIndex( iIndex ) )
             {
                 return m_pCombine->m_ArmorPieces[ iIndex ];
@@ -190,8 +193,13 @@ void CNPC_Combine_Armored::SpawnArmorPieces( void )
 
     ArmorPieceStruct ArmorPiecesData[] =
 	{
-		{ Vector(2, -8, 60),       QAngle(0, 0, 0),     20.0f,		"models/combine_scanner.mdl"},  // Right Shoulder   ( 0 ) m_ArmorPieces.Element(0)
-		{ Vector(2, 8, 60),		   QAngle(0, 0, 0),     20.0f,		"models/Gibs/HGIBS.mdl"},       // Left Shoulder    ( 1 ) m_ArmorPieces.Element(1)
+		{ Vector(2, -8, 60),       QAngle(0, 0, 0),     20.0f,		"models/combine_scanner.mdl"},  // Right Arm ( 0 ) m_ArmorPieces.Element(0)
+		{ Vector(2, 8, 60),		   QAngle(0, 0, 0),     20.0f,		"models/Gibs/HGIBS.mdl"},       // Left Arm    ( 1 ) m_ArmorPieces.Element(1)
+
+        { Vector(15, 0, 50),	   QAngle( 0, 0, 0 ),   30.0f,		"models/props_lab/partsbin01.mdl" }, // Chest       ( 2 ) m_ArmorPieces.Element(2)
+
+        { Vector( 8, 5, 25 ),	   QAngle( 0, 90, 0 ),   30.0f,		"models/props_junk/cinderblock01a.mdl" }, // Right Leg       ( 3 ) m_ArmorPieces.Element(3)
+        { Vector( 8, -5, 25 ),	   QAngle( 0, 90, 0 ),   30.0f,		"models/props_junk/cinderblock01a.mdl" }, // Left Leg       ( 4 ) m_ArmorPieces.Element(4)
 	};
 
 	for ( int i = 0; i < ARRAYSIZE(ArmorPiecesData); i++ )
@@ -210,6 +218,8 @@ void CNPC_Combine_Armored::SpawnArmorPieces( void )
             pArmor->SetHealth( i == 0 ? sk_combine_armored_armor_chest_health.GetInt() : sk_combine_armored_armor_health.GetInt() );
 
             DevLog( "Spawning armor piece with health: %d\n", pArmor->GetHealth() );
+
+            pArmor->ScriptSetColor( 50 * i, 50 * i, 50 * i );
 
             pArmor->m_pCombineUnit = this;
             m_ArmorPieces.AddToHead( pArmor );
