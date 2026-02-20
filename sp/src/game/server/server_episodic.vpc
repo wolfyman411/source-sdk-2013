@@ -294,6 +294,7 @@ $Project "Server (Episodic)"
 			$File	"episodic\weapon_iceaxe.h"
 			
 			$File	"episodic\xentree.cpp"
+			$File	"episodic\lightstalk.cpp"
 			
 			$Folder	"unused"
 			{
