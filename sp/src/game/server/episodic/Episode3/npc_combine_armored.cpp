@@ -270,7 +270,7 @@ inline CArmorPiece* GetClosestArmourPlate( CNPC_Combine_Armored* m_hCombine, Vec
     return NULL;
 }
 
-ConVar sk_combine_armored_head_dmg_multiplier( "sk_combine_armored_head_dmg_multiplier", "0.8" );
+ConVar sk_combine_armored_head_dmg_multiplier( "sk_combine_armored_head_dmg_multiplier", "0.3" );
 float CNPC_Combine_Armored::GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDamageInfo &info )
 {
     if ( iHitGroup == HITGROUP_HEAD && info.GetDamageType() & DMG_BULLET )
