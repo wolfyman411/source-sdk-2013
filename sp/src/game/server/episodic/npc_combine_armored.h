@@ -1,0 +1,80 @@
+#ifndef NPC_COMBINES_ARMOURED_H
+#define NPC_COMBINES_ARMOURED_H
+#ifdef _WIN32
+#pragma once
+#endif
+
+#include "cbase.h"
+#include "npc_combines.h"
+#include "props.h"
+
+// memdbgon must be the last include file in a .cpp file!!!
+#include "tier0/memdbgon.h"
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Heavily armored combine infantry
+//-----------------------------------------------------------------------------
+class CArmorPiece : public CDynamicProp
+{
+    DECLARE_CLASS( CArmorPiece, CDynamicProp );
+    public:
+    CBaseEntity* m_pCombineUnit;
+
+    void Spawn( void )
+    {
+        Precache();
+
+        BaseClass::Spawn();
+        SetModel( STRING( GetModelName() ) );
+
+        CreateVPhysics();
+    }
+
+    void Precache( void )
+    {
+        PrecacheModel( STRING( GetModelName() ) );
+    }
+
+    bool CreateVPhysics( void )
+    {
+        SetSolid( SOLID_VPHYSICS );
+
+        IPhysicsObject* pPhysicsObject = VPhysicsInitShadow( false, false );
+        if ( !pPhysicsObject )
+        {
+            SetSolid( SOLID_NONE );
+            SetMoveType( MOVETYPE_NONE );
+            Warning( "ERROR!: Can't create physics object for %s\n", STRING( GetModelName() ) );
+        }
+
+        return true;
+    }
+
+    int OnTakeDamage( const CTakeDamageInfo& info );
+
+    void OnPieceBreak( void );
+};
+
+LINK_ENTITY_TO_CLASS( combine_armor_piece, CArmorPiece );
+
+class CNPC_Combine_Armored : public CNPC_CombineS
+{
+    DECLARE_CLASS( CNPC_Combine_Armored, CNPC_CombineS );
+    public:
+    void		Spawn( void );
+    void		Precache( void );
+
+    void		SpawnArmorPieces( void );
+    void        Event_Killed( const CTakeDamageInfo& info );
+
+    int         OnTakeDamage_Alive( const CTakeDamageInfo& info );
+
+    float       GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDamageInfo& info );
+
+    CUtlVector<CArmorPiece*> m_ArmorPieces;
+};
+
+LINK_ENTITY_TO_CLASS( npc_combine_armored, CNPC_Combine_Armored );
+
+#endif
