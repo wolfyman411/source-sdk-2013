@@ -297,6 +297,7 @@ $Project "Server (Episodic)"
 			$File	"episodic\npc_combine_armored.h"
 
 			$File	"episodic\xentree.cpp"
+			$File	"lightstalk.cpp"
 			
 			$Folder	"unused"
 			{
