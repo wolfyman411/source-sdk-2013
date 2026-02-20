@@ -296,7 +296,7 @@ int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
         CTakeDamageInfo newInfo = info;
         newInfo.SetDamage( (float) info.GetDamage() / ( iArmourCount > 0 ? iArmourCount : 1 ) );
 
-        return BaseClass::OnTakeDamage( newInfo );
+        return BaseClass::OnTakeDamage_Alive( newInfo );
     }
     else if ( info.GetDamageType() & DMG_BLAST )
     {
@@ -326,11 +326,11 @@ int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
             CTakeDamageInfo newInfo = info;
             newInfo.SetDamage( flDamageToCombine );
 
-            return BaseClass::OnTakeDamage( newInfo );
+            return BaseClass::OnTakeDamage_Alive( newInfo );
         }
     }
 
-    return BaseClass::OnTakeDamage( info );
+    return BaseClass::OnTakeDamage_Alive( info );
 }
 
 // NOTE: Keep this here, cus otherwise 'CArmorPiece' isn't even aware of 'CNPC_Combine_Armored' existing, and thus can't call 'pCombine->m_ArmorPieces.FindAndRemove( this )' in the case of an armor piece breaking
