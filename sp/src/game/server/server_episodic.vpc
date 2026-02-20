@@ -292,10 +292,7 @@ $Project "Server (Episodic)"
 
 			$File	"episodic\weapon_iceaxe.cpp"
 			$File	"episodic\weapon_iceaxe.h"
-
-			$File	"episodic\npc_combine_armored.cpp"
-			$File	"episodic\npc_combine_armored.h"
-
+			
 			$File	"episodic\xentree.cpp"
 			
 			$Folder	"unused"
