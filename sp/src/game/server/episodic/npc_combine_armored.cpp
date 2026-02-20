@@ -230,6 +230,13 @@ int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
 
         return BaseClass::OnTakeDamage_Alive( newInfo );
     }
+    else if ( info.GetDamageType() & DMG_BLAST )
+    {
+        CTakeDamageInfo newInfo = info;
+        newInfo.SetDamage( 0 );
+
+        return BaseClass::OnTakeDamage_Alive( newInfo );
+    }
 
     return BaseClass::OnTakeDamage_Alive( info );
 }
