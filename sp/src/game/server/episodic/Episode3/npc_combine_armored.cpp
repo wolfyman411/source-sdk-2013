@@ -60,9 +60,9 @@ class CArmorPiece : public CDynamicProp
     {
         DevLog( "Armor piece took damage: %f\n", info.GetDamage() );
         DevLog( "Current armor piece health: %d\n", this->GetHealth() );
-        DevLog( "Damage is fit: %s\n", ( info.GetDamageType() & ( DMG_CLUB | DMG_BULLET | DMG_BLAST ) ) ? "true" : "false" );
+        DevLog( "Damage is fit: %s\n", ( info.GetDamageType() & ( DMG_BULLET | DMG_BLAST ) ) ? "true" : "false" );
 
-        if ( ( info.GetDamageType() & ( DMG_CLUB | DMG_BULLET | DMG_BLAST ) ) )
+        if ( info.GetDamageType() & DMG_BULLET )
         {
             this->SetHealth( this->GetHealth() - info.GetDamage() );
 
@@ -94,6 +94,8 @@ public:
     void        Event_Killed( const CTakeDamageInfo &info );
 
     int         OnTakeDamage_Alive( const CTakeDamageInfo& info );
+
+    float       GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDamageInfo &info );
 
     CUtlVector<CArmorPiece*> m_ArmorPieces;
 };
@@ -145,6 +147,37 @@ void CNPC_Combine_Armored::Precache()
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+
+struct ArmourPieceHitgroupStruct
+{
+    int iHitGroup;
+    int iArmorPieceIndex;
+};
+
+static const ArmourPieceHitgroupStruct g_ArmorHitgroups[] = 
+{
+    { HITGROUP_CHEST,       0 }, 
+    { HITGROUP_RIGHTARM,    0 },
+    { HITGROUP_LEFTARM,     1 },
+};
+
+inline CArmorPiece* GetArmourPieceHitgroup( CNPC_Combine_Armored* m_pCombine, int iHitGroup )
+{
+    for ( int i = 0; i < ARRAYSIZE( g_ArmorHitgroups ); i++ )
+    {
+        if ( g_ArmorHitgroups[ i ].iHitGroup == iHitGroup )
+        {
+            int iIndex = g_ArmorHitgroups[ i ].iArmorPieceIndex;
+            if ( m_pCombine->m_ArmorPieces.IsValidIndex( iIndex ) )
+            {
+                return m_pCombine->m_ArmorPieces[ iIndex ];
+            }
+        }
+    }
+
+    return NULL;
+}
+
 void CNPC_Combine_Armored::SpawnArmorPieces( void )
 {
 	struct ArmorPieceStruct
@@ -159,8 +192,8 @@ void CNPC_Combine_Armored::SpawnArmorPieces( void )
 
     ArmorPieceStruct ArmorPiecesData[] =
 	{
-		{ Vector(2, -8, 60),       QAngle(0, 0, 0),     20.0f,		"models/combine_scanner.mdl"},
-		{ Vector(2, 8, 60),		   QAngle(0, 0, 0),     20.0f,		"models/Gibs/HGIBS.mdl"},
+		{ Vector(2, -8, 60),       QAngle(0, 0, 0),     20.0f,		"models/combine_scanner.mdl"},  // Right Shoulder   ( 0 ) m_ArmorPieces.Element(0)
+		{ Vector(2, 8, 60),		   QAngle(0, 0, 0),     20.0f,		"models/Gibs/HGIBS.mdl"},       // Left Shoulder    ( 1 ) m_ArmorPieces.Element(1)
 	};
 
 	for ( int i = 0; i < ARRAYSIZE(ArmorPiecesData); i++ )
@@ -182,8 +215,7 @@ void CNPC_Combine_Armored::SpawnArmorPieces( void )
 
             pArmor->m_pCombineUnit = this;
             m_ArmorPieces.AddToHead( pArmor );
-        }
-		
+        }	
 	}
 }
 
@@ -202,6 +234,7 @@ void CNPC_Combine_Armored::Event_Killed( const CTakeDamageInfo& info )
     BaseClass::Event_Killed( info );
 }
 
+// TODO: Probably end up using this
 ConVar sk_combine_armored_armour_tolerance_dist( "sk_combine_armored_armour_tolerance_dist", "5.0");
 
 inline CArmorPiece* GetClosestArmourPlate( CNPC_Combine_Armored* m_hCombine, Vector vecPoint )
@@ -237,21 +270,69 @@ inline CArmorPiece* GetClosestArmourPlate( CNPC_Combine_Armored* m_hCombine, Vec
     return NULL;
 }
 
+ConVar sk_combine_armored_head_dmg_scale( "sk_combine_armored_head_dmg_scale", "3.5" );
+float CNPC_Combine_Armored::GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDamageInfo &info )
+{
+    if ( iHitGroup == HITGROUP_HEAD && info.GetDamageType() & DMG_BULLET )
+    {
+        return sk_combine_armored_head_dmg_scale.GetFloat();
+    }
+
+    return BaseClass::GetHitgroupDamageMultiplier( iHitGroup, info );
+}
+
+
 int CNPC_Combine_Armored::OnTakeDamage_Alive( const CTakeDamageInfo& info )
 {
+    int iArmourCount = m_ArmorPieces.Count();
+    if ( iArmourCount <= 0 ) { return BaseClass::OnTakeDamage( info ); }
+
     if ( info.GetDamageType() & DMG_CLUB )
     {
-        Vector vecDamage = info.GetDamagePosition();
-        DevLog( "Combine Armored taking club damage at position: %.2f, %.2f, %.2f\n", vecDamage.x, vecDamage.y, vecDamage.z );
-
-        CArmorPiece* pArmour = GetClosestArmourPlate( this, vecDamage );
-        if ( pArmour )
+        CArmorPiece* m_pRandomArmourPiece = m_ArmorPieces.Element( RandomInt( 0, iArmourCount - 1 ) );
+        if ( m_pRandomArmourPiece )
         {
-            // TODO: make it good
+            m_pRandomArmourPiece->OnPieceBreak();
+        }
+
+        CTakeDamageInfo newInfo = info;
+        newInfo.SetDamage( (float) info.GetDamage() / ( iArmourCount > 0 ? iArmourCount : 1 ) );
+
+        return BaseClass::OnTakeDamage( newInfo );
+    }
+    else if ( info.GetDamageType() & DMG_BLAST )
+    {
+        // Explosive damage is split between pieces of armor, and can only deal damage to the combine if no armor is left. For example if a grenade did 65 damage, and the total armor HP was 50, the combine would take 15 damage.
+        float flTotalArmourHealth = 0.0f;
+        for ( int i = 0; i < iArmourCount; i++ )
+        {
+            flTotalArmourHealth += m_ArmorPieces[ i ] ? m_ArmorPieces[ i ]->GetHealth() : 0.0f;
+        }
+
+        if ( flTotalArmourHealth > 0.0f )
+        {
+            float flDamageToArmor = MIN( info.GetDamage(), flTotalArmourHealth );
+            float flDamageToCombine = info.GetDamage() - flDamageToArmor;
+            float flDamagePerArmour = flDamageToArmor / iArmourCount;
+
+            for ( int i = 0; i < iArmourCount; i++ )
+            {
+                if ( m_ArmorPieces[ i ] )
+                {
+                    CTakeDamageInfo newInfo = info;
+                    newInfo.SetDamage( flDamagePerArmour );
+                    m_ArmorPieces[ i ]->TakeDamage( newInfo );
+                }
+            }
+
+            CTakeDamageInfo newInfo = info;
+            newInfo.SetDamage( flDamageToCombine );
+
+            return BaseClass::OnTakeDamage( newInfo );
         }
     }
 
-    return BaseClass::OnTakeDamage_Alive( info );
+    return BaseClass::OnTakeDamage( info );
 }
 
 // NOTE: Keep this here, cus otherwise 'CArmorPiece' isn't even aware of 'CNPC_Combine_Armored' existing, and thus can't call 'pCombine->m_ArmorPieces.FindAndRemove( this )' in the case of an armor piece breaking
