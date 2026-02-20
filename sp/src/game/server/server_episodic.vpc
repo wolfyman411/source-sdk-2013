@@ -292,7 +292,7 @@ $Project "Server (Episodic)"
 
 			$File	"episodic\weapon_iceaxe.cpp"
 			$File	"episodic\weapon_iceaxe.h"
-			
+
 			$File	"episodic\xentree.cpp"
 			$File	"lightstalk.cpp"
 			
