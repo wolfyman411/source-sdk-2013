@@ -6,8 +6,6 @@
 
 #include "cbase.h"
 #include "npc_combines.h"
-#include "weapon_physcannon.h"
-#include "hl2_gamerules.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
