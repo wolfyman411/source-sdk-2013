@@ -103,6 +103,8 @@ void CNPC_Combine_Armored::Spawn( void )
     CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
     CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
+    AddSpawnFlags( SF_NPC_NO_WEAPON_DROP );
+
 	SpawnArmorPieces();
 }
 
