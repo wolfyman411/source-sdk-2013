@@ -56,12 +56,11 @@ class CArmorPiece : public CDynamicProp
     void OnPieceBreak( void );
 };
 
-LINK_ENTITY_TO_CLASS( combine_armor_piece, CArmorPiece );
-
 class CNPC_Combine_Armored : public CNPC_CombineS
 {
     DECLARE_CLASS( CNPC_Combine_Armored, CNPC_CombineS );
-    public:
+
+public:
     void		Spawn( void );
     void		Precache( void );
 
@@ -72,9 +71,12 @@ class CNPC_Combine_Armored : public CNPC_CombineS
 
     float       GetHitgroupDamageMultiplier( int iHitGroup, const CTakeDamageInfo& info );
 
-    CUtlVector<CArmorPiece*> m_ArmorPieces;
-};
+    bool        CanSpawnJumpers( void );
 
-LINK_ENTITY_TO_CLASS( npc_combine_armored, CNPC_Combine_Armored );
+    CUtlVector<CArmorPiece*> m_ArmorPieces;
+private:
+    int         m_iSpawnedJumpers;
+    int         m_iActiveJumpers;
+};
 
 #endif

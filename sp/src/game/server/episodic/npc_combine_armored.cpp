@@ -30,7 +30,7 @@ void CNPC_Combine_Armored::Spawn( void )
 
 	BaseClass::Spawn();
 
-    m_nSkin = 1;
+    m_iSpawnedJTroops = 0;
 
     SetHealth( sk_combine_armored_health.GetFloat() );
     SetMaxHealth( sk_combine_armored_health.GetFloat() );
@@ -164,8 +164,10 @@ void CNPC_Combine_Armored::Event_Killed( const CTakeDamageInfo& info )
     BaseClass::Event_Killed( info );
 }
 
-// TODO: Probably end up using this
-ConVar sk_combine_armored_armour_tolerance_dist( "sk_combine_armored_armour_tolerance_dist", "5.0");
+bool CNPC_Combine_Armored::CanSpawnJumpers( void )
+{
+    return m_iSpawnedJumpers <= 5 && m_iActiveJumpers <= 2;
+}
 
 inline CArmorPiece* GetClosestArmourPlate( CNPC_Combine_Armored* m_hCombine, Vector vecPoint )
 {
@@ -335,3 +337,6 @@ int CArmorPiece::OnTakeDamage( const CTakeDamageInfo& info )
 
     return BaseClass::OnTakeDamage( info );
 }
+
+LINK_ENTITY_TO_CLASS( combine_armor_piece, CArmorPiece );
+LINK_ENTITY_TO_CLASS( npc_combine_armored, CNPC_Combine_Armored );
