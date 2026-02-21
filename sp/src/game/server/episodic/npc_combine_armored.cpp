@@ -320,6 +320,18 @@ int CArmorPiece::OnTakeDamage( const CTakeDamageInfo& info )
             }
         }
     }
+    else if (info.GetDamageType() & DMG_CLUB)
+    {
+        CNPC_Combine_Armored* pCombine = (CNPC_Combine_Armored*)this->m_pCombineUnit;
+        if (pCombine)
+        {
+            int iArmourCount = pCombine->m_ArmorPieces.Count();
+            this->OnPieceBreak();
+            CTakeDamageInfo newInfoCombine = info;
+            newInfoCombine.SetDamage((float)info.GetDamage() / (iArmourCount > 0 ? iArmourCount : 1));
+            pCombine->TakeDamage(newInfoCombine);
+        }
+    }
 
     return BaseClass::OnTakeDamage( info );
 }
