@@ -21,6 +21,8 @@ public:
     void Spawn( void );
     void Precache( void );
 
+    bool IsJumpLegal( const Vector& startPos, const Vector& apex, const Vector& endPos ) const;
+
     CNPC_Combine_Armored* m_pSpawnedBy;
 };
 
