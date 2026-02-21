@@ -59,7 +59,7 @@ class CArmorPiece : public CDynamicProp
 class CNPC_Combine_Armored : public CNPC_CombineS
 {
     DECLARE_CLASS( CNPC_Combine_Armored, CNPC_CombineS );
-
+    //DECLARE_DATADESC();
 public:
     void		Spawn( void );
     void		Precache( void );
@@ -73,10 +73,17 @@ public:
 
     bool        CanSpawnJumpers( void );
 
+    void        SpawnJumper( void );
+
     CUtlVector<CArmorPiece*> m_ArmorPieces;
-private:
+
     int         m_iSpawnedJumpers;
     int         m_iActiveJumpers;
 };
+
+//BEGIN_DATADESC( CNPC_Combine_Armored )
+    //DEFINE_FIELD( m_iSpawnedJumpers, FIELD_INTEGER ),
+    //DEFINE_FIELD( m_iActiveJumpers, FIELD_INTEGER ),
+//END_DATADESC()
 
 #endif
