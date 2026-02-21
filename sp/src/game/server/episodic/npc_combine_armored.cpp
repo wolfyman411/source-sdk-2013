@@ -37,7 +37,7 @@ void CNPC_Combine_Armored::Spawn( void )
     SetKickDamage( sk_combine_armored_kick.GetFloat() );
 
     CapabilitiesAdd( bits_CAP_ANIMATEDFACE );
-    CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
+    CapabilitiesRemove( bits_CAP_MOVE_SHOOT );
     CapabilitiesAdd( bits_CAP_DOORS_GROUP );
 
     AddSpawnFlags( SF_NPC_NO_WEAPON_DROP );
