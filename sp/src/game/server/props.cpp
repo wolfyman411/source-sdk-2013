@@ -41,8 +41,6 @@
 #include "physics_collisionevent.h"
 #include "gamestats.h"
 #include "vehicle_base.h"
-#include "envspark.h"
-#include "weapon_flaregun.h"
 #ifdef MAPBASE
 #include "mapbase/GlobalStrings.h"
 #include "collisionutils.h"
@@ -1664,10 +1662,6 @@ void CBreakableProp::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t
 	{
 		CreateFlare( PROP_FLARE_LIFETIME );
 	}
-	if (HasInteraction(PROPINTER_PHYSGUN_CREATE_LIGHT))
-	{
-		CreateLight(PROP_FLARE_LIFETIME);
-	}
 #endif
 }
 
@@ -1709,51 +1703,6 @@ void CBreakableProp::CreateFlare( float flLifetime )
 		AddEntityToDarknessCheck( pFlare );
 
 		AddEffects( EF_NOSHADOW );
-	}
-}
-//-----------------------------------------------------------------------------
-// Purpose: Create a flare at the attachment point
-//-----------------------------------------------------------------------------
-void CBreakableProp::CreateLight(float flLifetime)
-{
-	// Create the flare
-	CBaseEntity* ref = ::CreateFlare(GetAbsOrigin(), GetAbsAngles(), this, flLifetime);
-	CFlare* pFlare = dynamic_cast<CFlare*>(ref);
-
-	if (pFlare)
-	{
-		int iAttachment = LookupAttachment("fuse");
-
-		Vector vOrigin;
-#ifdef MAPBASE
-		if (!GetAttachment(iAttachment, vOrigin))
-			vOrigin = GetLocalOrigin();
-#else
-		GetAttachment(iAttachment, vOrigin);
-#endif
-
-		pFlare->SetMoveType(MOVETYPE_NONE);
-		pFlare->SetSolid(SOLID_NONE);
-		pFlare->SetRenderMode(kRenderTransAlpha);
-		pFlare->SetRenderColorA(1);
-		pFlare->SetLocalOrigin(vOrigin);
-		pFlare->SetParent(this, iAttachment);
-
-		pFlare->m_bisWhite = true;
-		pFlare->m_bLight = false;
-		pFlare->m_bSmoke = false;
-
-		RemoveInteraction(PROPINTER_PHYSGUN_CREATE_FLARE);
-		m_hFlareEnt = pFlare;
-
-		SetThink(&CBreakable::SUB_FadeOut);
-		SetNextThink(gpGlobals->curtime + flLifetime + 5.0f);
-
-		m_nSkin = 1;
-
-		AddEntityToDarknessCheck(pFlare);
-
-		AddEffects(EF_NOSHADOW);
 	}
 }
 #endif // HL2_EPISODIC
@@ -3158,7 +3107,7 @@ void CPhysicsProp::Spawn( )
 	}
 #endif
 
-	if ( HasSpawnFlags( SF_PHYSPROP_DEBRIS ) || HasInteraction( PROPINTER_PHYSGUN_CREATE_FLARE ) || HasInteraction(PROPINTER_PHYSGUN_CREATE_LIGHT))
+	if ( HasSpawnFlags( SF_PHYSPROP_DEBRIS ) || HasInteraction( PROPINTER_PHYSGUN_CREATE_FLARE ) )
 	{
 		SetCollisionGroup( HasSpawnFlags( SF_PHYSPROP_FORCE_TOUCH_TRIGGERS ) ? COLLISION_GROUP_DEBRIS_TRIGGER : COLLISION_GROUP_DEBRIS );
 	}
@@ -3564,7 +3513,7 @@ int CPhysicsProp::ObjectCaps()
 	{
 		caps |= FCAP_IMPULSE_USE;
 
-		if( hl2_episodic.GetBool() && (HasInteraction( PROPINTER_PHYSGUN_CREATE_FLARE )  || HasInteraction(PROPINTER_PHYSGUN_CREATE_LIGHT)))
+		if( hl2_episodic.GetBool() && HasInteraction( PROPINTER_PHYSGUN_CREATE_FLARE )  )
 		{
 			caps |= FCAP_USE_IN_RADIUS;
 		}

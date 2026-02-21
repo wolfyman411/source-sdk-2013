@@ -806,7 +806,7 @@ void DrawLightmappedGeneric_DX9_Internal(CBaseVSShader *pShader, IMaterialVar** 
 		bool hasNormalMapAlphaEnvmapMask = IS_FLAG_SET( MATERIAL_VAR_NORMALMAPALPHAENVMAPMASK );
 #ifdef PARALLAX_CORRECTED_CUBEMAPS
 		// Parallax cubemaps. Check for envmap because if we don't, white splotchs can appear at certain viewing angles when mat_specular is 0.
-		bool hasParallaxCorrection = params[ info.m_nEnvmap ]->IsDefined() && params[ info.m_nEnvmapParallax ]->GetIntValue() > 0;
+		bool hasParallaxCorrection = params[info.m_nEnvmap]->IsDefined() && params[info.m_nEnvmapParallax]->GetIntValue() > 0;
 #endif
 
 		if ( hasFlashlight && !IsX360() )				

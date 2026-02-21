@@ -118,9 +118,6 @@ protected:
 	void InputStartHangingFromCeiling( inputdata_t &inputdata );
 	void InputDropFromCeiling( inputdata_t &inputdata );
 
-	void InputStartPatrolling(inputdata_t& inputdata);
-	void InputStopPatrolling(inputdata_t& inputdata);
-
 	int CalcDamageInfo( CTakeDamageInfo *pInfo );
 	void CreateDust( bool placeDecal = true );
 
@@ -149,8 +146,6 @@ protected:
 	float	m_flBurrowTime;
 	int		m_nContext;			// for FValidateHintType context
 	int		m_nJumpFromCanisterDir;
-
-	bool	m_bShouldPatrol;
 
 	bool	m_bHangingFromCeiling;
 	float	m_flIlluminatedTime;

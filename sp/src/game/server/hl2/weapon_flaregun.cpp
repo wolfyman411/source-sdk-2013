@@ -65,7 +65,6 @@ BEGIN_DATADESC( CFlare )
 	DEFINE_FIELD( m_bSmoke,			FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bPropFlare,		FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bInActiveList,	FIELD_BOOLEAN ),
-	DEFINE_FIELD(m_bSparks,			FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_pNextFlare,		FIELD_CLASSPTR ),
 	
 	//Input functions
@@ -87,7 +86,6 @@ IMPLEMENT_SERVERCLASS_ST( CFlare, DT_Flare )
 	SendPropInt( SENDINFO( m_bLight ), 1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_bSmoke ), 1, SPROP_UNSIGNED ),
 	SendPropInt( SENDINFO( m_bPropFlare ), 1, SPROP_UNSIGNED ),
-	SendPropInt(SENDINFO(m_bisWhite), 0, SPROP_UNSIGNED),
 END_SEND_TABLE()
 
 CFlare *CFlare::activeFlares = NULL;
@@ -155,14 +153,12 @@ CFlare::CFlare( void )
 	m_bFading		= false;
 	m_bLight		= true;
 	m_bSmoke		= true;
-	m_bisWhite		= false;
 	m_flNextDamage	= gpGlobals->curtime;
 	m_lifeState		= LIFE_ALIVE;
 	m_iHealth		= 100;
 	m_bPropFlare	= false;
 	m_bInActiveList	= false;
 	m_pNextFlare	= NULL;
-	m_bSparks		= true;
 }
 
 CFlare::~CFlare()
@@ -205,11 +201,6 @@ int CFlare::Restore( IRestore &restore )
 		m_bSmoke = false;
 	}
 
-	if (m_spawnflags & SF_FLARE_NO_SPARKS)
-	{
-		m_bSparks = false;
-	}
-
 	return result;
 }
 
@@ -242,11 +233,6 @@ void CFlare::Spawn( void )
 	if ( m_spawnflags & SF_FLARE_NO_SMOKE )
 	{
 		m_bSmoke = false;
-	}
-
-	if (m_spawnflags & SF_FLARE_NO_SPARKS)
-	{
-		m_bSparks = false;
 	}
 
 	if ( m_spawnflags & SF_FLARE_INFINITE )
@@ -383,7 +369,7 @@ void CFlare::FlareThink( void )
 	else
 	{
 		//Shoot sparks
-		if ( random->RandomInt( 0, 8 ) == 1 && m_bSparks == true)
+		if ( random->RandomInt( 0, 8 ) == 1 )
 		{
 			g_pEffects->Sparks( GetAbsOrigin() );
 		}

@@ -60,19 +60,6 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-// Precipitation blocker entity
-//-----------------------------------------------------------------------------
-class C_PrecipitationBlocker : public C_BaseEntity
-{
-public:
-	DECLARE_CLASS(C_PrecipitationBlocker, C_BaseEntity);
-	DECLARE_CLIENTCLASS();
-
-	C_PrecipitationBlocker();
-	virtual ~C_PrecipitationBlocker();
-};
-
-//-----------------------------------------------------------------------------
 // Precipitation base entity
 //-----------------------------------------------------------------------------
 
@@ -141,7 +128,7 @@ private:
 
 private:
 	void CreateAshParticle( void );
-	void CreateRainOrSnowParticle(const Vector& vSpawnPosition, const Vector& vEndPosition, const Vector& vVelocity);
+	void CreateRainOrSnowParticle( Vector vSpawnPosition, Vector vVelocity );
 
 #ifdef MAPBASE
 	void ClampParticlePosition( Vector &vPlayerPos, Vector &vOffsetPos, Vector &vOffsetPosNear, Vector &vOffsetPosFar );

@@ -126,8 +126,6 @@ BEGIN_DATADESC( CBounceBomb )
 	DEFINE_FIELD( m_hPhysicsAttacker, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flLastPhysicsInfluenceTime, FIELD_TIME ),
 
-	DEFINE_KEYFIELD(m_alteredMass, FIELD_FLOAT,"alteredMass"),
-
 	DEFINE_PHYSPTR( m_pConstraint ),
 
 	DEFINE_OUTPUT( m_OnPulledUp, "OnPulledUp" ),
@@ -440,19 +438,13 @@ void CBounceBomb::SetMineState( int iState )
 
 	case MINE_STATE_LAUNCHED:
 		{
-		//Change Mass
-		if (m_alteredMass > 0.0f)
-		{
-			IPhysicsObject* pPhysicsObject = this->VPhysicsGetObject();
-			pPhysicsObject->SetMass(m_alteredMass);
-		}
-		UpdateLight( true, 255, 0, 0, 190 );
-		SetThink( NULL );
-		SetNextThink( gpGlobals->curtime + 0.5 );
+			UpdateLight( true, 255, 0, 0, 190 );
+			SetThink( NULL );
+			SetNextThink( gpGlobals->curtime + 0.5 );
 
-		SetTouch( &CBounceBomb::ExplodeTouch );
-		unsigned int flags = VPhysicsGetObject()->GetCallbackFlags();
-		VPhysicsGetObject()->SetCallbackFlags( flags | CALLBACK_GLOBAL_TOUCH_STATIC );
+			SetTouch( &CBounceBomb::ExplodeTouch );
+			unsigned int flags = VPhysicsGetObject()->GetCallbackFlags();
+			VPhysicsGetObject()->SetCallbackFlags( flags | CALLBACK_GLOBAL_TOUCH_STATIC );
 		}
 		break;
 
@@ -1125,7 +1117,7 @@ bool CBounceBomb::IsFriend( CBaseEntity *pEntity )
 	bool bIsCombine = false;
 
 	// Unconditional enemies to combine and Player.
-	if( classify == CLASS_ZOMBIE || classify == CLASS_HEADCRAB || classify == CLASS_ANTLION || classify == CLASS_HOUNDEYE || classify == CLASS_BULLSQUID )
+	if( classify == CLASS_ZOMBIE || classify == CLASS_HEADCRAB || classify == CLASS_ANTLION )
 	{
 		return false;
 	}

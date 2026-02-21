@@ -555,9 +555,6 @@ void CWeaponShotgun::PrimaryAttack( void )
 		return;
 	}
 
-	//Let the game know we've just attacked
-	pPlayer->OnMyWeaponFired(this);
-
 	// MUST call sound before removing a round from the clip of a CMachineGun
 	WeaponSound(SINGLE);
 
