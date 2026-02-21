@@ -30,7 +30,8 @@ void CNPC_Combine_Armored::Spawn( void )
 
 	BaseClass::Spawn();
 
-    m_iSpawnedJTroops = 0;
+    m_iSpawnedJumpers = 0;
+    m_iActiveJumpers = 0;
 
     SetHealth( sk_combine_armored_health.GetFloat() );
     SetMaxHealth( sk_combine_armored_health.GetFloat() );
