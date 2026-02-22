@@ -24,23 +24,9 @@ public:
 
     void Event_Killed( const CTakeDamageInfo& info );
 
-    CNPC_Combine_Armored* m_pSpawnedBy;
+    CHandle<CNPC_Combine_Armored> m_pSpawnedBy;
 };
 
 LINK_ENTITY_TO_CLASS( npc_combine_jumper, CNPC_Combine_Jumper );
 
-#endif // NPC_COMBINES_ARMOURED_H
-
-#ifndef GRENADE_TELEPORT_H
-#define GRENADE_TELEPORT_H
-#ifdef _WIN32
-#pragma once
-#endif
-
-class CBaseGrenade;
-struct edict_t;
-
-CBaseGrenade* Teleportgrenade_Create( const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, CBaseEntity* pOwner, float timer, bool combineSpawned );
-bool	Teleportgrenade_WasPunted( const CBaseEntity* pEntity );
-
-#endif // GRENADE_TELEPORT_H
+#endif // NPC_COMBINES_JUMPER_H

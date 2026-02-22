@@ -7,6 +7,7 @@
 #include "cbase.h"
 #include "npc_combines.h"
 #include "props.h"
+#include "grenade_teleport.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -75,7 +76,9 @@ public:
 
     void        SpawnJumper( void );
 
-    CUtlVector<CArmorPiece*> m_ArmorPieces;
+    void        HandleAnimEvent( animevent_t* pEvent );
+
+    CUtlVector<CArmorPiece*> m_aArmorPieces;
 
     int         m_iSpawnedJumpers;
     int         m_iActiveJumpers;
