@@ -461,3 +461,14 @@ bool Teleportgrenade_WasCreatedByCombine( const CBaseEntity* pEntity )
 
     return false;
 }
+
+ConCommand test_teleport_grenade( "test_teleport_grenade", []( const CCommand& args )
+{
+    CBasePlayer* pPlayer = UTIL_GetCommandClient();
+    if ( !pPlayer )
+        return;
+    Vector forward;
+    pPlayer->EyeVectors( &forward );
+    forward *= 200.0f;
+    Teleportgrenade_Create( pPlayer->GetAbsOrigin() + Vector( 0, 0, 50 ), vec3_angle, forward, AngularImpulse(0, 0, 0), pPlayer, 5.0f, false);
+} );

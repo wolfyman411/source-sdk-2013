@@ -296,6 +296,9 @@ $Project "Server (Episodic)"
 			$File	"episodic\npc_combine_armored.cpp"
 			$File	"episodic\npc_combine_armored.h"
 
+			$File	"episodic\grenade_teleport.cpp"
+			$File	"episodic\grenade_teleport.h"
+
 			$File	"episodic\xentree.cpp"
 			$File	"lightstalk.cpp"
 			

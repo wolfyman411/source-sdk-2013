@@ -16,4 +16,4 @@ CBaseGrenade* Teleportgrenade_Create( const Vector& position, const QAngle& angl
 bool	Teleportgrenade_WasPunted( const CBaseEntity* pEntity );
 bool	Teleportgrenade_WasCreatedByCombine( const CBaseEntity* pEntity );
 
-#endif // GRENADE_FRAG_H
+#endif // GRENADE_TELEPORT_H
