@@ -10,6 +10,7 @@
 #include "grenade_teleport.h"
 #include "Sprite.h"
 #include "SpriteTrail.h"
+#include "gamestats.h"
 #include "soundent.h"
 #ifdef MAPBASE
 #include "mapbase/ai_grenade.h"
@@ -55,6 +56,7 @@ class CGrenadeTeleport : public CBaseGrenade
     bool	IsCombineSpawned( void ) const { return m_combineSpawned; }
     void	SetPunted( bool punt ) { m_punted = punt; }
     bool	WasPunted( void ) const { return m_punted; }
+    void    Detonate( void );
 
     // this function only used in episodic.
 #if defined(HL2_EPISODIC) && 0 // FIXME: HandleInteraction() is no longer called now that base grenade derives from CBaseAnimating
@@ -71,6 +73,8 @@ class CGrenadeTeleport : public CBaseGrenade
     bool	m_inSolid;
     bool	m_combineSpawned;
     bool	m_punted;
+    private:
+    CNetworkHandle( CBaseEntity, m_hThrower );					// Who threw this grenade
 };
 
 LINK_ENTITY_TO_CLASS( npc_grenade_teleport, CGrenadeTeleport );
@@ -425,6 +429,64 @@ void CGrenadeTeleport::InputSetTimer( inputdata_t& inputdata )
 {
     SetTimer( inputdata.value.Float(), inputdata.value.Float() - TELEPORT_GRENADE_WARN_TIME );
 }
+
+void CGrenadeTeleport::Detonate( void )
+{
+    trace_t		tr;
+    Vector		vecSpot;// trace starts here!
+
+    SetThink( NULL );
+
+    vecSpot = GetAbsOrigin() + Vector( 0, 0, 8 );
+    UTIL_TraceLine( vecSpot, vecSpot + Vector( 0, 0, -32 ), MASK_SHOT_HULL, this, COLLISION_GROUP_NONE, &tr );
+
+    if ( tr.startsolid )
+    {
+        // Since we blindly moved the explosion origin vertically, we may have inadvertently moved the explosion into a solid,
+        // in which case nothing is going to be harmed by the grenade's explosion because all subsequent traces will startsolid.
+        // If this is the case, we do the downward trace again from the actual origin of the grenade. (sjb) 3/8/2007  (for ep2_outland_09)
+        UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + Vector( 0, 0, -32 ), MASK_SHOT_HULL, this, COLLISION_GROUP_NONE, &tr );
+    }
+
+#if !defined( CLIENT_DLL )
+
+    SetModelName( NULL_STRING );//invisible
+    AddSolidFlags( FSOLID_NOT_SOLID );
+
+    m_takedamage = DAMAGE_NO;
+
+    // Pull out of the wall a bit
+    if ( tr.fraction != 1.0 )
+    {
+        SetAbsOrigin( tr.endpos + ( tr.plane.normal * 0.6 ) );
+    }
+
+#if !defined( CLIENT_DLL )
+    CSoundEnt::InsertSound( SOUND_COMBAT, GetAbsOrigin(), BASEGRENADE_EXPLOSION_VOLUME, 3.0 );
+#endif
+    EmitSound( "BaseGrenade.Explode" );
+
+#ifdef MAPBASE
+    m_OnDetonate.FireOutput( GetThrower(), this );
+    m_OnDetonate_OutPosition.Set( GetAbsOrigin(), GetThrower(), this );
+#endif
+
+    SetThink( &CBaseGrenade::SUB_Remove );
+    SetTouch( NULL );
+    SetSolid( SOLID_NONE );
+
+    AddEffects( EF_NODRAW );
+    SetAbsVelocity( vec3_origin );
+
+#if HL2_EPISODIC
+    SetNextThink( gpGlobals->curtime + 0.1 );
+#else
+    SetNextThink( gpGlobals->curtime );
+#endif
+
+#endif
+}
+
 
 CBaseGrenade* Teleportgrenade_Create( const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, CBaseEntity* pOwner, float timer, bool combineSpawned )
 {
