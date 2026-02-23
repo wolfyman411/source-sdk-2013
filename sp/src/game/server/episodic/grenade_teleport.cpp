@@ -52,8 +52,8 @@ class CGrenadeTeleport : public CBaseGrenade
     void	DelayThink();
     void	VPhysicsUpdate( IPhysicsObject* pPhysics );
     void	OnPhysGunPickup( CBasePlayer* pPhysGunUser, PhysGunPickup_t reason );
-    void	SetArmouredSpawned( bool armouredSpawned ) { m_bArmouredSpawned = armouredSpawned; }
-    bool	IsArmouredSpawned( void ) const { return m_bArmouredSpawned; }
+    void	SetCombineSpawned( bool combineSpawned ) { m_combineSpawned = combineSpawned; }
+    bool	IsCombineSpawned( void ) const { return m_combineSpawned; }
     void	SetPunted( bool punt ) { m_punted = punt; }
     bool	WasPunted( void ) const { return m_punted; }
     void    Detonate( void );
@@ -71,7 +71,7 @@ class CGrenadeTeleport : public CBaseGrenade
 
     float	m_flNextBlipTime;
     bool	m_inSolid;
-    bool	m_bArmouredSpawned;
+    bool	m_combineSpawned;
     bool	m_punted;
     private:
     CNetworkHandle( CBaseEntity, m_hThrower );					// Who threw this grenade
@@ -86,7 +86,7 @@ DEFINE_FIELD( m_pMainGlow, FIELD_EHANDLE ),
 DEFINE_FIELD( m_pGlowTrail, FIELD_EHANDLE ),
 DEFINE_FIELD( m_flNextBlipTime, FIELD_TIME ),
 DEFINE_FIELD( m_inSolid, FIELD_BOOLEAN ),
-DEFINE_FIELD( m_bArmouredSpawned, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_combineSpawned, FIELD_BOOLEAN ),
 DEFINE_FIELD( m_punted, FIELD_BOOLEAN ),
 
 // Function Pointers
@@ -146,7 +146,7 @@ void CGrenadeTeleport::Spawn( void )
 
     AddSolidFlags( FSOLID_NOT_STANDABLE );
 
-    m_bArmouredSpawned = false;
+    m_combineSpawned = false;
     m_punted = false;
 
     BaseClass::Spawn();
@@ -488,7 +488,7 @@ void CGrenadeTeleport::Detonate( void )
 }
 
 
-CBaseGrenade* Teleportgrenade_Create( const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, CBaseEntity* pOwner, float timer, bool armouredSpawned )
+CBaseGrenade* Teleportgrenade_Create( const Vector& position, const QAngle& angles, const Vector& velocity, const AngularImpulse& angVelocity, CBaseEntity* pOwner, float timer, bool combineSpawned )
 {
     // Don't set the owner here, or the player can't interact with grenades he's thrown
     CGrenadeTeleport* pGrenade = ( CGrenadeTeleport* ) CBaseEntity::Create( "npc_grenade_teleport", position, angles, pOwner );
@@ -497,7 +497,7 @@ CBaseGrenade* Teleportgrenade_Create( const Vector& position, const QAngle& angl
     pGrenade->SetVelocity( velocity, angVelocity );
     pGrenade->SetThrower( ToBaseCombatCharacter( pOwner ) );
     pGrenade->m_takedamage = DAMAGE_EVENTS_ONLY;
-    pGrenade->SetArmouredSpawned( armouredSpawned );
+    pGrenade->SetCombineSpawned( combineSpawned );
 
     return pGrenade;
 }
@@ -518,7 +518,7 @@ bool Teleportgrenade_WasCreatedByCombine( const CBaseEntity* pEntity )
     const CGrenadeTeleport* pFrag = dynamic_cast< const CGrenadeTeleport* >( pEntity );
     if ( pFrag )
     {
-        return pFrag->IsArmouredSpawned();
+        return pFrag->IsCombineSpawned();
     }
 
     return false;
