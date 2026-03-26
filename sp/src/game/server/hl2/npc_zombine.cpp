@@ -917,7 +917,12 @@ void CNPC_Zombine::AttackSound( void )
 //-----------------------------------------------------------------------------
 const char *CNPC_Zombine::GetHeadcrabModel( void )
 {
-	return "models/headcrabclassic.mdl";
+	if (this->HasSpawnFlags(SF_ZOMBINE_INFESTED)) {
+		return "models/headcrabinfested.mdl";
+	}
+	else {
+		return "models/headcrabclassic.mdl";
+	}
 }
 
 //-----------------------------------------------------------------------------
