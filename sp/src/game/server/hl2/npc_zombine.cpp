@@ -57,6 +57,11 @@ enum
 
 #define ZOMBINE_MAX_GRENADES 1
 
+#define ZOMBINE_MODEL		"models/zombie/zombie_soldier.mdl"
+#define ZOMBINE_ALT_MODEL	"models/zombie/zombie_soldier_infested.mdl"
+
+#define SF_ZOMBINE_INFESTED ( 1 << 17 )
+
 int ACT_ZOMBINE_GRENADE_PULL;
 int ACT_ZOMBINE_GRENADE_WALK;
 int ACT_ZOMBINE_GRENADE_RUN;
@@ -249,7 +254,12 @@ void CNPC_Zombine::Precache( void )
 {
 	BaseClass::Precache();
 
-	PrecacheModel( "models/zombie/zombie_soldier.mdl" );
+	if (this->HasSpawnFlags(SF_ZOMBINE_INFESTED)) {
+		PrecacheModel(ZOMBINE_ALT_MODEL);
+	}
+	else {
+		PrecacheModel(ZOMBINE_MODEL);
+	}
 
 	PrecacheScriptSound( "Zombie.FootstepRight" );
 	PrecacheScriptSound( "Zombie.FootstepLeft" );
@@ -270,7 +280,12 @@ void CNPC_Zombine::Precache( void )
 
 void CNPC_Zombine::SetZombieModel( void )
 {
-	SetModel( "models/zombie/zombie_soldier.mdl" );
+	if (this->HasSpawnFlags(SF_ZOMBINE_INFESTED)) {
+		SetModel(ZOMBINE_ALT_MODEL);
+	}
+	else {
+		SetModel(ZOMBINE_MODEL);
+	}
 	SetHullType( HULL_HUMAN );
 
 	SetBodygroup( ZOMBIE_BODYGROUP_HEADCRAB, !m_fIsHeadless );
