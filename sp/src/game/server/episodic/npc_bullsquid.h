@@ -31,8 +31,8 @@ public:
 	bool SeenEnemyWithinTime(float flTime);
 
 	bool InnateWeaponLOSCondition(const Vector& ownerPos, const Vector& targetPos, bool bSetConditions);
-	bool GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut, bool lobbing);
-	Vector VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance, bool lobbing = false);
+	bool GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut );
+	Vector VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance);
 
 	void IdleSound(void);
 	void PainSound(const CTakeDamageInfo& info);

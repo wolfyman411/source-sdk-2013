@@ -46,8 +46,8 @@ public:
 
 	virtual	bool		AllowedToIgnite( void ) { return true; }
 
-	bool		IsArmorless() { return m_fIsArmorless; }
-	bool		m_fIsArmorless;
+	bool		IsArmorless() { return m_fIsArmourless; }
+	bool		m_fIsArmourless;
 
 private:
 	bool		ShouldHitPlayer( const Vector &targetDir, float targetDist );
