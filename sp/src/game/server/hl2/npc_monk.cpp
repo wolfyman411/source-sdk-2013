@@ -744,7 +744,7 @@ int CNPC_Monk::SelectFailSchedule( int failedSchedule, int failedTask, AI_TaskFa
 //-----------------------------------------------------------------------------
 bool CNPC_Monk::IsJumpLegal( const Vector &startPos, const Vector &apex, const Vector &endPos ) const
 {
-	if ( startPos.z - endPos.z < 0 )
+    if ( startPos.z - endPos.z < 0 && m_jumpUpOverride < 0 )
 		return false;
 	return BaseClass::IsJumpLegal( startPos, apex, endPos );
 }

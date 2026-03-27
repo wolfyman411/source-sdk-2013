@@ -2095,6 +2095,10 @@ public:
 	void InputIgnoreDangerSounds( inputdata_t &inputdata );
 	void InputUpdateEnemyMemory( inputdata_t &inputdata );
 
+    void InputSetJumpUp( inputdata_t& inputdata );
+    void InputSetJumpDown( inputdata_t& inputdata );
+    void InputSetJumpDist( inputdata_t& inputdata );
+
 	//---------------------------------
 	
 	virtual void		NotifyDeadFriend( CBaseEntity *pFriend ) { return; }
@@ -2443,6 +2447,10 @@ public:
 	void				GetPlayerAvoidBounds( Vector *pMins, Vector *pMaxs );
 
 	void				StartPingEffect( void ) { m_flTimePingEffect = gpGlobals->curtime + 2.0f; DispatchUpdateTransmitState(); }
+protected: // Jump override variables
+    float				m_jumpUpOverride = 0.0f;
+    float				m_jumpDownOverride = 0.0f;
+    float				m_jumpDistOverride = 0.0f;
 };
 
 
