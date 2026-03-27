@@ -24,6 +24,7 @@
 #include "hl2_gamerules.h"
 #include "gameweaponmanager.h"
 #include "vehicle_base.h"
+#include "props.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -455,7 +456,6 @@ Activity CNPC_CombineS::NPC_TranslateActivity( Activity eNewActivity )
 	return BaseClass::NPC_TranslateActivity( eNewActivity );
 }
 
-
 //---------------------------------------------------------
 // Save/Restore
 //---------------------------------------------------------
@@ -464,4 +464,5 @@ BEGIN_DATADESC( CNPC_CombineS )
 DEFINE_KEYFIELD( m_iUseMarch, FIELD_INTEGER, "usemarch" ),
 
 END_DATADESC()
+
 #endif
