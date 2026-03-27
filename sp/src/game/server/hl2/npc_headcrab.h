@@ -158,6 +158,8 @@ protected:
 #ifdef MAPBASE
 	COutputEvent m_OnLeap;
 #endif
+private:
+    inline bool	IsFlipped( void );
 };
 
 
