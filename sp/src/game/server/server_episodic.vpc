@@ -301,7 +301,7 @@ $Project "Server (Episodic)"
 
 			$File	"episodic\xentree.cpp"
 			$File	"lightstalk.cpp"
-			
+
 			$Folder	"unused"
 			{
 				$File	"hl2\grenade_beam.cpp"
