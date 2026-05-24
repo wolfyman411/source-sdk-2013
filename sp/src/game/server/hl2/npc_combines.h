@@ -11,10 +11,12 @@
 #endif
 
 #include "npc_combine.h"
+#include "props.h"
 
 //=========================================================
 //	>> CNPC_CombineS
 //=========================================================
+
 class CNPC_CombineS : public CNPC_Combine
 {
 	DECLARE_CLASS( CNPC_CombineS, CNPC_Combine );
@@ -48,7 +50,6 @@ public:
 
 	bool		IsArmorless() { return m_fIsArmorless; }
 	bool		m_fIsArmorless;
-
 private:
 	bool		ShouldHitPlayer( const Vector &targetDir, float targetDist );
 
