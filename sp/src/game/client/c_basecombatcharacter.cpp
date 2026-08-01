@@ -104,9 +104,15 @@ float C_BaseCombatCharacter::GetViewModelSnowOverlayAlpha( void )
 		m_flNextFade = gpGlobals->curtime + 0.1f;
 		if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
 			m_flCurrentSnowOverlayAlpha += sv_weapon_frost_rate.GetFloat();
+			if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
+				m_flCurrentSnowOverlayAlpha = m_flSnowOverlayAlpha;
+			}
 		}
 		else if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
 			m_flCurrentSnowOverlayAlpha -= sv_weapon_thaw_rate.GetFloat();
+			if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
+				m_flCurrentSnowOverlayAlpha = m_flSnowOverlayAlpha;
+			}
 		}
 	}
 
