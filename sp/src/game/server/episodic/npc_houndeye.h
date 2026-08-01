@@ -55,6 +55,11 @@ public:
 	void InputStartPatrolling(inputdata_t& inputdata);
 	void InputStopPatrolling(inputdata_t& inputdata);
 	void InputStartSleep(inputdata_t& inputdata);
+	void TraceAttack(const CTakeDamageInfo& info, const Vector& vecDir, trace_t* ptr, CDmgAccumulator* pAccumulator);
+	void CascadePush(const Vector& vecForce);
+	void Flip(bool bZapped);
+	inline bool IsFlipped(void);
+	void Touch(CBaseEntity* pOther);
 
 	DEFINE_CUSTOM_AI;
 	DECLARE_DATADESC();
@@ -65,6 +70,7 @@ private:
 	bool m_fAsleep;// some houndeyes sleep in idle mode if this is set, the houndeye is lying down
 	bool m_fDontBlink;// don't try to open/close eye if this bit is set!
 	Vector	m_vecPackCenter; // the center of the pack. The leader maintains this by averaging the origins of all pack members.
+	float m_flZapDuration;
 };
 
 #endif // NPC_HOUNDEYE_H
