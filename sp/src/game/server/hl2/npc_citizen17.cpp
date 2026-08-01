@@ -16,6 +16,9 @@
 #include "hl2_player.h"
 #include "items.h"
 
+#include "IEffects.h"
+#include "particle_parse.h"
+#include "te_particlesystem.h"
 
 #ifdef HL2MP
 #include "hl2mp/weapon_crowbar.h"
@@ -1000,6 +1003,31 @@ Class_T	CNPC_Citizen::Classify()
 bool CNPC_Citizen::ShouldAlwaysThink() 
 { 
 	return ( BaseClass::ShouldAlwaysThink() || IsInPlayerSquad() ); 
+}
+
+void CNPC_Citizen::NPCThink()
+{
+    BaseClass::NPCThink();
+
+    if ( !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
+
+    DevMsg("%s\t%f\t%f", this->GetDebugName(), this->GetTemperature(), this->GetIdealTemperature());
+    if ( this->GetTemperature() >= this->GetIdealTemperature() )
+    {
+
+    }
+    else
+    {
+        ColdThink();
+    }
+}
+
+void CNPC_Citizen::ColdThink()
+{
+    if ( m_flNextColdBreath < gpGlobals->curtime ) {
+        DispatchParticleEffect( "moderate_snow", PATTACH_POINT_FOLLOW, this, "mouth", true );
+        m_flNextColdBreath = gpGlobals->curtime + RandomFloat( 1.0f, 1.5f );
+    }
 }
 	
 //-----------------------------------------------------------------------------
