@@ -112,7 +112,6 @@ public:
     bool                m_bShouldDrawSnowOverlay;
     float               m_flSnowOverlayAlpha;
 	float               m_flCurrentSnowOverlayAlpha;
-	float				m_flSnowFadeRate;
 	float				m_flNextFade;
     virtual float GetViewModelSnowOverlayAlpha( void );
 
