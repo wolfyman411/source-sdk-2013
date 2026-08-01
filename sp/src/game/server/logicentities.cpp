@@ -7,6 +7,7 @@
 #include "cbase.h"
 #include "entityinput.h"
 #include "entityoutput.h"
+#include "basecombatcharacter.h"
 #include "eventqueue.h"
 #include "mathlib/mathlib.h"
 #include "globalstate.h"
@@ -1258,6 +1259,20 @@ void CEnvGlobal::Spawn( void )
 		if ( m_counter != 0 )
 		{
 			GlobalEntity_SetCounter( m_globalstate, m_counter );
+
+            if ( m_globalstate != NULL_STRING && stricmp( STRING( m_globalstate ), "global_frost_proxy" ) == 0 )
+            {
+                // Run a for i loop through all map entities, if they're CBaseCombat
+
+                for ( CBaseCombatCharacter* pEnt = ( CBaseCombatCharacter* ) gEntList.FirstEnt(); pEnt != NULL; pEnt = ( CBaseCombatCharacter* ) gEntList.NextEnt( pEnt ) )
+                {
+                    // if the GetClassname() doesn't start with "weapon_", continue
+                    if ( pEnt->GetClassname() && V_strnicmp( pEnt->GetClassname(), "weapon_", 7 ) == 0 )
+                        continue;
+                    // works with "ent_fire env_global setcounter 10"
+                    pEnt->m_flSnowOverlayAlpha = ( float ) GlobalEntity_GetCounter( m_globalstate ) / 100.0f;
+                }
+            }
 		}
 	}
 }
@@ -1339,6 +1354,14 @@ void CEnvGlobal::InputSetCounter( inputdata_t &inputdata )
 	}
 
 	GlobalEntity_SetCounter( m_globalstate, inputdata.value.Int() );
+
+    if ( m_globalstate != NULL_STRING && stricmp( STRING( m_globalstate ), "global_frost_proxy" ) == 0 )
+    {
+        for ( CBaseCombatCharacter* pEnt = ( CBaseCombatCharacter* ) gEntList.FirstEnt(); pEnt != NULL; pEnt = ( CBaseCombatCharacter* ) gEntList.NextEnt( pEnt ) )
+        {
+            pEnt->m_flSnowOverlayAlpha = ( float ) GlobalEntity_GetCounter( m_globalstate ) / 100.0f;
+        }
+    }
 }
 
 
@@ -1352,6 +1375,14 @@ void CEnvGlobal::InputAddToCounter( inputdata_t &inputdata )
 	}
 
 	GlobalEntity_AddToCounter( m_globalstate, inputdata.value.Int() );
+
+    if ( m_globalstate != NULL_STRING && stricmp( STRING( m_globalstate ), "global_frost_proxy" ) == 0 )
+    {
+        for ( CBaseCombatCharacter* pEnt = ( CBaseCombatCharacter* ) gEntList.FirstEnt(); pEnt != NULL; pEnt = ( CBaseCombatCharacter* ) gEntList.NextEnt( pEnt ) )
+        {
+            pEnt->m_flSnowOverlayAlpha = ( float ) GlobalEntity_GetCounter( m_globalstate ) / 100.0f;
+        }
+    }
 }
 
 

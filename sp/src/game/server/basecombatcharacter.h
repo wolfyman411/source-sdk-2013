@@ -124,7 +124,6 @@ public:
 #endif
 
 public:
-
 	virtual void		Spawn( void );
 	virtual void		Precache();
 
@@ -321,6 +320,9 @@ public:
 	virtual void	InputUnholsterWeapon( inputdata_t &inputdata );
 	void			InputSwitchToWeapon( inputdata_t &inputdata );
 
+    void            InputSetSnowOverlayAlpha( inputdata_t& inputdata );
+    void            InputSetShouldDrawSnowOverlay( inputdata_t& inputdata );
+
 	COutputEHANDLE	m_OnKilledEnemy;
 	COutputEHANDLE	m_OnKilledPlayer;
 	virtual void OnKilledNPC( CBaseCombatCharacter *pKilled ); 
@@ -382,8 +384,7 @@ public:
 	void					InputSetRelationship( inputdata_t &inputdata );
 #endif
 
-	virtual void			SetLightingOriginRelative( CBaseEntity *pLightingOrigin );
-
+    virtual void			SetLightingOriginRelative( CBaseEntity* pLightingOrigin );
 protected:
 	Relationship_t			*FindEntityRelationship( CBaseEntity *pTarget );
 
@@ -573,6 +574,11 @@ protected:
 
 public:
 	CNetworkVar( float, m_flNextAttack );			// cannot attack again until this time
+
+    CNetworkVar( bool, m_bShouldDrawSnowOverlay );
+    CNetworkVar( float, m_flSnowOverlayAlpha );
+
+    virtual float GetViewModelSnowOverlayAlpha( void );
 
 #ifdef GLOWS_ENABLE
 protected:

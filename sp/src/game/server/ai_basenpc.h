@@ -174,7 +174,7 @@ enum Interruptability_t
 #define SF_NPC_FALL_TO_GROUND			( 1 << 2  )	// used my NPC_Maker
 #define SF_NPC_DROP_HEALTHKIT			( 1 << 3  )	// Drop a healthkit upon death
 #define SF_NPC_START_EFFICIENT			( 1 << 4  ) // Set into efficiency mode from spawn
-//										( 1 << 5  )
+#define SF_NPC_USE_TEMPERATURE			( 1 << 5 )	// This NPC will use the temperature system
 //										( 1 << 6  )
 #define SF_NPC_WAIT_FOR_SCRIPT			( 1 << 7  )	// spawnflag that makes npcs wait to check for attacking until the script is done or they've been attacked
 #define SF_NPC_LONG_RANGE				( 1 << 8  )	// makes npcs look far and relaxes weapon range limit 
@@ -183,7 +183,7 @@ enum Interruptability_t
 #define SF_NPC_TEMPLATE					( 1 << 11 )	// This NPC will be used as a template by an npc_maker -- do not spawn.
 #define SF_NPC_ALTCOLLISION				( 1 << 12 )
 #define SF_NPC_NO_WEAPON_DROP			( 1 << 13 )	// This NPC will not actually drop a weapon that can be picked up
-#define SF_NPC_NO_PLAYER_PUSHAWAY		( 1 << 14 )	
+#define SF_NPC_NO_PLAYER_PUSHAWAY		( 1 << 14 )
 //										( 1 << 15 )	
 // !! Flags above ( 1 << 15 )	 are reserved for NPC sub-classes
 
@@ -594,6 +594,8 @@ public:
 	virtual void		UpdateOnRemove( void );
 
 	virtual int			UpdateTransmitState();
+	virtual int			GetSkin() const { return m_nSkin; }
+	void				SetSkin( int iSkin ) { m_nSkin = iSkin; }
 
 	//---------------------------------
 	// Component creation factories
@@ -770,6 +772,8 @@ public:
 	virtual int			GetLocalTaskId( int globalTaskId)			{ return GetClassScheduleIdSpace()->TaskGlobalToLocal( globalTaskId ); }
 
 	virtual const char *GetSchedulingErrorName()					{ return "CAI_BaseNPC"; }
+
+    
 
 protected:
 	static bool			LoadSchedules(void);
@@ -988,11 +992,33 @@ public:
 	void				Sleep();
 	bool				WokeThisTick() const;
 
+    virtual float       GetTemperature() const { return m_flTemperature; }
+    virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
+    virtual void        AddTemperature( float flTemp );
+
+    virtual float       GetMinTemperature( void ) { return m_flMinTemperature; }
+    virtual float       GetMaxTemperature( void ) { return m_flMaxTemperature; }
+	virtual float       GetIdealTemperature(void) { return m_flIdealTemperature; }
+
+    virtual float       GetTemperatureChangeRate( void ) { return m_flTemperatureChangeRate; }
+
+    virtual void        SetMinTemperature( float flTemp ) { m_flMinTemperature = flTemp; }
+    virtual void        SetMaxTemperature( float flTemp ) { m_flMaxTemperature = flTemp; }
+	virtual void        SetIdealTemperature(float flTemp) { m_flIdealTemperature = flTemp; }
+
+    virtual void        SetTemperatureChangeRate( float rate ) { m_flTemperatureChangeRate = rate; }
+
+    virtual bool        IsOverheating( void )   { return m_flTemperature >= m_flMaxTemperature; }
+    virtual bool        IsFreezing( void )      { return m_flTemperature <= m_flMinTemperature; }
+
+    virtual void        HandleTemperature( void );
+
+    virtual bool        IsFrozen( void ) { return m_bHasFrozen; }
+
 	//---------------------------------
 
 	NPC_STATE			m_NPCState;				// npc's current state
 	float				m_flLastStateChangeTime;
-
 private:
 	NPC_STATE			m_IdealNPCState;		// npc should change to this state
 	AI_Efficiency_t		m_Efficiency;
@@ -2422,6 +2448,13 @@ public:
 	CNetworkVar( int,   m_iSpeedModRadius );
 	CNetworkVar( int,   m_iSpeedModSpeed );
 	CNetworkVar( float, m_flTimePingEffect );			// Display the pinged effect until this time
+
+    CNetworkVar( float, m_flTemperature );
+    CNetworkVar( float, m_flMaxTemperature );
+    CNetworkVar( float, m_flMinTemperature );
+    CNetworkVar( float, m_flIdealTemperature );
+    CNetworkVar( float, m_flTemperatureChangeRate );
+    CNetworkVar( bool,  m_bHasFrozen );
 
 	void				InputActivateSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = true; }
 	void				InputDisableSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = false; }

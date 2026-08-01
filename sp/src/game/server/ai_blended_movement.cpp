@@ -299,7 +299,7 @@ void CAI_BlendedMotor::SetMoveScriptAnim( float flNewSpeed )
 
 	CAI_Navigator *pNavigator = GetNavigator();
 
-	SetPlaybackRate( m_flCurrRate );
+	// SetPlaybackRate( m_flCurrRate ); // Don't set a new playback rate, as this messes with the freezing NPC feature. -TheMaster974
 	// calc weight of idle animation layer that suppresses the run animation
 	float flWeight = 0.0f;
 	if (GetIdealSpeed() > 0.0f)
@@ -310,7 +310,7 @@ void CAI_BlendedMotor::SetMoveScriptAnim( float flNewSpeed )
 	{
 		m_flCurrRate = flNewSpeed / GetIdealSpeed();
 		m_flCurrRate = clamp( m_flCurrRate, 0.0f, 1.0f );
-		SetPlaybackRate( m_flCurrRate );
+		// SetPlaybackRate( m_flCurrRate ); // Don't set a new playback rate, as this messes with the freezing NPC feature. -TheMaster974
 		flWeight = 0.0;
 	}
 	// Msg("weight %.3f rate %.3f\n", flWeight, m_flCurrRate );
@@ -386,7 +386,8 @@ void CAI_BlendedMotor::SetMoveScriptAnim( float flNewSpeed )
 			}
 			else
 			{
-				SetLayerPlaybackRate( m_iSecondaryLayer, 1.0 );
+				// SetLayerPlaybackRate( m_iSecondaryLayer, 1.0 );
+				SetLayerPlaybackRate( m_iSecondaryLayer, GetPlaybackRate() );
 			}
 			SetLayerNoRestore( m_iSecondaryLayer, true );
 			m_flSecondaryWeight = 0.0;
@@ -1743,7 +1744,8 @@ bool CAI_BlendedMotor::AddTurnGesture( float flYD )
 		{
 			GetOuter()->SetLayerPriority( iLayer, 100 );
 			// vary the playback a bit
-			SetLayerPlaybackRate( iLayer, 1.0 );
+			// SetLayerPlaybackRate( iLayer, 1.0 );
+			SetLayerPlaybackRate( iLayer, GetPlaybackRate() );
 			float actualDuration = GetOuter()->GetLayerDuration( iLayer );
 
 			float rate = random->RandomFloat( 0.5f, 1.1f );

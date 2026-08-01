@@ -19,6 +19,9 @@
 #define THUMPER_RADIUS 1000
 #endif
 
+#define SF_NO_DUST		1
+#define SF_NO_SHAKE		2
+#define SF_DISABLED		4
 
 #define STATE_CHANGE_MODIFIER 0.02f
 #define THUMPER_SOUND_DURATION 1.5f
@@ -26,7 +29,7 @@
 #define THUMPER_MODEL_NAME "models/props_combine/CombineThumper002.mdl"
 
 
-ConVar thumper_show_radius("thumper_show_radius","0",FCVAR_CHEAT,"If true, advisor will use her custom impact damage table.");
+ConVar thumper_show_radius( "thumper_show_radius", "0", FCVAR_CHEAT, "If true, advisor will use her custom impact damage table." );
 
 
 class CPropThumper : public CBaseAnimating
@@ -37,12 +40,12 @@ public:
 
 	virtual void Spawn( void );
 	virtual void Precache( void );
-	virtual void Think ( void );
-	virtual void HandleAnimEvent( animevent_t *pEvent );
+	virtual void Think( void );
+	virtual void HandleAnimEvent( animevent_t* pEvent );
 	virtual void StopLoopingSounds( void );
 
-	void	InputDisable( inputdata_t &inputdata );
-	void	InputEnable( inputdata_t &inputdata );
+	void	InputDisable( inputdata_t& inputdata );
+	void	InputEnable( inputdata_t& inputdata );
 
 	void	InitMotorSound( void );
 
@@ -51,13 +54,16 @@ public:
 	void	Thump( void );
 
 private:
-	
+
 	bool m_bEnabled;
 	int m_iHammerAttachment;
 	CSoundPatch* m_sndMotor;
 	EHANDLE m_hRepellantEnt;
 	int m_iDustScale;
-	
+
+	// I would have used color24 instead of color32, but there is no FIELD_COLOR32
+	color32 m_DustColor;
+
 	COutputEvent	m_OnThumped;	// Fired when thumper goes off
 
 #if HL2_EPISODIC
@@ -68,31 +74,31 @@ private:
 LINK_ENTITY_TO_CLASS( prop_thumper, CPropThumper );
 
 //-----------------------------------------------------------------------------
-// Save/load 
+// Save/load
 //-----------------------------------------------------------------------------
 BEGIN_DATADESC( CPropThumper )
-	DEFINE_FIELD( m_bEnabled, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_hRepellantEnt, FIELD_EHANDLE ),
-	DEFINE_FIELD( m_iHammerAttachment, FIELD_INTEGER ),
-	DEFINE_KEYFIELD( m_iDustScale, FIELD_INTEGER, "dustscale" ),
+DEFINE_FIELD( m_bEnabled, FIELD_BOOLEAN ),
+DEFINE_FIELD( m_hRepellantEnt, FIELD_EHANDLE ),
+DEFINE_FIELD( m_iHammerAttachment, FIELD_INTEGER ),
+DEFINE_KEYFIELD( m_iDustScale, FIELD_INTEGER, "dustscale" ),
 #if HL2_EPISODIC
-	DEFINE_KEYFIELD( m_iEffectRadius, FIELD_INTEGER, "EffectRadius" ),
+DEFINE_KEYFIELD( m_iEffectRadius, FIELD_INTEGER, "EffectRadius" ),
 #endif
-	DEFINE_SOUNDPATCH( m_sndMotor ),
-	DEFINE_THINKFUNC( Think ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "Disable", InputDisable ),
-	DEFINE_INPUTFUNC( FIELD_VOID, "Enable", InputEnable ),
+DEFINE_SOUNDPATCH( m_sndMotor ),
+DEFINE_THINKFUNC( Think ),
+DEFINE_INPUTFUNC( FIELD_VOID, "Disable", InputDisable ),
+DEFINE_INPUTFUNC( FIELD_VOID, "Enable", InputEnable ),
 
-	DEFINE_OUTPUT( m_OnThumped, "OnThumped" ),
+DEFINE_OUTPUT( m_OnThumped, "OnThumped" ),
+
+DEFINE_KEYFIELD( m_DustColor, FIELD_COLOR32, "DustColor" ),
 END_DATADESC()
 
-void CPropThumper::Spawn( void )
-{
-	char *szModel = (char *)STRING( GetModelName() );
-	if (!szModel || !*szModel)
-	{
+void CPropThumper::Spawn( void ) {
+	char* szModel = ( char* ) STRING( GetModelName() );
+	if ( !szModel || !*szModel ) {
 		szModel = THUMPER_MODEL_NAME;
-		SetModelName( AllocPooledString(szModel) );
+		SetModelName( AllocPooledString( szModel ) );
 	}
 
 	Precache();
@@ -104,28 +110,29 @@ void CPropThumper::Spawn( void )
 
 	BaseClass::Spawn();
 
-	m_bEnabled = true;
+	if ( HasSpawnFlags( SF_DISABLED ) )
+		m_bEnabled = false;
+	else
+		m_bEnabled = true;
 
 	SetThink( &CPropThumper::Think );
 	SetNextThink( gpGlobals->curtime + 1.0f );
 
-	int iSequence = SelectHeaviestSequence ( ACT_IDLE );
+	int iSequence = SelectHeaviestSequence( ACT_IDLE );
 
-	if ( iSequence != ACT_INVALID )
-	{
-		 SetSequence( iSequence );
-		 ResetSequenceInfo();
+	if ( iSequence != ACT_INVALID ) {
+		SetSequence( iSequence );
+		ResetSequenceInfo();
 
-		 //Do this so we get the nice ramp-up effect.
-		 m_flPlaybackRate = random->RandomFloat( 0.0f, 1.0f);
+		//Do this so we get the nice ramp-up effect.
+		m_flPlaybackRate = random->RandomFloat( 0.0f, 1.0f );
 	}
 
 	m_iHammerAttachment = LookupAttachment( "hammer" );
-	
-	CAntlionRepellant *pRepellant = (CAntlionRepellant*)CreateEntityByName( "point_antlion_repellant" );
 
-	if ( pRepellant )
-	{
+	CAntlionRepellant* pRepellant = ( CAntlionRepellant* ) CreateEntityByName( "point_antlion_repellant" );
+
+	if ( pRepellant ) {
 		pRepellant->Spawn();
 		pRepellant->SetAbsOrigin( GetAbsOrigin() );
 		pRepellant->SetRadius( THUMPER_RADIUS );
@@ -134,17 +141,23 @@ void CPropThumper::Spawn( void )
 	}
 
 	if ( m_iDustScale == 0 )
-		 m_iDustScale = THUMPER_MIN_SCALE;
+		m_iDustScale = THUMPER_MIN_SCALE;
 
 #if HL2_EPISODIC
 	if ( m_iEffectRadius == 0 )
 		m_iEffectRadius = 1000;
 #endif
 
+	//This isn't very clever, but there needs to be a fallback for maps that dont have a color specified.
+	//Mappers can use 1 1 1 instead of 0 0 0, as it looks the same.
+	if ( ( m_DustColor.r == 0 && m_DustColor.g == 0 && m_DustColor.b == 0 ) && !HasSpawnFlags( SF_NO_DUST ) ) {
+		m_DustColor.r = 0.85 * 255;
+		m_DustColor.g = 0.75 * 255;
+		m_DustColor.b = 0.52 * 255;
+	}
 }
 
-void CPropThumper::Precache( void )
-{
+void CPropThumper::Precache( void ) {
 	BaseClass::Precache();
 
 	PrecacheModel( STRING( GetModelName() ) );
@@ -156,47 +169,38 @@ void CPropThumper::Precache( void )
 	PrecacheScriptSound( "coast.thumper_large_hit" );
 }
 
-void CPropThumper::InitMotorSound( void )
-{
+void CPropThumper::InitMotorSound( void ) {
 	CPASAttenuationFilter filter( this );
-	m_sndMotor = (CSoundEnvelopeController::GetController()).SoundCreate( filter, entindex(), CHAN_STATIC, "coast.thumper_ambient" , ATTN_NORM );
+	m_sndMotor = ( CSoundEnvelopeController::GetController() ).SoundCreate( filter, entindex(), CHAN_STATIC, "coast.thumper_ambient", ATTN_NORM );
 
-	if ( m_sndMotor )
-	{
-		(CSoundEnvelopeController::GetController()).Play( m_sndMotor, 1.0f, 100 );
+	if ( m_sndMotor ) {
+		( CSoundEnvelopeController::GetController() ).Play( m_sndMotor, 1.0f, 100 );
 	}
 }
 
-void CPropThumper::HandleState( void )
-{
-	if ( m_bEnabled == false )
-	{
-		 m_flPlaybackRate = MAX( m_flPlaybackRate - STATE_CHANGE_MODIFIER, 0.0f );
-	}
-	else
-	{
- 		 m_flPlaybackRate = MIN( m_flPlaybackRate + STATE_CHANGE_MODIFIER, 1.0f );
+void CPropThumper::HandleState( void ) {
+	if ( m_bEnabled == false ) {
+		m_flPlaybackRate = MAX( m_flPlaybackRate - STATE_CHANGE_MODIFIER, 0.0f );
+	} else {
+		m_flPlaybackRate = MIN( m_flPlaybackRate + STATE_CHANGE_MODIFIER, 1.0f );
 	}
 
-	(CSoundEnvelopeController::GetController()).Play( m_sndMotor, 1.0f, m_flPlaybackRate * 100 );
+	( CSoundEnvelopeController::GetController() ).Play( m_sndMotor, 1.0f, m_flPlaybackRate * 100 );
 }
 
-void CPropThumper::Think( void )
-{
+void CPropThumper::Think( void ) {
 	StudioFrameAdvance();
 	DispatchAnimEvents( this );
 	SetNextThink( gpGlobals->curtime + 0.1 );
 
 	if ( m_sndMotor == NULL )
-		 InitMotorSound();
+		InitMotorSound();
 	else
-		 HandleState();
+		HandleState();
 }
 
-void CPropThumper::Thump ( void )
-{
-	if ( m_iHammerAttachment != -1 )
-	{
+void CPropThumper::Thump( void ) {
+	if ( m_iHammerAttachment != -1 ) {
 		Vector vOrigin;
 		GetAttachment( m_iHammerAttachment, vOrigin );
 
@@ -205,35 +209,41 @@ void CPropThumper::Thump ( void )
 		data.m_nEntIndex = entindex();
 		data.m_vOrigin = vOrigin;
 		data.m_flScale = m_iDustScale * m_flPlaybackRate;
-		DispatchEffect( "ThumperDust", data );
-		UTIL_ScreenShake( vOrigin, 10.0 * m_flPlaybackRate, m_flPlaybackRate, m_flPlaybackRate / 2, THUMPER_RADIUS * m_flPlaybackRate, SHAKE_START, false );
+
+		data.m_bCustomColors = true;
+		data.m_CustomColors.m_vecColor1.x = ( float ) m_DustColor.r / 255;
+		data.m_CustomColors.m_vecColor1.y = ( float ) m_DustColor.g / 255;
+		data.m_CustomColors.m_vecColor1.z = ( float ) m_DustColor.b / 255;
+
+		if ( !HasSpawnFlags( SF_NO_DUST ) )
+			DispatchEffect( "ThumperDust", data );
+
+		if ( !HasSpawnFlags( SF_NO_SHAKE ) )
+			UTIL_ScreenShake( vOrigin, 10.0 * m_flPlaybackRate, m_flPlaybackRate, m_flPlaybackRate / 2, THUMPER_RADIUS * m_flPlaybackRate, SHAKE_START, false );
 	}
 
 	EmitSound( "coast.thumper_dust" );
-	CSoundEnt::InsertSound ( SOUND_THUMPER, GetAbsOrigin(), THUMPER_RADIUS * m_flPlaybackRate, THUMPER_SOUND_DURATION, this );
+	CSoundEnt::InsertSound( SOUND_THUMPER, GetAbsOrigin(), THUMPER_RADIUS * m_flPlaybackRate, THUMPER_SOUND_DURATION, this );
 
-	if ( thumper_show_radius.GetBool() )
-	{
-		NDebugOverlay::Box( GetAbsOrigin(), Vector(-THUMPER_RADIUS, -THUMPER_RADIUS, -THUMPER_RADIUS), Vector(THUMPER_RADIUS, THUMPER_RADIUS, THUMPER_RADIUS), 
+	if ( thumper_show_radius.GetBool() ) {
+		NDebugOverlay::Box( GetAbsOrigin(), Vector( -THUMPER_RADIUS, -THUMPER_RADIUS, -THUMPER_RADIUS ), Vector( THUMPER_RADIUS, THUMPER_RADIUS, THUMPER_RADIUS ),
 			255, 64, 64, 255, THUMPER_SOUND_DURATION );
 	}
 
 	if ( m_flPlaybackRate < 0.7f )
-		 return;
+		return;
 
-	if( m_iDustScale == THUMPER_MIN_SCALE )
-		 EmitSound( "coast.thumper_hit" );
+	if ( m_iDustScale == THUMPER_MIN_SCALE )
+		EmitSound( "coast.thumper_hit" );
 	else
-		 EmitSound( "coast.thumper_large_hit" );
+		EmitSound( "coast.thumper_large_hit" );
 
 	// Signal that we've thumped
 	m_OnThumped.FireOutput( this, this );
 }
 
-void CPropThumper::HandleAnimEvent( animevent_t *pEvent )
-{
-	if ( pEvent->event == AE_THUMPER_THUMP )
-	{
+void CPropThumper::HandleAnimEvent( animevent_t* pEvent ) {
+	if ( pEvent->event == AE_THUMPER_THUMP ) {
 		Thump();
 		return;
 	}
@@ -245,38 +255,32 @@ void CPropThumper::HandleAnimEvent( animevent_t *pEvent )
 //-----------------------------------------------------------------------------
 // Shuts down sounds
 //-----------------------------------------------------------------------------
-void CPropThumper::StopLoopingSounds( void )
-{
-	if ( m_sndMotor != NULL )
-	{
-		 (CSoundEnvelopeController::GetController()).SoundDestroy( m_sndMotor );
-		 m_sndMotor = NULL;
+void CPropThumper::StopLoopingSounds( void ) {
+	if ( m_sndMotor != NULL ) {
+		( CSoundEnvelopeController::GetController() ).SoundDestroy( m_sndMotor );
+		m_sndMotor = NULL;
 	}
 
 	BaseClass::StopLoopingSounds();
 }
 
-void CPropThumper::InputDisable( inputdata_t &inputdata )
-{
+void CPropThumper::InputDisable( inputdata_t& inputdata ) {
 	m_bEnabled = false;
-	
+
 	EmitSound( "coast.thumper_shutdown" );
-	
-	if ( m_hRepellantEnt )
-	{
+
+	if ( m_hRepellantEnt ) {
 		variant_t emptyVariant;
 		m_hRepellantEnt->AcceptInput( "Disable", this, this, emptyVariant, 0 );
 	}
 }
 
-void CPropThumper::InputEnable( inputdata_t &inputdata )
-{
+void CPropThumper::InputEnable( inputdata_t& inputdata ) {
 	m_bEnabled = true;
 
 	EmitSound( "coast.thumper_startup" );
 
-	if ( m_hRepellantEnt )
-	{
+	if ( m_hRepellantEnt ) {
 		variant_t emptyVariant;
 		m_hRepellantEnt->AcceptInput( "Enable", this, this, emptyVariant, 0 );
 	}

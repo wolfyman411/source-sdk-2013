@@ -331,7 +331,6 @@ END_RECV_TABLE()
 		
 
 		RecvPropString( RECVINFO(m_szLastPlaceName) ),
-        RecvPropBool( RECVINFO( m_bShouldDrawSnowOverlay ) ),
 
 #ifdef MAPBASE // From Alien Swarm SDK
 		RecvPropEHandle( RECVINFO( m_hPostProcessCtrl ) ),		// Send to everybody - for spectating
@@ -341,6 +340,8 @@ END_RECV_TABLE()
 #if defined USES_ECON_ITEMS
 		RecvPropUtlVector( RECVINFO_UTLVECTOR( m_hMyWearables ), MAX_WEARABLES_SENT_FROM_SERVER,	RecvPropEHandle(NULL, 0, 0) ),
 #endif
+
+        RecvPropFloat( RECVINFO( m_flTemperature ) ),
 
 	END_RECV_TABLE()
 
@@ -486,8 +487,6 @@ C_BasePlayer::C_BasePlayer() : m_iv_vecViewOffset( "C_BasePlayer::m_iv_vecViewOf
 	m_nForceVisionFilterFlags = 0;
 
 	ListenForGameEvent( "base_player_teleported" );
-
-    m_bShouldDrawSnowOverlay = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -511,6 +510,10 @@ C_BasePlayer::~C_BasePlayer()
 	delete m_pFlashlight;
 }
 
+void C_BasePlayer::AddTemperature( float increment )
+{
+    SetTemperature( GetTemperature() + increment);
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 

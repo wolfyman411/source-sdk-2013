@@ -277,6 +277,8 @@ BEGIN_DATADESC( CBasePlayer )
 
 	DEFINE_FIELD( m_StuckLast, FIELD_INTEGER ),
 
+    DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flNextTemperatureDamage, FIELD_FLOAT ),
 	DEFINE_FIELD( m_nButtons, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonLast, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonPressed, FIELD_INTEGER ),
@@ -462,7 +464,6 @@ BEGIN_DATADESC( CBasePlayer )
 
 	// Inputs
 	DEFINE_INPUTFUNC( FIELD_INTEGER, "SetHealth", InputSetHealth ),
-    DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SnowyHands", InputSnowyHands ),
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetHUDVisibility", InputSetHUDVisibility ),
 #ifdef MAPBASE // From Alien Swarm SDK (kind of)
 	DEFINE_INPUTFUNC( FIELD_INPUT, "SetFogController", InputSetFogController ),
@@ -494,8 +495,6 @@ BEGIN_DATADESC( CBasePlayer )
 
 	// DEFINE_UTLVECTOR( m_vecPlayerCmdInfo ),
 	// DEFINE_UTLVECTOR( m_vecPlayerSimInfo ),
-
-    DEFINE_FIELD( m_bShouldDrawSnowOverlay, FIELD_BOOLEAN ),
 END_DATADESC()
 
 #ifdef MAPBASE_VSCRIPT
@@ -749,7 +748,7 @@ CBasePlayer::CBasePlayer( )
 
 	m_hZoomOwner = NULL;
 
-	m_nUpdateRate = 20;  // cl_updaterate defualt
+	m_nUpdateRate = 20;  // cl_updaterate default
 	m_fLerpTime = 0.1f; // cl_interp default
 	m_bPredictWeapons = true;
 	m_bLagCompensation = false;
@@ -796,7 +795,13 @@ CBasePlayer::CBasePlayer( )
 
 	m_hPostProcessCtrl.Set( NULL );
 
-    m_bShouldDrawSnowOverlay = false;
+    m_flTemperature = 70.0f;
+    m_flNextTemperatureDamage = 0.0f;
+}
+
+void CBasePlayer::AddTemperature( float increment )
+{
+    SetTemperature( GetTemperature() + increment );
 }
 
 CBasePlayer::~CBasePlayer( )
@@ -4020,6 +4025,32 @@ void CBasePlayer::HandleFuncTrain(void)
 	}
 }
 
+void CBasePlayer::HandleTemperature( void )
+{
+    DevMsg( 2, "Temp: %.1f\n", GetTemperature() );
+    if ( GetTemperature() > 100 || GetTemperature() < 0 && m_flNextTemperatureDamage < gpGlobals->curtime )
+    {
+        CTakeDamageInfo info;
+        info.SetDamage( 1 );
+        info.SetDamageType( DMG_SLOWBURN );
+        info.SetAttacker( this );
+        info.SetInflictor( this );
+
+        TakeDamage( info );
+
+        m_flNextTemperatureDamage = gpGlobals->curtime + 1.0f;
+    }
+
+    // Passively try to return to ideal temperature
+    if ( GetTemperature() > 70.0f )
+    {
+        AddTemperature( -0.1f );
+    }
+    else if ( GetTemperature() < 70.0f )
+    {
+        AddTemperature( 0.1f );
+    }
+}
 
 void CBasePlayer::PreThink(void)
 {						
@@ -4771,6 +4802,8 @@ void CBasePlayer::UpdateTonemapController( void )
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
+extern ConVar sv_infinite_aux_power;
+
 void CBasePlayer::PostThink()
 {
 	m_vecSmoothedVelocity = m_vecSmoothedVelocity * SMOOTHING_FACTOR + GetAbsVelocity() * ( 1 - SMOOTHING_FACTOR );
@@ -4890,6 +4923,7 @@ void CBasePlayer::PostThink()
 	SimulatePlayerSimulatedEntities();
 #endif
 
+    HandleTemperature();
 }
 
 // handles touching physics objects
@@ -8925,8 +8959,7 @@ void SendProxy_ShiftPlayerSpawnflags( const SendProp *pProp, const void *pStruct
 		// Data that only gets sent to the local player.
 		SendPropDataTable( "localdata", 0, &REFERENCE_SEND_TABLE(DT_LocalPlayerExclusive), SendProxy_SendLocalDataTable ),
 
-        SendPropBool( SENDINFO( m_bShouldDrawSnowOverlay ) ),
-
+        SendPropFloat( SENDINFO( m_flTemperature) ),
 	END_SEND_TABLE()
 
 //=============================================================================
@@ -9586,11 +9619,6 @@ void CBasePlayer::InputSetHealth( inputdata_t &inputdata )
 		TakeDamage( CTakeDamageInfo( this, this, iDelta, DMG_GENERIC ) );
 		m_ArmorValue = armor;
 	}
-}
-
-void CBasePlayer::InputSnowyHands( inputdata_t& inputdata )
-{
-    m_bShouldDrawSnowOverlay = inputdata.value.Bool();
 }
 
 //-----------------------------------------------------------------------------

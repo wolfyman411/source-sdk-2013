@@ -438,6 +438,7 @@ public:
 
 	string_t GetPhysOverrideScript( void ) { return m_iszOverrideScript; }
 	float	GetMassScale( void ) { return m_massScale; }
+	CAI_BaseNPC *pFrozenNPC; // What NPC is frozen inside? -TheMaster974
 
 private:
 	// Compute impulse to apply to the enabled entity.

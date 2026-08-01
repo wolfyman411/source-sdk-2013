@@ -113,6 +113,13 @@ public:
 	void 			PrescheduleThink();
 	void			BuildScheduleTestBits();
 
+    void            ColdThink();
+
+    CNetworkVar( float, m_flNextColdBreath );
+protected:
+    void            NPCThink();
+public:
+
 	bool			FInViewCone( CBaseEntity *pEntity );
 
 	int				SelectFailSchedule( int failedSchedule, int failedTask, AI_TaskFailureCode_t taskFailCode );

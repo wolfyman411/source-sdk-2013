@@ -18,6 +18,7 @@
 #include "hintsystem.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "util_shared.h"
+#include "globalstate.h"
 
 #if defined USES_ECON_ITEMS
 #include "game_item_schema.h"
@@ -663,6 +664,8 @@ public:
 
 	virtual bool			ShouldAnnounceAchievement( void ){ return true; }
 
+    CNetworkVar( float, m_flTemperature );
+
 #if defined USES_ECON_ITEMS
 	// Wearables
 	virtual void			EquipWearable( CEconWearable *pItem );
@@ -829,13 +832,23 @@ public:
 	void	InputSetSuppressAttacks( inputdata_t &inputdata );
 #endif
 
+    virtual bool    ShouldTakeTemperature( void ) const 
+    { 
+        // comment@bloodycop6385 -- dunno
+        return true;
+    }
+
+    virtual float       GetTemperature() const { return m_flTemperature; }
+    virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
+    virtual void        AddTemperature( float flTemp );
+    virtual void        HandleTemperature( void );
+    float               m_flNextTemperatureDamage;
+
 	surfacedata_t *GetSurfaceData( void ) { return m_pSurfaceData; }
 	void SetLadderNormal( Vector vecLadderNormal ) { m_vecLadderNormal = vecLadderNormal; }
 
 	// Here so that derived classes can use the expresser
 	virtual CAI_Expresser *GetExpresser() { return NULL; };
-
-    void    InputSnowyHands( inputdata_t& inputdata );
 
 #if !defined(NO_STEAM)
 	//----------------------------
@@ -972,8 +985,6 @@ public:
 #ifdef MAPBASE
 	CNetworkVar( bool, m_bInTriggerFall );
 #endif
-
-    CNetworkVar( bool, m_bShouldDrawSnowOverlay );
 
 private:
 

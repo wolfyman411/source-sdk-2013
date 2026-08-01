@@ -11,6 +11,7 @@
 #include "materialsystem/itexture.h"
 #include "proxyentity.h"
 #include "functionproxy.h"
+#include "c_ai_basenpc.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -76,6 +77,12 @@ void CPupilProxy::OnBind( C_BaseEntity *pBaseEntity )
 
 	if( m_pAnimatedTextureVar->GetType() != MATERIAL_VAR_TYPE_TEXTURE )
 		return;
+        
+    C_AI_BaseNPC* pNPC = dynamic_cast<C_AI_BaseNPC*>( pBaseEntity );
+    if ( pNPC && pNPC->IsFrozen() )
+    {
+        return;
+    }
 
 	ITexture *pTexture = m_pAnimatedTextureVar->GetTextureValue();
 	int nFrameCount = pTexture->GetNumAnimationFrames();

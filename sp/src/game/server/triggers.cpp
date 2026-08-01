@@ -5678,3 +5678,101 @@ bool IsTriggerClass( CBaseEntity *pEntity )
 	
 	return false;
 }
+
+class CTriggerFreeze : public CBaseTrigger
+{
+    public:
+        DECLARE_CLASS( CTriggerFreeze, CBaseTrigger );
+        DECLARE_DATADESC();
+
+        CTriggerFreeze();
+        
+        virtual void Think( void );
+        virtual void Spawn( void );
+
+        virtual void InputTemperatureIncrementer( inputdata_t& inputdata );
+        virtual void InputIdealTemperature( inputdata_t& inputdata );
+
+        float	m_flTemperatureIncrementer;
+        float	m_flIdealTemperature;
+
+        
+};
+
+LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
+
+BEGIN_DATADESC( CTriggerFreeze )
+    DEFINE_FUNCTION( Think ),
+
+	DEFINE_KEYFIELD( m_flTemperatureIncrementer, FIELD_FLOAT, "TemperatureIncrementer"),
+    DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" ),
+
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperatureIncrementer", InputTemperatureIncrementer ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputIdealTemperature ),
+END_DATADESC()
+
+CTriggerFreeze::CTriggerFreeze()
+{
+    m_flTemperatureIncrementer = 1.0f;
+    m_flIdealTemperature = 70.0f; // This is in Fahrenheit
+}
+
+void CTriggerFreeze::InputTemperatureIncrementer( inputdata_t& inputdata )
+{
+    m_flTemperatureIncrementer = inputdata.value.Float();
+}
+
+void CTriggerFreeze::InputIdealTemperature( inputdata_t& inputdata )
+{
+    m_flIdealTemperature = inputdata.value.Float();
+}
+
+void CTriggerFreeze::Spawn( void ) {
+	BaseClass::Spawn();
+
+	InitTrigger();
+
+    SetNextThink( gpGlobals->curtime + 1.0f );
+	SetThink( &CTriggerFreeze::Think );
+}
+
+void CTriggerFreeze::Think( void )
+{
+    for ( CBaseEntity* pOther : m_hTouchingEntities )
+    {
+        if ( !pOther )
+        {
+            continue;
+        }
+
+        CBasePlayer* pPlayer = ToBasePlayer( pOther );
+        if ( pPlayer )
+        {
+
+            float flCurrentTemp = pPlayer->GetTemperature();
+            if ( ( m_flTemperatureIncrementer < 0.0f && flCurrentTemp < m_flIdealTemperature ) || ( m_flTemperatureIncrementer > 0.0f && flCurrentTemp > m_flIdealTemperature ) )
+            {
+                continue;
+            }
+
+            pPlayer->AddTemperature( m_flTemperatureIncrementer );
+            continue; // move to the next entity
+        }
+
+        CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
+        if ( pNPC )
+        {
+            if ( !pNPC->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { continue; }
+
+            float flCurrentTemp = pNPC->GetTemperature();
+            if ( ( m_flTemperatureIncrementer < 0.0f && flCurrentTemp < m_flIdealTemperature ) || ( m_flTemperatureIncrementer > 0.0f && flCurrentTemp > m_flIdealTemperature ) )
+            {
+                continue;
+            }
+
+            pNPC->AddTemperature( m_flTemperatureIncrementer );
+        }
+    }
+
+    SetNextThink( gpGlobals->curtime + 1.0f );
+}

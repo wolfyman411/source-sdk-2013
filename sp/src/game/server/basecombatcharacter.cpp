@@ -118,6 +118,9 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 #endif
 	DEFINE_FIELD( m_bPreventWeaponPickup, FIELD_BOOLEAN ),
 
+    DEFINE_FIELD( m_bShouldDrawSnowOverlay, FIELD_BOOLEAN ),
+    DEFINE_FIELD( m_flSnowOverlayAlpha, FIELD_FLOAT ),
+
 #ifndef MAPBASE // See CBaseEntity::InputKilledNPC()
 	DEFINE_INPUTFUNC( FIELD_VOID, "KilledNPC", InputKilledNPC ),
 #endif
@@ -135,6 +138,10 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 	DEFINE_INPUTFUNC( FIELD_STRING, "GiveWeapon", InputGiveWeapon ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "DropWeapon", InputDropWeapon ),
 	DEFINE_INPUTFUNC( FIELD_EHANDLE, "PickupWeaponInstant", InputPickupWeaponInstant ),
+
+    DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetShouldDrawSnowOverlay", InputSetShouldDrawSnowOverlay ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetSnowOverlayAlpha", InputSetSnowOverlayAlpha ),
+
 	DEFINE_OUTPUT( m_OnWeaponEquip, "OnWeaponEquip" ),
 	DEFINE_OUTPUT( m_OnWeaponDrop, "OnWeaponDrop" ),
 
@@ -308,10 +315,12 @@ IMPLEMENT_SERVERCLASS_ST(CBaseCombatCharacter, DT_BaseCombatCharacter)
 
 	SendPropEHandle( SENDINFO( m_hActiveWeapon ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_hMyWeapons), SendPropEHandle( SENDINFO_ARRAY(m_hMyWeapons) ) ),
-
 #ifdef INVASION_DLL
 	SendPropInt( SENDINFO(m_iPowerups), MAX_POWERUPS, SPROP_UNSIGNED ), 
 #endif
+
+    SendPropBool( SENDINFO( m_bShouldDrawSnowOverlay ) ),
+    SendPropFloat( SENDINFO( m_flSnowOverlayAlpha ) ),
 
 END_SEND_TABLE()
 
@@ -890,6 +899,9 @@ CBaseCombatCharacter::CBaseCombatCharacter( void )
 	m_GlowColor.GetForModify().Init( 0.76f, 0.76f, 0.76f );
 	m_GlowAlpha.Set(1.0f);
 #endif // GLOWS_ENABLE
+
+    m_bShouldDrawSnowOverlay = false;
+    m_flSnowOverlayAlpha = GlobalEntity_GetCounter( "global_frost_proxy" ) / 10 || 0.0f;
 }
 
 //------------------------------------------------------------------------------
@@ -2678,6 +2690,12 @@ bool CBaseCombatCharacter::Weapon_SlotOccupied( CBaseCombatWeapon *pWeapon )
 	return true;
 }
 
+float CBaseCombatCharacter::GetViewModelSnowOverlayAlpha()
+{
+    return GlobalEntity_GetCounter( "global_frost_proxy" );
+}
+
+
 //-----------------------------------------------------------------------------
 // Purpose: Returns the weapon (if any) in the requested slot
 // Input  : slot - which slot to poll
@@ -2719,7 +2737,6 @@ CBaseCombatWeapon *CBaseCombatCharacter::Weapon_GetWpnForAmmo( int iAmmoIndex )
 
 	return NULL;
 }
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Can this character operate this weapon?
@@ -4366,6 +4383,19 @@ void CBaseCombatCharacter::InputSwitchToWeapon( inputdata_t &inputdata )
 	}
 }
 
+void CBaseCombatCharacter::InputSetSnowOverlayAlpha( inputdata_t &inputdata )
+{
+    float flAlpha = inputdata.value.Float();
+    flAlpha = clamp( flAlpha, 0.0f, 1.0f );
+
+    m_flSnowOverlayAlpha = flAlpha;
+}
+
+void CBaseCombatCharacter::InputSetShouldDrawSnowOverlay( inputdata_t &inputdata )
+{
+    m_bShouldDrawSnowOverlay = inputdata.value.Bool();
+}
+
 #define FINDNAMEDENTITY_MAX_ENTITIES	32
 //-----------------------------------------------------------------------------
 // Purpose: FindNamedEntity has been moved from CAI_BaseNPC to CBaseCombatCharacter so players can use it.
@@ -4954,4 +4984,3 @@ float CBaseCombatCharacter::GetTimeSinceLastInjury( int team /*= TEAM_ANY */ ) c
 
 	return never;
 }
-

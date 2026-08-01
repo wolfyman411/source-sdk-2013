@@ -62,7 +62,6 @@
 	input CreateSeparateRagdollClient(void) : "Creates a separate clientside ragdoll at this entity's origin."
 	input SetLightingOrigin(target_destination) : "Sets this entity's lighting origin." // Was this really not in the FGD before?
 	input SetPoseParameter(string) : "Sets the specified pose parameter to the specified value (e.g. ''aim_yaw 45'')."
-
 	// Outputs
 	output OnIgnite(void) : "Fires when this object catches fire."
 	output OnServerRagdoll(ehandle) : "Fires when this object becomes/creates a serverside ragdoll. Passes the ragdoll."
@@ -80,7 +79,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	disableflashlight(choices) : "Disable flashlight" : 0 : "Used to disable flashlight/env_projectedtexture lighting and shadows on this entity." =
 	[
 		0 : "No"
@@ -129,7 +127,6 @@
 	input FireUser2(void) : "Causes this entity's OnUser2 output to be fired."
 	input FireUser3(void) : "Causes this entity's OnUser3 output to be fired."
 	input FireUser4(void) : "Causes this entity's OnUser4 output to be fired."
-
 	// Mapbase -- New User I
 	input PassUser1(string) : "Causes this entity's OutUser1 output to be fired. Can pass any parameter."
 	input PassUser2(string) : "Causes this entity's OutUser2 output to be fired. Can pass any parameter."
@@ -144,7 +141,6 @@
 	input RemoveOutput(string) : "Removes all instances of the named output on this entity. Wildcards are supported, meaning you could just pass '*' to wipe all outputs from this entity."
 	input AcceptInput(string) : "Fires the named input on this entity. Format: '<input name>:<parameter>:<activator>:<caller>:<output ID>' (SetTarget:cheese). Everything beyond the input name is optional. Mind the fact this is arranged differently from FireOutput, having the parameter right after the input name."
 	input CancelPending(void) : "Cancels any events fired by this entity that are currently pending in the I/O event queue."
-
 	input SetLocalOrigin(vector) : "Sets this entity's origin in local space, relative to its parent if one exists. Otherwise relative to the world."
 	input SetAbsOrigin(vector) : "Sets this entity's origin in the map, always relative to the world origin."
 	input SetLocalVelocity(vector) : "Sets this entity's current velocity."
@@ -179,7 +175,6 @@
 	output OnUser2(void) : "Fires in response to FireUser2 input."
 	output OnUser3(void) : "Fires in response to FireUser3 input."
 	output OnUser4(void) : "Fires in response to FireUser4 input."
-
 	// Mapbase -- New User O
 	output OutUser1(string) : "Fires in response to PassUser1 input. Can pass any parameter."
 	output OutUser2(string) : "Fires in response to PassUser2 input. Can pass any parameter."
@@ -196,7 +191,6 @@
 	input SetParentAttachment(string) : "Change this entity to attach to a specific attachment point on its parent. Entities must be parented before being sent this input. The parameter passed in should be the name of the attachment."
 	input SetParentAttachmentMaintainOffset(string) : "Change this entity to attach to a specific attachment point on it's parent. Entities must be parented before being sent this input. The parameter passed in should be the name of the attachment. The entity will maintain it's position relative to the parent at the time it is attached."
 	input ClearParent(void) : "Removes this entity from the the movement hierarchy, leaving it free to move independently."
-
 	input FreeChildren(void) : "Unparents all entities parented to this entity in a movement hierarchy."
 ]
 
@@ -275,7 +269,6 @@
 	]
 	renderamt(integer) : "FX Amount (0 - 255)" : 255 : "The FX amount is used by the selected Render Mode."
 	rendercolor(color255) : "FX Color (R G B)" : "255 255 255" : "The FX color is used by the selected Render Mode."
-
 	viewhideflags(choices) : "View ID nodraw" : 0 : "This keyvalue can control whether an entity should only draw on things like monitors or mirrors, or the opposite. The code for this is { m_iViewHideFlags & (1 << CurrentViewID()) } and supports any combination of view IDs." =
 	[
 		0 : "[0] Draw normally"
@@ -292,7 +285,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	EFlags(choices) : "EFlags" : 0 : "Special internal entity flags normally only set by the code. Be careful with this keyvalue." =
 	[
 		131072 : "[131072] Pretend to be in skybox (always transmits to client)"
@@ -304,7 +296,6 @@
 
 	input Alpha(integer) : "Sets the sprite's alpha (0 - 255)."
 	input Color(color255) : "Sets the sprite's color (R G B)."
-
 	input SetRenderMode(integer) : "Sets this entity's render mode."
 	input SetRenderFX(integer) : "Sets this entity's render FX."
 	input SetViewHideFlags(integer) : "Sets this entity's view ID nodraw flags (takes raw flag combination)."
@@ -314,7 +305,6 @@
 	input DisableDraw(void) : "Undraws an entity if it is drawn. Equivalent to AddEffects > 32."
 	input AddEFlags(integer) : "Adds an entity flag. NOTE: Entity flags are not the spawn flags you see in Hammer. Use AddSpawnFlags to add spawnflags."
 	input RemoveEFlags(integer) : "Removes an entity flag. NOTE: Entity flags are not the spawn flags you see in Hammer. Use RemoveSpawnFlags to remove spawnflags."
-
 	// This is the closest I could get without putting this in Targetname, as most entities that use collision groups usually use render fields as well
 	input SetCollisionGroup(integer) : "Sets this entity's collision group."
 ]
@@ -372,7 +362,6 @@
 		1 : "On"
 		2 : "Dead"
 	]
-
 	counter(integer) : "Counter" : 0 : "An integer counter value associated with this global."
 
 	spawnflags(flags) =
@@ -421,7 +410,6 @@
 		2 : "Full Gibs on All Platforms"
 		3 : "Reduced gibs"
 	]
-
 	BreakModelMessage(string) : "Break Model Message" : "" : "If set, will use this break model message instead of the normal break behavior."
 
 	// Inputs
@@ -561,7 +549,6 @@
 		32 : "[32] Break on Pressure" : 0
 	]
 	pressuredelay(float) : "Pressure Delay" : 0 : "Delay, in seconds, after 'broken' by pressure before breaking apart (allows for sound to play before breaking apart)."
-
 	// Inputs
 	input SetInteraction(integer) : "Adds an interaction to this entity."
 	input RemoveInteraction(integer) : "Removes an interaction from this entity."
@@ -666,19 +653,16 @@
 		3 : "Very Good"
 		4 : "Perfect"
 	]
-
 	SetForceServerRagdoll(choices) : "Force server ragdoll" : 0 : "Forces this NPC to turn into a serverside prop_ragdoll instead of a clientside ragdoll when it dies." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	SpawnWithStartScripting(choices) : "Spawn with StartScripting" : 0 : "Spawns the NPC in the StartScripting state." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	BaseSpeedModifier(float) : "Speed Modifier" : "1.0" : "Multiplies how far a NPC travels while moving. Does not affect the animation itself."
 
 	// Outputs
@@ -728,20 +712,17 @@
 	input IgnoreDangerSounds(float) : "Ignore danger sounds for the specified number of seconds."
 	input ForceInteractionWithNPC(target_destination) : "Force the NPC to use a dynamic interaction with another NPC. Parameter format: <target NPC name> <dynamic interaction name>"
 	input UpdateEnemyMemory(target_destination) : "Update (or Create) this NPC's memory of an enemy and its location"
-
 	input SetMoveType(integer) : "Sets this NPC's movetype."
 	input AddCapabilities(integer) : "Adds capabilities to this NPC."
 	input RemoveCapabilities(integer) : "Removes capabilities from this NPC."
 	input SetCondition(integer) : "Sets a condition. Can use a condition's string ID or its integer."
 	input RemoveCondition(integer) : "Removes a condition. Can use a condition's string ID or its integer."
-
 	input GiveWeapon(string) : "Gives the NPC a weapon of the specified class name. They will drop their current weapon if it is not holstered."
 	input GiveWeaponHolstered(string) : "Puts the weapon of the specified class name in the NPC's inventory. If they do not have a weapon equipped, they will unholster it when given the 'UnholsterWeapon' input or when they see an enemy."
 	input DropWeapon(string) : "Forces the NPC to drop its current weapon in front of it. No animation will play."
 	input ChangeWeapon(string) : "Causes the NPC to change to the specified weapon. They will holster their current weapon and unholster the specified weapon, creating it if they don't already have it."
 	input PickupWeapon(target_destination) : "Causes the NPC to seek and pick up the specified weapon."
 	input PickupItem(target_destination) : "Causes the NPC to seek and pick up the specified item."
-
 	input SetFriendlyFire(integer) : "Overrides our friendly fire. 0 = No friendly fire, 1 = Friendly fire enabled, 2 = Default (No override)"
 	input SetDynamicInteractions(integer) : "Sets whether we could use dynamic interactions. 0 = Disabled, 1 = Enabled, 2 = Default."
 	input SetProficiencyOverride(integer) : "Sets our weapon's proficiency. Use integer."
@@ -846,7 +827,6 @@
 [
 	InitialSpeed(string) : "Initial Speed" : "0" : "Sets the helicopter's desired speed that it should try to reach as soon as it's spawned."
 	target(target_destination) : "Target path_track" : : "(Optional) The name of a path_track entity that this NPC will fly to after spawning."
-
 	AllowAnyDamage(Choices) : "Allows any damage" : 0 : "Allows this NPC to take any amount of any type of damage, including bullet or melee damage. This is supposed to allow this NPC to be taken down in a previously impossible way and should be used with an actual damage filter." =
 	[
 		0 : "No"
@@ -984,7 +964,6 @@
 		1001: "HL1 World: Blinking Light"
 		1002: "HL1 World: Human Blood"
 		1003: "HL1 World: Alien Blood"
-
 //		1100: "CS Hostage: Escape Point"
 
 		10000: "Mapbase - Custom Cover (Use hint activity)"
@@ -1041,7 +1020,6 @@
 	// Inputs
 	input EnableHint(void) : "Enable hint."
 	input DisableHint(void) : "Disable hint."
-
 	input SetHintGroup(string) : "Sets this hint's group."
 ]
 
@@ -1394,7 +1372,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	// Inputs
 	input SetMaxRagdollCount(integer) : "Set the Max Ragdoll Count."
 	input SetMaxRagdollCountDX8(integer) : "Set the Max Ragdoll Count on DX8 hardware."
@@ -1409,7 +1386,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	input SetMaxPieces(integer)	: "Set the max gib count."
 	input SetMaxPiecesDX8(integer)	: "Set the max gib count under DX8."
 ]
@@ -1517,7 +1493,6 @@
 		79 : "Foliage"
 		78 : "Sand"
 	]
-
 	// Inputs
 	input Enable(void) : "Start watching the player's surface."
 	input Disable(void) : "Stop watching the player's surface."
@@ -1540,7 +1515,6 @@
 	AutoExposureMin(float) : "Auto Exposure Minimum" : "-1" : "Sets a custom tonemap auto exposure minimum. -1 = use default" // 0.5
 	AutoExposureMax(float) : "Auto Exposure Maximum" : "-1" : "Sets a custom tonemap auto exposure maximum. -1 = use default" // 2.0
 	BloomScale(float) : "Bloom Scale" : "-1" : "Sets a custom bloom scale. -1 = use default" // 1.0
-
 	spawnflags(flags) =
 	[
 		1 : "[1] Master (Has priority if multiple env_tonemap_controllers exist)" : 0
@@ -1624,7 +1598,6 @@
 	TranslucencyLimit(string) : "Translucency limit"  : "0.2" : "This value limits the translucency of the bmodel and prevents it from becoming invisible when the viewer is right on top of it."
 	BackgroundBModel(string) : "Foreground bmodel"   : "" : "(Optional) brush model that is drawn after the fading brush model. This model should have alpha in its textures so you can see through it."
 	PortalVersion(integer)	readonly	: "Portal Version"      : 1  : "(Don't change). Differentiates between shipping HL2 maps and maps using new engine features."
-
 	// Inputs
 	input SetFadeStartDistance(integer) : "Set fade start distance."
 	input SetFadeEndDistance(integer) : "Set fade end distance."
@@ -1763,7 +1736,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	muted(choices) : "Mute Movie" : 1 =
 	[
 		0 : "No"
@@ -2077,7 +2049,6 @@
 	// Inputs
 	input Explode(void) : "Triggers the explosion."
 	input ExplodeAndRemove(void) : "Triggers the explosion and then removes the entity."
-
 	// Outputs
 	output OnPushedPlayer(void) : "Fires when the player is pushed by the explosion."
 ]
@@ -2210,7 +2181,6 @@
 [
 	target(target_destination) : "Entity to ignite" : : "Name of the entity to catch on fire."
 	lifetime(float) : "Lifetime in seconds" : 10 : "Duration of flames."
-
 	// Inputs
 	input Ignite(void) : "Ignite the target entity."
 ]
@@ -2298,7 +2268,6 @@
 	JetLength(integer) : "Length of steam jet" : 80 : "The length of the jet determines the lifetime of each particle."
 	renderamt(integer) : "Translucency" : 255
 	rollspeed(float) : "How fast does the particles spin" : 8
-
 	// Inputs
 	input TurnOn(void) : "Turns the steam jet on."
 	input TurnOff(void) : "Turns the steam jet off."
@@ -2342,7 +2311,6 @@
 	input TurnOff(void) : "Turns the laser off."
 	input Toggle(void) : "Toggles the laser between on and off."
 	input SetTarget(target_destination) : "Sets the laser's target."
-
 	// Outputs
 	output OnTouchedByEntity(void) : "Fired when an entity touches the laser. Please note this fires for each frame the entity is touching, unlike env_beam."
 ]
@@ -2528,7 +2496,6 @@
 		//"FleshGibs" : "FleshGibs"
 		//"WebGibs" : "WebGibs"
 	]
-
 	modeltype(choices) :"Model Type" : 0 : "The type of model to use." =
 	[
 		0: "Breakable Chunks"
@@ -2625,7 +2592,6 @@
 		256: "[256] Silent" : 0
 		512: "[512] Directional" : 0
 	]
-
 	// Inputs
 	input StartSpark(void) : "Start the spark effect."
 	input StopSpark(void) : "Stop the spark effect."
@@ -2649,7 +2615,6 @@
 	GlowProxySize(float) : "Size of Glow Proxy Geometry." : "2.0" : "Size of the glow to be rendered for visibility testing. Must be larger than the distance from the sprite center to empty space.  So if this glow is inside geometry (like a light bulb), set this value to be bigger than the bulb's radius. Any time a sphere of this radius would be visible (poking through any nearby geometry), the glow will be rendered."
 
 	HDRColorScale(float) : "HDR color scale." : "1.0" : "float value to multiply sprite color by when running in HDR mode."
-
 	// Inputs
 	input ColorRedValue(float) : "Sets the red color channel's value (0 - 255)."
 	input ColorGreenValue(float) : "Sets the green color channel's value (0 - 255)."
@@ -2675,7 +2640,6 @@
 	GlowProxySize(float) : "Size of Glow Proxy Geometry." : "2.0" : "Size of the glow to be rendered for visibility testing. Must be larger than the distance from the sprite center to empty space.  So if this glow is inside geometry (like a light bulb), set this value to be bigger than the bulb's radius. Any time a sphere of this radius would be visible (poking through any nearby geometry), the glow will be rendered."
 
 	HDRColorScale(float) : "HDR color scale." : "1.0" : "float value to multiply sprite color by when running in HDR mode."
-
 	// Inputs
 	input ColorRedValue(float) : "Sets the red color channel's value (0 - 255)."
 	input ColorGreenValue(float) : "Sets the green color channel's value (0 - 255)."
@@ -2736,7 +2700,6 @@
 		1: "[1] Master (takes priority if multiple sky_cameras exist)" : 0
 		2: "[2] Continuously update position (for moving sky_cameras)" : 0
 	]
-
 	skycolor(color255) : "Sky Color" : "255 255 255 0" : "Causes the skybox to use a solid color instead of the sky texture specified in worldspawn. Blended alpha is unfortunately not supported, but an alpha of '0' disables the effect and any alpha greater than that (e.g. 255) enables the effect."
 
 	scale(integer) : "3D Skybox scale" : 16 : "Scale of the skybox."
@@ -2804,7 +2767,6 @@
 	]
 	rulescript(string) : "Context rule script" : "" : "Script file containing rules for playing appropriate sounds."
 	concept(string) : "Concept name" : "" : "High level concept name used as primary search key."
-
 	target(target_destination) : "Speaker entity" : "" : "All responses, including scenes, will be redirected to this entity if specified. Use the SetTarget input to change mid-game."
 
 	// Inputs
@@ -2812,7 +2774,6 @@
 	input TurnOff(void) : "Turn off the random announcements."
 	input Toggle(void) : "Toggle the random announcements off and on."
 	input SetTarget(target_destination) : "Sets the speaker target."
-
 	// Outputs
 	output OnSpeak(string) : "Fires each time this env_speaker speaks, passing its selected response (scene path, sound name, etc.) as the parameter."
 ]
@@ -2877,7 +2838,6 @@
 
 	points(integer) : "Points to add (+/-)" : 1
 	//master(target_destination) : "Master (Obsolete)" : : "Legacy support: The name of a master entity. If the master hasn't been activated, this entity will not activate."
-
 	// Inputs
 	input ApplyScore(void) : "Add score to player."
 ]
@@ -2941,7 +2901,6 @@
 
 	SetRPCState(string) : "RPC State" : "" : "Sets the 'state' that should be reported to rich presence clients like Discord. Shows the mod's name from gameinfo.txt by default."
 	SetRPCDetails(string) : "RPC Details" : "" : "Sets the 'details' that should be reported to rich presence clients like Discord. Shows the map being played by default."
-
 	input SetRPCState(string) : "Sets the RPC state."
 	input SetRPCDetails(string) : "Sets the RPC details."
 ]
@@ -3012,7 +2971,6 @@
 	font(string) : "Font" : : "The font to use from resource/ClientScheme.res. A blank value is equivalent to the default font. Not all fonts may function. Commonly defined fonts include 'DefaultSmall' and 'Trebuchet18'/'Trebuchet24'."
 	resolution(integer) : "Panel Resolution" : 200 : "The number of pixels available to the text. The higher the resolution is, the smaller the text will be. (NOTE: Changing the resolution with inputs later will scale the screen itself)"
 	textsize(float) : "Panel Size" : 100 : "The size of the text panel in the world. This is previewed with a sphere, but it actually extends 'north-west' relative to the direction it's facing. Due to the limited in-editor previewing abilities, it's recommended to use the 'SetPanelSize' input in-game with the 'ent_fire' command to fine-tune this value. Use 'r_vguitext_bg' to display the panel in-game."
-
 	renderamt(integer) : "Alpha (0 - 255)" : 255 : "The FX amount is used by the selected Render Mode."
 	rendercolor(color255) : "Color" : "255 255 255"
 
@@ -3049,7 +3007,6 @@
 	input LightOn(void) : "Turn the spotlight on."
 	input LightOff(void) : "Turn the spotlight off"
 	input LightToggle(void) : "Toggles the spotlight on or off"
-
 	// outputs
 	output OnLightOn(void) : "Fires when light turns on."
 	output OnLightOff(void) : "Fires when light turns off."
@@ -3122,13 +3079,11 @@
 		128 : "[128] +Use Deactivates" : 1
 		256 : "[256] Jump Deactivates" : 1
 	]
-
 	FieldOfView(float) : "FieldOfView" : "-1.0" : "The amount of tolerance in the view checking when determining whether the player's input is still under control. 1.0 = straight ahead, 0.0 = +/- 90 degrees, -1.0 = all directions. If the player isn't within the tolerance, the player regains control."
 
 	// Inputs
 	input Deactivate(void) : "Return Player Control."
 	input Activate(string) : "Take Player Control."
-
 	input GetButtons(void) : "Fires OutButtons with the player's current button flags."
 
 	// Outputs
@@ -3181,7 +3136,6 @@
 		1 : "Farthest"
 		2 : "Random"
 	]
-
 	// Inputs
 	input FindEntity(void) : "Find an entity that meets the specified criteria.  Will fire OutEntity if found and pass the entity as !Caller."
 
@@ -3209,7 +3163,6 @@
 		1 : "Farthest"
 		2 : "Random"
 	]
-
 	// Inputs
 	input BeginSearch(void) : "Begins finding entities with all of the current options."
 	input SetSearchFilter(target_destination) : "Sets the search filter."
@@ -3372,7 +3325,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	cpoint1(target_destination) : "Control Point 1" : : "If set, control point 1 of the effect will be at this entity's location."
 	cpoint2(target_destination) : "Control Point 2" : : "If set, control point 2 of the effect will be at this entity's location. If control point 1 is not set, this will be ignored."
 	cpoint3(target_destination) : "Control Point 3" : : "If set, control point 3 of the effect will be at this entity's location. If control point 2 is not set, this will be ignored."
@@ -3436,7 +3388,6 @@
 	cpoint61(target_destination) : "Control Point 61" : : "If set, control point 61 of the effect will be at this entity's location. If control point 60 is not set, this will be ignored."
 	cpoint62(target_destination) : "Control Point 62" : : "If set, control point 62 of the effect will be at this entity's location. If control point 61 is not set, this will be ignored."
 	cpoint63(target_destination) : "Control Point 63" : : "If set, control point 63 of the effect will be at this entity's location. If control point 62 is not set, this will be ignored."
-
 	cpoint1_parent(integer) : "Control Point 1's Parent" : 0 : "If set and nonzero, control point 1 of the effect will use this point for its parent."
 	cpoint2_parent(integer) : "Control Point 2's Parent" : 0 : "If set and nonzero, control point 2 of the effect will use this point for its parent."
 	cpoint3_parent(integer) : "Control Point 3's Parent" : 0 : "If set and nonzero, control point 3 of the effect will use this point for its parent."
@@ -3528,7 +3479,6 @@
 	cpoint61(origin) : "Control Point 61" : : "If set, control point 61 of the effect will be at this location. If control point 60 is not set, this will be ignored."
 	cpoint62(origin) : "Control Point 62" : : "If set, control point 62 of the effect will be at this location. If control point 61 is not set, this will be ignored."
 	cpoint63(origin) : "Control Point 63" : : "If set, control point 63 of the effect will be at this location. If control point 62 is not set, this will be ignored."
-
 	cpoint1_parent(integer) : "Control Point 1's Parent" : 0 : "If set and nonzero, control point 1 of the effect will use this point for its parent."
 	cpoint2_parent(integer) : "Control Point 2's Parent" : 0 : "If set and nonzero, control point 2 of the effect will use this point for its parent."
 	cpoint3_parent(integer) : "Control Point 3's Parent" : 0 : "If set and nonzero, control point 3 of the effect will use this point for its parent."
@@ -3559,7 +3509,6 @@
 	[
 		2 : "[2] Bar Magnet (use axis helper)" : 0
 	]
-
 	// Outputs
 	output OnUsed(vector) : "Fires when this magnet is used by a ragdoll. Passes the ragdoll's original force + the force this magnet has applied."
 ]
@@ -3719,13 +3668,11 @@
 	"Only entities that pass the specified filter can use this link. While disabled, the filter is disregarded and filtering is handed to the regular exclusion rules."
 [
     damagefilter(filterclass) : "Link Filter" : "" : "Name of the filter entity that controls which entities can use this link."
-
 	Usage(choices) : "Usage" : 0 : "Causes the link to use slightly different behavior." =
 	[
 		0 : "Enabled uses filter, disabled hands to exclusion rules"
 		1 : "Enabled is free-to-use, disabled uses filter"
 	]
-
 	// Inputs
 	input SetLinkFilter(target_destination) : "Sets the link's filter."
 ]
@@ -3757,7 +3704,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	AllowUse(target_name_or_class) : "Allow Pass When Off" : : "Entity or class to allow passage even when node is off"
 	InvertAllow(choices) : "Invert exclusion rules" : 0 : "Allowed entity is the only entity NOT allowed when this is set to 'yes'" =
 	[
@@ -3931,7 +3877,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	spawnflags(flags) =
 	[
 		1 : "[1] Master (Default color correction when used with L4D fog_volume)" : 0
@@ -3977,7 +3922,6 @@
 //		2 : "Deaccel"
 //		2 : "Accel/Deaccel (sine)"
 //	]
-
 	MoveSpeed(integer) : "Speed (units per second)" : 64					// NEEDHELP
 //	NextTime(string) : "Time to get to next keyframe"
 ]
@@ -4064,7 +4008,6 @@
 	]
 	_minlight(string) : "Minimum Light Level" : : "The minimum level of ambient light that hits this brush."
 	dmg(integer) : "Blocking Damage" : 0 : "Damage done to any entity that blocks the rotation, per frame."
-
 	minpitch(integer) : "Minimum Sound Pitch" : 30 : "Minimum pitch for the rotating sound when it plays based on the speed of the rotating brush."
 	maxpitch(integer) : "Maximum Sound Pitch" : 100 : "Maximum pitch for the rotating sound when it plays based on the speed of the rotating brush."
 
@@ -4184,7 +4127,6 @@
 	input SetWidth(float) : "Set the rope's width."
 	input SetSubdivision(integer) : "Set the rope's subdivision. (Wind may need to be enabled for changes to apply)"
 	input Break(void) : "Break the rope, if it's marked to do so."
-
 	// Outputs
 	output OnBreak(void) : "Fires when this rope breaks."
 
@@ -4602,7 +4544,6 @@
 		2 : "Push bar"
 		3 : "Keypad"
 	]
-
 	ajarangles(angle) : "Ajar Angles (Pitch Yaw Roll)" : "0 0 0" : "If the door 'Spawn Position' is set to Ajar, these are the angles to spawn at, instead of being open or closed."
 	spawnpos(choices) : "Spawn Position" : 0 =
 	[
@@ -4611,7 +4552,6 @@
 		2 : "Open back"
 		3 : "Ajar (use Ajar Angles)"
 	]
-
 	axis(axis) : "Hinge Axis"
 	distance(float) : "Rotation Distance (deg)" : 90 : "The amount, in degrees, that the door should rotate when opened."
 	speed(integer) : "Speed" : 100 : "The speed at which the door moves."
@@ -4653,14 +4593,12 @@
 		1 : "Open Forward Only"
 		2 : "Open Backward Only"
 	]
-
 	//breaktype(choices) : "Break Type" : 0 : "If this door is breakable or it receives the 'Break' input, what should it do?" =
 	//[
 	//	0 : "Break normally"
 	//	1 : "Turn into prop_physics"
 	//	2 : "Turn into prop_physics and hinge"
 	//]
-
 	//DoorFilter(filterclass) : "NPC Filter" : "" : "An optional filter that can control which NPCs are allowed to pass through this door."
 
 	// Outputs
@@ -4681,7 +4619,6 @@
 	input Toggle(void) : "Toggle the door between open and closed."
 	input Lock(void) : "Lock the door."
 	input Unlock(void) : "Unlock the door."
-
 	input SetCycle(float) : "Skip to a specific point in the current animation." //added by vizzys
 	input SetModel(string) : "Changes the model to the specified path. Form of models/ammo/ammo_us.mdl. Absolutely NO quotes. Make sure you use forward slash." //added by vizzys
 	input SetPlayBackRate(float) : "Change the animation speed multiplier." //added by vizzys
@@ -4718,7 +4655,6 @@
 		9 : "256x256"
 	]
 	sides(sidelist) : "Brush faces": : "(Optional) Brushes faces to directly attach to the env_cubemap. Press Pick then click on faces in the 3D View to select them. Use CTRL while clicking to add or remove from the selection."
-
 	parallaxobb(target_destination) : "Cubemap Bounds" : : "MAPBASE VBSP ONLY: Optionally assigns this cubemap a bounding box for parallax correction (brush entity tied to parallax_obb). This means the cubemap reflection will move as the camera moves, similar to func_reflective_glass."
 ]
 
@@ -4863,7 +4799,6 @@
 		"is_console" : "Game is running on a console"
 		"is_pc" : "Game is running on a PC"
 	]
-
 	// Outputs
 	output OnMapSpawn(void) : "Fired when the map is loaded for any reason."
 	output OnNewGame(void) : "Fired when the map is loaded to start a new game."
@@ -4886,7 +4821,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	spawnflags(flags) =
 	[
 		1: "[1] Start At Player" : 1
@@ -4947,7 +4881,6 @@
 	FModTimeOffset(float) : "Frequency Modulation Time Offset" : "0.0" : "Modulation time offset from -1.0f to 1.0."
 	FModRate(float) : "Frequency Modulation Rate" : "0.0" : "Modulation cycles per second from -10.0f to 10.0."
 	FModAmplitude(float) : "Frequency Modulation Amplitude" : "0.0" : "Modulation extents from 0.0f to 10.0."
-
 	// Inputs
 	input SetTarget(target_destination) : "Sets the prop to control."
 	input SetPoseParameterName(string) : "Sets the pose parameter to control."
@@ -4970,7 +4903,6 @@
 	// Keys
 	InitialValue(string) : "Initial value" : : "Initial value for the input value. This keyvalue supports matchers (<, >, !=, etc.)."
 	CompareValue(string) : "Compare value" : : "The value to compare against. This keyvalue supports matchers (<, >, !=, etc.)."
-
 	// Inputs
 	input SetValue(string) : "Sets the value that will be compared against the compare value."
 	input SetValueCompare(string) : "Sets the value that will be compared against the compare value and performs the comparison."
@@ -4993,7 +4925,6 @@
 [
 	// Keys
 	InitialValue(integer) : "Initial value" : : "Initial value for the boolean value (0 or 1)."
-
 	// Inputs
 	input SetValue(bool) : "Set the boolean value without performing the comparison. Use this to hold a value for a future test."
 	input SetValueTest(bool) : "Set the boolean value and test it, firing OnTrue or OnFalse based on the new value."
@@ -5050,7 +4981,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	Case01(string) : "Case 01" : : "Fires OnCase01 if the InValue parameter matches this value. This keyvalue supports matchers (<, >, !=, etc.). Not needed for PickRandom or PickRandomShuffle."
 	Case02(string) : "Case 02" : : "Fires OnCase02 if the InValue parameter matches this value. This keyvalue supports matchers (<, >, !=, etc.). Not needed for PickRandom or PickRandomShuffle."
 	Case03(string) : "Case 03" : : "Fires OnCase03 if the InValue parameter matches this value. This keyvalue supports matchers (<, >, !=, etc.). Not needed for PickRandom or PickRandomShuffle."
@@ -5072,7 +5002,6 @@
 	input InValue(string) : "Compares the Input value to the case values, and fires the appropriate output, if any."
 	input PickRandom(void) : "Fires a random OnCase output with at least one connection."
 	input PickRandomShuffle(void) : "Fires a random OnCase output with at least one connection, with no repeats until all cases have been picked, at which point the shuffle starts over."
-
 	// Outputs
 	output OnCase01(void) : "Fired when the input value equals the Case01 value."
 	output OnCase02(void) : "Fired when the input value equals the Case02 value."
@@ -5144,7 +5073,6 @@
 	input Trigger(void) : "Trigger this entity, causing its OnTrigger outputs to fire if it is enabled."
 	input Toggle(void) : "Toggle this entity between enabled and disabled."
 	//input CancelPending(void) : "Cancel any events fired by this entity that are currently pending in the I/O event queue."
-
 	// Outputs
 	output OnSpawn(void) : "Fired when this entity is spawned. If this entity is set to only trigger once, it will "+
 		"delete itself after firing this output."
@@ -5170,7 +5098,6 @@
 	input FireRegisteredAsActivator3(void) : "Start a message from this entity using the matching OnRegisteredActivating - but the activator is the registered entity."
 	input FireRegisteredAsActivator4(void) : "Start a message from this entity using the matching OnRegisteredActivating - but the activator is the registered entity."
 	input RegisterEntity(target_destination) : "Stores an entity to later be used as an activator."
-
 	// Outputs
 	output OnRegisteredActivate1(void) : "Fired to send a message using the registered as the activator."
 	output OnRegisteredActivate2(void) : "Fired to send a message using the registered as the activator."
@@ -5198,7 +5125,6 @@
 	//input CancelPending(void) : "Cancel any events fired by this relay that are currently pending in the I/O event queue."
 	input EnableRefire(void) : "If fast retrigger is disabled, the relay will not be able to fire again until its most delayed output has been fired. "+
 		"This input allows the relay to fire again early if it is in this state."
-
 	// Outputs
 	output OnSpawn(void) : "Fired when the relay is spawned. If the relay is set to only trigger once, it will "+
 		"delete itself after firing this output."
@@ -5215,7 +5141,6 @@
 	"This is useful for when you don't want something to happen multiple times at once, but don't want to discard further requests either."
 [
 	SetMaxQueueItems(integer) : "Maximum Items" : 3 : "The maximum number of Trigger and TriggerWithParameter inputs allowed in the queue. Any others received while this value is full will be discarded. Keep in mind this does not count the I/O chain currently being handled."
-
 	DontQueueWhenDisabled(choices) : "Don't queue when disabled" : 0 : "Prevents the relay from queuing inputs when disabled. This means inputs will only be queued when enabled and still handling its current I/O connections." =
 	[
 		0 : "No"
@@ -5265,13 +5190,11 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	RunOnServer(choices) : "Run on Server" : 0 : "Runs the entity scripts on the server as well as the client. Use IsServer() or IsClient() to determine which side is running from within the scripts." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	input CallScriptFunctionClient(string) : "Call a named function on the entity's client-side script scope."
 ]
 
@@ -5384,7 +5307,6 @@
 		57 : "8 LOUDSPEAKER, ECHO"
 		58 : "9 SPEAKER SMALL"
 		59 : "10 SPEAKER TINY"
-
 		// A few unmarked DSP presets added with Mapbase
 		32 : "32 EXPLOSION MUFFLE 1"
 		33 : "33 EXPLOSION MUFFLE 2"
@@ -5464,7 +5386,6 @@
 
 	// Inputs
 	input InValue(float) : "Input value and fire the output with the remapped value."
-
 	// Outputs
 	output OutValue(float) : "Fired when the InValue input is received, with the remapped input value as the parameter."
 ]
@@ -5484,7 +5405,6 @@
 
 	// Inputs
 	input InValue(float) : "Input value and fire the output with the remapped value."
-
 	// Outputs
 	output OutColor(color255) : "Fired when the InValue input is received, with the remapped RGB color as the parameter."
 ]
@@ -5532,13 +5452,11 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	AlwaysOutputAsInt(choices) : "Always Output As Int" : 0 : "If set to 'Yes', the stored value (and OutValue) will always be rounded to an integer before firing." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	SetLerpPercent(float) : "Lerp Percent" : "0.5" : "The percentage used by the LerpTo input."
 
 	// Inputs
@@ -5588,7 +5506,6 @@
 	[
 		"Ignore" : "NPCs Ignore this when navigating (they'll bump into it)"
 	]
-
 	// Inputs
 	input TurnOn(void) : "Turn on. The Navigation Entity will have its navigation properties set."
 	input TurnOff(void) : "Turn off. The Navigation Entity will have its navigation properties returned to the default settings."
@@ -5604,7 +5521,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	MinimumHitPoints(integer): "Minimum Hit Points" : 0 : "Don't save dangerous when player has less than this many hitpoints."
 	MinHitPointsToCommit(integer) : "Minimum Hit Points to Commit" : 0 : "Minimum hitpoints required to commit to save. The save will be made if you have at least Minimum Hit Points, but when the autosave timer expires, the autosave is only kept if you have at least Min Hitpoints to Commit."
 
@@ -5621,7 +5537,6 @@
 	TriggerHitPoints(integer): "Trigger Hit Points" : 75 : "If started looking for an opportunity, save when hitpoints reach this level."
 	TimeToTrigget(float): "Time to trigger" : 0 : "If > 0, how long to try and get a save off before giving up"
 	DangerousTime(float): "Dangerous time" : 10 : "If 0, just autosave. Otherwise, do an autosavedangerous with this time threshold"
-
 	// Inputs
 	input Enable(void) : "Enable the entity"
 	input Disable(void) : "Enable the entity"
@@ -5692,7 +5607,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	Template01(target_destination) : "Template 1"
 	Template02(target_destination) : "Template 2"
 	Template03(target_destination) : "Template 3"
@@ -5768,7 +5682,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	// Inputs
 	input Test(void) : "Test the skill level and fire an input based on the returning value."
 	input StartListening(void) : "Starts listening for difficulty level changes."
@@ -5788,13 +5701,11 @@
 	SetDevLvl(integer) : "Developer Level" : 1 : "What level developer messages should appear at."
 	SetMsgColor(color255) : "Message Color" : "210 250 255 255" : "The color of standard messages."
 	SetWarningColor(color255) : "Warning Color" : "255 210 210 255" : "The color of warning messages."
-
 	SetNewLineNotAuto(choices) : "Don't automatically append \n?" : 0 : "Prevents this logic_console from automatically appending a new line each time it prints." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	// Inputs
 	input SendMsg(string) : "Sends a message to the console."
 	input SendWarning(string) : "Sends a message to the console in red text."
@@ -5807,7 +5718,6 @@
 	input NewLine(void) : "Manually sends \n."
 	input DevNewLine(void) : "Manually sends \n in the specified developer level."
 	input ClearConsole(void) : "Clears the console of all output."
-
 	// No way, you wacko!
 	//input SendError(string) : "Crashes the player's game and gives the parameter as an error message. Please handle with care."
 ]
@@ -5821,13 +5731,11 @@
 	// Keys
 	SetConVar(string) : "ConVar" : : "The ConVar to read. Can be serverside or clientside(?)"
 	SetTestValue(string) : "Compare value" : : "The value to compare with the ConVar's value during comparisons. This keyvalue supports matchers (<, >, !=, etc.)."
-
 	// Inputs
 	input SetConVar(string) : "Sets the ConVar whose variable will be retrieved."
 	input SetTestValue(string) : "Sets the value that will be compared with the ConVar variable during comparisons."
 	input GetValue(void) : "Retrieves the ConVar's value, firing OutValue with its value."
 	input Test(void) : "Compares the ConVar's value with the compare value."
-
 	// Outputs
 	output OnTrue(void) : "Fired when a comparison is true."
 	output OnFalse(void) : "Fired when a comparison is false."
@@ -5858,7 +5766,6 @@
 	SetParameter6(string) : "Parameter 6" : : "Will replace all instances of {6} in the input value."
 	SetParameter7(string) : "Parameter 7" : : "Will replace all instances of {7} in the input value."
 	SetBackupParameter(string) : "Backup Parameter" : : "If an invalid parameter is used (e.g. null parameter or asks for a parameter beyond {7}), then this will be used instead. Otherwise just uses '<null>'."
-
 	// Inputs
 	input GetFormattedValue(void) : "Fires OutFormattedValue, which passes the formatted input value."
 	input SetInputValue(string) : "Sets the input value. Should contain {0}, {1}, etc. enclosed by curly brackets, which will be replaced by the parameters and then output as OutFormattedValue."
@@ -5871,7 +5778,6 @@
 	input SetParameter6(string) : "Sets the text that will replace all instances of {6}."
 	input SetParameter7(string) : "Sets the text that will replace all instances of {7}."
 	input SetBackupParameter(string) : "Sets the text that will replace all invalid parameters."
-
 	// Outputs
 	output OutFormattedValue(string) : "Fired when the formatted value is requested. Outputs the formatted value."
 ]
@@ -5886,7 +5792,6 @@
 	// Keys
 	target(target_destination) : "Target Entity" : : "The entity with the key to measure."
 	keyname(string) : "Key Name" : : "The name of the key to measure."
-
 	// Inputs
 	input Test(void) : "Gets the stored key's value from stored target."
 	input TestKey(string) : "Tests the specified key against the target instead of using the stored key. Does not change the stored key."
@@ -5894,7 +5799,6 @@
 	input SetKey(string) : "Sets the key to measure."
 	input SetValue(string) : "Sets the stored target's stored key value to the specified string."
 	input SetTarget(target_destination) : "Sets the target entity."
-
 	// Outputs
 	output OutValue(string) : "Fires when a keyfield is found. Passes its value."
 	output OnFailed(void) : "Fires when this entity fails to find the specified keyfield."
@@ -5907,7 +5811,6 @@
 	// Keys
 	target(target_destination) : "Target Entity" : : "The entity whose data description will be measured."
 	keyname(string) : "Element Name" : : "The internal name (e.g. m_iName) of the field to measure. Use the ''ent_info_datatable'' command followed by an entity's class name to see all of their fields."
-
 	// Inputs
 	input Test(void) : "Gets the stored field's value from stored target."
 	input TestKey(string) : "Tests the specified field against the target instead of using the stored field. Does not change the stored field."
@@ -5915,7 +5818,6 @@
 	input SetKey(string) : "Sets the field to measure."
 	input SetValue(string) : "Sets the stored target's stored field to the specified string."
 	input SetTarget(target_destination) : "Sets the target entity."
-
 	// Outputs
 	output OutValue(string) : "Fires when a field is found. Passes its value."
 	output OnFailed(void) : "Fires when this entity fails to find the specified field."
@@ -5927,12 +5829,10 @@
 	// Keys
 	SetMax(string) : "Max" : : "The maximum value. Can be an integer, a float, or a vector."
 	SetMin(string) : "Min" : : "The minimum value. Can be an integer, a float, or a vector."
-
 	// Inputs
 	input ClampValue(string) : "Clamps the specified value. Can be an integer, a float, or a vector."
 	input SetMax(string) : "Sets the max value. Can be an integer, a float, or a vector."
 	input SetMin(string) : "Sets the max value. Can be an integer, a float, or a vector."
-
 	// Outputs
 	output OutValue(string) : "Outputs the clamped value."
 	output OnBeforeMin(string) : "Fires when a clamped value was before the minimum value. Outputs the clamped value."
@@ -5968,7 +5868,6 @@
 [
 	// Keys
 	startvalue(vector) : "Initial Value" : "0 0 0" : "The vector this entity should start with."
-
 	spawnflags(flags) =
 	[
 		1 : "[1] Disable X" : 0
@@ -5994,7 +5893,6 @@
 	input AngleVectorForward(void): "Converts this entity's vector angles to a vector in the forward direction. Fires the OutValue output with the result."
 	input AngleVectorRight(void): "Converts this entity's vector angles to a vector in the right direction. Fires the OutValue output with the result."
 	input AngleVectorUp(void): "Converts this entity's vector angles to a vector in the up direction. Fires the OutValue output with the result."
-
 	input SetX(float) : "Sets this entity's X coordinate."
 	input SetY(float) : "Sets this entity's Y coordinate."
 	input SetZ(float) : "Sets this entity's Z coordinate."
@@ -6013,7 +5911,6 @@
 	output OutX(float) : "Fired when the value changes, passing the resulting X coordinate."
 	output OutY(float) : "Fired when the value changes, passing the resulting Y coordinate."
 	output OutZ(float) : "Fired when the value changes, passing the resulting Z coordinate."
-
 	output OnGetValue(vector) : "Fired in response to the GetValue input. Used for polling this entity's current value when you don't want constant updates from the OutValue output."
 	output OnGetX(float) : "Fired in response to the GetX input."
 	output OnGetY(float) : "Fired in response to the GetY input."
@@ -6059,7 +5956,6 @@
 	input GetNumSkins(void) : "Gets the number of skins on the target entity."
 	input LookupSequence(string) : "Looks up the specified sequence on the target entity."
 	input LookupActivity(string) : "Looks up the specified activity on the target entity. Uses the sequence outputs and outputs the first sequence with the given activity."
-
 	input SetPoseParameterName(string) : "Sets the pose parameter to target."
 	input SetPoseParameterValue(float) : "Sets the target pose parameter's current value."
 	input GetPoseParameter(void) : "Gets the current value of the target pose parameter and fires OutPoseParameterValue with it."
@@ -6068,7 +5964,6 @@
 	output OutNumSkins(integer) : "Outputs number of skins."
 	output OnHasSequence(integer) : "Fires when the target has the sequence requested. Outputs the sequence's index."
 	output OnLacksSequence(void) : "Fires when the target does not have the sequence requested."
-
 	output OutPoseParameterValue(float) : "Fires when the pose parameter value is requested, outputting its current value."
 ]
 
@@ -6124,7 +6019,6 @@
 	// Keys
 	target(target_destination) : "Target Entity" : : "The entity with the context to measure."
 	context(string) : "Context Name" : : "The name of the context to measure."
-
 	// Inputs
 	input Test(void) : "Gets the stored context's value from stored target."
 	input TestContext(string) : "Tests the specified context against the target instead of using the stored context. Does not change the stored context."
@@ -6132,7 +6026,6 @@
 	input SetContext(string) : "Sets the context to measure."
 	input SetValue(string) : "Sets the stored target's stored context value to the specified string."
 	input SetTarget(target_destination) : "Sets the target entity."
-
 	// Outputs
 	output OutValue(string) : "Fires when a context is found. Passes its value."
 	output OnFailed(void) : "Fires when this entity fails to find the specified context."
@@ -6170,7 +6063,6 @@
 	input Enable(void) : "Enables this entity."
 	input Disable(void) : "Disables this entity."
 	input Toggle(void) : "Toggles this entity."
-
 	// Outputs
 	output OutValue(float) : "Outputs with a brightness equivalent to the current letter."
 	output OutLetter(string) : "Outputs with the current letter itself."
@@ -6184,13 +6076,11 @@
 	"This is intended for things like passwords in keypads, which usually demand a specific combination of numbers."
 [
 	InitialCase(integer) : "Initial Case" : 1 : "Which case to start on, meaning inputs will initially compare with this case. Uses the case's index. (e.g. 4 for Case 04)"
-
 	StartDisabled(choices) : "Start Disabled" : 0 : "If this entity is disabled, it will not accept any case tests. It will still accept other inputs, like SetSequenceIndex." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	Case01(string) : "Case 01" : : "If the sequence's current case is 01, fires OnCasePass or OnCaseFail based on whether this value matches the InValue parameter. This keyvalue supports matchers (<, >, !=, etc.)."
 	Case02(string) : "Case 02" : : "If the sequence's current case is 02, fires OnCasePass or OnCaseFail based on whether this value matches the InValue parameter. This keyvalue supports matchers (<, >, !=, etc.)."
 	Case03(string) : "Case 03" : : "If the sequence's current case is 03, fires OnCasePass or OnCaseFail based on whether this value matches the InValue parameter. This keyvalue supports matchers (<, >, !=, etc.)."
@@ -6207,7 +6097,6 @@
 	Case14(string) : "Case 14" : : "If the sequence's current case is 14, fires OnCasePass or OnCaseFail based on whether this value matches the InValue parameter. This keyvalue supports matchers (<, >, !=, etc.)."
 	Case15(string) : "Case 15" : : "If the sequence's current case is 15, fires OnCasePass or OnCaseFail based on whether this value matches the InValue parameter. This keyvalue supports matchers (<, >, !=, etc.)."
 	Case16(string) : "Case 16" : : "If the sequence's current case is 16, fires OnCasePass or OnCaseFail based on whether this value matches the InValue parameter. This keyvalue supports matchers (<, >, !=, etc.)."
-
 	DontIncrementOnPass(choices) : "Suppress auto increment" : 0 : "Prevents automatically incrementing the sequence each time a case passes." =
 	[
 		0 : "No"
@@ -6223,7 +6112,6 @@
 	input SetCurrentCaseNoFire(integer) : "Sets the sequence's current case without firing OutCurCase."
 	input IncrementSequence(integer) : "Increments the current case by the specified number. (1 if blank)"
 	input ResetSequence(void) : "Resets the sequence to Case 01."
-
 	// Outputs
 	output OutCurCase(integer) : "Fires each time the sequence's current case value changes, e.g. when it's incremented by a passing case."
 	output OnCasePass(string) : "Fires when a case is matched, passing the input value."
@@ -6240,7 +6128,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	GenerateType(choices) : "Generation Type" : 1 =
 	[
 		0 : "Sine Wave (param 1 = time offset, param 2 = sine period)"
@@ -6291,7 +6178,6 @@
 	StartTime(float) : "Start time" : "0" : "How long after we've received the 'Activate' input should ragdolls boogie?"
 	BoogieLength(float) : "Boogie length" : "5.0" : "How long should the boogie last? Can be a range with a lower bound and a higher bound, e.g. ''2.5,4.0'' (no quotes)"
 	Magnitude(float) : "Magnitude" : "150" : "How intense is the boogie?"
-
 	ZapColor(color255) : "Zap Color" : "255 255 255" : "The color of each tesla beam on an electrical boogie."
 
 	// Inputs
@@ -6363,7 +6249,6 @@
 	Inflictor(target_destination) : "Inflictor" : : "The entity that actually supposedly dealt the damage. This isn't supposed to be the attacker as much as it's supposed to be their weapon or a projectile from their weapon."
 	Attacker(target_destination) : "Attacker" : : "The entity that the damage is credited to."
 	Weapon(target_destination) : "Weapon" : : "The weapon that did the damage. This is usually used when the inflictor would already be used for something else. For example, when the inflictor is a rocket, this would be the RPG."
-
 	MaxEnts(integer) : "Maximum Victims" : 1 : "When ApplyDamage is called, how many entities that match the target's description should be victimized? Use 0 for no limit."
 
 	Damage(integer) : "Damage" : 0 : "How much damage to inflict."
@@ -6396,7 +6281,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	// Inputs
 	input SetInflictor(target_destination) : "Sets the inflictor."
 	input SetAttacker(target_destination) : "Sets the attacker."
@@ -6416,7 +6300,6 @@
 	input SetReportedPosition(vector) : "Sets the reported position."
 	input ApplyDamage(void) : "Applies damage."
 	input ApplyDamageToEntity(target_destination) : "Applies damage to a specific entity."
-
 	// Outputs
 	output OnApplyDamage(void) : "Fires for every entity that takes our damage, using that as the activator."
 	output OnApplyDeath(void) : "Fires for every entity that dies from our damage, using that as the activator."
@@ -6441,31 +6324,26 @@
 		0 : "Target Origin"
 		1 : "Target Center (WorldSpaceCenter)"
 	]
-
 	RemoveOriginalEntity(choices) : "Remove original entity" : 1 : "Removes the entity being replaced." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	TakeTargetname(choices) : "Take Targetname" : 0 : "Causes the replacement entity to take the target's name." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	TakeParent(choices) : "Take Parent" : 0 : "Causes the replacement entity to take the target's current parent as well as its children." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	TakeOwner(choices) : "Take Owner" : 0 : "Causes the replacement entity to take the target's owner." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	TakeModelStuff(choices) : "Take Model Stuff" : 0 : "Causes the replacement entity to take the target's model stuff, including render fields and animation data." =
 	[
 		0 : "No"
@@ -6485,7 +6363,6 @@
 	input ReplaceEntity(target_destination) : "Replaces the specified entity with the replacement entity."
 	input SetTarget(target_destination) : "Sets the entity to be replaced."
 	input SetReplacementEntity(target_destination) : "Sets the entity to replace the target."
-
 	// Outputs
 	output OnReplace(ehandle) : "Fires for each replacement we undergo, passing the replacement entity as the activator and parameter. The caller can be the replaced entity or this entity depending on this entity's settings."
 ]
@@ -6527,14 +6404,12 @@
 		51 : "Hear thumper"
 	]
 	Conditions(string) : "Conditions (advanced)" : : "Allows you to specify exactly which conditions to monitor, either by their actual integer ID or their string name. Separate multiple conditions with colons: 'COND_BEHIND_ENEMY:COND_ENEMY_OCCLUDED:11'"
-
 	Schedules(string) : "Schedules (advanced)" : : "Allows you to specify exactly which schedules to monitor, either by their actual integer ID or their string name. Separate multiple schedules with colons: 'SCHED_INVESTIGATE_SOUND:SCHED_COMBAT_FACE:14'"
 	TranslateSchedules(choices) : "Translate schedules" : 0 : "Translates schedules based on each NPC's behavior each time they're checked. This depends on how the NPC remaps that schedule, which may be either their own version of it or something completely different that may not be desirable. The performance impact of this setting is not known." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	HintsSimple(choices) : "Hint Node" : 0 : "Which hint to monitor. Use 'Hints (advanced)' to use conditions outside of this list or use multiple hints." =
 	[
 		0 : "None"
@@ -6617,7 +6492,6 @@
 	input SetRestInterval(string) : "Sets the rest interval. Follows the same format as the keyvalue."
 	input SetBurstShotCountRange(string) : "Sets the burst shot count range. Follows the same format as the keyvalue."
 	input SetBurstShotsRemaining(integer) : "Sets how many shots are left in the current burst."
-
 	input EnableShooting(void) : "Enables shooting if it was disabled."
 	input DisableShooting(void) : "Disables shooting."
 	input FireNoEarlierThan(float) : "Causes the NPC to stop firing for this amount of time."
@@ -6651,7 +6525,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	ReloadBeforeEachAction(choices) : "Reload file before each action" : 0 : "Reloads the file before each change this entity makes. This is mostly useful when there is a possibility that the file could change by other means which could be overwritten, like another logic_externaldata somewhere." =
 	[
 		0 : "No"
@@ -6679,7 +6552,6 @@
 	Owner(target_destination) : "Owner Entity" : : "The projectile's owner entity, or whoever kills will be credited to."
 	Damage(float) : "Damage" : "100.0" : "The damage of the projectile."
 	Speed(float) : "Speed" : "1500" : "How fast the projectile should move."
-
 	FireFromOwner(choices) : "Fire From Owner" : 0 : "Fires the projectile from the owner entity's origin instead of our own." =
 	[
 		0 : "No"
@@ -6690,7 +6562,6 @@
 	input Fire(void) : "Fires a projectile with our current angles."
 	input FireAtEntity(target_destination) : "Fires a projectile at a specific entity."
 	input FireAtPosition(vector) : "Fires a projectile at a specific position."
-
 	input SetDamage(float) : "Sets the projectile's damage."
 	input SetOwnerEntity(target_destination) : "Sets the owner."
 	input SetSpeed(float) : "Sets the projectile's starting speed."
@@ -6716,7 +6587,6 @@
 	input InValue(string) : "Input a string to substring and return through OutValue"
 	input SetLength(integer) : "Set length of substring"
 	input SetStartPos(integer) : "Set start position of substring"
-
 	output OutValue(string) : "Output substring from InValue"
 ]
 
@@ -6735,7 +6605,6 @@
 		0 : "Allow entities that match criteria"
 		1 : "Disallow entities that match criteria"
 	]
-
 	PassCallerWhenTested(choices) : "Pass caller when tested" : 0 : "When tested with TestActivator or TestEntity, this causes the OnPass and OnFail outputs to use either this filter as the caller or the entity that called the test as the caller." =
 	[
 		0 : "No"
@@ -6857,7 +6726,6 @@
 	filtername(string) : "Name/Classname" : : "The classname or entity name to filter by. If the filter mode is Allow, only entities whose "+
 		"class name matches the given string will pass the filter. If the filter mode is Disallow, "+
 		"all entities EXCEPT those whose class name matches the given string will pass the filter."
-
 	filter_radius(float) : "Radius" : 0 : "Radius by which to test the proximity of the enemy.  If the filter mode is Allow, only entities whose "+
 		"distance is equal to or closer than the radius will pass the filter. If the filter mode is Disallow, "+
 		"all entities outside the radius will pass the filter."
@@ -6878,7 +6746,6 @@
 	filtermodel(studio) : "Filter Model" : : "The model to filter by. If the filter mode is Allow, only entities whose "+
 		"model matches the given string will pass the filter. If the filter mode is Disallow, "+
 		"all entities EXCEPT those whose model matches the given string will pass the filter."
-
 	skin(string) : "Skin" : -1 : "Some models have multiple versions of their textures, called skins. Use this if you want to filter by skins as well. If you want any skin to be allowed, be sure to leave this at -1! It might automatically change when you choose a model. This keyvalue supports matchers (<, >, !=, etc.)."
 ]
 
@@ -6888,13 +6755,11 @@
 	ResponseContext(string) : "Filter Context" : : "The context(s) to filter by. Syntax is 'key:value,key:value'. "+
 		"Values in this field can use wildcards. For example, if this filter contains 'lastname:*', it will pass any entity with the context 'lastname', regardless of its value. "+
 		"Wildcards do not apply to context names and you cannot define the same context multiple times, but inputs like AddContext or RemoveContext can be used to add to the filter context."
-
 	any(choices) : "Pass if entity has any of these contexts" : 0 : "Should this filter only pass if the entity contains all of these contexts or can it pass if the entity has at least one of them?" =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	// Inputs
 	input AddContext(string) : "Adds a context to this fitler's list of response contexts. The format should be 'key:value'."
 	input RemoveContext(string) : "Remove a context from this filter's list of response contexts. The name should match the 'key' of a previously added context."
@@ -6907,7 +6772,6 @@
 	filtername(string) : "Filter Squad" : : "The squad name to filter by. If the filter mode is Allow, only entities who are "+
 		"in the squad of the given string will pass the filter. If the filter mode is Disallow, "+
 		"all entities EXCEPT those who are in the squad of the given string will pass the filter."
-
 	allowsilentmembers(choices) : "Allow Silent Members" : 1 : "Allows silent squad members to pass the filter. Silent squad members are enemy finders and vital allies in player_squad." =
 	[
 		0 : "No"
@@ -6921,7 +6785,6 @@
 	filtername(string) : "Filter Hintgroup" : : "The hintgroup to filter by. If the filter mode is Allow, only entities who have "+
 		"the given hintgroup will pass the filter. If the filter mode is Disallow, "+
 		"all entities EXCEPT those who have the given hintgroup will pass the filter."
-
 	hintlimiting(choices) : "Hint Limit Nav" : 2 : "If set to Yes, only entities who are limiting navigation to their hintgroup will be allowed. "+
 			"If set to No, only entities who are *not* limiting navigation to their hintgroup will be allowed. "+
 			"If set to Don't Care, entities will pass regardless of the their navigational limits as long as they match the hintgroup."=
@@ -6937,7 +6800,6 @@
 [
 	keyname(string) : "Key" : : "The key name to filter by. Please note that certain keyvalues, particularly "+
 		"targetnames and base values related to clientside rendering (e.g. render mode), cannot be found by this filter."
-
 	value(string) : "Value (Optional)" : : "The key value to filter by. If empty, the filter will pass if the entity just has the keyfield."
 ]
 
@@ -6945,7 +6807,6 @@
 	"A filter that filters by the activator's relationship with another entity. Please note that any entity incapable of supporting relationships is automatically passed if this filter is set to 'Neutral'."
 [
 	target(target_destination) : "Subject" : : "The entity whose relationships we should test with. If empty, the entity using the filter will be used."
-
 	rank(string) : "Priority" : : "The priority the subject should have with the target. If empty, priority will be disregarded."
 	disposition(choices) : "Disposition" : 3 : "What relationship the subject should have with the activator." =
 	[
@@ -6954,13 +6815,11 @@
 		3 : "Like"
 		4 : "Neutral"
 	]
-
 	inverttarget(choices) : "Invert Subject" : 0 : "Should we use the activator's relationship to the subject instead?"  =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	Reciprocal(choices) : "Reciprocal" : 0 : "Should we only pass if both entities have the same relationship with each other? Makes 'Invert Subject' useless."  =
 	[
 		0 : "No"
@@ -7008,7 +6867,6 @@
 	"A filter that tests whether the activator is within a volume."
 [
 	target(target_destination) : "Volume" : : "The volume to be tested with. This filter passes if the activator is within this volume. Intended to be a brush entity. (e.g. a trigger)"
-
 	tester(target_destination) : "Volume Tester" : "!activator" : "Who should be in the volume for the filter to pass?"
 ]
 
@@ -7021,7 +6879,6 @@
 		"metalgrate" : "Metal Grate"
 		"metalvent" : "Metal Vent"
 	]
-
 	SurfaceType(choices) : "Type" : 1 : "What to actually filter by."  =
 	[
 		0 : "Surface Prop"
@@ -7058,7 +6915,6 @@
 [
 	target(target_destination) : "Transfer Target" : "" : "The name of the entity/entities that will receive the damage. Please note that this complies with their own damage filters."
 	input SetTarget(target_destination) : "Sets the transfer target."
-
 	AdjustDamagePosition(choices) : "Adjust Damage Position" : 0 : "Adjusts the damage position to be relative to the target entity." =
 	[
 		0 : "No"
@@ -7080,7 +6936,6 @@
 		1 : "Must pass to transfer damage to targets"
 		2 : "Each transfer target must pass"
 	]
-
 	input SetField(target_destination) : "Sets the secondary filter."
 ]
 
@@ -7125,7 +6980,6 @@
 		1 : "Must pass to modify damage (others use the original damage)"
 		2 : "Attackers must pass to modify damage"
 	]
-
 	input SetDamageMultiplier(float) : "Sets the damage multiplier."
 	input SetDamageAddend(float) : "Sets the damage addend."
 	input SetDamageBitsAdded(integer) : "Sets the damage types added."
@@ -7189,12 +7043,10 @@
 [
 	// Keys
 	target(string) : "Manifest File" : : "The manifest file to load. Keep in mind ''maps/%mapname%_manifest.txt'' is always loaded automatically without this entity."
-
 	spawnflags(Flags) =
 	[
 		1 : "[1] Start Activated" : 1
 	]
-
 	// Inputs
 	input Activate(void) : "Loads the manifest file if it hasn't been loaded already."
 ]
@@ -7204,18 +7056,15 @@
 [
 	// Keys
 	target(string) : "ConVars" : "" : "The convars to modify. Multiple cvars can be modded with ';', e.g. 'host_timescale 0.5; npc_alyx_interact_manhacks 1'"
-
 	UseServer(choices) : "Command from Server" : 0 : "Mods convars directly from the server instead of acting as if the convars were typed into the local player's console, similar to using point_servercommand as opposed to point_clientcommand. Required to function in MP games." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	spawnflags(Flags) =
 	[
 		1 : "[1] Start Activated" : 1
 	]
-
 	// Inputs
 	input Activate(void) : "Begins modding the cvars."
 	input Deactivate(void) : "Stops modding the cvars."
@@ -7239,12 +7088,10 @@
 	[
 		1 : "[1] Use target entity's angles (NOT position)" : 0
 	]
-
 	// Inputs
 	input Toggle(void) : "Toggle the sensor between enabled and disabled."
 	input Test(void) : "Check to see if the Target Entity is facing the Look At Entity within the specified tolerance, firing either the OnFacingLookat or OnNotFacingLookat output based on the result."
 	input SetTargetEntity(string) : "Set the target entity" //added by vizzys
-
 	// Outputs
 	output TargetDir(vector) : "Fired when the forward direction of the Target Entity changes. Passes the new forward direction as a parameter."
 	output OnFacingLookat(void) : "Fired when the Target Entity points at the Look At Entity for more than the specified Duration, or in response to a Test input."
@@ -7273,7 +7120,6 @@
 
 	input TestWithInterval(void) : "Checks to see if the Target Entity's angular velocity meets or exceeds the Threshold Velocity. Once the Fire Interval expires, " +
 		"fires the appropriate test result output if the result is stable throughout the Fire Interval."
-
 	// Outputs
 	output AngularVelocity(float) : "Fired when the Target's Angular Velocity changes, passing the new magnitude of the angular velocity."
 	output OnGreaterThan(void) : "Fired when the Target Entity goes from slower than the threshold angular velocity to faster than the threshold angular velocity."
@@ -7343,7 +7189,6 @@
 	"If 'Target Entity' is specified, the damage is only done to that entity."
 [
 	DamageTarget(target_destination) : "Target Entity" : "" : "If specified, only this entity will take damage. Otherwise, all entities within the Radius will take damage."
-
 	DamageRadius(float) : "Radius" : 256 : "All entities within this radius of this entity will take damage. If a 'Target Entity' is specified, only that entity will take damage."
 	Damage(integer) : "Damage" : 5 : "Damage done to all affected entities each time this entity fires."
 	DamageDelay(float) : "Delay" : 1 : "Delay between refires, in seconds."
@@ -7396,13 +7241,11 @@
 		8388608: "[8388608] Prevent motion enable on player bump" : 0
 		16777216: "[16777216] Radius pickup (easier to pickup)" : 0
 	]
-
 	Damagetype(choices) : "Impact Damage Type" : 0 =
 	[
 		0: "Blunt"
 		1: "Sharp"
 	]
-
 	massScale(float) : "Mass Scale" : "0" : "A scale multiplier for the object's mass."
 	overridescript(string) : "Override Parameters" : "" : "A list of physics key/value pairs that are usually in a physics prop .qc file. Format is 'key,value,key,value,etc'."
 	damagetoenablemotion(integer) : "Health Level to Override Motion" : 0 : "If specified, this object will start motion disabled. Once its health has dropped below this specified amount, it will enable motion."
@@ -7414,7 +7257,6 @@
 		0: "Solid to World"
 		1: "Passes through World"
 	]
-
 	// Inputs
 	input Wake(void) : "Wake up this physics object, if it is sleeping."
 	input Sleep(void) : "Put this physics object to sleep. It will wake if given the Wake input, or if force is applied to it. Note that physics objects go to sleep automatically after coming to rest for a while, so you don't really need to use this."
@@ -7422,7 +7264,6 @@
 	input DisableMotion(void) : "Disable physics motion/collision response."
 	input ForceDrop(void) : "If this object is being carried by a player, with the physgun or +USE, force it to be dropped."
 	input SetDebris(bool) : "Sets whether this brush is debris."
-
 	// Outputs
 	output OnDamaged(void) : "Fired when this entity is damaged."
 	output OnAwakened(void) : "Fired when this entity becomes awake (collision/force is applied)."
@@ -7688,7 +7529,6 @@
 	target(target_destination) : "Entity to convert" : : "Name of the entity that will be converted to a physics object when the ConvertTarget input is fired."
 	swapmodel(target_destination) : "Model Swap Entity"
 	massoverride(float) : "Mass Override" : "0" : "Sets the mass when the object(s) are converted (0 means auto-calculate)"
-
 	SetConversionType(choices) : "Conversion Type" : 0 : "How this phys_convert should convert objects." =
 	[
 		0 : "Simple (simple_physics_prop, simple_physics_brush)"
@@ -7800,7 +7640,6 @@
 	// Inputs
 	input TurnOn(void) : "Turn the magnet on."
 	input TurnOff(void) : "The the magnet off. This will detach anything current stuck to the magnet."
-
 	input SetCycle(float) : "Skip to a specific point in the current animation." //added by vizzys
 	input SetModel(string) : "Changes the model to the specified path. Form of models/ammo/ammo_us.mdl. Absolutely NO quotes. Make sure you use forward slash." //added by vizzys
 	input SetPlayBackRate(float) : "Change the animation speed multiplier." //added by vizzys
@@ -7899,7 +7738,6 @@
 	MinAnimTime(float) : "Min Random Anim Time" : "5" : "Minimum time between random animations."
 	MaxAnimTime(float) : "Max Random Anim Time" : "10" : "Maximum time between random animations."
 	SetBodyGroup(integer) : "Body Group" : 0	// NEEDHELP
-
 	DisableBoneFollowers(choices) : "Disable Bone Followers" : 0 : "If set, this prop won't generate bone followers, even if they're listed in the model's .qc" =
 	[
 		0: "No"
@@ -7911,14 +7749,12 @@
 		0: "No"
 		1: "Yes"
 	]
-
 	updatechildren(choices) : "Update children" : 0 : "Update touches for any children that are attached to attachment points as this prop animates. "+
 		"This allows SetParentAttached triggers or func_brushes to touch properly." =
 	[
 		0: "No"
 		1: "Yes"
 	]
-
 	// Inputs
 	input SetAnimation(string) : "Forces the prop to play an animation. The parameter should be the name of the animation."
 	input SetAnimationNoReset(string) : "Force the prop to play an animation unless the prop is already playing the animation. The parameter should be the name of the animation."
@@ -7995,7 +7831,6 @@
 	input Lock(void) : "Locks this prop_interactable, making it uninteractable."
 	input Unlock(void) : "Unlocks this prop_interactable, making it interactable."
 	input Press(void) : "Presses this prop_interactable as if someone interacted with it."
-
 	input EnableUseInteraction(void) : "Enables use interaction if it was disabled before."
 	input DisableUseInteraction(void) : "Disables use interaction if it was enabled before."
 	input EnableTouchInteraction(void) : "Enables touch interaction if it was disabled before."
@@ -8032,7 +7867,6 @@
 		2097152: "[2097152] No collisions" : 0
 		8388608: "[8388608] Zombies can't swat" : 0
 	]
-
 	minhealthdmg(integer) : "Min Damage to Hurt" : 0 : "The prop will ignore any damage events if the damage is less than this amount."
 	shadowcastdist(integer) : "Shadow Cast Distance" : 0 : "Use this to override how far this object casts shadows. 0 = default distance."
 	physdamagescale(float) : "Physics Impact Damage Scale" : "0.1" : "Scales damage energy when this object is hit by a physics object. NOTE: 0 means this feature is disabled for backwards compatibility.\nSet to 1.0 for materials as strong as flesh, smaller numbers indicate stronger materials."
@@ -8053,7 +7887,6 @@
 	overridescript(string) : "Override Parameters" : "" : "A list of physics key/value pairs that are usually in a physics prop .qc file. Format is 'key,value,key,value,etc'."
 	damagetoenablemotion(integer) : "Health Level to Override Motion" : 0 : "If specified, this object will start motion disabled. Once its health has dropped below this specified amount, it will enable motion."
 	forcetoenablemotion(float) : "Physics Impact Force to Override Motion" : 0 : "If specified, this object will start motion disabled. Any impact that imparts a force greater than this value on the physbox will enable motion."
-
 	puntsound(sound) : "Sound to make when punted"
 
 	// Inputs
@@ -8069,7 +7902,6 @@
 	input EnablePuntSound(void) : "Allow this prop to play its own sound when punted"
 	input DisablePuntSound(void) : "Prevent this prop from playing its own sound when punted"
 	input SetDebris(bool) : "Sets whether this prop is debris."
-
 	input SetCycle(float) : "Skip to a specific point in the current animation." //added by vizzys
 	input SetModel(string) : "Changes the model to the specified path. Form of models/ammo/ammo_us.mdl. Absolutely NO quotes. Make sure you use forward slash." //added by vizzys
 	input SetPlayBackRate(float) : "Change the animation speed multiplier." //added by vizzys
@@ -8090,7 +7922,6 @@
 	"or other constraints. It can also be configured to break when it takes enough damage. Props not meant to be used with prop_physics (dynamic or static props) can be used with this and it can also override health or interactions."
 [
 	health(integer) : "Health" : 0 : "Number of points of damage to take before breaking.  0 means don't break. Use -1 to use default health, which could be 0 depending on the model."
-
 	InitialInteractions(choices) : "Interaction Override" : "" : "Overrides this prop's default interactions. If you want to combine them, enter each number with a space or comma in between. (e.g. '1 5 7')" =
 	[
 		"": "None"
@@ -8170,7 +8001,6 @@
 	input EnableMotion(void) : "Enable physics motion/collision response."
 	input DisableMotion(void) : "Disable physics motion/collision response."
 	input FadeAndRemove(float) : "Fade out then remove (kill) self. Parameter override = duration of fade"
-
 	input SetCycle(float) : "Skip to a specific point in the current animation." //added by vizzys
 	input SetModel(string) : "Changes the model to the specified path. Form of models/ammo/ammo_us.mdl. Absolutely NO quotes. Make sure you use forward slash." //added by vizzys
 	input SetPlayBackRate(float) : "Change the animation speed multiplier." //added by vizzys
@@ -8248,7 +8078,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	input DisableOneWay(void) : "Disable the one-way behavior of the portal."
 	input EnableOneWay(void) : "Enable the one-way behavior of the portal."
 	input ToggleOneWay(void) : "Toggle the one-way behavior of the portal."
@@ -8353,7 +8182,6 @@
 		6 : "Particle Rainstorm"
 		7 : "Particle Snow"
 	]
-
 	spawnflags(flags) =
 	[
 		1 : "[1] Particle types only: Clamp precipitation to brush bounds" : 1
@@ -8393,12 +8221,10 @@
 	target(target_destination) : "First stop target" : : "The name of the first path_track entity in the path that this target should follow."
 	health(integer) : "Damage to Take" : 0 : "The amount of damage taken before this target is killed."
 	_minlight(string) : "Minimum Light Level" : : "The minimum level of ambient light that hits this brush."
-
 	// Inputs
 	input Start(void) : "Start the target moving."
 	input Stop(void) : "Stop the target from moving."
 	input Toggle(void) : "Toggle the target between moving and stopped."
-
 	// Outputs
 	output OnDeath(void) : "Fires when the target is killed."
 ]
@@ -8418,7 +8244,6 @@
 	input PanicLoudFromPoint(vector) : "Causes a loud panic event at the specified location vector."
 	input PanicQuietFromPoint(vector) : "Causes a quiet panic event at the specified location vector."
 	input Skin(integer) : "Changes the fish skin to the specified number."
-
 	// Outputs
 	output OnSpawnFish(ehandle) : "Fires when a fish is spawned, passing the fish as the activator."
 ]
@@ -8510,7 +8335,6 @@
 		1 : "Linear blend"
 		2 : "Ease in/ease out"
 	]
-
 	orientationtype(choices) : "Change angles" : 1 : "The method through which this train changes its orientation as it moves along the path." =
 	[
 		0 : "Never (fixed orientation)"
@@ -8556,7 +8380,6 @@
 	"these dimensions in order to operate when the train is near it."
 [
 	_minlight(string) : "Minimum Light Level" : : "The minimum level of ambient light that hits this brush."
-
 	// Inputs
 	input Trigger(void) : "Trigger the track change."
 ]
@@ -8578,7 +8401,6 @@
 	// Outputs
 	output OnStart(void) : "Fired when the train starts moving in either direction."
 	output OnNext(string) : "Fires when this train picks a new point to move towards (and just after OnStart)."
-
 	ManualSpeedChanges(choices) : "Manual Train Speed" : 0 : "Train Speed is controlled through IO, handles accel, decel times." =
 	[
 		0 : "Off"
@@ -8599,7 +8421,6 @@
 	"When it spawns it will automatically rotate to face the next path_track on the path."
 [
 	health(integer) : "Health" : 100
-
 	// Outputs
 	output OnDeath(void) : "Fired when the tank is killed."
 ]
@@ -8639,7 +8460,6 @@
 		32: "[32] Part of an uphill path" : 0
 		64: "[64] Part of a downhill path" : 0
 	]
-
 	target(target_destination) : "Next Stop Target" : : "The next path_track in the path."
 	altpath(target_destination) : "Branch Path" : : "An alternative path_track to be the next node in the path. Useful for making branching paths. Use the ToggleAlternatePath / EnableAlternatePath inputs to make the alternative path active."
 	speed(float) : "New Train Speed" : 0 : "When the train reaches this path_track, it will set its speed to this speed. "+
@@ -8764,7 +8584,6 @@
 		0 : "Normal"
 		1 : "Doubling w/forgiveness"
 	]
-
 	nodmgforce(choices) : "Zero Damage Force" : 0 : "Should the damaged entity receive no physics force from this trigger." =
 	[
 		0 : "No"
@@ -8795,7 +8614,6 @@
 	wait(integer) : "Delay Before Reset" : 1 : "Amount of time, in seconds, after the trigger_multiple has triggered before it can be triggered again. If set to -1, it will never trigger again (in which case you should just use a trigger_once)."
 
 	// Touch test stuff is now on all trigger entities.
-
 	// Outputs
 	output OnTrigger(void) : "Fired whenever the trigger is activated."
 ]
@@ -8825,13 +8643,11 @@
 	LookTime(string) : "LookTime" : "0.5" : "The time, in seconds, that the player must look at the target before firing the output. Resets if player leaves trigger, or looks outside the Field of View threshold."
 	FieldOfView(string) : "FieldOfView" : "0.9" : "How close the player has to be looking at the target. 1.0 = straight ahead\n 0.0 = +/- 90 degrees\n -1.0 = all directions)."
 	Timeout(float) : "Timeout" : "0" : "The time, in seconds, to wait after player enters the trigger before firing the OnTimeout output, 0 = never."
-
 	UseLOS(choices) : "Require LOS" : 0 : "If enabled, the player must have full LOS to the target entity in order to count as ''looking''." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	LookEntityCaller(choices) : "Use look entity as caller" : 0 : "When firing OnTrigger, use the triggered look entity as the output's caller. Useful for when multiple look targets exist." =
 	[
 		0 : "No"
@@ -8856,7 +8672,6 @@
 
 	speed(integer) : "Speed of Push" : 40 : "The speed at which to push entities away, in units / second."
 	alternateticksfix(float) : "Scale force for alternate ticks" : "0" : "If nonzero, scale the force by this amount when running with alternate ticks. This fixes problems with an overly large force due to the longer frametime on when running with sv_alternateticks 1."
-
 	// Inputs
 	input SetSpeed(float) : "Set the speed at which to push entities away."
 	input SetPushDir(vector) : "Set the angles indicating the direction to push touched entities."
@@ -8898,7 +8713,6 @@
 [
 	measuretarget(target_destination) : "Point to Measure From" : : "The name of a target entity who's origin is the point to measure the player's distance from."
 	radius(string) : "Radius to measure within" : 256 : "The radius to which the distance should be mapped. If the player is outside the radius he will be ignored."
-
 	// Outputs
 	output NearestEntityDistance(integer) : "Fired continuously when entities are touching the trigger volume. The output parameter is the distance from the "+
 						"Point to Measure From to the nearest entity that passed the trigger filters. The distance is mapped to the radius distance, "+
@@ -8915,7 +8729,6 @@
 	spawnflags(flags) =
 	[
 		32: "[32] Preserve angles even when a local landmark is not specified" : 0
-
 		// Reckless...
 		64: "[64] Everything (not including physics debris)" : 0
 		512: "[512] Only clients *not* in vehicles" : 0
@@ -9009,7 +8822,6 @@
 [
 	target(target_destination) : "Entity Whose Material Uses _rt_camera"
 	PointCamera(target_destination) : "Camera Name" : : "The name of a point_camera entity in the map that the material should be rendered from."
-
 	// Inputs
 	input SetCamera(target_destination) : "Set the camera to use. The parameter should be the name of a point_camera entity in the map."
 ]
@@ -9024,13 +8836,11 @@
 	"an output when it happens."
 [
 	EventName(string) : "Event Name" : "" : "The name of the event that you want to listen for."
-
 	StartDisabled(choices) : "Start Disabled" : 0 =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	//TeamNum(choices) : "Team Number" : -1 : "If set, will only fire its output if the event is generated from someone of the specified team." =
 	//[
 	//	-1 : "Don't care"
@@ -9038,12 +8848,10 @@
 	//	2 : "Team 2 (ORANGE)"
 	//	3 : "Team 3 (BLUE)"
 	//]
-
 	// Inputs
 	input Enable(void) : "Enables this entity."
 	input Disable(void) : "Disables this entity."
 	input Toggle(void) : "Toggles this entity."
-
 	// Outputs
 	output OnEventFired(void)  : "Fires when the event has been detected."
 ]
@@ -9053,7 +8861,6 @@
 	"an output when it happens."
 [
 	EventName(string) : "Event Name" : "" : "The names of the events that you want to listen for. Separated by colon. (e.g. player_hurt:game_init)"
-
 	KeyName01(string) : "Key Name 01" : "" : "A keyvalue name to search for in detected events. If an event contains this key, then this entity will fire its respective OutValue output with the value."
 	KeyName02(string) : "Key Name 02" : "" : "A keyvalue name to search for in detected events. If an event contains this key, then this entity will fire its respective OutValue output with the value."
 	KeyName03(string) : "Key Name 03" : "" : "A keyvalue name to search for in detected events. If an event contains this key, then this entity will fire its respective OutValue output with the value."
@@ -9062,13 +8869,11 @@
 	KeyName06(string) : "Key Name 06" : "" : "A keyvalue name to search for in detected events. If an event contains this key, then this entity will fire its respective OutValue output with the value."
 	KeyName07(string) : "Key Name 07" : "" : "A keyvalue name to search for in detected events. If an event contains this key, then this entity will fire its respective OutValue output with the value."
 	KeyName08(string) : "Key Name 08" : "" : "A keyvalue name to search for in detected events. If an event contains this key, then this entity will fire its respective OutValue output with the value."
-
 	StartDisabled(choices) : "Start Disabled" : 0 =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	//TeamNum(choices) : "Team Number" : -1 : "If set, will only fire its output if the event is generated from someone of the specified team." =
 	//[
 	//	-1 : "Don't care"
@@ -9147,7 +8952,6 @@
 								"If 'Fire position outputs' is disabled, the activator that fired GetPosition will be used instead."
 	input Enable(void) : "Enable the logic_measure_movement."
 	input Disable(void) : "Disable the logic_measure_movement."
-
 	// Outputs
 	output OutPosition(vector)  : "Outputs the resulting position when allowed."
 	output OutAngles(vector)  : "Outputs the resulting angles when allowed."
@@ -9179,7 +8983,6 @@
 		2 : "Attachment point angles"
 		//3 : "Aim angles"
 	]
-
 	TraceDistance(float) : "Trace distance" : "8192" : "The maximum distance that the trace can go. 0 = no limit."
 	Mask(choices) : "Trace Mask" : 1174421507 : "How the measurement tracing should act in regards to what it should collide with." =
 	[
@@ -9191,25 +8994,21 @@
 		16449 : "MASK_BLOCKLOS (Anything that blocks line of sight)"
 		1174421507 : "MASK_SHOT (Anything that would be hit by a bullet)"
 	]
-
 	CollisionGroup(choices) : "Collision Group" : 0 : "The collision group the measurement tracing should use." =
 	[
 		0 : "None"
 	]
-
 	damagefilter(filterclass) : "Trace Filter" : "" : "A filter to use for tracing."
 	HitIfPassed(choices) : "Trace Filter behavior" : 0 : "What the filter should actually be used for." =
 	[
 		0 : "If pass, don't hit"
 		1 : "If pass, hit"
 	]
-
 	TraceTargetReference(choices) : "Additional trace from movement reference" : 0 : "Initiates another trace from the Movement Reference using the existing properties and adjusts the position to its end point. Only use this if the Movement Reference is different from the Measure Reference." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	// Inputs
 	input SetMeasureTarget(target_destination) : "Set the Entity to Measure, whose movement should be measured."
 	input SetMeasureReference(target_destination) : "Set the Measure Reference entity."
@@ -9246,7 +9045,6 @@
 	input RollCredits(void) : "Start the intro credits rolling."
 	input RollOutroCredits(void) : "Start the outro credits rolling."
 	input ShowLogo(void) : "Show the HL2 logo."
-
 	// Outputs
 	output OnCreditsDone(void)  : "Fired when the credits having finished rolling."
 ]
@@ -9334,7 +9132,6 @@
 		0 : "No"
 		1 : "Yes"
 	]
-
 	HandsVM(studio) : "Hands Viewmodel" : : "Custom hands viewmodel. Requires weapon viewmodels that support them."
 	HandsVMSkin(string) : "Hands Viewmodel Skin" : : "Skin for the custom hands viewmodel."
 	HandsVMBody(string) : "Hands Viewmodel Bodygroup" : : "Bodygroup value for the custom hands viewmodel."
@@ -9387,7 +9184,6 @@
 	input GetPlayerInfo(target_destination) : "Gets player info from the specified entity. If no entity is passed, this will get the local player."
 	input GetPlayerByID(string) : "Gets a player by their steam ID. Supports wildcards."
 	input GetPlayerByName(string) : "Gets a player by their Steam name. Supports wildcards."
-
 	output OutUserID(string) : "Outputs a player's user ID."
 	output OutPlayerName(string) : "Outputs a player's Steam name."
 	output OutPlayerEntity(ehandle) : "Outputs a player's entity."
@@ -9476,7 +9272,6 @@
 	constant_attn(string)	: "Constant" : "0" : "The light's constant attenuation, giving the light no falloff. (This value is internally corrected with x*0.5)"
 	linear_attn(string)	: "Linear" : "1" : "The light's linear attenuation, giving the light linear decline. This is the most common attenuation for projected textures. (This value is internally corrected with x*100)"
 	quadratic_attn(string)	: "Quadratic" : "0" : "The light's quadratic attenuation, giving the light exponentially decreasing falloff. (This value is internally corrected with x*10000)"
-
 	cameraspace(Choices)		: "Camera Space" : 0 : "Angles are interpreted as being relative to camera." =
 	[
 		0 : "No"
@@ -9485,13 +9280,11 @@
 
 	texturename(material) : "Texture Name" : "effects/flashlight001" : "The texture which should be used. Please note that env_projectedtexture uses .vtf files directly and does not use .vmt files. The material browser is only available here to assist with finding textures since materials typically have the same name as their textures."
 	textureframe(integer) : "Texture Frame" : 0 : "Sets the frame of the projected texture. Only relevant if the texture is animated/has multiple frames."
-
 	alwaysdraw(Choices)		: "Always Draw" : 0 : "Always draws the projected texture, regardless of whether the player can see its frustum. Use this for projected textures that can be seen on monitors or in the skybox." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-
 	ProjectedTextureVersion(integer)	readonly	: "Projected Texture Version"      : 1  : "(Don't change). Differentiates between projected textures built before/outside of Mapbase and projected textures using new features."
 
 	// Inputs
@@ -9580,7 +9373,6 @@
 		"_rt_Camera" : "_rt_Camera (requires no active point_camera)"
 		"0" : "None (disables reflection)"
 	]
-
 	RefractRenderTarget(choices) : "Refraction render target" : "_rt_WaterRefraction" : "Makes this mirror target a specific RT texture for its refraction instead of just _rt_WaterRefraction. You can manually type in any RT texture name if you know what you're doing or leave this blank to disable refraction entirely." =
 	[
 		"_rt_WaterRefraction" : "_rt_WaterRefraction (default)"
@@ -9588,7 +9380,6 @@
 		"_rt_Camera" : "_rt_Camera (requires no active point_camera)"
 		"0" : "None (disables refraction)"
 	]
-
 	// Inputs
 	input SetReflectRenderTarget(string) : "Sets the reflection render target."
 	input SetRefractRenderTarget(string) : "Sets the refraction render target."
@@ -9604,7 +9395,6 @@
 [
 	target(target_destination) : "Target Plane" : "" : "Target entity to render from."
 	PlaneAngles(angle) : "Plane Direction (Pitch Yaw Roll)" : "0 0 0" : "Angles indicating the direction to look in. (added onto target entity's angles)"
-
 	SkyMode(choices) : "Sky Mode" : 2 : "How to draw the sky through this view." =
 	[
 		2 : "Draw sky texture"
@@ -9671,7 +9461,6 @@
 		1 : "Postfix"
 		2 : "None"
 	]
-
 	remap_vecline(choices) : "Remap Vector Lines" : 0 : "Remaps vecline keyvalues to the instance's origin. vecline is a type of vector which displays a line back to the entity's origin. This is often used on entities like phys_hinge for displaying an axis." =
 	[
 		0 : "No"
@@ -9724,13 +9513,11 @@
 		0 : "Follow the Target Entity"
 		1 : "Show on the hud"
 	]
-
 	hint_allow_nodraw_target(Choices) : "Allow invisible target" : 1 : "Do we allow the hint to follow entities with nodraw set?" =
 	[
 		0 : "End immediately on nodraw"
 		1 : "Yes"
 	]
-
 	hint_caption(string) : "Caption" : : "The text of your hint."
 	hint_activator_caption(string) : "Activator Caption" : : "The text of your hint shown to only the activating player."
 	hint_color(color255) : "Caption Color" : "255 255 255" : "The color of the caption text"
@@ -9739,7 +9526,6 @@
 		0 : "No"
 		1 : "Show when occluded"
 	]
-
 	hint_icon_onscreen(Choices) : "Onscreen Icon" : "icon_tip" : "The icon to use when the hint is within the player's view." =
 	[
 		"icon_bulb" : "icon_bulb"
@@ -9761,7 +9547,6 @@
 		"icon_fire" : "icon_fire"
 		"icon_present" : "icon_present"
 		"use_binding" : "show key bindings"
-
 		"icon_health" : "(HL2) icon_health"
 		"icon_battery" : "(HL2) icon_battery"
 		"icon_frag" : "(HL2) icon_frag"
@@ -9779,7 +9564,6 @@
 		"icon_slam" : "(HL2) icon_slam"
 		"icon_pistol" : "(HL2) icon_pistol"
 	]
-
 	hint_icon_offscreen(Choices) : "Offscreen Icon" : "icon_tip" : "The icon to use when the hint is outside the player's view." =
 	[
 		"icon_bulb" : "icon_bulb"
@@ -9800,7 +9584,6 @@
 		"icon_arrow_right" : "icon_arrow_right"
 		"icon_fire" : "icon_fire"
 		"icon_present" : "icon_present"
-
 		"icon_health" : "(HL2) icon_health"
 		"icon_battery" : "(HL2) icon_battery"
 		"icon_frag" : "(HL2) icon_frag"
@@ -9834,7 +9617,6 @@
 		2 : "Fast Pulse"
 		3 : "Urgent Pulse"
 	]
-
 	hint_alphaoption(Choices) : "Alpha Pulsing" : 0 : "The icon alpha can pulsate" =
 	[
 		0 : "No Pulse"
@@ -9842,7 +9624,6 @@
 		2 : "Fast Pulse"
 		3 : "Urgent Pulse"
 	]
-
 	hint_shakeoption(Choices) : "Shaking" : 0 : "The icon can shake" =
 	[
 		0 : "No Shaking"
@@ -9883,7 +9664,6 @@
 [
 	target(target_destination) : "Target" : : "One target only."
 	GlowColor(color255) : "Glow Color" : "255 0 0 255" : "<r> <g> <b> <a> 0-255"
-
 	input SetGlowColor(color255) : "<r> <g> <b> <a> 0-255"
 	input Toggle(void) : "Toggles this entity."
 ]
