@@ -5747,10 +5747,7 @@ void CTriggerFreeze::Think( void )
 {
     for ( CBaseEntity* pOther : m_hTouchingEntities )
     {
-        if ( !pOther )
-        {
-            continue;
-        }
+        if ( !pOther ) { break; }
 
         CBasePlayer* pPlayer = ToBasePlayer( pOther );
         if ( pPlayer )
