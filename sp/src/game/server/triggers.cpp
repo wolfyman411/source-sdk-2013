@@ -5692,11 +5692,11 @@ class CTriggerFreeze : public CBaseTrigger
 
         virtual void InputTemperatureIncrementer( inputdata_t& inputdata );
         virtual void InputIdealTemperature( inputdata_t& inputdata );
+        virtual void InputTemperatureApplicationDelay( inputdata_t& inputdata );
 
         float	m_flTemperatureIncrementer;
         float	m_flIdealTemperature;
-
-        
+        float   m_flTemperatureApplicationDelay;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
@@ -5706,9 +5706,11 @@ BEGIN_DATADESC( CTriggerFreeze )
 
 	DEFINE_KEYFIELD( m_flTemperatureIncrementer, FIELD_FLOAT, "TemperatureIncrementer"),
     DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" ),
+    DEFINE_KEYFIELD( m_flTemperatureApplicationDelay, FIELD_FLOAT, "TemperatureApplicationDelay" ),
 
     DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperatureIncrementer", InputTemperatureIncrementer ),
     DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputIdealTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperatureApplicationDelay", InputTemperatureApplicationDelay ),
 END_DATADESC()
 
 CTriggerFreeze::CTriggerFreeze()
@@ -5727,12 +5729,17 @@ void CTriggerFreeze::InputIdealTemperature( inputdata_t& inputdata )
     m_flIdealTemperature = inputdata.value.Float();
 }
 
+void CTriggerFreeze::InputTemperatureApplicationDelay( inputdata_t& inputdata )
+{
+    m_flTemperatureApplicationDelay = inputdata.value.Float();
+}
+
 void CTriggerFreeze::Spawn( void ) {
 	BaseClass::Spawn();
 
 	InitTrigger();
 
-    SetNextThink( gpGlobals->curtime + 1.0f );
+    SetNextThink( gpGlobals->curtime + 0.3f );
 	SetThink( &CTriggerFreeze::Think );
 }
 
@@ -5774,5 +5781,5 @@ void CTriggerFreeze::Think( void )
         }
     }
 
-    SetNextThink( gpGlobals->curtime + 1.0f );
+    SetNextThink( gpGlobals->curtime + this->m_flTemperatureApplicationDelay );
 }
