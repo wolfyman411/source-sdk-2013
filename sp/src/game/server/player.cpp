@@ -4025,30 +4025,39 @@ void CBasePlayer::HandleFuncTrain(void)
 	}
 }
 
+// ConVar sv_player_ideal_temperature( "sv_player_ideal_temperature", "70.0", FCVAR_REPLICATED, "Ideal temperature for players" ); // This is in farenheit, because wolfy fucking hates us
+
+ConVar sv_player_temperature_damage_interval( "sv_player_temperature_damage_interval", "1.0", FCVAR_REPLICATED, "Interval in seconds between temperature damage ticks" );
+ConVar sv_player_temperature_damage( "sv_player_temperature_damage", "1", FCVAR_REPLICATED, "Damage done by high/low temperatures" );
+
 void CBasePlayer::HandleTemperature( void )
 {
-    DevMsg( 2, "Temp: %.1f\n", GetTemperature() );
-    if ( GetTemperature() > 100 || GetTemperature() < 0 && m_flNextTemperatureDamage < gpGlobals->curtime )
+    float playerTemp = GetTemperature();
+    float idealTemperature = GetIdealTemperature();
+
+    DevMsg( 2, "Player Temp: %.1f\n", playerTemp );
+
+    if ( playerTemp > idealTemperature * 1.1f || playerTemp < 0 && m_flNextTemperatureDamage < gpGlobals->curtime )
     {
         CTakeDamageInfo info;
-        info.SetDamage( 1 );
+        info.SetDamage( sv_player_temperature_damage.GetInt() );
         info.SetDamageType( DMG_SLOWBURN );
         info.SetAttacker( this );
         info.SetInflictor( this );
 
         TakeDamage( info );
 
-        m_flNextTemperatureDamage = gpGlobals->curtime + 1.0f;
+        m_flNextTemperatureDamage = gpGlobals->curtime + sv_player_temperature_damage_interval.GetFloat();
     }
 
     // Passively try to return to ideal temperature
-    if ( GetTemperature() > 70.0f )
+    if ( playerTemp > idealTemperature )
     {
-        AddTemperature( -0.1f );
+        //AddTemperature( -0.1f );
     }
-    else if ( GetTemperature() < 70.0f )
+    else if ( playerTemp < idealTemperature )
     {
-        AddTemperature( 0.1f );
+        //AddTemperature( 0.1f );
     }
 }
 
