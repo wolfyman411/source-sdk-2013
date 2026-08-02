@@ -839,6 +839,7 @@ public:
     }
 
     virtual float       GetTemperature() const { return m_flTemperature; }
+    virtual float       GetIdealTemperature() const { return 70.0f; }
     virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
     virtual void        AddTemperature( float flTemp );
     virtual void        HandleTemperature( void );
