@@ -5753,6 +5753,9 @@ void CTriggerFreeze::Spawn( void ) {
 
 void CTriggerFreeze::Think( void )
 {
+    static ConVarRef ai_use_temperature( "ai_use_temperature" );
+    static ConVarRef ai_debug_temperature( "ai_debug_temperature" );
+
     for ( CBaseEntity* pOther : m_hTouchingEntities )
     {
         if ( !pOther ) { continue; }
@@ -5773,7 +5776,6 @@ void CTriggerFreeze::Think( void )
         CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
         if ( pNPC )
         {
-            static ConVarRef ai_use_temperature( "ai_use_temperature" );
             if ( !ai_use_temperature.GetBool() || !pNPC->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { continue; }
 
             float flCurrentTemp = pNPC->GetTemperature();
@@ -5782,8 +5784,13 @@ void CTriggerFreeze::Think( void )
                 continue;
             }
 
+            if ( ai_debug_temperature.GetBool() )
+            {
+                DevLog( "[TRIGGER FREEZE] %s's temperature changed from %.2f to %.2f\n", pNPC->GetDebugName(), flCurrentTemp, flCurrentTemp + m_flTemperatureIncrementer );
+            }
+
             pNPC->AddTemperature( m_flTemperatureIncrementer );
-            pNPC->m_flTemperatureLastTriggerChange = gpGlobals->curtime;
+            pNPC->m_flNextTemperatureIncrement = gpGlobals->curtime + 3;
         }
     }
 

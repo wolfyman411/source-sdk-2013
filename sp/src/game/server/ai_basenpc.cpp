@@ -4434,7 +4434,7 @@ void CAI_BaseNPC::HandleTemperature( void )
     }
     else if ( IsOverheating() )
     {
-        Ignite( 1.0f , true, 0.0f, true );
+        Ignite( 1.0f, true, 0.0f, false );
     }
 
     // Check to see if the npc has been frozen, if so slowly thaw them.
@@ -4450,11 +4450,16 @@ void CAI_BaseNPC::HandleTemperature( void )
         SetPlaybackRate( playbackRate );
     }
 
-    // Passively try to return to ideal temperature
-    if ( GetTemperature() > GetIdealTemperature() && m_flTemperatureLastTriggerChange < gpGlobals->curtime - 2.0f ) {
+    // Passively try to return to ideal temperature, if they've been away from a trigger for like 3 seconds
+    if ( ai_debug_temperature.GetBool() )
+    {
+        DevMsg( "%s -> Current Temp: %.2f, Ideal Temp: %.2f, Next Increment: %.2f (Ready: %i)\n", this->GetDebugName(), GetTemperature(), GetIdealTemperature(), m_flNextTemperatureIncrement, m_flNextTemperatureIncrement < gpGlobals->curtime );
+    }
+
+    if ( GetTemperature() > GetIdealTemperature() && m_flNextTemperatureIncrement < gpGlobals->curtime ) {
         AddTemperature( -0.1f );
     }
-    else if ( GetTemperature() < GetIdealTemperature() && m_flTemperatureLastTriggerChange < gpGlobals->curtime - 2.0f ) {
+    else if ( GetTemperature() < GetIdealTemperature() && m_flNextTemperatureIncrement < gpGlobals->curtime ) {
         AddTemperature( 0.1f );
     }
 }
@@ -12331,7 +12336,7 @@ BEGIN_DATADESC( CAI_BaseNPC )
 
 	DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
-    DEFINE_FIELD( m_flTemperatureLastTriggerChange, FIELD_TIME ),
+    DEFINE_FIELD( m_flNextTemperatureIncrement, FIELD_TIME ),
     DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
     DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
     DEFINE_FIELD( m_flIdealTemperature, FIELD_FLOAT ),
@@ -13259,6 +13264,7 @@ CAI_BaseNPC::CAI_BaseNPC(void)
 
     m_flIdealTemperature = ( abs( m_flMinTemperature ) + m_flMaxTemperature ) / 2.0f;
 	m_flTemperature = m_flIdealTemperature;
+    m_flNextTemperatureIncrement = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
