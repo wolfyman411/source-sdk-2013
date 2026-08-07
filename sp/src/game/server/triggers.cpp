@@ -5704,10 +5704,6 @@ LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
 BEGIN_DATADESC( CTriggerFreeze )
     DEFINE_FUNCTION( Think ),
 
-    DEFINE_FIELD( m_flTemperatureIncrementer, FIELD_FLOAT),
-    DEFINE_FIELD( m_flIdealTemperature, FIELD_FLOAT ),
-    DEFINE_FIELD( m_flTemperatureApplicationDelay, FIELD_FLOAT ),
-
 	DEFINE_KEYFIELD( m_flTemperatureIncrementer, FIELD_FLOAT, "TemperatureIncrementer"),
     DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" ),
     DEFINE_KEYFIELD( m_flTemperatureApplicationDelay, FIELD_FLOAT, "TemperatureApplicationDelay" ),
