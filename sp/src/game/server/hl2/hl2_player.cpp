@@ -243,6 +243,8 @@ public:
 	COutputEvent m_OnPlayerSpawn;
 #endif
 
+    COutputFloat m_RequestedPlayerTemperature;
+
 	void InputRequestPlayerHealth( inputdata_t &inputdata );
 	void InputSetFlashlightSlowDrain( inputdata_t &inputdata );
 	void InputSetFlashlightNormalDrain( inputdata_t &inputdata );
@@ -269,6 +271,8 @@ public:
 	void InputSetPlayerModel( inputdata_t &inputdata );
 	void InputSetPlayerDrawExternally( inputdata_t &inputdata );
 #endif
+
+    void InputRequestPlayerTemperature( inputdata_t& inputdata );
 
 	void Activate ( void );
 
@@ -4579,6 +4583,7 @@ BEGIN_DATADESC( CLogicPlayerProxy )
 	DEFINE_OUTPUT( m_RequestedPlayerFlashBattery, "PlayerFlashBattery" ),
 	DEFINE_OUTPUT( m_OnPlayerSpawn, "OnPlayerSpawn" ),
 #endif
+    DEFINE_OUTPUT( m_RequestedPlayerTemperature, "PlayerTemperature" ),
 
 	DEFINE_INPUTFUNC( FIELD_VOID,	"RequestPlayerHealth",	InputRequestPlayerHealth ),
 	DEFINE_INPUTFUNC( FIELD_VOID,	"SetFlashlightSlowDrain",	InputSetFlashlightSlowDrain ),
@@ -4605,6 +4610,9 @@ BEGIN_DATADESC( CLogicPlayerProxy )
 	DEFINE_INPUT( m_MaxArmor, FIELD_INTEGER, "SetMaxInputArmor" ),
 	DEFINE_INPUT( m_SuitZoomFOV, FIELD_INTEGER, "SetSuitZoomFOV" ),
 #endif
+
+    DEFINE_INPUTFUNC( FIELD_VOID, "RequestPlayerTemperature", InputRequestPlayerTemperature ),
+
 	DEFINE_FIELD( m_hPlayer, FIELD_EHANDLE ),
 END_DATADESC()
 
@@ -4810,6 +4818,14 @@ void CLogicPlayerProxy::InputRequestPlayerFlashBattery( inputdata_t &inputdata )
 		return;
 
 	m_RequestedPlayerFlashBattery.Set( static_cast<CHL2_Player*>(m_hPlayer.Get())->GetFlashlightBattery(), inputdata.pActivator, inputdata.pCaller );
+}
+
+void CLogicPlayerProxy::InputRequestPlayerTemperature( inputdata_t& inputdata )
+{
+    if ( m_hPlayer == NULL )
+        return;
+
+    m_RequestedPlayerTemperature.Set( static_cast< CHL2_Player* >( m_hPlayer.Get() )->GetTemperature(), inputdata.pActivator, inputdata.pCaller );
 }
 
 // If it's the EP2 flashlight, it returns the flashlight battery. If it's the legacy flashlight, it returns the aux power.
