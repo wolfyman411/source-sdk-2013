@@ -12444,6 +12444,13 @@ BEGIN_DATADESC( CAI_BaseNPC )
 
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetSpeedModifier", InputSetSpeedModifier ),
 
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "AddTemperature", InputAddTemperature),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "TakeTemperature", InputTakeTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputSetIdealTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
+
 	DEFINE_OUTPUT( m_OnStateChange,	"OnStateChange" ),
 #endif
 
@@ -12537,7 +12544,17 @@ BEGIN_ENT_SCRIPTDESC( CAI_BaseNPC, CBaseCombatCharacter, "The base class all NPC
 	DEFINE_SCRIPTFUNC( Stand, "Tells the NPC to stand if it is crouching." )
 
 
-    DEFINE_SCRIPTFUNC_NAMED( GetTemperature, "GetTemperature", "Get the NPC's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetTemperature, "GetTemperature", "Get the NPC's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperature, "SetTemperature", "Set the NPC's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptAddTemperature, "AddTemperature", "Add to the NPC's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetMinTemperature, "SetMinTemperature", "Set the NPC's minimum temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetMaxTemperature, "SetMaxTemperature", "Set the NPC's maximum temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetIdealTemperature, "SetIdealTemperature", "Set the NPC's ideal temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetMinTemperature, "GetMinTemperature", "Get the NPC's minimum temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetMaxTemperature, "GetMaxTemperature", "Get the NPC's maximum temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetIdealTemperature, "GetIdealTemperature", "Get the NPC's ideal temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetTemperatureChangeRate, "GetTemperatureChangeRate", "Get the rate at which the NPC's temperature changes." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperatureChangeRate, "SetTemperatureChangeRate", "Set the rate at which the NPC's temperature changes." )
 
 	// 
 	// Hooks
