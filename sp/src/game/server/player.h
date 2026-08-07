@@ -843,7 +843,7 @@ public:
     void                InputTakeTemperature( inputdata_t& inputdata );
     void                InputAddTemperature( inputdata_t& inputdata );
 
-    float               m_flIdealTemperature = 70.0f; // Farenheit
+    float               m_flIdealTemperature = 70.0f; // Fahrenheit
     float               m_flNextTemperatureDamage;
 
     virtual float       GetTemperature() const { return m_flTemperature; }

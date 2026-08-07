@@ -4041,7 +4041,7 @@ void CBasePlayer::HandleFuncTrain(void)
 	}
 }
 
-// ConVar sv_player_ideal_temperature( "sv_player_ideal_temperature", "70.0", FCVAR_REPLICATED, "Ideal temperature for players" ); // This is in farenheit, because wolfy fucking hates us
+// ConVar sv_player_ideal_temperature( "sv_player_ideal_temperature", "70.0", FCVAR_REPLICATED, "Ideal temperature for players" ); // This is in Fahrenheit, because wolfy fucking hates us
 
 ConVar sv_player_use_temperature( "sv_player_use_temperature", "1", FCVAR_REPLICATED, "Whether or not to use the temperature system" );
 ConVar sv_player_temperature_damage_interval( "sv_player_temperature_damage_interval", "1.0", FCVAR_REPLICATED, "Interval in seconds between temperature damage ticks" );

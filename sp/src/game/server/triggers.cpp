@@ -5798,5 +5798,5 @@ void CTriggerFreeze::Think( void )
         }
     }
 
-    SetNextThink( gpGlobals->curtime + this->m_flTemperatureApplicationDelay );
+    SetNextThink( gpGlobals->curtime + MAX( 0.01f, this->m_flTemperatureApplicationDelay ) );
 }
