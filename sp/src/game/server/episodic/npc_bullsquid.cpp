@@ -182,13 +182,15 @@ bool CNPC_Bullsquid::InnateWeaponLOSCondition( const Vector& ownerPos, const Vec
 
 bool CNPC_Bullsquid::GetSpitVector( const Vector &vecStartPos, const Vector &vecTarget, Vector *vecOut )
 {
+    float spitSpeed = sk_bullsquid_spit_speed.GetFloat();
+
 	// Try the most direct route
-	Vector vecToss = VecCheckThrowTolerance( this, vecStartPos, vecTarget, sk_bullsquid_spit_speed.GetFloat(), (10.0f * 12.0f) );
+	Vector vecToss = VecCheckThrowTolerance( this, vecStartPos, vecTarget, spitSpeed, (10.0f * 12.0f) );
 
 	// If this failed then try a little faster (flattens the arc)
 	if ( vecToss == vec3_origin )
 	{
-		vecToss = VecCheckThrowTolerance( this, vecStartPos, vecTarget, sk_bullsquid_spit_speed.GetFloat() * 1.5f, (10.0f * 12.0f) );
+		vecToss = VecCheckThrowTolerance( this, vecStartPos, vecTarget, spitSpeed * 1.5f, (10.0f * 12.0f) );
 		if ( vecToss == vec3_origin )
 			return false;
 	}
