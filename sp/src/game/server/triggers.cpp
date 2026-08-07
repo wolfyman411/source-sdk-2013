@@ -5717,6 +5717,14 @@ CTriggerFreeze::CTriggerFreeze()
 {
     m_flTemperatureIncrementer = 1.0f;
     m_flIdealTemperature = 70.0f; // This is in Fahrenheit
+    m_flTemperatureApplicationDelay = 0.3f;
+
+    if ( !HasSpawnFlags(SF_TRIGGER_ALLOW_NPCS) )
+    {
+        // TODO: Remove this warning for public release.
+        ConDColorMsg( Color( 90, 255, 165, 255 ), "A trigger_freeze in this map has been spawned in, without the NPC flag. Please let env_wind know, and provide the map name and location.\n" );
+        AddSpawnFlags( SF_TRIGGER_ALLOW_NPCS );
+    }
 }
 
 void CTriggerFreeze::InputTemperatureIncrementer( inputdata_t& inputdata )
@@ -5739,7 +5747,7 @@ void CTriggerFreeze::Spawn( void ) {
 
 	InitTrigger();
 
-    SetNextThink( gpGlobals->curtime + 0.3f );
+    SetNextThink( gpGlobals->curtime );
 	SetThink( &CTriggerFreeze::Think );
 }
 
@@ -5747,7 +5755,7 @@ void CTriggerFreeze::Think( void )
 {
     for ( CBaseEntity* pOther : m_hTouchingEntities )
     {
-        if ( !pOther ) { break; }
+        if ( !pOther ) { continue; }
 
         CBasePlayer* pPlayer = ToBasePlayer( pOther );
         if ( pPlayer )
@@ -5760,7 +5768,6 @@ void CTriggerFreeze::Think( void )
             }
 
             pPlayer->AddTemperature( m_flTemperatureIncrementer );
-            break; // move to the next entity
         }
 
         CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
