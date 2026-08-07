@@ -517,7 +517,7 @@ void CNPC_Alyx::ColdThink( void )
     {
         DevMsg( "Breath from %s", this->GetDebugName() );
         DispatchParticleEffect( "npc_coldbreath", PATTACH_POINT, this, "mouth", false );
-        m_flNextColdBreath = gpGlobals->curtime + RandomFloat( 1.0f, 1.5f );
+        m_flNextColdBreath = gpGlobals->curtime + RandomFloat( 1.0f, 2.0f );
     }
 }
 
