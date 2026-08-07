@@ -852,6 +852,12 @@ public:
     virtual void        AddTemperature( float flTemp );
     virtual void        HandleTemperature( void );
 
+    float               VScriptGetTemperature( void ) { return GetTemperature(); }
+    void                VScriptAddTemperature( float increment ) { AddTemperature( increment ); }
+    void                VScriptTakeTemperature( float decrement ) { AddTemperature( -decrement ); }
+    float               VScriptGetIdealTemperature( void ) { return GetIdealTemperature(); }
+    void                VScriptSetTemperature( float newTemp ) { SetTemperature( newTemp ); }
+
 	surfacedata_t *GetSurfaceData( void ) { return m_pSurfaceData; }
 	void SetLadderNormal( Vector vecLadderNormal ) { m_vecLadderNormal = vecLadderNormal; }
 

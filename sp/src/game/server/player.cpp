@@ -579,10 +579,11 @@ BEGIN_ENT_SCRIPTDESC( CBasePlayer, CBaseCombatCharacter, "The player entity." )
 	END_SCRIPTHOOK()
 
 
-    DEFINE_SCRIPTFUNC_NAMED( GetTemperature, "GetTemperature", "Gets the player's current temperature." )
-    DEFINE_SCRIPTFUNC_NAMED( AddTemperature, "AddTemperature", "Adds temperature to the player." )
-    DEFINE_SCRIPTFUNC_NAMED( InputTakeTemperature, "TakeTemperature", "Takes temperature from the player." )
-    DEFINE_SCRIPTFUNC_NAMED( GetIdealTemperature, "GetIdealTemperature", "Gets the player's ideal temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetTemperature, "GetTemperature", "Gets the player's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptAddTemperature, "AddTemperature", "Adds temperature to the player." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptTakeTemperature, "TakeTemperature", "Takes temperature from the player." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetIdealTemperature, "GetIdealTemperature", "Gets the player's ideal temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperature, "SetTemperature", "Gets the player's ideal temperature." )
 
 END_SCRIPTDESC();
 #else
