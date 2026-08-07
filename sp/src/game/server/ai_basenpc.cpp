@@ -4451,10 +4451,10 @@ void CAI_BaseNPC::HandleTemperature( void )
     }
 
     // Passively try to return to ideal temperature
-    if ( GetTemperature() > GetIdealTemperature() ) {
+    if ( GetTemperature() > GetIdealTemperature() && m_flTemperatureLastTriggerChange < gpGlobals->curtime - 2.0f ) {
         AddTemperature( -0.1f );
     }
-    else if ( GetTemperature() < GetIdealTemperature() ) {
+    else if ( GetTemperature() < GetIdealTemperature() && m_flTemperatureLastTriggerChange < gpGlobals->curtime - 2.0f ) {
         AddTemperature( 0.1f );
     }
 }
@@ -12331,6 +12331,12 @@ BEGIN_DATADESC( CAI_BaseNPC )
 
 	DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flTemperatureLastTriggerChange, FIELD_TIME ),
+    DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flIdealTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flTemperatureChangeRate, FIELD_FLOAT ),
+    DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
 
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
