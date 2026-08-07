@@ -5743,7 +5743,6 @@ void CTriggerFreeze::Spawn( void ) {
 	SetThink( &CTriggerFreeze::Think );
 }
 
-ConVarRef ai_use_temperature( "ai_use_temperature" );
 void CTriggerFreeze::Think( void )
 {
     for ( CBaseEntity* pOther : m_hTouchingEntities )
@@ -5767,6 +5766,7 @@ void CTriggerFreeze::Think( void )
         CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
         if ( pNPC )
         {
+            static ConVarRef ai_use_temperature( "ai_use_temperature" );
             if ( !ai_use_temperature.GetBool() || !pNPC->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { continue; }
 
             float flCurrentTemp = pNPC->GetTemperature();
