@@ -12536,6 +12536,9 @@ BEGIN_ENT_SCRIPTDESC( CAI_BaseNPC, CBaseCombatCharacter, "The base class all NPC
 	DEFINE_SCRIPTFUNC( Crouch, "Tells the NPC to crouch." )
 	DEFINE_SCRIPTFUNC( Stand, "Tells the NPC to stand if it is crouching." )
 
+
+    DEFINE_SCRIPTFUNC_NAMED( GetTemperature, "GetTemperature", "Get the NPC's current temperature." )
+
 	// 
 	// Hooks
 	// 
