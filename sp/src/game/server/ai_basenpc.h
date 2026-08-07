@@ -1336,7 +1336,9 @@ private:
 
     float               VScriptGetTemperature() { return GetTemperature(); }
     void                VScriptSetTemperature( float newTemp ) { SetTemperature( newTemp ); }
-    void                VScriptAddTemperature( float addTemp ) { AddTemperature( addTemp ); }
+    void                VScriptAddTemperature( float addTemp, bool bIncludeChangeRate = true );
+    void                VScriptTakeTemperature( float takeTemp, bool bIncludeChangeRate = true );
+                        
 
     void                VScriptSetMinTemperature( float newTemp ) { SetMinTemperature( newTemp ); }
     float               VScriptGetMinTemperature() { return GetMinTemperature(); }
@@ -1351,8 +1353,8 @@ private:
     void                VScriptSetTemperatureChangeRate( float newRate ) { SetTemperatureChangeRate( newRate ); }
 
     void                InputSetTemperature( inputdata_t& inputdata ) { SetTemperature( inputdata.value.Float() ); }
-    void                InputAddTemperature( inputdata_t& inputdata ) { AddTemperature( inputdata.value.Float() ); }
-    void                InputTakeTemperature( inputdata_t& inputdata ) { AddTemperature( -inputdata.value.Float() ); }
+    void                InputAddTemperature( inputdata_t& inputdata ) { m_flTemperature += inputdata.value.Float(); }
+    void                InputTakeTemperature( inputdata_t& inputdata ) { m_flTemperature -= abs(inputdata.value.Float()); }
     void                InputSetMinTemperature( inputdata_t& inputdata ) { SetMinTemperature( inputdata.value.Float() ); }
     void                InputSetMaxTemperature( inputdata_t& inputdata ) { SetMaxTemperature( inputdata.value.Float() ); }
     void                InputSetIdealTemperature( inputdata_t& inputdata ) { SetIdealTemperature( inputdata.value.Float() ); }

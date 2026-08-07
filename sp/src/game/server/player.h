@@ -853,9 +853,10 @@ public:
     virtual void        HandleTemperature( void );
 
     float               VScriptGetTemperature( void ) { return GetTemperature(); }
-    void                VScriptAddTemperature( float increment ) { AddTemperature( increment ); }
-    void                VScriptTakeTemperature( float decrement ) { AddTemperature( -decrement ); }
+    void                VScriptAddTemperature( float flTemperature, bool bMultiplyByChangeRate );
+    void                VScriptTakeTemperature( float flTemperature, bool bMultiplyByChangeRate );
     float               VScriptGetIdealTemperature( void ) { return GetIdealTemperature(); }
+    float               VScriptGetTimeNextTemperatureDamage( void ) { return m_flNextTemperatureDamage; }
     void                VScriptSetTemperature( float newTemp ) { SetTemperature( newTemp ); }
 
 	surfacedata_t *GetSurfaceData( void ) { return m_pSurfaceData; }

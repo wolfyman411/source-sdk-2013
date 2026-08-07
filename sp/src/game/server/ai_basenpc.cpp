@@ -875,6 +875,30 @@ HSCRIPT CAI_BaseNPC::VScriptGetSquad()
 }
 #endif
 
+void CAI_BaseNPC::VScriptAddTemperature( float flTemperature, bool bMultiplyByChangeRate )
+{
+    if ( !bMultiplyByChangeRate )
+    {
+        SetTemperature( m_flTemperature + abs( flTemperature ) );
+    }
+    else
+    {
+        AddTemperature( flTemperature );
+    }
+}
+
+void CAI_BaseNPC::VScriptTakeTemperature( float flTemperature, bool bMultiplyByChangeRate )
+{
+    if ( !bMultiplyByChangeRate )
+    {
+        SetTemperature( m_flTemperature - abs( flTemperature ) );
+    }
+    else
+    {
+        AddTemperature( -flTemperature );
+    }
+}
+
 bool CAI_BaseNPC::PassesDamageFilter( const CTakeDamageInfo &info )
 {
 	if ( ai_use_temperature.GetBool() && IsFrozen() ) {
@@ -12558,6 +12582,7 @@ BEGIN_ENT_SCRIPTDESC( CAI_BaseNPC, CBaseCombatCharacter, "The base class all NPC
     DEFINE_SCRIPTFUNC_NAMED( VScriptGetTemperature, "GetTemperature", "Get the NPC's current temperature." )
     DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperature, "SetTemperature", "Set the NPC's current temperature." )
     DEFINE_SCRIPTFUNC_NAMED( VScriptAddTemperature, "AddTemperature", "Add to the NPC's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptTakeTemperature, "TakeTemperature", "Take temperature from the NPC." )
     DEFINE_SCRIPTFUNC_NAMED( VScriptSetMinTemperature, "SetMinTemperature", "Set the NPC's minimum temperature." )
     DEFINE_SCRIPTFUNC_NAMED( VScriptSetMaxTemperature, "SetMaxTemperature", "Set the NPC's maximum temperature." )
     DEFINE_SCRIPTFUNC_NAMED( VScriptSetIdealTemperature, "SetIdealTemperature", "Set the NPC's ideal temperature." )

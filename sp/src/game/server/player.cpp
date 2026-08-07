@@ -583,7 +583,8 @@ BEGIN_ENT_SCRIPTDESC( CBasePlayer, CBaseCombatCharacter, "The player entity." )
     DEFINE_SCRIPTFUNC_NAMED( VScriptAddTemperature, "AddTemperature", "Adds temperature to the player." )
     DEFINE_SCRIPTFUNC_NAMED( VScriptTakeTemperature, "TakeTemperature", "Takes temperature from the player." )
     DEFINE_SCRIPTFUNC_NAMED( VScriptGetIdealTemperature, "GetIdealTemperature", "Gets the player's ideal temperature." )
-    DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperature, "SetTemperature", "Gets the player's ideal temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperature, "SetTemperature", "Sets the player's temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetTimeNextTemperatureDamage, "GetTimeNextTemperatureDamage", "Gets the time until the player takes temperature damage." )
 
 END_SCRIPTDESC();
 #else
@@ -7250,6 +7251,30 @@ void CBasePlayer::ShowCrosshair( bool bShow )
 bool CBasePlayer::ScriptIsPlayerNoclipping(void)
 {
 	return (GetMoveType() == MOVETYPE_NOCLIP);
+}
+
+void CBasePlayer::VScriptAddTemperature( float flTemperature, bool bMultiplyByChangeRate )
+{
+    if ( !bMultiplyByChangeRate )
+    {
+        SetTemperature( m_flTemperature + abs( flTemperature ) );
+    }
+    else
+    {
+        AddTemperature( flTemperature );
+    }
+}
+
+void CBasePlayer::VScriptTakeTemperature( float flTemperature, bool bMultiplyByChangeRate )
+{
+    if ( !bMultiplyByChangeRate )
+    {
+        SetTemperature( m_flTemperature - abs( flTemperature ) );
+    }
+    else
+    {
+        AddTemperature( -flTemperature );
+    }
 }
 
 #ifdef MAPBASE_VSCRIPT
