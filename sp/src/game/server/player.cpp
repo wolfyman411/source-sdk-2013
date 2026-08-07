@@ -278,7 +278,9 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_StuckLast, FIELD_INTEGER ),
 
     DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flIdealTemperature, FIELD_FLOAT ),
     DEFINE_FIELD( m_flNextTemperatureDamage, FIELD_FLOAT ),
+
 	DEFINE_FIELD( m_nButtons, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonLast, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonPressed, FIELD_INTEGER ),
@@ -476,6 +478,11 @@ BEGIN_DATADESC( CBasePlayer )
 #ifdef MAPBASE
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetSuppressAttacks", InputSetSuppressAttacks ),
 #endif
+        
+    DEFINE_INPUTFUNC( FIELD_VOID, "SetIdealTemperature", InputSetIdealTemperature ),
+    DEFINE_INPUTFUNC( FIELD_VOID, "SetTemperature", InputSetTemperature ),
+    DEFINE_INPUTFUNC( FIELD_VOID, "TakeTemperature", InputTakeTemperature ),
+    DEFINE_INPUTFUNC( FIELD_VOID, "AddTemperature", InputAddTemperature ),
 
 	DEFINE_FIELD( m_nNumCrouches, FIELD_INTEGER ),
 	DEFINE_FIELD( m_bDuckToggled, FIELD_BOOLEAN ),
@@ -797,6 +804,7 @@ CBasePlayer::CBasePlayer( )
 
     m_flTemperature = 70.0f;
     m_flNextTemperatureDamage = 0.0f;
+    m_flIdealTemperature = 70.0f;
 }
 
 void CBasePlayer::AddTemperature( float increment )
@@ -4027,7 +4035,7 @@ void CBasePlayer::HandleFuncTrain(void)
 
 // ConVar sv_player_ideal_temperature( "sv_player_ideal_temperature", "70.0", FCVAR_REPLICATED, "Ideal temperature for players" ); // This is in farenheit, because wolfy fucking hates us
 
-ConVar sv_player_use_temperature( "sv_player_use_temperature", "1", FCVAR_REPLICATED | FCVAR_CHEAT, "Whether or not to use the temperature system" );
+ConVar sv_player_use_temperature( "sv_player_use_temperature", "1", FCVAR_REPLICATED, "Whether or not to use the temperature system" );
 ConVar sv_player_temperature_damage_interval( "sv_player_temperature_damage_interval", "1.0", FCVAR_REPLICATED, "Interval in seconds between temperature damage ticks" );
 ConVar sv_player_temperature_damage( "sv_player_temperature_damage", "1", FCVAR_REPLICATED, "Damage done by high/low temperatures" );
 
@@ -4040,13 +4048,18 @@ void CBasePlayer::HandleTemperature( void )
 
     DevMsg( 2, "Player Temp: %.1f\n", playerTemp );
 
-    if ( playerTemp > idealTemperature * 1.1f || playerTemp < 0 && m_flNextTemperatureDamage < gpGlobals->curtime )
+    if ( ( playerTemp > idealTemperature * 1.1f || playerTemp < 0 ) && m_flNextTemperatureDamage < gpGlobals->curtime )
     {
         CTakeDamageInfo info;
         info.SetDamage( sv_player_temperature_damage.GetInt() );
         info.SetDamageType( DMG_SLOWBURN );
         info.SetAttacker( this );
         info.SetInflictor( this );
+
+        Vector forward;
+        AngleVectors( GetAbsAngles(), &forward, NULL, NULL );
+
+        info.SetDamageForce( -forward );
 
         TakeDamage( info );
 
@@ -4062,6 +4075,26 @@ void CBasePlayer::HandleTemperature( void )
     {
         //AddTemperature( 0.1f );
     }
+}
+
+void CBasePlayer::InputSetTemperature( inputdata_t& inputdata )
+{
+    SetTemperature( inputdata.value.Float() );
+}
+
+void CBasePlayer::InputAddTemperature( inputdata_t& inputdata )
+{
+    AddTemperature( inputdata.value.Float() );
+}
+
+void CBasePlayer::InputTakeTemperature( inputdata_t& inputdata )
+{
+    AddTemperature( -inputdata.value.Float() );
+}
+
+void CBasePlayer::InputSetIdealTemperature( inputdata_t& inputdata )
+{
+    m_flIdealTemperature = inputdata.value.Float();
 }
 
 void CBasePlayer::PreThink(void)

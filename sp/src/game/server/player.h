@@ -838,12 +838,19 @@ public:
         return true;
     }
 
+    void                InputSetIdealTemperature( inputdata_t& inputdata );
+    void                InputSetTemperature( inputdata_t& inputdata );
+    void                InputTakeTemperature( inputdata_t& inputdata );
+    void                InputAddTemperature( inputdata_t& inputdata );
+
+    float               m_flIdealTemperature = 70.0f; // Farenheit
+    float               m_flNextTemperatureDamage;
+
     virtual float       GetTemperature() const { return m_flTemperature; }
-    virtual float       GetIdealTemperature() const { return 70.0f; }
+    virtual float       GetIdealTemperature() const { return m_flIdealTemperature; }
     virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
     virtual void        AddTemperature( float flTemp );
     virtual void        HandleTemperature( void );
-    float               m_flNextTemperatureDamage;
 
 	surfacedata_t *GetSurfaceData( void ) { return m_pSurfaceData; }
 	void SetLadderNormal( Vector vecLadderNormal ) { m_vecLadderNormal = vecLadderNormal; }
