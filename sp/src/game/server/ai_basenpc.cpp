@@ -12365,7 +12365,6 @@ BEGIN_DATADESC( CAI_BaseNPC )
     DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
     DEFINE_FIELD( m_flIdealTemperature, FIELD_FLOAT ),
     DEFINE_FIELD( m_flTemperatureChangeRate, FIELD_FLOAT ),
-    DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
 
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
