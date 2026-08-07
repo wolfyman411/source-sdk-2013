@@ -479,10 +479,10 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetSuppressAttacks", InputSetSuppressAttacks ),
 #endif
         
-    DEFINE_INPUTFUNC( FIELD_VOID, "SetIdealTemperature", InputSetIdealTemperature ),
-    DEFINE_INPUTFUNC( FIELD_VOID, "SetTemperature", InputSetTemperature ),
-    DEFINE_INPUTFUNC( FIELD_VOID, "TakeTemperature", InputTakeTemperature ),
-    DEFINE_INPUTFUNC( FIELD_VOID, "AddTemperature", InputAddTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputSetIdealTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "TakeTemperature", InputTakeTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "AddTemperature", InputAddTemperature ),
 
 	DEFINE_FIELD( m_nNumCrouches, FIELD_INTEGER ),
 	DEFINE_FIELD( m_bDuckToggled, FIELD_BOOLEAN ),
