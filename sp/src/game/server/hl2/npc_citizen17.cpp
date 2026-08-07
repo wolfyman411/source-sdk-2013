@@ -1005,11 +1005,12 @@ bool CNPC_Citizen::ShouldAlwaysThink()
 	return ( BaseClass::ShouldAlwaysThink() || IsInPlayerSquad() ); 
 }
 
+ConVarRef ai_use_temperature("ai_use_temperature");
 void CNPC_Citizen::NPCThink()
 {
     BaseClass::NPCThink();
 
-    if ( !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
+    if ( !ai_use_temperature.GetBool() || !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
 
     DevMsg("%s\t%f\t%f", this->GetDebugName(), this->GetTemperature(), this->GetIdealTemperature());
     if ( this->GetTemperature() >= this->GetIdealTemperature() )
