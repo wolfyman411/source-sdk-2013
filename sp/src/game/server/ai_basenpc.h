@@ -2479,6 +2479,8 @@ public:
     CNetworkVar( float, m_flTemperatureChangeRate );
     CNetworkVar( bool,  m_bHasFrozen );
 
+    float               m_flTemperatureLastTriggerChange;
+
 	void				InputActivateSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = true; }
 	void				InputDisableSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = false; }
 	void				InputSetSpeedModifierRadius( inputdata_t &inputdata );

@@ -5783,6 +5783,7 @@ void CTriggerFreeze::Think( void )
             }
 
             pNPC->AddTemperature( m_flTemperatureIncrementer );
+            pNPC->m_flTemperatureLastTriggerChange = gpGlobals->curtime;
         }
     }
 
