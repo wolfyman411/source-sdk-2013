@@ -129,7 +129,7 @@ void CNPC_Bullsquid::Spawn()
 	m_NPCState = NPC_STATE_NONE;
 
 	CapabilitiesClear();
-	CapabilitiesAdd(bits_CAP_MOVE_GROUND | bits_CAP_INNATE_RANGE_ATTACK1 | bits_CAP_INNATE_MELEE_ATTACK1 | bits_CAP_INNATE_MELEE_ATTACK2);
+	CapabilitiesAdd(bits_CAP_MOVE_GROUND | bits_CAP_INNATE_RANGE_ATTACK1 | bits_CAP_INNATE_MELEE_ATTACK1 | bits_CAP_INNATE_MELEE_ATTACK2 | bits_CAP_TURN_HEAD);
 	CapabilitiesAdd(bits_CAP_SQUAD);
 
 	m_fCanThreatDisplay = TRUE;
@@ -992,6 +992,13 @@ NPC_STATE CNPC_Bullsquid::SelectIdealState(void)
 	}
 
 	return BaseClass::SelectIdealState();
+}
+
+void CNPC_Bullsquid::PrescheduleThink(void)
+{
+	UpdateHead();
+
+	BaseClass::PrescheduleThink();
 }
 
 void CNPC_Bullsquid::PopulatePoseParameters(void)

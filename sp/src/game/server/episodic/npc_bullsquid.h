@@ -65,6 +65,7 @@ public:
 
 	void StartTask(const Task_t* pTask);
 	void RunTask(const Task_t* pTask);
+	void PrescheduleThink(void);
 	void PopulatePoseParameters(void);
 	void UpdateHead(void);
 
