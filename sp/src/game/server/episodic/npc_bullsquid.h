@@ -31,8 +31,8 @@ public:
 	bool SeenEnemyWithinTime(float flTime);
 
 	bool InnateWeaponLOSCondition(const Vector& ownerPos, const Vector& targetPos, bool bSetConditions);
-	bool GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut );
-	Vector VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance);
+	bool GetSpitVector(const Vector& vecStartPos, const Vector& vecTarget, Vector* vecOut, bool lobbing );
+	Vector VecCheckThrowTolerance(CBaseEntity* pEdict, const Vector& vecSpot1, Vector vecSpot2, float flSpeed, float flTolerance, bool lobbing = false);
 
 	void IdleSound(void);
 	void PainSound(const CTakeDamageInfo& info);
@@ -65,6 +65,9 @@ public:
 
 	void StartTask(const Task_t* pTask);
 	void RunTask(const Task_t* pTask);
+	void PrescheduleThink(void);
+	void PopulatePoseParameters(void);
+	void UpdateHead(void);
 
 	NPC_STATE SelectIdealState(void);
 
@@ -80,6 +83,7 @@ private:
 	Vector m_vecSaveSpitVelocity;
 
 protected:
+	int m_poseHead_Yaw, m_poseHead_Pitch;
 
 	CAI_AssaultBehavior			m_AssaultBehavior;
 	CAI_StandoffBehavior		m_StandoffBehavior;
