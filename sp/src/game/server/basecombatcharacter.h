@@ -575,10 +575,12 @@ protected:
 public:
 	CNetworkVar( float, m_flNextAttack );			// cannot attack again until this time
 
-    CNetworkVar( bool, m_bShouldDrawSnowOverlay );
-    CNetworkVar( float, m_flSnowOverlayAlpha );
+    CNetworkVar( float, m_flCurrentSnowOverlayAlpha);
 
     virtual float GetViewModelSnowOverlayAlpha( void );
+	float				m_flSnowOverlayAlpha;
+	float				m_flNextFade;
+	bool				m_bShouldDrawSnowOverlay;
 
 #ifdef GLOWS_ENABLE
 protected:
