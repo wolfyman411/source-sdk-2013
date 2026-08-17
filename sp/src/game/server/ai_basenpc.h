@@ -1334,6 +1334,31 @@ private:
 	void				VScriptSetCondition( const char *szCondition ) { SetCondition( GetConditionID( szCondition ) ); }
 	void				VScriptClearCondition( const char *szCondition ) { ClearCondition( GetConditionID( szCondition ) ); }
 
+    float               VScriptGetTemperature() { return GetTemperature(); }
+    void                VScriptSetTemperature( float newTemp ) { SetTemperature( newTemp ); }
+    void                VScriptAddTemperature( float addTemp, bool bIncludeChangeRate = true );
+    void                VScriptTakeTemperature( float takeTemp, bool bIncludeChangeRate = true );
+                        
+
+    void                VScriptSetMinTemperature( float newTemp ) { SetMinTemperature( newTemp ); }
+    float               VScriptGetMinTemperature() { return GetMinTemperature(); }
+
+    void                VScriptSetMaxTemperature( float newTemp ) { SetMaxTemperature( newTemp ); }
+    float               VScriptGetMaxTemperature() { return GetMaxTemperature(); }
+
+    void                VScriptSetIdealTemperature( float newTemp ) { SetIdealTemperature( newTemp ); }
+    float               VScriptGetIdealTemperature() { return GetIdealTemperature(); }
+
+    float               VScriptGetTemperatureChangeRate() { return GetTemperatureChangeRate(); }
+    void                VScriptSetTemperatureChangeRate( float newRate ) { SetTemperatureChangeRate( newRate ); }
+
+    void                InputSetTemperature( inputdata_t& inputdata ) { SetTemperature( inputdata.value.Float() ); }
+    void                InputAddTemperature( inputdata_t& inputdata ) { m_flTemperature += inputdata.value.Float(); }
+    void                InputTakeTemperature( inputdata_t& inputdata ) { m_flTemperature -= abs(inputdata.value.Float()); }
+    void                InputSetMinTemperature( inputdata_t& inputdata ) { SetMinTemperature( inputdata.value.Float() ); }
+    void                InputSetMaxTemperature( inputdata_t& inputdata ) { SetMaxTemperature( inputdata.value.Float() ); }
+    void                InputSetIdealTemperature( inputdata_t& inputdata ) { SetIdealTemperature( inputdata.value.Float() ); }
+
 	HSCRIPT				VScriptGetExpresser();
 
 	HSCRIPT				VScriptGetCine();
@@ -2455,6 +2480,8 @@ public:
     CNetworkVar( float, m_flIdealTemperature );
     CNetworkVar( float, m_flTemperatureChangeRate );
     CNetworkVar( bool,  m_bHasFrozen );
+
+    float               m_flNextTemperatureIncrement;
 
 	void				InputActivateSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = true; }
 	void				InputDisableSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = false; }
