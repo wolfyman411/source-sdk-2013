@@ -50,6 +50,7 @@
 #include "collisionutils.h"
 #include "vstdlib/IKeyValuesSystem.h" // From Alien Swarm SDK
 #endif
+#include "physics_saverestore.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -7253,6 +7254,7 @@ bool UTIL_CreateScaledPhysObject( CBaseAnimating *pInstance, float flScale )
 
 	pInstance->VPhysicsDestroyObject();
 	pInstance->VPhysicsSetObject( pNewObject );
+    g_pPhysSaveRestoreManager->AssociateModel( pNewObject, pInstance->GetModelIndex() );
 
 	// Increase our model bounds
 	const model_t *pModel = modelinfo->GetModel( pInstance->GetModelIndex() );
