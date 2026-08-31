@@ -43,6 +43,8 @@
 #include "vehicle_base.h"
 #include "envspark.h"
 #include "weapon_flaregun.h"
+#include "particle_parse.h"
+#include "particle_system.h"
 #ifdef MAPBASE
 #include "mapbase/GlobalStrings.h"
 #include "collisionutils.h"
@@ -298,6 +300,8 @@ void CBaseProp::Precache( void )
 
 	PrecacheScriptSound( "Metal.SawbladeStick" );
 	PrecacheScriptSound( "PropaneTank.Burst" );
+	PrecacheScriptSound("Flesh_Bloody.ImpactHard");
+	PrecacheParticleSystem("antlion_spit");
 
 #ifdef HL2_EPISODIC
 	UTIL_PrecacheOther( "env_flare" );
@@ -1957,6 +1961,11 @@ void CBreakableProp::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 		}
 
 		bExploded = true;
+	}
+
+	if (HasInteraction(PROPINTER_PHYSGUN_BREAK_ALIEN)) {
+		EmitSound("Flesh_Bloody.ImpactHard");
+		DispatchParticleEffect("antlion_spit", GetAbsOrigin(), GetAbsAngles());
 	}
 
 	// Allow derived classes to emit special things

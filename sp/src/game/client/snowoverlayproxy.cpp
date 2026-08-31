@@ -78,6 +78,7 @@ void C_SnowyTextureProxy::OnBind( void *pC_BaseEntity )
 		return;
 
 	C_BaseEntity *pEntity = BindArgToEntity( pC_BaseEntity );
+
 	C_BaseViewModel *pViewModel = dynamic_cast<C_BaseViewModel *>( pEntity );
 	if ( pViewModel )
 	{
@@ -85,6 +86,9 @@ void C_SnowyTextureProxy::OnBind( void *pC_BaseEntity )
 		if (pOwner) {
 			m_pBlendFactor->SetFloatValue(pOwner->GetViewModelSnowOverlayAlpha());
 		}
+	}
+	else {
+		return;
 	}
 
 	if ( ToolsEnabled() )

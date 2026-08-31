@@ -11,12 +11,15 @@
 
 #include "ai_basenpc.h"
 #include "hl2_gamerules.h"
+#include "ai_behavior_assault.h"
+#include "ai_baseactor.h"
 
-class CNPC_Houndeye : public CAI_BaseNPC
+class CNPC_Houndeye : public CAI_BaseActor
 {
-	DECLARE_CLASS(CNPC_Houndeye, CAI_BaseNPC);
+	DECLARE_CLASS(CNPC_Houndeye, CAI_BaseActor);
 
 public:
+	bool CreateBehaviors();
 	void Spawn(void);
 	void Precache(void);
 
@@ -63,6 +66,9 @@ public:
 
 	DEFINE_CUSTOM_AI;
 	DECLARE_DATADESC();
+
+protected:
+	CAI_AssaultBehavior			m_AssaultBehavior;
 
 private:
 	bool m_bShouldPatrol;

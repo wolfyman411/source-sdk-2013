@@ -80,6 +80,10 @@ ConVar ai_use_visibility_cache( "ai_use_visibility_cache", "1" );
 #endif
 #endif
 
+
+ConVar sv_weapon_frost_rate("sv_weapon_frost_rate", "0.1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Rate to apply snow overlay to view model");
+ConVar sv_weapon_thaw_rate("sv_weapon_thaw_rate", "0.1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Rate to remove snow overlay to view model");
+
 BEGIN_DATADESC( CBaseCombatCharacter )
 
 #ifdef INVASION_DLL
@@ -119,6 +123,7 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 	DEFINE_FIELD( m_bPreventWeaponPickup, FIELD_BOOLEAN ),
 
     DEFINE_FIELD( m_bShouldDrawSnowOverlay, FIELD_BOOLEAN ),
+	DEFINE_FIELD(m_flCurrentSnowOverlayAlpha, FIELD_FLOAT),
     DEFINE_FIELD( m_flSnowOverlayAlpha, FIELD_FLOAT ),
 
 #ifndef MAPBASE // See CBaseEntity::InputKilledNPC()
@@ -319,8 +324,7 @@ IMPLEMENT_SERVERCLASS_ST(CBaseCombatCharacter, DT_BaseCombatCharacter)
 	SendPropInt( SENDINFO(m_iPowerups), MAX_POWERUPS, SPROP_UNSIGNED ), 
 #endif
 
-    SendPropBool( SENDINFO( m_bShouldDrawSnowOverlay ) ),
-    SendPropFloat( SENDINFO( m_flSnowOverlayAlpha ) ),
+    SendPropFloat( SENDINFO( m_flCurrentSnowOverlayAlpha ) ),
 
 END_SEND_TABLE()
 
@@ -2692,7 +2696,24 @@ bool CBaseCombatCharacter::Weapon_SlotOccupied( CBaseCombatWeapon *pWeapon )
 
 float CBaseCombatCharacter::GetViewModelSnowOverlayAlpha()
 {
-    return GlobalEntity_GetCounter( "global_frost_proxy" );
+	// Frozen Weapon Fade in and out
+	if (m_flNextFade < gpGlobals->curtime) {
+		m_flNextFade = gpGlobals->curtime + 0.1f;
+		if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
+			m_flCurrentSnowOverlayAlpha += sv_weapon_frost_rate.GetFloat();
+			if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
+				m_flCurrentSnowOverlayAlpha = m_flSnowOverlayAlpha;
+			}
+		}
+		else if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
+			m_flCurrentSnowOverlayAlpha -= sv_weapon_thaw_rate.GetFloat();
+			if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
+				m_flCurrentSnowOverlayAlpha = m_flSnowOverlayAlpha;
+			}
+		}
+	}
+
+	return clamp(m_flCurrentSnowOverlayAlpha, 0.0f, 1.0f);
 }
 
 

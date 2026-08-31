@@ -1160,6 +1160,9 @@ void CHL2_Player::PostThink( void )
 	if ( !g_fGameOver && !IsPlayerLockedInPlace() && IsAlive() )
 	{
 		 HandleAdmireGlovesAnimation();
+
+		 // Handle HUD cold effect
+		 GetViewModelSnowOverlayAlpha();
 	}
 
 #ifdef SP_ANIM_STATE

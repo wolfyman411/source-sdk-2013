@@ -17,8 +17,8 @@
 #error weapon_iceaxe.h must not be included in hl2mp. The windows compiler will use the wrong class elsewhere if it is.
 #endif
 
-#define	ICEAXE_RANGE	75.0f
-#define	ICEAXE_REFIRE	0.7f
+#define	ICEAXE_RANGE	100.0f
+#define	ICEAXE_REFIRE	0.55f
 
 //-----------------------------------------------------------------------------
 // CWeaponIceaxe

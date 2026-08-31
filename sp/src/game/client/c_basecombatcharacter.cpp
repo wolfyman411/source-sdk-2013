@@ -20,9 +20,6 @@
 #undef CBaseCombatCharacter	
 #endif
 
-ConVar sv_weapon_frost_rate("sv_weapon_frost_rate", "0.1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Rate to apply snow overlay to view model");
-ConVar sv_weapon_thaw_rate("sv_weapon_thaw_rate", "0.1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Rate to remove snow overlay to view model");
-
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -42,9 +39,6 @@ C_BaseCombatCharacter::C_BaseCombatCharacter()
 	m_GlowAlpha = 1.0f;
 	m_OldGlowAlpha = 1.0f;
 #endif // GLOWS_ENABLE
-
-    m_bShouldDrawSnowOverlay = false;
-    m_flSnowOverlayAlpha = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -96,27 +90,10 @@ void C_BaseCombatCharacter::OnDataChanged( DataUpdateType_t updateType )
 #endif // GLOWS_ENABLE
 }
 
-float C_BaseCombatCharacter::GetViewModelSnowOverlayAlpha( void )
+float C_BaseCombatCharacter::GetViewModelSnowOverlayAlpha(void)
 {
 
-	// Frozen Weapon Fade in and out
-	if (m_flNextFade < gpGlobals->curtime) {
-		m_flNextFade = gpGlobals->curtime + 0.1f;
-		if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
-			m_flCurrentSnowOverlayAlpha += sv_weapon_frost_rate.GetFloat();
-			if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
-				m_flCurrentSnowOverlayAlpha = m_flSnowOverlayAlpha;
-			}
-		}
-		else if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
-			m_flCurrentSnowOverlayAlpha -= sv_weapon_thaw_rate.GetFloat();
-			if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
-				m_flCurrentSnowOverlayAlpha = m_flSnowOverlayAlpha;
-			}
-		}
-	}
-
-    return clamp(m_flCurrentSnowOverlayAlpha,0.0f,1.0f);
+	return m_flCurrentSnowOverlayAlpha;
 }
 
 //-----------------------------------------------------------------------------
@@ -206,8 +183,7 @@ BEGIN_RECV_TABLE(C_BaseCombatCharacter, DT_BaseCombatCharacter)
 	RecvPropInt( RECVINFO( m_iPowerups ) ),
 #endif
 
-    RecvPropBool( RECVINFO( m_bShouldDrawSnowOverlay ) ),
-    RecvPropFloat( RECVINFO( m_flSnowOverlayAlpha ) ),
+    RecvPropFloat( RECVINFO(m_flCurrentSnowOverlayAlpha) ),
 
 END_RECV_TABLE()
 
