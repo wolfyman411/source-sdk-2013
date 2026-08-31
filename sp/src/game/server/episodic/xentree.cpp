@@ -156,6 +156,7 @@ void CXenTree::Attack(void)
 	{
 		CPASAttenuationFilter filter(this);
 		SetActivity(ACT_MELEE_ATTACK);
+		m_flPlaybackRate = speedScale;
 		EmitSound(filter, entindex(), "XenTree.AttackMiss");
 		angryTimer = gpGlobals->curtime + random->RandomFloat(5.0, 15.0);
 	}
@@ -170,6 +171,7 @@ void CXenTree::Think(void)
 	if (gpGlobals->curtime > angryTimer)
 	{
 		SetActivity(ACT_IDLE_ANGRY);
+		m_flPlaybackRate = speedScale;
 		angryTimer = gpGlobals->curtime + random->RandomFloat(5.0, 15.0);
 	}
 
