@@ -54,6 +54,11 @@ public:
 	bool	OnBeginMoveAndShoot();
 	void	SpeakAttacking( void );
 
+    void    NPCThink( void );
+    void    ColdThink( void );
+
+    float   m_flNextColdBreath;
+
 #ifdef MAPBASE
 	// This skips CAI_PlayerAlly's CanFlinch() function since Episodic Alyx can flinch to begin with.
 	virtual bool		CanFlinch( void ) { return CAI_BaseActor::CanFlinch(); }

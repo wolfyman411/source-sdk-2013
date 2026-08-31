@@ -875,6 +875,30 @@ HSCRIPT CAI_BaseNPC::VScriptGetSquad()
 }
 #endif
 
+void CAI_BaseNPC::VScriptAddTemperature( float flTemperature, bool bMultiplyByChangeRate )
+{
+    if ( !bMultiplyByChangeRate )
+    {
+        SetTemperature( m_flTemperature + abs( flTemperature ) );
+    }
+    else
+    {
+        AddTemperature( flTemperature );
+    }
+}
+
+void CAI_BaseNPC::VScriptTakeTemperature( float flTemperature, bool bMultiplyByChangeRate )
+{
+    if ( !bMultiplyByChangeRate )
+    {
+        SetTemperature( m_flTemperature - abs( flTemperature ) );
+    }
+    else
+    {
+        AddTemperature( -flTemperature );
+    }
+}
+
 bool CAI_BaseNPC::PassesDamageFilter( const CTakeDamageInfo &info )
 {
 	if ( ai_use_temperature.GetBool() && IsFrozen() ) {
@@ -4434,7 +4458,7 @@ void CAI_BaseNPC::HandleTemperature( void )
     }
     else if ( IsOverheating() )
     {
-        Ignite( 1.0f , true, 0.0f, true );
+        Ignite( 1.0f, true, 0.0f, false );
     }
 
     // Check to see if the npc has been frozen, if so slowly thaw them.
@@ -4450,11 +4474,16 @@ void CAI_BaseNPC::HandleTemperature( void )
         SetPlaybackRate( playbackRate );
     }
 
-    // Passively try to return to ideal temperature
-    if ( GetTemperature() > GetIdealTemperature() ) {
+    // Passively try to return to ideal temperature, if they've been away from a trigger for like 3 seconds
+    if ( ai_debug_temperature.GetBool() )
+    {
+        DevMsg( "%s -> Current Temp: %.2f, Ideal Temp: %.2f, Next Increment: %.2f (Ready: %i)\n", this->GetDebugName(), GetTemperature(), GetIdealTemperature(), m_flNextTemperatureIncrement, m_flNextTemperatureIncrement < gpGlobals->curtime );
+    }
+
+    if ( GetTemperature() > GetIdealTemperature() && m_flNextTemperatureIncrement < gpGlobals->curtime ) {
         AddTemperature( -0.1f );
     }
-    else if ( GetTemperature() < GetIdealTemperature() ) {
+    else if ( GetTemperature() < GetIdealTemperature() && m_flNextTemperatureIncrement < gpGlobals->curtime ) {
         AddTemperature( 0.1f );
     }
 }
@@ -4471,7 +4500,7 @@ void CAI_BaseNPC::AddTemperature( float newTemp )
 
 void CAI_BaseNPC::NPCThink( void )
 {
-	if ( HasSpawnFlags(SF_NPC_USE_TEMPERATURE) ) {
+	if ( ai_use_temperature.GetBool() && HasSpawnFlags(SF_NPC_USE_TEMPERATURE) ) {
         /*
         if ( IsPlayer() && !g_pGameRules->IsTemperatureEnabled(TEMPERATURE_MODE_PLAYER | TEMPERATURE_MODE_ALL) ) {
             DevMsg( "NPCThink: Temperature disabled for players\n" );
@@ -12331,6 +12360,11 @@ BEGIN_DATADESC( CAI_BaseNPC )
 
 	DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flNextTemperatureIncrement, FIELD_TIME ),
+    DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flIdealTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flTemperatureChangeRate, FIELD_FLOAT ),
 
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
@@ -12444,6 +12478,13 @@ BEGIN_DATADESC( CAI_BaseNPC )
 
 	DEFINE_INPUTFUNC( FIELD_FLOAT, "SetSpeedModifier", InputSetSpeedModifier ),
 
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "AddTemperature", InputAddTemperature),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "TakeTemperature", InputTakeTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputSetIdealTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
+
 	DEFINE_OUTPUT( m_OnStateChange,	"OnStateChange" ),
 #endif
 
@@ -12535,6 +12576,20 @@ BEGIN_ENT_SCRIPTDESC( CAI_BaseNPC, CBaseCombatCharacter, "The base class all NPC
 	DEFINE_SCRIPTFUNC( IsCrouching, "Returns true if the NPC is crouching." )
 	DEFINE_SCRIPTFUNC( Crouch, "Tells the NPC to crouch." )
 	DEFINE_SCRIPTFUNC( Stand, "Tells the NPC to stand if it is crouching." )
+
+
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetTemperature, "GetTemperature", "Get the NPC's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperature, "SetTemperature", "Set the NPC's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptAddTemperature, "AddTemperature", "Add to the NPC's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptTakeTemperature, "TakeTemperature", "Take temperature from the NPC." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetMinTemperature, "SetMinTemperature", "Set the NPC's minimum temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetMaxTemperature, "SetMaxTemperature", "Set the NPC's maximum temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetIdealTemperature, "SetIdealTemperature", "Set the NPC's ideal temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetMinTemperature, "GetMinTemperature", "Get the NPC's minimum temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetMaxTemperature, "GetMaxTemperature", "Get the NPC's maximum temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetIdealTemperature, "GetIdealTemperature", "Get the NPC's ideal temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetTemperatureChangeRate, "GetTemperatureChangeRate", "Get the rate at which the NPC's temperature changes." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperatureChangeRate, "SetTemperatureChangeRate", "Set the rate at which the NPC's temperature changes." )
 
 	// 
 	// Hooks
@@ -13233,6 +13288,7 @@ CAI_BaseNPC::CAI_BaseNPC(void)
 
     m_flIdealTemperature = ( abs( m_flMinTemperature ) + m_flMaxTemperature ) / 2.0f;
 	m_flTemperature = m_flIdealTemperature;
+    m_flNextTemperatureIncrement = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
