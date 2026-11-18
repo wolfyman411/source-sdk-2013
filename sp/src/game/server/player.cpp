@@ -278,7 +278,9 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_StuckLast, FIELD_INTEGER ),
 
     DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+    DEFINE_FIELD( m_flIdealTemperature, FIELD_FLOAT ),
     DEFINE_FIELD( m_flNextTemperatureDamage, FIELD_FLOAT ),
+
 	DEFINE_FIELD( m_nButtons, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonLast, FIELD_INTEGER ),
 	DEFINE_FIELD( m_afButtonPressed, FIELD_INTEGER ),
@@ -476,6 +478,11 @@ BEGIN_DATADESC( CBasePlayer )
 #ifdef MAPBASE
 	DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetSuppressAttacks", InputSetSuppressAttacks ),
 #endif
+        
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputSetIdealTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperature", InputSetTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "TakeTemperature", InputTakeTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "AddTemperature", InputAddTemperature ),
 
 	DEFINE_FIELD( m_nNumCrouches, FIELD_INTEGER ),
 	DEFINE_FIELD( m_bDuckToggled, FIELD_BOOLEAN ),
@@ -570,6 +577,14 @@ BEGIN_ENT_SCRIPTDESC( CBasePlayer, CBaseCombatCharacter, "The player entity." )
 		DEFINE_SCRIPTHOOK_PARAM( "entity", FIELD_HSCRIPT )
 		DEFINE_SCRIPTHOOK_PARAM( "is_radius", FIELD_BOOLEAN )
 	END_SCRIPTHOOK()
+
+
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetTemperature, "GetTemperature", "Gets the player's current temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptAddTemperature, "AddTemperature", "Adds temperature to the player." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptTakeTemperature, "TakeTemperature", "Takes temperature from the player." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetIdealTemperature, "GetIdealTemperature", "Gets the player's ideal temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptSetTemperature, "SetTemperature", "Sets the player's temperature." )
+    DEFINE_SCRIPTFUNC_NAMED( VScriptGetTimeNextTemperatureDamage, "GetTimeNextTemperatureDamage", "Gets the time until the player takes temperature damage." )
 
 END_SCRIPTDESC();
 #else
@@ -797,6 +812,7 @@ CBasePlayer::CBasePlayer( )
 
     m_flTemperature = 70.0f;
     m_flNextTemperatureDamage = 0.0f;
+    m_flIdealTemperature = 70.0f;
 }
 
 void CBasePlayer::AddTemperature( float increment )
@@ -4025,31 +4041,68 @@ void CBasePlayer::HandleFuncTrain(void)
 	}
 }
 
+// ConVar sv_player_ideal_temperature( "sv_player_ideal_temperature", "70.0", FCVAR_REPLICATED, "Ideal temperature for players" ); // This is in Fahrenheit, because wolfy fucking hates us
+
+ConVar sv_player_use_temperature( "sv_player_use_temperature", "1", FCVAR_REPLICATED, "Whether or not to use the temperature system" );
+ConVar sv_player_temperature_damage_interval( "sv_player_temperature_damage_interval", "1.0", FCVAR_REPLICATED, "Interval in seconds between temperature damage ticks" );
+ConVar sv_player_temperature_damage( "sv_player_temperature_damage", "1", FCVAR_REPLICATED, "Damage done by high/low temperatures" );
+
 void CBasePlayer::HandleTemperature( void )
 {
-    DevMsg( 2, "Temp: %.1f\n", GetTemperature() );
-    if ( GetTemperature() > 100 || GetTemperature() < 0 && m_flNextTemperatureDamage < gpGlobals->curtime )
+    if ( !sv_player_use_temperature.GetBool() ) { return; }
+
+    float playerTemp = GetTemperature();
+    float idealTemperature = GetIdealTemperature();
+
+    DevMsg( 2, "Player Temp: %.1f\n", playerTemp );
+
+    if ( ( playerTemp > idealTemperature * 1.1f || playerTemp < 0 ) && m_flNextTemperatureDamage < gpGlobals->curtime )
     {
         CTakeDamageInfo info;
-        info.SetDamage( 1 );
+        info.SetDamage( sv_player_temperature_damage.GetInt() );
         info.SetDamageType( DMG_SLOWBURN );
         info.SetAttacker( this );
         info.SetInflictor( this );
 
+        Vector forward;
+        AngleVectors( GetAbsAngles(), &forward, NULL, NULL );
+
+        info.SetDamageForce( -forward );
+
         TakeDamage( info );
 
-        m_flNextTemperatureDamage = gpGlobals->curtime + 1.0f;
+        m_flNextTemperatureDamage = gpGlobals->curtime + sv_player_temperature_damage_interval.GetFloat();
     }
 
     // Passively try to return to ideal temperature
-    if ( GetTemperature() > 70.0f )
+    if ( playerTemp > idealTemperature )
     {
-        AddTemperature( -0.1f );
+        //AddTemperature( -0.1f );
     }
-    else if ( GetTemperature() < 70.0f )
+    else if ( playerTemp < idealTemperature )
     {
-        AddTemperature( 0.1f );
+        //AddTemperature( 0.1f );
     }
+}
+
+void CBasePlayer::InputSetTemperature( inputdata_t& inputdata )
+{
+    SetTemperature( inputdata.value.Float() );
+}
+
+void CBasePlayer::InputAddTemperature( inputdata_t& inputdata )
+{
+    AddTemperature( inputdata.value.Float() );
+}
+
+void CBasePlayer::InputTakeTemperature( inputdata_t& inputdata )
+{
+    AddTemperature( -inputdata.value.Float() );
+}
+
+void CBasePlayer::InputSetIdealTemperature( inputdata_t& inputdata )
+{
+    m_flIdealTemperature = inputdata.value.Float();
 }
 
 void CBasePlayer::PreThink(void)
@@ -7198,6 +7251,30 @@ void CBasePlayer::ShowCrosshair( bool bShow )
 bool CBasePlayer::ScriptIsPlayerNoclipping(void)
 {
 	return (GetMoveType() == MOVETYPE_NOCLIP);
+}
+
+void CBasePlayer::VScriptAddTemperature( float flTemperature, bool bMultiplyByChangeRate )
+{
+    if ( !bMultiplyByChangeRate )
+    {
+        SetTemperature( m_flTemperature + abs( flTemperature ) );
+    }
+    else
+    {
+        AddTemperature( flTemperature );
+    }
+}
+
+void CBasePlayer::VScriptTakeTemperature( float flTemperature, bool bMultiplyByChangeRate )
+{
+    if ( !bMultiplyByChangeRate )
+    {
+        SetTemperature( m_flTemperature - abs( flTemperature ) );
+    }
+    else
+    {
+        AddTemperature( -flTemperature );
+    }
 }
 
 #ifdef MAPBASE_VSCRIPT

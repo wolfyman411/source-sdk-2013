@@ -49,6 +49,10 @@ public:
 	bool		IsArmorless() { return m_fIsArmourless; }
 	bool		m_fIsArmourless;
 
+    float       m_flNextColdBreath;
+    void        NPCThink( void );
+    void        ColdThink( void );
+
 private:
 	bool		ShouldHitPlayer( const Vector &targetDir, float targetDist );
 

@@ -5692,11 +5692,11 @@ class CTriggerFreeze : public CBaseTrigger
 
         virtual void InputTemperatureIncrementer( inputdata_t& inputdata );
         virtual void InputIdealTemperature( inputdata_t& inputdata );
+        virtual void InputTemperatureApplicationDelay( inputdata_t& inputdata );
 
         float	m_flTemperatureIncrementer;
         float	m_flIdealTemperature;
-
-        
+        float   m_flTemperatureApplicationDelay;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_freeze, CTriggerFreeze );
@@ -5706,15 +5706,25 @@ BEGIN_DATADESC( CTriggerFreeze )
 
 	DEFINE_KEYFIELD( m_flTemperatureIncrementer, FIELD_FLOAT, "TemperatureIncrementer"),
     DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" ),
+    DEFINE_KEYFIELD( m_flTemperatureApplicationDelay, FIELD_FLOAT, "TemperatureApplicationDelay" ),
 
     DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperatureIncrementer", InputTemperatureIncrementer ),
     DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputIdealTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetTemperatureApplicationDelay", InputTemperatureApplicationDelay ),
 END_DATADESC()
 
 CTriggerFreeze::CTriggerFreeze()
 {
     m_flTemperatureIncrementer = 1.0f;
     m_flIdealTemperature = 70.0f; // This is in Fahrenheit
+    m_flTemperatureApplicationDelay = 0.3f;
+
+    if ( !HasSpawnFlags(SF_TRIGGER_ALLOW_NPCS) )
+    {
+        // TODO: Remove this warning for public release.
+        ConDColorMsg( Color( 90, 255, 165, 255 ), "A trigger_freeze in this map has been spawned in, without the NPC flag. Please let env_wind know, and provide the map name and location.\n" );
+        AddSpawnFlags( SF_TRIGGER_ALLOW_NPCS );
+    }
 }
 
 void CTriggerFreeze::InputTemperatureIncrementer( inputdata_t& inputdata )
@@ -5727,23 +5737,28 @@ void CTriggerFreeze::InputIdealTemperature( inputdata_t& inputdata )
     m_flIdealTemperature = inputdata.value.Float();
 }
 
+void CTriggerFreeze::InputTemperatureApplicationDelay( inputdata_t& inputdata )
+{
+    m_flTemperatureApplicationDelay = inputdata.value.Float();
+}
+
 void CTriggerFreeze::Spawn( void ) {
 	BaseClass::Spawn();
 
 	InitTrigger();
 
-    SetNextThink( gpGlobals->curtime + 1.0f );
+    SetNextThink( gpGlobals->curtime );
 	SetThink( &CTriggerFreeze::Think );
 }
 
 void CTriggerFreeze::Think( void )
 {
+    static ConVarRef ai_use_temperature( "ai_use_temperature" );
+    static ConVarRef ai_debug_temperature( "ai_debug_temperature" );
+
     for ( CBaseEntity* pOther : m_hTouchingEntities )
     {
-        if ( !pOther )
-        {
-            continue;
-        }
+        if ( !pOther ) { continue; }
 
         CBasePlayer* pPlayer = ToBasePlayer( pOther );
         if ( pPlayer )
@@ -5756,13 +5771,12 @@ void CTriggerFreeze::Think( void )
             }
 
             pPlayer->AddTemperature( m_flTemperatureIncrementer );
-            continue; // move to the next entity
         }
 
         CAI_BaseNPC* pNPC = dynamic_cast< CAI_BaseNPC* >( pOther );
         if ( pNPC )
         {
-            if ( !pNPC->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { continue; }
+            if ( !ai_use_temperature.GetBool() || !pNPC->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { continue; }
 
             float flCurrentTemp = pNPC->GetTemperature();
             if ( ( m_flTemperatureIncrementer < 0.0f && flCurrentTemp < m_flIdealTemperature ) || ( m_flTemperatureIncrementer > 0.0f && flCurrentTemp > m_flIdealTemperature ) )
@@ -5770,9 +5784,15 @@ void CTriggerFreeze::Think( void )
                 continue;
             }
 
+            if ( ai_debug_temperature.GetBool() )
+            {
+                DevLog( "[TRIGGER FREEZE] %s's temperature changed from %.2f to %.2f\n", pNPC->GetDebugName(), flCurrentTemp, flCurrentTemp + m_flTemperatureIncrementer );
+            }
+
             pNPC->AddTemperature( m_flTemperatureIncrementer );
+            pNPC->m_flNextTemperatureIncrement = gpGlobals->curtime + 3;
         }
     }
 
-    SetNextThink( gpGlobals->curtime + 1.0f );
+    SetNextThink( gpGlobals->curtime + MAX( 0.01f, this->m_flTemperatureApplicationDelay ) );
 }

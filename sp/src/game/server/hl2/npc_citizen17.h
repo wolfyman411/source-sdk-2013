@@ -115,7 +115,7 @@ public:
 
     void            ColdThink();
 
-    CNetworkVar( float, m_flNextColdBreath );
+    float           m_flNextColdBreath;
 protected:
     void            NPCThink();
 public:

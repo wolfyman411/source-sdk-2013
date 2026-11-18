@@ -24,6 +24,9 @@
 #include "hl2_gamerules.h"
 #include "gameweaponmanager.h"
 #include "vehicle_base.h"
+#include "IEffects.h"
+#include "particle_parse.h"
+#include "te_particlesystem.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -51,6 +54,7 @@ LINK_ENTITY_TO_CLASS( npc_combine_s, CNPC_CombineS );
 extern Activity ACT_WALK_EASY;
 extern Activity ACT_WALK_MARCH;
 
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -67,10 +71,10 @@ void CNPC_CombineS::Spawn( void )
 		SetKickDamage( sk_combine_guard_kick.GetFloat() );
 	}
 	else if ( IsArmorless() ) {
-		SetHealth( sk_combine_s_health.GetFloat() / 2 );
-		SetMaxHealth( sk_combine_s_health.GetFloat() / 2 );
+		SetHealth( sk_combine_s_health.GetFloat() * 0.5 );
+		SetMaxHealth( sk_combine_s_health.GetFloat() * 0.5 );
 		// bloodycop6385 :: Let's assume the lads are not entirely as strong as the finished product, cus they're naked.
-		SetKickDamage( sk_combine_s_kick.GetFloat() / 2 );
+		SetKickDamage( sk_combine_s_kick.GetFloat() * 0.5 );
 
 		GetExpresser()->SetVoicePitch( random->RandomInt( 70, 85 ) );
 	}
@@ -84,6 +88,8 @@ void CNPC_CombineS::Spawn( void )
 	CapabilitiesAdd( bits_CAP_ANIMATEDFACE | bits_CAP_TURN_HEAD );
 	CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
 	CapabilitiesAdd( bits_CAP_DOORS_GROUP );
+
+    m_flNextColdBreath = 0.0f;
 
 	BaseClass::Spawn();
 
@@ -135,6 +141,7 @@ void CNPC_CombineS::Precache()
 	UTIL_PrecacheOther( "item_healthvial" );
 	UTIL_PrecacheOther( "weapon_frag" );
 	UTIL_PrecacheOther( "item_ammo_ar2_altfire" );
+    PrecacheParticleSystem( "npc_coldbreath" );
 
 	BaseClass::Precache();
 }
@@ -468,3 +475,26 @@ DEFINE_KEYFIELD( m_iUseMarch, FIELD_INTEGER, "usemarch" ),
 
 END_DATADESC()
 #endif
+
+void CNPC_CombineS::NPCThink( void )
+{
+    BaseClass::NPCThink();
+    static ConVarRef ai_use_temperature( "ai_use_temperature" );
+    if ( !ai_use_temperature.GetBool() || !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
+
+    DevMsg( "%s\t%f\t%f\n", this->GetDebugName(), this->GetTemperature(), this->GetIdealTemperature() );
+    if ( this->GetTemperature() < this->GetIdealTemperature() )
+    {
+        ColdThink();
+    }
+}
+
+void CNPC_CombineS::ColdThink( void )
+{
+    if ( m_flNextColdBreath < gpGlobals->curtime )
+    {
+        DevMsg( "Breath from %s", this->GetDebugName() );
+        DispatchParticleEffect( "npc_coldbreath", PATTACH_POINT, this, "mouth", false );
+        m_flNextColdBreath = gpGlobals->curtime + RandomFloat( 1.0f, 2.0f );
+    }
+}
