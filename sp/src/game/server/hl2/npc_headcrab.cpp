@@ -126,6 +126,8 @@ enum
 
 	SCHED_HEADCRAB_CEILING_WAIT,
 	SCHED_HEADCRAB_CEILING_DROP,
+
+    SCHED_HEADCRAB_FLIP,
 };
 
 
@@ -165,6 +167,7 @@ enum
 	COND_HEADCRAB_ILLEGAL_GROUNDENT,
 	COND_HEADCRAB_BARNACLED,
 	COND_HEADCRAB_UNHIDE,
+    COND_HEADCRAB_FLIPPED,
 };
 
 //=========================================================
@@ -184,6 +187,7 @@ int ACT_HEADCRAB_CEILING_IDLE;
 int ACT_HEADCRAB_CEILING_DETACH;
 int ACT_HEADCRAB_CEILING_FALL;
 int ACT_HEADCRAB_CEILING_LAND;
+int ACT_HEADCRAB_FLIP;
 
 
 //-----------------------------------------------------------------------------
@@ -1965,6 +1969,13 @@ int CBaseHeadcrab::SelectSchedule( void )
 		return SCHED_HEADCRAB_BARNACLED;
 	}
 
+    if ( HasCondition( COND_HEADCRAB_FLIPPED ) )
+    {
+        ClearCondition( COND_HEADCRAB_FLIPPED );
+
+        return SCHED_HEADCRAB_FLIP;
+    }
+
 	switch ( m_NPCState )
 	{
 		case NPC_STATE_IDLE:
@@ -2071,21 +2082,42 @@ void CBaseHeadcrab::TraceAttack( const CTakeDamageInfo &info, const Vector &vecD
 	// Ignore if we're in a dynamic scripted sequence
 	if ( info.GetDamageType() & DMG_PHYSGUN && !IsRunningDynamicInteraction() )
 	{
-		Vector	puntDir = ( info.GetDamageForce() * 1000.0f );
+        if ( hl2_episodic.GetBool() )
+        {
+            if ( GetFlags() & FL_ONGROUND )
+            {
+                SetCondition( COND_HEADCRAB_FLIPPED );
+            }
 
-		newInfo.SetDamage( m_iMaxHealth / 3.0f );
+            Vector vecShoveDir = vecDir;
+            vecShoveDir.z = 0.0f;
 
-		if( info.GetDamage() >= GetHealth() )
-		{
-			// This blow will be fatal, so scale the damage force
-			// (it's a unit vector) so that the ragdoll will be 
-			// affected.
-			newInfo.SetDamageForce( info.GetDamageForce() * 3000.0f );
-		}
+            Vector vecForce = ( vecShoveDir * random->RandomInt( 500.0f, 1000.0f ) ) + Vector( 0, 0, 64.0f );
+
+            ApplyAbsVelocityImpulse( vecForce );
+            SetGroundEntity( NULL );
+        }
+        else
+        {
+            // Headcrabs get launched further by the physgun in EPisodic
+            Vector	puntDir = ( info.GetDamageForce() * 1000.0f );
+
+            newInfo.SetDamage( m_iMaxHealth / 3.0f );
+
+            if ( info.GetDamage() >= GetHealth() )
+            {
+                // This blow will be fatal, so scale the damage force
+                // (it's a unit vector) so that the ragdoll will be 
+                // affected.
+                newInfo.SetDamageForce( info.GetDamageForce() * 3000.0f );
+            }
+
+            SetGroundEntity( NULL );
+            ApplyAbsVelocityImpulse( puntDir );
+        }
 
 		PainSound( newInfo );
-		SetGroundEntity( NULL );
-		ApplyAbsVelocityImpulse( puntDir );
+		
 	}
 
 	BaseClass::TraceAttack( newInfo, vecDir, ptr, pAccumulator );
@@ -2452,6 +2484,10 @@ void CBaseHeadcrab::CreateDust( bool placeDecal )
 	}
 }
 
+inline bool CBaseHeadcrab::IsFlipped( void )
+{
+    return ( GetActivity() == ACT_HEADCRAB_FLIP );
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -2574,6 +2610,7 @@ void CHeadcrab::BiteSound( void )
 {
 	EmitSound( "NPC_HeadCrab.Bite" );
 }
+
 
 
 //---------------------------------------------------------
@@ -3666,6 +3703,7 @@ AI_BEGIN_CUSTOM_NPC( npc_headcrab, CBaseHeadcrab )
 	DECLARE_CONDITION( COND_HEADCRAB_ILLEGAL_GROUNDENT )
 	DECLARE_CONDITION( COND_HEADCRAB_BARNACLED )
 	DECLARE_CONDITION( COND_HEADCRAB_UNHIDE )
+    DECLARE_CONDITION( COND_HEADCRAB_FLIPPED )
 
 	//Adrian: events go here
 	DECLARE_ANIMEVENT( AE_HEADCRAB_JUMPATTACK )
@@ -3694,6 +3732,19 @@ AI_BEGIN_CUSTOM_NPC( npc_headcrab, CBaseHeadcrab )
 		"		COND_ENEMY_OCCLUDED"
 		"		COND_NO_PRIMARY_AMMO"
 	)
+
+    DEFINE_SCHEDULE
+    (
+    SCHED_HEADCRAB_FLIP,
+
+    "	Tasks"
+    "		TASK_STOP_MOVING	0"
+    "		TASK_RESET_ACTIVITY		0"
+    "		TASK_PLAY_SEQUENCE		ACTIVITY:ACT_HEADCRAB_FLIP"
+
+    "	Interrupts"
+    "		COND_TASK_FAILED"
+    )
 
 	//=========================================================
 	//
