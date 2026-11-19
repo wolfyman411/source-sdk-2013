@@ -12359,12 +12359,12 @@ BEGIN_DATADESC( CAI_BaseNPC )
 	DEFINE_FIELD( m_bPlayerAvoidState,			FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( m_bHasFrozen, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT ),
+	DEFINE_FIELD( m_flTemperature, FIELD_FLOAT, "Temperature" ),
     DEFINE_FIELD( m_flNextTemperatureIncrement, FIELD_TIME ),
-    DEFINE_FIELD( m_flMaxTemperature, FIELD_FLOAT ),
-    DEFINE_FIELD( m_flMinTemperature, FIELD_FLOAT ),
-    DEFINE_FIELD( m_flIdealTemperature, FIELD_FLOAT ),
-    DEFINE_FIELD( m_flTemperatureChangeRate, FIELD_FLOAT ),
+    DEFINE_KEYFIELD( m_flMaxTemperature, FIELD_FLOAT, "MaxTemperature" ),
+    DEFINE_KEYFIELD( m_flMinTemperature, FIELD_FLOAT, "MinTemperature" ),
+    DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" ),
+    DEFINE_FIELD( m_flTemperatureChangeRate, FIELD_FLOAT, "TemperatureChangeRate" ),
 
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
