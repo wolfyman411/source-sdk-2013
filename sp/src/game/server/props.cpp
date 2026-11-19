@@ -1943,7 +1943,7 @@ void CBreakableProp::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 		}
 	}
 
-	if ( m_explodeDamage > 0 || m_explodeRadius > 0 )
+	if ((m_explodeDamage > 0 || m_explodeRadius > 0) && !HasInteraction(PROPINTER_PHYSGUN_BREAK_ALIEN))
 	{
 		if( HasInteraction( PROPINTER_PHYSGUN_BREAK_EXPLODE ) )
 		{
@@ -1964,8 +1964,18 @@ void CBreakableProp::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 	}
 
 	if (HasInteraction(PROPINTER_PHYSGUN_BREAK_ALIEN)) {
+		ExplosionCreate(WorldSpaceCenter(), angles, pAttacker, m_explodeDamage, m_explodeRadius,
+			SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE | SF_ENVEXPLOSION_SURFACEONLY | SF_ENVEXPLOSION_NOSOUND | SF_ENVEXPLOSION_NOPARTICLES | SF_ENVEXPLOSION_NOFIREBALL | SF_ENVEXPLOSION_GENERIC_DAMAGE | SF_ENVEXPLOSION_NODECAL,
+			0.0f, this);
 		EmitSound("Flesh_Bloody.ImpactHard");
 		DispatchParticleEffect("antlion_spit", GetAbsOrigin(), GetAbsAngles());
+		trace_t tr;
+		Vector vecStart = WorldSpaceCenter();
+		Vector vecEnd = vecStart - Vector(0, 0, 64);
+		UTIL_TraceLine(vecStart, vecEnd, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr);
+		if (tr.fraction != 1.0) {
+			UTIL_DecalTrace(&tr, "BeerSplash");
+		}
 	}
 
 	// Allow derived classes to emit special things
