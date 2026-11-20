@@ -32,6 +32,7 @@
 #include "hl2_shareddefs.h"
 #include "particle_parse.h"
 #include "vehicle_base.h"
+#include "ai_behavior.h"
 
 // houndeye does 20 points of damage spread over a sphere 384 units in diameter, and each additional 
 // squad member increases the BASE damage by 110%, per the spec.
@@ -117,6 +118,12 @@ enum HoundEyeSquadSlots
 {
 	SQUAD_SLOTS_HOUND_ATTACK = LAST_SHARED_SQUADSLOT
 };
+
+bool CNPC_Houndeye::CreateBehaviors()
+{
+	AddBehavior(&m_AssaultBehavior);
+	return BaseClass::CreateBehaviors();
+}
 
 
 //=========================================================
@@ -1050,6 +1057,11 @@ int CNPC_Houndeye::SelectSchedule(void)
 
 		break;
 	}
+	}
+	if (m_AssaultBehavior.CanSelectSchedule())
+	{
+		DeferSchedulingToBehavior(&m_AssaultBehavior);
+		return BaseClass::SelectSchedule();
 	}
 
 	return BaseClass::SelectSchedule();

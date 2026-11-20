@@ -43,6 +43,8 @@
 #include "vehicle_base.h"
 #include "envspark.h"
 #include "weapon_flaregun.h"
+#include "particle_parse.h"
+#include "particle_system.h"
 #ifdef MAPBASE
 #include "mapbase/GlobalStrings.h"
 #include "collisionutils.h"
@@ -298,6 +300,8 @@ void CBaseProp::Precache( void )
 
 	PrecacheScriptSound( "Metal.SawbladeStick" );
 	PrecacheScriptSound( "PropaneTank.Burst" );
+	PrecacheScriptSound("Flesh_Bloody.ImpactHard");
+	PrecacheParticleSystem("antlion_spit");
 
 #ifdef HL2_EPISODIC
 	UTIL_PrecacheOther( "env_flare" );
@@ -1939,7 +1943,7 @@ void CBreakableProp::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 		}
 	}
 
-	if ( m_explodeDamage > 0 || m_explodeRadius > 0 )
+	if ((m_explodeDamage > 0 || m_explodeRadius > 0) && !HasInteraction(PROPINTER_PHYSGUN_BREAK_ALIEN))
 	{
 		if( HasInteraction( PROPINTER_PHYSGUN_BREAK_EXPLODE ) )
 		{
@@ -1957,6 +1961,21 @@ void CBreakableProp::Break( CBaseEntity *pBreaker, const CTakeDamageInfo &info )
 		}
 
 		bExploded = true;
+	}
+
+	if (HasInteraction(PROPINTER_PHYSGUN_BREAK_ALIEN)) {
+		ExplosionCreate(WorldSpaceCenter(), angles, pAttacker, m_explodeDamage, m_explodeRadius,
+			SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSMOKE | SF_ENVEXPLOSION_SURFACEONLY | SF_ENVEXPLOSION_NOSOUND | SF_ENVEXPLOSION_NOPARTICLES | SF_ENVEXPLOSION_NOFIREBALL | SF_ENVEXPLOSION_GENERIC_DAMAGE | SF_ENVEXPLOSION_NODECAL,
+			0.0f, this);
+		EmitSound("Flesh_Bloody.ImpactHard");
+		DispatchParticleEffect("antlion_spit", GetAbsOrigin(), GetAbsAngles());
+		trace_t tr;
+		Vector vecStart = WorldSpaceCenter();
+		Vector vecEnd = vecStart - Vector(0, 0, 64);
+		UTIL_TraceLine(vecStart, vecEnd, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr);
+		if (tr.fraction != 1.0) {
+			UTIL_DecalTrace(&tr, "BeerSplash");
+		}
 	}
 
 	// Allow derived classes to emit special things
@@ -3053,6 +3072,7 @@ void CInteractableProp::PushThink()
 LINK_ENTITY_TO_CLASS( physics_prop, CPhysicsProp );
 LINK_ENTITY_TO_CLASS( prop_physics, CPhysicsProp );	
 LINK_ENTITY_TO_CLASS( prop_physics_override, CPhysicsProp );	
+LINK_ENTITY_TO_CLASS( prop_physics_frozen, CPhysicsProp ); // For frozen NPCs. -TheMaster974
 
 BEGIN_DATADESC( CPhysicsProp )
 
@@ -3477,6 +3497,12 @@ void CPhysicsProp::OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t Reaso
 
 		PhysSetGameFlags( VPhysicsGetObject(), FVPHYSICS_WAS_THROWN );
 		m_bFirstCollisionAfterLaunch = true;
+
+		// If we are a frozen prop, break when punted. -TheMaster974
+		if (FClassnameIs(this, "prop_physics_frozen"))
+		{
+            this->SetHealth( 1 );
+		}
 	}
 	else if ( Reason == THROWN_BY_PLAYER )
 	{

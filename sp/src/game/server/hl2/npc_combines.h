@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -24,7 +24,7 @@ class CNPC_CombineS : public CNPC_Combine
 	DECLARE_DATADESC();
 #endif
 
-public: 
+public:
 	void		Spawn( void );
 	void		Precache( void );
 	void		DeathSound( const CTakeDamageInfo &info );
@@ -48,8 +48,13 @@ public:
 
 	virtual	bool		AllowedToIgnite( void ) { return true; }
 
-	bool		IsArmorless() { return m_fIsArmorless; }
-	bool		m_fIsArmorless;
+	bool		IsArmorless() { return m_fIsArmourless; }
+	bool		m_fIsArmourless;
+
+    float       m_flNextColdBreath;
+    void        NPCThink( void );
+    void        ColdThink( void );
+
 private:
 	bool		ShouldHitPlayer( const Vector &targetDir, float targetDist );
 

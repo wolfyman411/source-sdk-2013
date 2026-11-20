@@ -50,6 +50,7 @@
  
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+#include <string>
 
 extern ConVar sk_npc_head;
 
@@ -2603,6 +2604,9 @@ void CNPC_BaseZombie::ReleaseHeadcrab( const Vector &vecOrigin, const Vector &ve
 			if (iCrabAttachment > 0 && pAnimatingGib )
 			{
 				SetHeadcrabSpawnLocation( iCrabAttachment, pAnimatingGib );
+
+				// Update to ensure model and skins are correct
+				UpdateHeadcrabModel(pAnimatingGib, this->GetSkin());
 			}
 
 #ifdef MAPBASE
@@ -2730,6 +2734,9 @@ void CNPC_BaseZombie::ReleaseHeadcrab( const Vector &vecOrigin, const Vector &ve
 
 		CopyRenderColorTo( pCrab );
 
+
+		// Update to ensure model and skins are correct
+		UpdateHeadcrabModel(pCrab, this->GetSkin());
 		pCrab->Activate();
 
 #ifdef MAPBASE
@@ -2748,6 +2755,10 @@ void CNPC_BaseZombie::ReleaseHeadcrab( const Vector &vecOrigin, const Vector &ve
 	}
 }
 
+void CNPC_BaseZombie::UpdateHeadcrabModel(CBaseAnimating* pCrab, int skin) {
+	pCrab->SetSkin(skin);
+	pCrab->SetModel(GetHeadcrabModel());
+}
 
 
 void CNPC_BaseZombie::SetHeadcrabSpawnLocation( int iCrabAttachment, CBaseAnimating *pCrab )

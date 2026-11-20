@@ -31,6 +31,7 @@ IMPLEMENT_CLIENTCLASS_DT( C_AI_BaseNPC, DT_AI_BaseNPC, CAI_BaseNPC )
 	RecvPropInt( RECVINFO( m_bSpeedModActive ) ),
 	RecvPropBool( RECVINFO( m_bImportanRagdoll ) ),
 	RecvPropFloat( RECVINFO( m_flTimePingEffect ) ),
+    RecvPropBool( RECVINFO( m_bHasFrozen ) ),
 END_RECV_TABLE()
 
 extern ConVar cl_npc_speedmod_intime;

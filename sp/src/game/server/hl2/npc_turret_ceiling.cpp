@@ -1444,7 +1444,7 @@ protected:
 	const char *GetMoveSound()		{ return "NPC_LabTurret.Move"; }
 	const char *GetActiveSound()	{ return "NPC_LabTurret.Active"; }
 	const char *GetAlertSound()		{ return "NPC_LabTurret.Alert"; }
-	const char *GetShootSound()		{ return "NPC_LabTurret.ShotSounds"; }
+	const char *GetShootSound()		{ return STRING(m_szCustomSound); }
 	const char *GetPingSound()		{ return "NPC_LabTurret.Ping"; }
 	const char *GetDieSound()		{ return "NPC_LabTurret.Die"; }
 
@@ -1463,6 +1463,7 @@ protected:
 #endif
 
 	bool		m_bMirrored;
+	string_t	m_szCustomSound;
 
 	DECLARE_DATADESC();
 };
@@ -1470,6 +1471,7 @@ protected:
 BEGIN_DATADESC( CNPC_LabTurret )
 
 	DEFINE_KEYFIELD( m_bManualArmYaw, FIELD_BOOLEAN, "ManualArmYaw" ),
+	DEFINE_KEYFIELD (m_szCustomSound, FIELD_STRING, "TurretSound"),
 #ifdef LAB_TURRET_MANUAL_YAW
 	DEFINE_KEYFIELD( m_flStoredArmYaw, FIELD_FLOAT, "ArmYaw" ),
 	DEFINE_FIELD( m_flGoalArmYaw, FIELD_FLOAT ),

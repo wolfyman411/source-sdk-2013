@@ -18,6 +18,7 @@
 #include "hintsystem.h"
 #include "SoundEmitterSystem/isoundemittersystembase.h"
 #include "util_shared.h"
+#include "globalstate.h"
 
 #if defined USES_ECON_ITEMS
 #include "game_item_schema.h"
@@ -663,6 +664,8 @@ public:
 
 	virtual bool			ShouldAnnounceAchievement( void ){ return true; }
 
+    CNetworkVar( float, m_flTemperature );
+
 #if defined USES_ECON_ITEMS
 	// Wearables
 	virtual void			EquipWearable( CEconWearable *pItem );
@@ -829,13 +832,38 @@ public:
 	void	InputSetSuppressAttacks( inputdata_t &inputdata );
 #endif
 
+    virtual bool    ShouldTakeTemperature( void ) const 
+    { 
+        // comment@bloodycop6385 -- dunno
+        return true;
+    }
+
+    void                InputSetIdealTemperature( inputdata_t& inputdata );
+    void                InputSetTemperature( inputdata_t& inputdata );
+    void                InputTakeTemperature( inputdata_t& inputdata );
+    void                InputAddTemperature( inputdata_t& inputdata );
+
+    float               m_flIdealTemperature = 70.0f; // Fahrenheit
+    float               m_flNextTemperatureDamage;
+
+    virtual float       GetTemperature() const { return m_flTemperature; }
+    virtual float       GetIdealTemperature() const { return m_flIdealTemperature; }
+    virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
+    virtual void        AddTemperature( float flTemp );
+    virtual void        HandleTemperature( void );
+
+    float               VScriptGetTemperature( void ) { return GetTemperature(); }
+    void                VScriptAddTemperature( float flTemperature, bool bMultiplyByChangeRate );
+    void                VScriptTakeTemperature( float flTemperature, bool bMultiplyByChangeRate );
+    float               VScriptGetIdealTemperature( void ) { return GetIdealTemperature(); }
+    float               VScriptGetTimeNextTemperatureDamage( void ) { return m_flNextTemperatureDamage; }
+    void                VScriptSetTemperature( float newTemp ) { SetTemperature( newTemp ); }
+
 	surfacedata_t *GetSurfaceData( void ) { return m_pSurfaceData; }
 	void SetLadderNormal( Vector vecLadderNormal ) { m_vecLadderNormal = vecLadderNormal; }
 
 	// Here so that derived classes can use the expresser
 	virtual CAI_Expresser *GetExpresser() { return NULL; };
-
-    void    InputSnowyHands( inputdata_t& inputdata );
 
 #if !defined(NO_STEAM)
 	//----------------------------
@@ -972,8 +1000,6 @@ public:
 #ifdef MAPBASE
 	CNetworkVar( bool, m_bInTriggerFall );
 #endif
-
-    CNetworkVar( bool, m_bShouldDrawSnowOverlay );
 
 private:
 

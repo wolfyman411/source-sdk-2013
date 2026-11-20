@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	$basetexture "detail/snow_hands"
+	$translucent "1"
+}

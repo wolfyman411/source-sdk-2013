@@ -80,6 +80,7 @@ void CNPC_WpnScanner::Spawn( void )
 	SetMaxHealth( GetHealth() );
 
 	CapabilitiesAdd( bits_CAP_INNATE_MELEE_ATTACK1 );
+	CapabitilitesAdd( bits_CAP_INNATE_RANGE_ATTACK1 );
 
 	m_iMuzzleAttachment = LookupAttachment( "light" );
 

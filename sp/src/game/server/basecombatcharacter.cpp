@@ -80,6 +80,10 @@ ConVar ai_use_visibility_cache( "ai_use_visibility_cache", "1" );
 #endif
 #endif
 
+
+ConVar sv_weapon_frost_rate("sv_weapon_frost_rate", "0.1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Rate to apply snow overlay to view model");
+ConVar sv_weapon_thaw_rate("sv_weapon_thaw_rate", "0.1", FCVAR_REPLICATED | FCVAR_ARCHIVE, "Rate to remove snow overlay to view model");
+
 BEGIN_DATADESC( CBaseCombatCharacter )
 
 #ifdef INVASION_DLL
@@ -118,6 +122,10 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 #endif
 	DEFINE_FIELD( m_bPreventWeaponPickup, FIELD_BOOLEAN ),
 
+    DEFINE_FIELD( m_bShouldDrawSnowOverlay, FIELD_BOOLEAN ),
+	DEFINE_FIELD(m_flCurrentSnowOverlayAlpha, FIELD_FLOAT),
+    DEFINE_FIELD( m_flSnowOverlayAlpha, FIELD_FLOAT ),
+
 #ifndef MAPBASE // See CBaseEntity::InputKilledNPC()
 	DEFINE_INPUTFUNC( FIELD_VOID, "KilledNPC", InputKilledNPC ),
 #endif
@@ -135,6 +143,10 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 	DEFINE_INPUTFUNC( FIELD_STRING, "GiveWeapon", InputGiveWeapon ),
 	DEFINE_INPUTFUNC( FIELD_STRING, "DropWeapon", InputDropWeapon ),
 	DEFINE_INPUTFUNC( FIELD_EHANDLE, "PickupWeaponInstant", InputPickupWeaponInstant ),
+
+    DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetShouldDrawSnowOverlay", InputSetShouldDrawSnowOverlay ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetSnowOverlayAlpha", InputSetSnowOverlayAlpha ),
+
 	DEFINE_OUTPUT( m_OnWeaponEquip, "OnWeaponEquip" ),
 	DEFINE_OUTPUT( m_OnWeaponDrop, "OnWeaponDrop" ),
 
@@ -308,10 +320,11 @@ IMPLEMENT_SERVERCLASS_ST(CBaseCombatCharacter, DT_BaseCombatCharacter)
 
 	SendPropEHandle( SENDINFO( m_hActiveWeapon ) ),
 	SendPropArray3( SENDINFO_ARRAY3(m_hMyWeapons), SendPropEHandle( SENDINFO_ARRAY(m_hMyWeapons) ) ),
-
 #ifdef INVASION_DLL
 	SendPropInt( SENDINFO(m_iPowerups), MAX_POWERUPS, SPROP_UNSIGNED ), 
 #endif
+
+    SendPropFloat( SENDINFO( m_flCurrentSnowOverlayAlpha ) ),
 
 END_SEND_TABLE()
 
@@ -890,6 +903,9 @@ CBaseCombatCharacter::CBaseCombatCharacter( void )
 	m_GlowColor.GetForModify().Init( 0.76f, 0.76f, 0.76f );
 	m_GlowAlpha.Set(1.0f);
 #endif // GLOWS_ENABLE
+
+    m_bShouldDrawSnowOverlay = false;
+    m_flSnowOverlayAlpha = GlobalEntity_GetCounter( "global_frost_proxy" ) / 10 || 0.0f;
 }
 
 //------------------------------------------------------------------------------
@@ -2678,6 +2694,29 @@ bool CBaseCombatCharacter::Weapon_SlotOccupied( CBaseCombatWeapon *pWeapon )
 	return true;
 }
 
+float CBaseCombatCharacter::GetViewModelSnowOverlayAlpha()
+{
+	// Frozen Weapon Fade in and out
+	if (m_flNextFade < gpGlobals->curtime) {
+		m_flNextFade = gpGlobals->curtime + 0.1f;
+		if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
+			m_flCurrentSnowOverlayAlpha += sv_weapon_frost_rate.GetFloat();
+			if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
+				m_flCurrentSnowOverlayAlpha = m_flSnowOverlayAlpha;
+			}
+		}
+		else if (m_flCurrentSnowOverlayAlpha > m_flSnowOverlayAlpha) {
+			m_flCurrentSnowOverlayAlpha -= sv_weapon_thaw_rate.GetFloat();
+			if (m_flCurrentSnowOverlayAlpha < m_flSnowOverlayAlpha) {
+				m_flCurrentSnowOverlayAlpha = m_flSnowOverlayAlpha;
+			}
+		}
+	}
+
+	return clamp(m_flCurrentSnowOverlayAlpha, 0.0f, 1.0f);
+}
+
+
 //-----------------------------------------------------------------------------
 // Purpose: Returns the weapon (if any) in the requested slot
 // Input  : slot - which slot to poll
@@ -2719,7 +2758,6 @@ CBaseCombatWeapon *CBaseCombatCharacter::Weapon_GetWpnForAmmo( int iAmmoIndex )
 
 	return NULL;
 }
-
 
 //-----------------------------------------------------------------------------
 // Purpose: Can this character operate this weapon?
@@ -4366,6 +4404,19 @@ void CBaseCombatCharacter::InputSwitchToWeapon( inputdata_t &inputdata )
 	}
 }
 
+void CBaseCombatCharacter::InputSetSnowOverlayAlpha( inputdata_t &inputdata )
+{
+    float flAlpha = inputdata.value.Float();
+    flAlpha = clamp( flAlpha, 0.0f, 1.0f );
+
+    m_flSnowOverlayAlpha = flAlpha;
+}
+
+void CBaseCombatCharacter::InputSetShouldDrawSnowOverlay( inputdata_t &inputdata )
+{
+    m_bShouldDrawSnowOverlay = inputdata.value.Bool();
+}
+
 #define FINDNAMEDENTITY_MAX_ENTITIES	32
 //-----------------------------------------------------------------------------
 // Purpose: FindNamedEntity has been moved from CAI_BaseNPC to CBaseCombatCharacter so players can use it.
@@ -4954,4 +5005,3 @@ float CBaseCombatCharacter::GetTimeSinceLastInjury( int team /*= TEAM_ANY */ ) c
 
 	return never;
 }
-

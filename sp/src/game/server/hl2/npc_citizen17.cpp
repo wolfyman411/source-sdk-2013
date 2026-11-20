@@ -16,6 +16,9 @@
 #include "hl2_player.h"
 #include "items.h"
 
+#include "IEffects.h"
+#include "particle_parse.h"
+#include "te_particlesystem.h"
 
 #ifdef HL2MP
 #include "hl2mp/weapon_crowbar.h"
@@ -405,6 +408,8 @@ BEGIN_DATADESC( CNPC_Citizen )
 	DEFINE_USEFUNC( CommanderUse ),
 	DEFINE_USEFUNC( SimpleUse ),
 
+    DEFINE_FIELD( m_flNextColdBreath, FIELD_TIME ),
+
 END_DATADESC()
 
 #ifdef MAPBASE_VSCRIPT
@@ -497,6 +502,8 @@ void CNPC_Citizen::Precache()
 #ifndef MAPBASE // See above
 	BaseClass::Precache();
 #endif
+
+    PrecacheParticleSystem( "npc_coldbreath" );
 }
 
 //-----------------------------------------------------------------------------
@@ -633,6 +640,8 @@ void CNPC_Citizen::Spawn()
 		m_bTossesMedkits = true;
 	}
 #endif
+
+    m_flNextColdBreath = 0.0f;
 }
 
 //-----------------------------------------------------------------------------
@@ -1000,6 +1009,28 @@ Class_T	CNPC_Citizen::Classify()
 bool CNPC_Citizen::ShouldAlwaysThink() 
 { 
 	return ( BaseClass::ShouldAlwaysThink() || IsInPlayerSquad() ); 
+}
+
+void CNPC_Citizen::NPCThink( void )
+{
+    BaseClass::NPCThink();
+    static ConVarRef ai_use_temperature( "ai_use_temperature" );
+    if ( !ai_use_temperature.GetBool() || !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
+
+    DevMsg("%s\t%f\t%f\n", this->GetDebugName(), this->GetTemperature(), this->GetIdealTemperature());
+    if ( this->GetTemperature() < this->GetIdealTemperature() )
+    {
+        ColdThink();
+    }
+}
+
+void CNPC_Citizen::ColdThink( void )
+{
+    if ( m_flNextColdBreath < gpGlobals->curtime ) {
+        DevMsg( "Breath from %s", this->GetDebugName() );
+        DispatchParticleEffect( "npc_coldbreath", PATTACH_POINT, this, "mouth", false );
+        m_flNextColdBreath = gpGlobals->curtime + RandomFloat( 1.0f, 2.0f );
+    }
 }
 	
 //-----------------------------------------------------------------------------

@@ -53,6 +53,7 @@ BEGIN_DATADESC( CEnvProjectedTexture )
 	DEFINE_KEYFIELD( m_flShadowFilter, FIELD_FLOAT, "shadowfilter" ),
 #endif
 	// Additions. -TheMaster974
+	DEFINE_FIELD(m_bIsAnimated, FIELD_BOOLEAN),
 	DEFINE_KEYFIELD( m_iFrameTotal, FIELD_INTEGER, "frameTotal" ),
 	DEFINE_KEYFIELD( m_iFrameRate, FIELD_INTEGER, "frameRate" ),
 

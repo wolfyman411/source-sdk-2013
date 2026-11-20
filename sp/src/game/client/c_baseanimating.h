@@ -555,6 +555,9 @@ protected:
 	// Animation playback framerate
 	float							m_flPlaybackRate;
 
+	// Obtain this variable from the Server. -TheMaster974
+	bool 							m_bHasFrozen;
+
 	// Decomposed ragdoll info
 	bool							m_bStoreRagdollInfo;
 	RagdollInfo_t					*m_pRagdollInfo;

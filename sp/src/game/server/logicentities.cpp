@@ -7,6 +7,7 @@
 #include "cbase.h"
 #include "entityinput.h"
 #include "entityoutput.h"
+#include "basecombatcharacter.h"
 #include "eventqueue.h"
 #include "mathlib/mathlib.h"
 #include "globalstate.h"
@@ -1258,6 +1259,17 @@ void CEnvGlobal::Spawn( void )
 		if ( m_counter != 0 )
 		{
 			GlobalEntity_SetCounter( m_globalstate, m_counter );
+
+            if ( m_globalstate != NULL_STRING && stricmp( STRING( m_globalstate ), "global_frost_proxy" ) == 0 )
+            {
+                // Grab the player
+
+				CBasePlayer* pEnt = UTIL_GetLocalPlayer();
+
+				if (pEnt) {
+					pEnt->m_flSnowOverlayAlpha = (float)GlobalEntity_GetCounter(m_globalstate) / 100.0f;
+				}
+            }
 		}
 	}
 }
@@ -1339,6 +1351,15 @@ void CEnvGlobal::InputSetCounter( inputdata_t &inputdata )
 	}
 
 	GlobalEntity_SetCounter( m_globalstate, inputdata.value.Int() );
+
+    if ( m_globalstate != NULL_STRING && stricmp( STRING( m_globalstate ), "global_frost_proxy" ) == 0 )
+    {
+		CBasePlayer* pEnt = UTIL_GetLocalPlayer();
+
+		if (pEnt) {
+			pEnt->m_flSnowOverlayAlpha = (float)GlobalEntity_GetCounter(m_globalstate) / 100.0f;
+		}
+    }
 }
 
 
@@ -1352,6 +1373,15 @@ void CEnvGlobal::InputAddToCounter( inputdata_t &inputdata )
 	}
 
 	GlobalEntity_AddToCounter( m_globalstate, inputdata.value.Int() );
+
+    if ( m_globalstate != NULL_STRING && stricmp( STRING( m_globalstate ), "global_frost_proxy" ) == 0 )
+    {
+		CBasePlayer* pEnt = UTIL_GetLocalPlayer();
+
+		if (pEnt) {
+			pEnt->m_flSnowOverlayAlpha = (float)GlobalEntity_GetCounter(m_globalstate) / 100.0f;
+		}
+    }
 }
 
 

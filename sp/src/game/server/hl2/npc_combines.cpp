@@ -24,7 +24,6 @@
 #include "hl2_gamerules.h"
 #include "gameweaponmanager.h"
 #include "vehicle_base.h"
-#include "props.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -52,8 +51,9 @@ LINK_ENTITY_TO_CLASS( npc_combine_s, CNPC_CombineS );
 extern Activity ACT_WALK_EASY;
 extern Activity ACT_WALK_MARCH;
 
+
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CNPC_CombineS::Spawn( void )
 {
@@ -68,9 +68,12 @@ void CNPC_CombineS::Spawn( void )
 		SetKickDamage( sk_combine_guard_kick.GetFloat() );
 	}
 	else if ( IsArmorless() ) {
-		SetHealth( sk_combine_s_health.GetFloat() / 2 );
-		SetMaxHealth( sk_combine_s_health.GetFloat() / 2 );
-		SetKickDamage( sk_combine_s_kick.GetFloat() );
+		SetHealth( sk_combine_s_health.GetFloat() * 0.5 );
+		SetMaxHealth( sk_combine_s_health.GetFloat() * 0.5 );
+		// bloodycop6385 :: Let's assume the lads are not entirely as strong as the finished product, cus they're naked.
+		SetKickDamage( sk_combine_s_kick.GetFloat() * 0.5 );
+
+		GetExpresser()->SetVoicePitch( random->RandomInt( 70, 85 ) );
 	}
 	else
 	{
@@ -82,6 +85,8 @@ void CNPC_CombineS::Spawn( void )
 	CapabilitiesAdd( bits_CAP_ANIMATEDFACE | bits_CAP_TURN_HEAD );
 	CapabilitiesAdd( bits_CAP_MOVE_SHOOT );
 	CapabilitiesAdd( bits_CAP_DOORS_GROUP );
+
+    m_flNextColdBreath = 0.0f;
 
 	BaseClass::Spawn();
 
@@ -117,10 +122,10 @@ void CNPC_CombineS::Precache()
 	}
 
 	if ( !Q_stricmp( pModelName, "models/baresoldier/baresoldier.mdl" ) ) {
-		m_fIsArmorless = true;
+		m_fIsArmourless = true;
 	}
 	else {
-		m_fIsArmorless = false;
+		m_fIsArmourless = false;
 	}
 
 	if ( !GetModelName() )
@@ -133,6 +138,7 @@ void CNPC_CombineS::Precache()
 	UTIL_PrecacheOther( "item_healthvial" );
 	UTIL_PrecacheOther( "weapon_frag" );
 	UTIL_PrecacheOther( "item_ammo_ar2_altfire" );
+    PrecacheParticleSystem( "npc_coldbreath" );
 
 	BaseClass::Precache();
 }
@@ -159,7 +165,7 @@ void CNPC_CombineS::DeathSound( const CTakeDamageInfo& info )
 // Purpose: Soldiers use CAN_RANGE_ATTACK2 to indicate whether they can throw
 //			a grenade. Because they check only every half-second or so, this
 //			condition must persist until it is updated again by the code
-//			that determines whether a grenade can be thrown, so prevent the 
+//			that determines whether a grenade can be thrown, so prevent the
 //			base class from clearing it out. (sjb)
 //-----------------------------------------------------------------------------
 void CNPC_CombineS::ClearAttackConditions()
@@ -303,8 +309,8 @@ void CNPC_CombineS::OnListened()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &info - 
+// Purpose:
+// Input  : &info -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 void CNPC_CombineS::Event_Killed( const CTakeDamageInfo& info )
@@ -400,8 +406,8 @@ void CNPC_CombineS::Event_Killed( const CTakeDamageInfo& info )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &info - 
+// Purpose:
+// Input  : &info -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 bool CNPC_CombineS::IsLightDamage( const CTakeDamageInfo& info )
@@ -410,8 +416,8 @@ bool CNPC_CombineS::IsLightDamage( const CTakeDamageInfo& info )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &info - 
+// Purpose:
+// Input  : &info -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 bool CNPC_CombineS::IsHeavyDamage( const CTakeDamageInfo& info )
@@ -440,6 +446,30 @@ bool CNPC_CombineS::IsHeavyDamage( const CTakeDamageInfo& info )
 
 	return BaseClass::IsHeavyDamage( info );
 }
+
+void CNPC_CombineS::NPCThink( void )
+{
+    BaseClass::NPCThink();
+    static ConVarRef ai_use_temperature( "ai_use_temperature" );
+    if ( !ai_use_temperature.GetBool() || !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
+
+    DevMsg( "%s\t%f\t%f\n", this->GetDebugName(), this->GetTemperature(), this->GetIdealTemperature() );
+    if ( this->GetTemperature() < this->GetIdealTemperature() )
+    {
+        ColdThink();
+    }
+}
+
+void CNPC_CombineS::ColdThink( void )
+{
+    if ( m_flNextColdBreath < gpGlobals->curtime )
+    {
+        DevMsg( "Breath from %s", this->GetDebugName() );
+        DispatchParticleEffect( "npc_coldbreath", PATTACH_POINT, this, "mouth", false );
+        m_flNextColdBreath = gpGlobals->curtime + RandomFloat( 1.0f, 2.0f );
+    }
+}
+
 
 #if HL2_EPISODIC
 //-----------------------------------------------------------------------------

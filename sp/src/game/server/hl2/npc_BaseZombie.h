@@ -201,6 +201,7 @@ public:
 	virtual bool CanBecomeLiveTorso() { return false; }
 	virtual bool HeadcrabFits( CBaseAnimating *pCrab, const Vector *vecOrigin = NULL );
 	void ReleaseHeadcrab( const Vector &vecOrigin, const Vector &vecVelocity, bool fRemoveHead, bool fRagdollBody, bool fRagdollCrab = false );
+	void UpdateHeadcrabModel(CBaseAnimating* pCrab, int skin = 0);
 	void SetHeadcrabSpawnLocation( int iCrabAttachment, CBaseAnimating *pCrab );
 
 	// Slumping/sleeping

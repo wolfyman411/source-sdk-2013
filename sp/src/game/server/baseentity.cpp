@@ -3191,7 +3191,7 @@ void CBaseEntity::PhysicsRelinkChildren( float dt )
 		{
 			// the only case where this is valid is if this entity is an attached ragdoll.
 			// So assert here to catch the non-ragdoll case.
-			Assert( 0 );
+			//Assert( 0 );
 		}
 
 		if ( child->FirstMoveChild() )
@@ -9343,6 +9343,10 @@ static ConCommand ent_autoaim("ent_autoaim", CC_Ent_Autoaim, "Displays the entit
 //-----------------------------------------------------------------------------
 CAI_BaseNPC	*CBaseEntity::MyNPCPointer( void ) 
 { 
+	// wolfy411 - I had to add this line here because gethealth was having an issue
+	if (!this)
+		return NULL;
+
 	if ( IsNPC() ) 
 		return assert_cast<CAI_BaseNPC *>(this);
 

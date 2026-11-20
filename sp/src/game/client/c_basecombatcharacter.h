@@ -109,6 +109,8 @@ public:
 #endif
 
 public:
+	float               m_flCurrentSnowOverlayAlpha;
+    virtual float GetViewModelSnowOverlayAlpha( void );
 
 	float			m_flNextAttack;
 

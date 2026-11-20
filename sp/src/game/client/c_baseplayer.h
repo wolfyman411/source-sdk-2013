@@ -414,8 +414,6 @@ public:
 
 	virtual bool			CanUseFirstPersonCommand( void ){ return true; }
 
-    bool                    m_bShouldDrawSnowOverlay;
-
 protected:
 	fogparams_t				m_CurrentFog;
 	EHANDLE					m_hOldFogController;
@@ -475,6 +473,12 @@ public:
 
 	bool			m_bInTriggerFall;
 #endif
+
+    virtual float       GetTemperature() const { return m_flTemperature; }
+    virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
+    virtual void        AddTemperature( float flTemp );
+
+    float           m_flTemperature;
 
 protected:
 

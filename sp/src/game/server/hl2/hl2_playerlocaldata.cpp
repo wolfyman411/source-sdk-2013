@@ -15,22 +15,22 @@
 #include "tier0/memdbgon.h"
 
 BEGIN_SEND_TABLE_NOBASE( CHL2PlayerLocalData, DT_HL2Local )
-	SendPropFloat( SENDINFO(m_flSuitPower), 10, SPROP_UNSIGNED | SPROP_ROUNDUP, 0.0, 100.0 ),
-	SendPropInt( SENDINFO(m_bZooming), 1, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO(m_bitsActiveDevices), MAX_SUIT_DEVICES, SPROP_UNSIGNED ),
-	SendPropInt( SENDINFO(m_iSquadMemberCount) ),
-	SendPropInt( SENDINFO(m_iSquadMedicCount) ),
-	SendPropBool( SENDINFO(m_fSquadInFollowMode) ),
-	SendPropBool( SENDINFO(m_bWeaponLowered) ),
-	SendPropEHandle( SENDINFO(m_hAutoAimTarget) ),
-	SendPropVector( SENDINFO(m_vecAutoAimPoint) ),
-	SendPropEHandle( SENDINFO(m_hLadder) ),
-	SendPropBool( SENDINFO(m_bDisplayReticle) ),
-	SendPropBool( SENDINFO(m_bStickyAutoAim) ),
-	SendPropBool( SENDINFO(m_bAutoAimTarget) ),
+SendPropFloat( SENDINFO( m_flSuitPower ), 10, SPROP_UNSIGNED | SPROP_ROUNDUP, 0.0, 100.0 ),
+SendPropInt( SENDINFO( m_bZooming ), 1, SPROP_UNSIGNED ),
+SendPropInt( SENDINFO( m_bitsActiveDevices ), MAX_SUIT_DEVICES, SPROP_UNSIGNED ),
+SendPropInt( SENDINFO( m_iSquadMemberCount ) ),
+SendPropInt( SENDINFO( m_iSquadMedicCount ) ),
+SendPropBool( SENDINFO( m_fSquadInFollowMode ) ),
+SendPropBool( SENDINFO( m_bWeaponLowered ) ),
+SendPropEHandle( SENDINFO( m_hAutoAimTarget ) ),
+SendPropVector( SENDINFO( m_vecAutoAimPoint ) ),
+SendPropEHandle( SENDINFO( m_hLadder ) ),
+SendPropBool( SENDINFO( m_bDisplayReticle ) ),
+SendPropBool( SENDINFO( m_bStickyAutoAim ) ),
+SendPropBool( SENDINFO( m_bAutoAimTarget ) ),
 #ifdef HL2_EPISODIC
-	SendPropFloat( SENDINFO(m_flFlashBattery) ),
-	SendPropVector( SENDINFO(m_vecLocatorOrigin) ),
+SendPropFloat( SENDINFO( m_flFlashBattery ) ),
+SendPropVector( SENDINFO( m_vecLocatorOrigin ) ),
 #endif
 END_SEND_TABLE()
 

@@ -362,7 +362,6 @@ public:
 
 	CSoundPatch *m_sndLeeches;
 	CSoundPatch *m_sndWaterSplashes;
-
 protected:
 	virtual void		PreThink( void );
 	virtual	void		PostThink( void );

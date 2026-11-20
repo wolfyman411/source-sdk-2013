@@ -40,6 +40,9 @@
 #include "mapbase/GlobalStrings.h"
 #endif
 
+#include "particle_parse.h"
+#include "te_particlesystem.h"
+
 extern Vector PointOnLineNearestPoint(const Vector& vStartPos, const Vector& vEndPos, const Vector& vPoint);
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -132,6 +135,7 @@ BEGIN_DATADESC( CNPC_Alyx )
 
 	DEFINE_USEFUNC( Use ),
 
+    DEFINE_FIELD( m_flNextColdBreath, FIELD_TIME ),
 END_DATADESC()
 
 #define ALYX_FEAR_ZOMBIE_DIST_SQR	Square(60)
@@ -379,6 +383,7 @@ void CNPC_Alyx::Spawn()
 	m_fCombatEndTime   = 0.0f;
 
 	m_AnnounceAttackTimer.Set( 3, 5 );
+    m_flNextColdBreath = 0.0f;
 }
 
 //=========================================================
@@ -412,6 +417,8 @@ void CNPC_Alyx::Precache()
 	CLASSNAME_SHOTGUN = AllocPooledString( "weapon_shotgun" );
 	CLASSNAME_AR2 = AllocPooledString( "weapon_ar2" );
 #endif
+
+    PrecacheParticleSystem( "npc_coldbreath" );
 }	
 
 //-----------------------------------------------------------------------------
@@ -488,6 +495,30 @@ void CNPC_Alyx::StopLoopingSounds( void )
 	m_sndDarknessBreathing = NULL;
 
 	BaseClass::StopLoopingSounds();
+}
+
+void CNPC_Alyx::NPCThink( void )
+{
+    BaseClass::NPCThink();
+
+    static ConVarRef ai_use_temperature( "ai_use_temperature" );
+    if ( !ai_use_temperature.GetBool() || !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
+
+    float temp = this->GetTemperature();
+    if ( temp < this->GetIdealTemperature() )
+    {
+        this->ColdThink();
+    }
+}
+
+void CNPC_Alyx::ColdThink( void )
+{
+    if ( m_flNextColdBreath < gpGlobals->curtime )
+    {
+        DevMsg( "Breath from %s", this->GetDebugName() );
+        DispatchParticleEffect( "npc_coldbreath", PATTACH_POINT, this, "mouth", false );
+        m_flNextColdBreath = gpGlobals->curtime + RandomFloat( 1.0f, 2.0f );
+    }
 }
 
 //-----------------------------------------------------------------------------

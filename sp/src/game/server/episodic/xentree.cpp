@@ -70,12 +70,13 @@ public:
 	void		Touch(CBaseEntity* pOther);
 	void		Think(void);
 	void		Whack(void);
-	void SetActivity(Activity NewActivity);
+	void		SetActivity(Activity NewActivity);
 	int			OnTakeDamage(const CTakeDamageInfo& info) { Attack(); return 0; }
-	float angryTimer = 0.0f;
+	float		angryTimer = 0.0f;
+	float		speedScale = 1.0f;
 	void		Attack(void);
-	Class_T			Classify(void) { return CLASS_EARTH_FAUNA; }
-	void HandleAnimEvent(animevent_t* pEvent);
+	Class_T		Classify(void) { return CLASS_EARTH_FAUNA; }
+	void		HandleAnimEvent(animevent_t* pEvent);
 
 	DECLARE_DATADESC();
 
@@ -87,6 +88,7 @@ LINK_ENTITY_TO_CLASS(xen_tree, CXenTree);
 
 BEGIN_DATADESC(CXenTree)
 DEFINE_FIELD(m_pTrigger, FIELD_CLASSPTR),
+DEFINE_KEYFIELD(speedScale, FIELD_FLOAT, "speedScale"),
 END_DATADESC()
 
 void CXenTree::Spawn(void)
@@ -107,7 +109,7 @@ void CXenTree::Spawn(void)
 	SetActivity(ACT_IDLE);
 	SetNextThink(gpGlobals->curtime + 0.1);
 	SetCycle(random->RandomFloat(0, 1));
-	m_flPlaybackRate = random->RandomFloat(0.7, 1.4);
+	m_flPlaybackRate = random->RandomFloat(0.7, 1.4) * speedScale;
 	angryTimer = gpGlobals->curtime + random->RandomFloat(5.0, 15.0);
 
 	Vector triggerPosition, vForward;
@@ -154,6 +156,7 @@ void CXenTree::Attack(void)
 	{
 		CPASAttenuationFilter filter(this);
 		SetActivity(ACT_MELEE_ATTACK);
+		m_flPlaybackRate = speedScale;
 		EmitSound(filter, entindex(), "XenTree.AttackMiss");
 		angryTimer = gpGlobals->curtime + random->RandomFloat(5.0, 15.0);
 	}
@@ -168,6 +171,7 @@ void CXenTree::Think(void)
 	if (gpGlobals->curtime > angryTimer)
 	{
 		SetActivity(ACT_IDLE_ANGRY);
+		m_flPlaybackRate = speedScale;
 		angryTimer = gpGlobals->curtime + random->RandomFloat(5.0, 15.0);
 	}
 
@@ -178,14 +182,14 @@ void CXenTree::Think(void)
 		if (IsSequenceFinished())
 		{
 			SetActivity(ACT_IDLE);
-			m_flPlaybackRate = random->RandomFloat(0.6f, 1.4f);
+			m_flPlaybackRate = random->RandomFloat(0.6f, 1.4f) * speedScale;
 		}
 		break;
 	case ACT_IDLE_ANGRY:
 		if (IsSequenceFinished())
 		{
 			SetActivity(ACT_IDLE);
-			m_flPlaybackRate = random->RandomFloat(0.6f, 1.4f);
+			m_flPlaybackRate = random->RandomFloat(0.6f, 1.4f) * speedScale;
 		}
 		break;
 	default:

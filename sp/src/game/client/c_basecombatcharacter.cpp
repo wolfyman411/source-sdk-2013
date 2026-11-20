@@ -90,6 +90,12 @@ void C_BaseCombatCharacter::OnDataChanged( DataUpdateType_t updateType )
 #endif // GLOWS_ENABLE
 }
 
+float C_BaseCombatCharacter::GetViewModelSnowOverlayAlpha(void)
+{
+
+	return m_flCurrentSnowOverlayAlpha;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Overload our muzzle flash and send it to any actively held weapon
 //-----------------------------------------------------------------------------
@@ -176,6 +182,8 @@ BEGIN_RECV_TABLE(C_BaseCombatCharacter, DT_BaseCombatCharacter)
 #ifdef INVASION_CLIENT_DLL
 	RecvPropInt( RECVINFO( m_iPowerups ) ),
 #endif
+
+    RecvPropFloat( RECVINFO(m_flCurrentSnowOverlayAlpha) ),
 
 END_RECV_TABLE()
 
