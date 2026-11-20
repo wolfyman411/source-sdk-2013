@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -11,10 +11,12 @@
 #endif
 
 #include "npc_combine.h"
+#include "props.h"
 
 //=========================================================
 //	>> CNPC_CombineS
 //=========================================================
+
 class CNPC_CombineS : public CNPC_Combine
 {
 	DECLARE_CLASS( CNPC_CombineS, CNPC_Combine );
@@ -22,7 +24,7 @@ class CNPC_CombineS : public CNPC_Combine
 	DECLARE_DATADESC();
 #endif
 
-public: 
+public:
 	void		Spawn( void );
 	void		Precache( void );
 	void		DeathSound( const CTakeDamageInfo &info );
