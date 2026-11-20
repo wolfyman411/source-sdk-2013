@@ -505,7 +505,7 @@ void CNPC_Alyx::NPCThink( void )
     if ( !ai_use_temperature.GetBool() || !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
 
     float temp = this->GetTemperature();
-    if ( temp < this->GetIdealTemperature() )
+    if ( temp <= this->GetColdBreathTemperature() || this->m_bForceColdBreath )
     {
         this->ColdThink();
     }
