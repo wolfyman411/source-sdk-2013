@@ -140,6 +140,8 @@ bool RagdollManager_SaveImportant( CAI_BaseNPC *pNPC );
 
 #define FINDNAMEDENTITY_MAX_ENTITIES	32		// max number of entities to be considered for random entity selection in FindNamedEntity
 
+#define DISABLED_TEMP_EFFECTS	true			// wolfy: Disable NPCs freezing and burning for 1.1, we'll reenable it later
+
 extern bool			g_fDrawLines;
 extern short		g_sModelIndexLaser;		// holds the index for the laser beam
 extern short		g_sModelIndexLaserDot;	// holds the index for the laser beam dot
@@ -4376,7 +4378,7 @@ bool CAI_BaseNPC::CheckPVSCondition()
 
 void CAI_BaseNPC::HandleTemperature( void )
 {
-    if ( IsFreezing() )
+    if ( IsFreezing() && !DISABLED_TEMP_EFFECTS)
     {
         if ( GetPlaybackRate() <= FLT_EPSILON )
         {
@@ -4456,7 +4458,7 @@ void CAI_BaseNPC::HandleTemperature( void )
 
         }
     }
-    else if ( IsOverheating() )
+    else if ( IsOverheating() && !DISABLED_TEMP_EFFECTS)
     {
         Ignite( 1.0f, true, 0.0f, false );
     }
@@ -4515,7 +4517,7 @@ void CAI_BaseNPC::NPCThink( void )
         */
 
         HandleTemperature();
-		debugoverlay->AddEntityTextOverlay(entindex(), 0, 0.5f, 255, 255, 255, 255, "Temp: %.2f", GetTemperature());
+		// debugoverlay->AddEntityTextOverlay(entindex(), 0, 0.5f, 255, 255, 255, 255, "Temp: %.2f", GetTemperature()); // wolfy: Uncomment this to see temperatures on NPCs
 
 		if (IsFrozen()) {
 			SetNextThink(TICK_NEVER_THINK);

@@ -923,6 +923,11 @@ void CClient_Precipitation::PrecacheParticlePrecip( void )
 		PrecacheParticleSystem( "snow" );
 		PrecacheParticleSystem( "snow_outer" );
 	}
+	else if (m_nPrecipType == PRECIPITATION_TYPE_PARTICLESNOW_DUSK)
+	{
+		PrecacheParticleSystem("snow_dusk");
+		PrecacheParticleSystem("snow_outer");
+	}
 	else if ( m_nPrecipType == PRECIPITATION_TYPE_PARTICLERAINSTORM )
 	{
 		PrecacheParticleSystem( "rain_storm" );
@@ -995,6 +1000,10 @@ void CClient_Precipitation::ClampParticlePosition( Vector &vPlayerPos, Vector &v
 			break;
 
 		case PRECIPITATION_TYPE_PARTICLESNOW:
+			flMax = r_RainParticleClampOffset_Snow.GetFloat();
+			break;
+
+		case PRECIPITATION_TYPE_PARTICLESNOW_DUSK:
 			flMax = r_RainParticleClampOffset_Snow.GetFloat();
 			break;
 	}
@@ -1165,6 +1174,13 @@ void CClient_Precipitation::InitializeParticlePrecip( void )
 	{
 		m_pParticleInnerNearDef = "snow";
 		m_pParticleInnerFarDef = "snow";
+		m_pParticleOuterDef = "snow_outer";
+		m_flParticleInnerDist = 280.0;
+	}
+	else if (m_nPrecipType == PRECIPITATION_TYPE_PARTICLESNOW_DUSK)
+	{
+		m_pParticleInnerNearDef = "snow_dusk";
+		m_pParticleInnerFarDef = "snow_dusk";
 		m_pParticleOuterDef = "snow_outer";
 		m_flParticleInnerDist = 280.0;
 	}
