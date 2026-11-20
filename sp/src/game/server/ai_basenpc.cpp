@@ -12365,7 +12365,8 @@ BEGIN_DATADESC( CAI_BaseNPC )
     DEFINE_KEYFIELD( m_flMinTemperature, FIELD_FLOAT, "MinTemperature" ),
     DEFINE_KEYFIELD( m_flIdealTemperature, FIELD_FLOAT, "IdealTemperature" ),
     DEFINE_KEYFIELD( m_flTemperatureChangeRate, FIELD_FLOAT, "TemperatureChangeRate" ),
-
+    DEFINE_KEYFIELD( m_flColdBreathTemperature, FIELD_FLOAT, "ColdBreathTemperature" ),
+    DEFINE_KEYFIELD( m_bForceColdBreath, FIELD_BOOLEAN, "ForceColdBreath" ),
 #ifdef MAPBASE
 	DEFINE_KEYFIELD( m_FriendlyFireOverride,	FIELD_INTEGER, "FriendlyFireOverride" ),
 
@@ -12484,6 +12485,8 @@ BEGIN_DATADESC( CAI_BaseNPC )
     DEFINE_INPUTFUNC( FIELD_FLOAT, "SetIdealTemperature", InputSetIdealTemperature ),
     DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMinTemperature", InputSetMinTemperature ),
     DEFINE_INPUTFUNC( FIELD_FLOAT, "SetMaxTemperature", InputSetMaxTemperature ),
+    DEFINE_INPUTFUNC( FIELD_FLOAT, "SetColdBreathTemperature", InputSetColdBreathTemperature ),
+    DEFINE_INPUTFUNC( FIELD_BOOLEAN, "SetForceColdBreath", InputSetForceColdBreath ),
 
 	DEFINE_OUTPUT( m_OnStateChange,	"OnStateChange" ),
 #endif

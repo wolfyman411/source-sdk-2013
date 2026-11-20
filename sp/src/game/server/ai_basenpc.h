@@ -991,8 +991,9 @@ public:
 #endif
 	void				Sleep();
 	bool				WokeThisTick() const;
+    virtual float       GetColdBreathTemperature() { return m_flColdBreathTemperature; }
 
-    virtual float       GetTemperature() const { return m_flTemperature; }
+    virtual float       GetTemperature() { return m_flTemperature; }
     virtual void        SetTemperature( float flTemp ) { m_flTemperature = flTemp; }
     virtual void        AddTemperature( float flTemp );
 
@@ -1358,6 +1359,8 @@ private:
     void                InputSetMinTemperature( inputdata_t& inputdata ) { SetMinTemperature( inputdata.value.Float() ); }
     void                InputSetMaxTemperature( inputdata_t& inputdata ) { SetMaxTemperature( inputdata.value.Float() ); }
     void                InputSetIdealTemperature( inputdata_t& inputdata ) { SetIdealTemperature( inputdata.value.Float() ); }
+    void                InputSetColdBreathTemperature( inputdata_t& inputdata ) { m_flColdBreathTemperature = inputdata.value.Float(); }
+    void                InputSetForceColdBreath( inputdata_t& inputdata ) { m_bForceColdBreath = inputdata.value.Bool(); }
 
 	HSCRIPT				VScriptGetExpresser();
 
@@ -2481,12 +2484,17 @@ public:
     CNetworkVar( float, m_flTemperatureChangeRate );
     CNetworkVar( bool,  m_bHasFrozen );
 
+    CNetworkVar( float, m_flColdBreathTemperature );
+    CNetworkVar( bool,  m_bForceColdBreath );
+
     float               m_flNextTemperatureIncrement;
 
 	void				InputActivateSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = true; }
 	void				InputDisableSpeedModifier( inputdata_t &inputdata ) { m_bSpeedModActive = false; }
 	void				InputSetSpeedModifierRadius( inputdata_t &inputdata );
 	void				InputSetSpeedModifierSpeed( inputdata_t &inputdata );
+
+
 
 #ifdef MAPBASE
 	// Hammer input to change the speed of the NPC (based on 1upD's npc_shadow_walker code)
