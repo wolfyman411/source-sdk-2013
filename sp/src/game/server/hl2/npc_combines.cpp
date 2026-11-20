@@ -453,8 +453,10 @@ void CNPC_CombineS::NPCThink( void )
     static ConVarRef ai_use_temperature( "ai_use_temperature" );
     if ( !ai_use_temperature.GetBool() || !this->HasSpawnFlags( SF_NPC_USE_TEMPERATURE ) ) { return; }
 
+    float temp = this->GetTemperature();
+
     DevMsg( "%s\t%f\t%f\n", this->GetDebugName(), this->GetTemperature(), this->GetIdealTemperature() );
-    if ( this->GetTemperature() < this->GetIdealTemperature() )
+    if ( temp <= this->GetColdBreathTemperature() || this->m_bForceColdBreath )
     {
         ColdThink();
     }
