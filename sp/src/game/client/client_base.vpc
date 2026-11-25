@@ -513,6 +513,8 @@ $Project
 		$File	"$SRCDIR\public\haptics\haptic_msgs.cpp"	[!$X360]
 		$File	"$SRCDIR\public\haptics\haptic_utils.cpp"	[$WIN32&&!$X360]
 
+		$File	"snowoverlayproxy.cpp"
+
 		$Folder	"Sixense"
 		{
 			$File	"sixense\in_sixense.cpp"
