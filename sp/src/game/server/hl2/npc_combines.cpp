@@ -24,9 +24,6 @@
 #include "hl2_gamerules.h"
 #include "gameweaponmanager.h"
 #include "vehicle_base.h"
-#include "IEffects.h"
-#include "particle_parse.h"
-#include "te_particlesystem.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -56,7 +53,7 @@ extern Activity ACT_WALK_MARCH;
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CNPC_CombineS::Spawn( void )
 {
@@ -168,7 +165,7 @@ void CNPC_CombineS::DeathSound( const CTakeDamageInfo& info )
 // Purpose: Soldiers use CAN_RANGE_ATTACK2 to indicate whether they can throw
 //			a grenade. Because they check only every half-second or so, this
 //			condition must persist until it is updated again by the code
-//			that determines whether a grenade can be thrown, so prevent the 
+//			that determines whether a grenade can be thrown, so prevent the
 //			base class from clearing it out. (sjb)
 //-----------------------------------------------------------------------------
 void CNPC_CombineS::ClearAttackConditions()
@@ -312,8 +309,8 @@ void CNPC_CombineS::OnListened()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &info - 
+// Purpose:
+// Input  : &info -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 void CNPC_CombineS::Event_Killed( const CTakeDamageInfo& info )
@@ -409,8 +406,8 @@ void CNPC_CombineS::Event_Killed( const CTakeDamageInfo& info )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &info - 
+// Purpose:
+// Input  : &info -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 bool CNPC_CombineS::IsLightDamage( const CTakeDamageInfo& info )
@@ -419,8 +416,8 @@ bool CNPC_CombineS::IsLightDamage( const CTakeDamageInfo& info )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &info - 
+// Purpose:
+// Input  : &info -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 bool CNPC_CombineS::IsHeavyDamage( const CTakeDamageInfo& info )
@@ -450,32 +447,6 @@ bool CNPC_CombineS::IsHeavyDamage( const CTakeDamageInfo& info )
 	return BaseClass::IsHeavyDamage( info );
 }
 
-#if HL2_EPISODIC
-//-----------------------------------------------------------------------------
-// Purpose: Translate base class activities into combot activites
-//-----------------------------------------------------------------------------
-Activity CNPC_CombineS::NPC_TranslateActivity( Activity eNewActivity )
-{
-	// If the special ep2_outland_05 "use march" flag is set, use the more casual marching anim.
-	if ( m_iUseMarch && eNewActivity == ACT_WALK )
-	{
-		eNewActivity = ACT_WALK_MARCH;
-	}
-
-	return BaseClass::NPC_TranslateActivity( eNewActivity );
-}
-
-
-//---------------------------------------------------------
-// Save/Restore
-//---------------------------------------------------------
-BEGIN_DATADESC( CNPC_CombineS )
-
-DEFINE_KEYFIELD( m_iUseMarch, FIELD_INTEGER, "usemarch" ),
-
-END_DATADESC()
-#endif
-
 void CNPC_CombineS::NPCThink( void )
 {
     BaseClass::NPCThink();
@@ -500,3 +471,30 @@ void CNPC_CombineS::ColdThink( void )
         m_flNextColdBreath = gpGlobals->curtime + RandomFloat( 1.0f, 2.0f );
     }
 }
+
+
+#if HL2_EPISODIC
+//-----------------------------------------------------------------------------
+// Purpose: Translate base class activities into combot activites
+//-----------------------------------------------------------------------------
+Activity CNPC_CombineS::NPC_TranslateActivity( Activity eNewActivity )
+{
+	// If the special ep2_outland_05 "use march" flag is set, use the more casual marching anim.
+	if ( m_iUseMarch && eNewActivity == ACT_WALK )
+	{
+		eNewActivity = ACT_WALK_MARCH;
+	}
+
+	return BaseClass::NPC_TranslateActivity( eNewActivity );
+}
+
+//---------------------------------------------------------
+// Save/Restore
+//---------------------------------------------------------
+BEGIN_DATADESC( CNPC_CombineS )
+
+DEFINE_KEYFIELD( m_iUseMarch, FIELD_INTEGER, "usemarch" ),
+
+END_DATADESC()
+
+#endif
